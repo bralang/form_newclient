@@ -46,6 +46,7 @@ export const Step3Identification = () => {
           <RadioGroup
             value={identificationInfo.additionalIdType || ""}
             onValueChange={(value: any) => setIdentificationInfo({ additionalIdType: value })}
+            className="space-y-3"
           >
             <div className="flex items-center space-x-2 space-x-reverse">
               <RadioGroupItem value="parentId" id="parentId" />
@@ -115,6 +116,7 @@ export const Step3Identification = () => {
               onValueChange={(value: any) =>
                 setIdentificationInfo({ spouseAdditionalIdType: value })
               }
+              className="space-y-3"
             >
               <div className="flex items-center space-x-2 space-x-reverse">
                 <RadioGroupItem value="parentId" id="spouseParentId" />

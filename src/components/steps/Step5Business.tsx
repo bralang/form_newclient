@@ -59,7 +59,7 @@ export const Step5Business = () => {
         <RadioGroup
           value={businessInfo.businessType || ""}
           onValueChange={(value: any) => setBusinessInfo({ businessType: value })}
-          className="flex flex-wrap gap-4"
+          className="flex flex-wrap flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="exempt" id="exempt" />
@@ -94,7 +94,7 @@ export const Step5Business = () => {
         <RadioGroup
           value={businessInfo.ownershipType || ""}
           onValueChange={(value: any) => setBusinessInfo({ ownershipType: value })}
-          className="flex gap-4"
+          className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="sole" id="sole" />
@@ -201,7 +201,7 @@ export const Step5Business = () => {
         <RadioGroup
           value={businessInfo.businessModel || ""}
           onValueChange={(value: any) => setBusinessInfo({ businessModel: value })}
-          className="flex gap-4"
+          className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="service" id="service" />
@@ -228,6 +228,7 @@ export const Step5Business = () => {
         <RadioGroup
           value={businessInfo.documentSystem || ""}
           onValueChange={(value: any) => setBusinessInfo({ documentSystem: value })}
+          className="space-y-3"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="summit" id="summit" />

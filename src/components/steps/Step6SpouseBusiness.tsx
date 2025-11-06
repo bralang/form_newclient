@@ -52,7 +52,7 @@ export const Step6SpouseBusiness = () => {
         <RadioGroup
           value={spouseBusinessInfo.businessType || ""}
           onValueChange={(value: any) => setSpouseBusinessInfo({ businessType: value })}
-          className="flex flex-wrap gap-4"
+          className="flex flex-wrap flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="exempt" id="spouse_exempt" />
@@ -89,7 +89,7 @@ export const Step6SpouseBusiness = () => {
         <RadioGroup
           value={spouseBusinessInfo.ownershipType || ""}
           onValueChange={(value: any) => setSpouseBusinessInfo({ ownershipType: value })}
-          className="flex gap-4"
+          className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="sole" id="spouse_sole" />
@@ -201,7 +201,7 @@ export const Step6SpouseBusiness = () => {
         <RadioGroup
           value={spouseBusinessInfo.businessModel || ""}
           onValueChange={(value: any) => setSpouseBusinessInfo({ businessModel: value })}
-          className="flex gap-4"
+          className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="service" id="spouse_service" />
@@ -228,6 +228,7 @@ export const Step6SpouseBusiness = () => {
         <RadioGroup
           value={spouseBusinessInfo.documentSystem || ""}
           onValueChange={(value: any) => setSpouseBusinessInfo({ documentSystem: value })}
+          className="space-y-3"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="summit" id="spouse_summit" />

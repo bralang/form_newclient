@@ -30,7 +30,7 @@ export const Step7Financial = () => {
         <RadioGroup
           value={financialInfo.hasWealthDeclaration ? "yes" : "no"}
           onValueChange={(value) => setFinancialInfo({ hasWealthDeclaration: value === "yes" })}
-          className="flex gap-4"
+          className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="yes" id="wealthYes" />

@@ -53,7 +53,7 @@ export const Step1Personal = () => {
         <RadioGroup
           value={personalInfo.gender}
           onValueChange={(value: "male" | "female") => setPersonalInfo({ gender: value })}
-          className="flex gap-4"
+          className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="male" id="male" />
@@ -97,7 +97,7 @@ export const Step1Personal = () => {
           onValueChange={(value: "single" | "married") =>
             setPersonalInfo({ maritalStatus: value })
           }
-          className="flex gap-4"
+          className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="single" id="single" />
