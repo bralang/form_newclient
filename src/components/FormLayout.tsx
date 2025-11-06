@@ -19,7 +19,8 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
     <div className="min-h-screen bg-background py-8 px-4" dir="rtl">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-2">שאלון קבלת לקוח</h1>
+          <h1 className="text-4xl font-bold text-primary mb-4">ליבי חסידה</h1>
+          <h2 className="text-2xl font-semibold text-foreground mb-2">שאלון קבלת לקוח</h2>
           <p className="text-muted-foreground">אנא מלא את הפרטים הבאים בקפידה</p>
         </div>
 
