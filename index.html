@@ -1,24 +1,250 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>שאלון קבלת לקוח - מערכת טפסים דיגיטלית</title>
-    <meta name="description" content="מערכת טפסים דיגיטלית מתקדמת לקבלת לקוחות חדשים. מלאו את הפרטים בקלות ובנוחות." />
-    <meta name="author" content="Link-Up" />
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שאלון קבלת לקוח - ליבי חסידה</title>
+    <meta name="description" content="מערכת טפסים דיגיטלית מתקדמת לקבלת לקוחות חדשים. מלאו את הפרטים בקלות ובנוחות.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="logo">ליבי חסידה</h1>
+            <h2 class="title">שאלון קבלת לקוח</h2>
+            <p class="subtitle">אנא מלא את הפרטים הבאים בקפידה</p>
+        </div>
 
-    <meta property="og:title" content="שאלון קבלת לקוח - מערכת טפסים דיגיטלית" />
-    <meta property="og:description" content="מערכת טפסים דיגיטלית מתקדמת לקבלת לקוחות חדשים. מלאו את הפרטים בקלות ובנוחות." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step-item active" data-step="1">
+                <div class="step-circle">1</div>
+                <span class="step-title">פרטים אישיים וזיהוי</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="2">
+                <div class="step-circle">2</div>
+                <span class="step-title">פרטי עסק ושירות</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="3">
+                <div class="step-circle">3</div>
+                <span class="step-title">מידע פיננסי ומשוב</span>
+            </div>
+        </div>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@Lovable" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+        <!-- Form Card -->
+        <div class="form-card">
+            <form id="clientForm">
+                <!-- Step 1: Personal and Contact Info -->
+                <div class="form-step active" id="step1">
+                    <div class="form-section">
+                        <h3 class="section-title">פרטים אישיים</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>שם פרטי *</label>
+                                <input type="text" name="firstName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>שם משפחה *</label>
+                                <input type="text" name="lastName" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>מין *</label>
+                                <select name="gender" required>
+                                    <option value="">בחר/י</option>
+                                    <option value="male">זכר</option>
+                                    <option value="female">נקבה</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>תעודת זהות *</label>
+                                <input type="text" name="idNumber" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>תאריך לידה *</label>
+                                <input type="date" name="birthDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>מצב משפחתי *</label>
+                                <select name="maritalStatus" required>
+                                    <option value="">בחר/י</option>
+                                    <option value="single">רווק/ה</option>
+                                    <option value="married">נשוי/אה</option>
+                                    <option value="divorced">גרוש/ה</option>
+                                    <option value="widowed">אלמן/ה</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="hasChildren" name="hasChildren">
+                            <label for="hasChildren">יש לי ילדים</label>
+                        </div>
+                        <div id="childrenSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מספר ילדים</label>
+                                <input type="number" name="numberOfChildren" min="0">
+                            </div>
+                        </div>
+                    </div>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+                    <div class="form-section">
+                        <h3 class="section-title">פרטי התקשרות</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>טלפון נייד *</label>
+                                <input type="tel" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label>דוא"ל *</label>
+                                <input type="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="preferPhone" name="preferPhone">
+                            <label for="preferPhone">מעדיף/ה ליצור קשר בטלפון על פני דוא"ל</label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">מסמכי זיהוי</h3>
+                        <div class="form-group">
+                            <label>העלאת תעודת זהות</label>
+                            <input type="file" name="idDocument" accept="image/*,.pdf">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Business Info -->
+                <div class="form-step" id="step2">
+                    <div class="form-section">
+                        <h3 class="section-title">סוג השירות המבוקש</h3>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="bookkeeping" name="purposes" value="bookkeeping">
+                                <label for="bookkeeping">ניהול ספרים</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="taxReturns" name="purposes" value="taxReturns">
+                                <label for="taxReturns">הגשת דוחות</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="taxPlanning" name="purposes" value="taxPlanning">
+                                <label for="taxPlanning">תכנון מס</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="payroll" name="purposes" value="payroll">
+                                <label for="payroll">ניהול שכר</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">פרטי העסק שלך</h3>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="hasBusiness" name="hasBusiness">
+                            <label for="hasBusiness">יש לי עסק</label>
+                        </div>
+                        <div id="businessSection" style="display: none;">
+                            <div class="form-group">
+                                <label>שם העסק</label>
+                                <input type="text" name="businessName">
+                            </div>
+                            <div class="form-group">
+                                <label>תחום העיסוק</label>
+                                <input type="text" name="businessField">
+                            </div>
+                            <div class="form-group">
+                                <label>סוג העסק</label>
+                                <select name="businessType">
+                                    <option value="">בחר/י</option>
+                                    <option value="עוסק מורשה">עוסק מורשה</option>
+                                    <option value="חברה בע״מ">חברה בע״מ</option>
+                                    <option value="שותפות">שותפות</option>
+                                    <option value="עמותה">עמותה</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>כתובת העסק</label>
+                                <input type="text" name="businessAddress">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Financial and Feedback -->
+                <div class="form-step" id="step3">
+                    <div class="form-section">
+                        <h3 class="section-title">מידע פיננסי</h3>
+                        <div class="form-group">
+                            <label>הצהרת הון</label>
+                            <select name="wealthDeclaration">
+                                <option value="">בחר/י</option>
+                                <option value="submitted">הוגשה</option>
+                                <option value="not_submitted">לא הוגשה</option>
+                                <option value="not_required">לא נדרש</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>שם הבנק</label>
+                                <input type="text" name="bankName">
+                            </div>
+                            <div class="form-group">
+                                <label>מספר סניף</label>
+                                <input type="text" name="branchNumber">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>מספר חשבון</label>
+                                <input type="text" name="accountNumber">
+                            </div>
+                            <div class="form-group">
+                                <label>בעל החשבון</label>
+                                <input type="text" name="accountHolder">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">משוב</h3>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="agreeNotifications" name="agreeNotifications" required>
+                            <label for="agreeNotifications">אני מסכים/ה לקבל עדכונים ותזכורות *</label>
+                        </div>
+                        <div class="form-group">
+                            <label>הערות נוספות</label>
+                            <textarea name="feedback" rows="4" placeholder="שתף/י אותנו בהערות או שאלות..."></textarea>
+                        </div>
+                    </div>
+
+                    <div id="successMessage" style="display: none;" class="success-message">
+                        <div class="success-icon">✓</div>
+                        <h3>השאלון נשלח בהצלחה!</h3>
+                        <p>תודה על מילוי הפרטים. ניצור איתך קשר בקרוב.</p>
+                        <button type="button" onclick="resetForm()" class="btn-primary">מלא שאלון חדש</button>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="form-navigation" id="formNav">
+                    <button type="button" id="prevBtn" onclick="previousStep()" class="btn-secondary" style="display: none;">
+                        <span>←</span> חזור
+                    </button>
+                    <button type="button" id="nextBtn" onclick="nextStep()" class="btn-primary">
+                        המשך <span>→</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
