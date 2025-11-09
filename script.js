@@ -34,10 +34,12 @@ function setupEventListeners() {
 
     // Additional ID method
     const idMethod = document.querySelector('[name="additionalIdMethod"]');
-    idMethod.addEventListener('change', function() {
-        toggleAdditionalIdFields('client');
-        saveFormData();
-    });
+    if (idMethod) {
+        idMethod.addEventListener('change', function() {
+            toggleAdditionalIdFields('client');
+            saveFormData();
+        });
+    }
 
     // Partner additional ID method
     const partnerIdMethod = document.querySelector('[name="partnerAdditionalIdMethod"]');
@@ -50,21 +52,25 @@ function setupEventListeners() {
 
     // Service purpose
     const servicePurpose = document.querySelectorAll('[name="servicePurpose"]');
-    servicePurpose.forEach(radio => {
-        radio.addEventListener('change', function() {
-            toggleBusinessSection();
-            saveFormData();
+    if (servicePurpose.length > 0) {
+        servicePurpose.forEach(radio => {
+            radio.addEventListener('change', function() {
+                toggleBusinessSection();
+                saveFormData();
+            });
         });
-    });
+    }
 
     // Partner employment status
     const partnerEmployment = document.querySelectorAll('[name="partnerEmployment"]');
-    partnerEmployment.forEach(radio => {
-        radio.addEventListener('change', function() {
-            togglePartnerBusinessSection();
-            saveFormData();
+    if (partnerEmployment.length > 0) {
+        partnerEmployment.forEach(radio => {
+            radio.addEventListener('change', function() {
+                togglePartnerBusinessSection();
+                saveFormData();
+            });
         });
-    });
+    }
 
     // Business location
     const businessAtHome = document.querySelector('[name="businessAtHome"]');
