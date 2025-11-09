@@ -23,7 +23,7 @@ export const Step3FinancialAndFeedback = () => {
   const handleSubmit = async () => {
     setLoading(true);
     const success = await sendToWebhook(
-      "https://n8n.link-up.co.il/webhook/client-intake-final",
+      "https://n8n.chasida.biz/webhook/client-intake-final",
       { financialInfo, feedbackInfo }
     );
     setLoading(false);

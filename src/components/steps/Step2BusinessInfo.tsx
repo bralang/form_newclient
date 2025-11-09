@@ -44,7 +44,7 @@ export const Step2BusinessInfo = () => {
   const handleNext = async () => {
     setLoading(true);
     const success = await sendToWebhook(
-      "https://n8n.link-up.co.il/webhook/client-intake-step2",
+      "https://n8n.chasida.biz/webhook/client-intake-step2",
       { serviceType, businessInfo, spouseBusinessInfo }
     );
     setLoading(false);
