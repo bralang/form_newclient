@@ -1,60 +1,149 @@
 // Webhook URLs
 const WEBHOOKS = {
-    step1: 'https://n8n.link-up.co.il/webhook/client-intake-step1',
-    step2: 'https://n8n.link-up.co.il/webhook/client-intake-step2',
-    step3: 'https://n8n.link-up.co.il/webhook/client-intake-final'
+    step1: 'https://n8n.chasida.biz/webhook/client-intake-step1',
+    step2: 'https://n8n.chasida.biz/webhook/client-intake-step2',
+    final: 'https://n8n.chasida.biz/webhook/client-intake-final'
 };
 
 let currentStep = 1;
 const totalSteps = 3;
 
-// Initialize form
 document.addEventListener('DOMContentLoaded', function() {
     loadFormData();
     updateUI();
     setupEventListeners();
 });
 
-// Setup event listeners
 function setupEventListeners() {
-    // Marital status change
-    const maritalStatus = document.querySelector('[name="maritalStatus"]');
-    maritalStatus.addEventListener('change', function() {
-        saveFormData();
-    });
-
-    // Has children checkbox
-    const hasChildren = document.getElementById('hasChildren');
-    hasChildren.addEventListener('change', function() {
-        document.getElementById('childrenSection').style.display = 
-            this.checked ? 'block' : 'none';
-        saveFormData();
-    });
-
-    // Has business checkbox
-    const hasBusiness = document.getElementById('hasBusiness');
-    hasBusiness.addEventListener('change', function() {
-        document.getElementById('businessSection').style.display = 
-            this.checked ? 'block' : 'none';
-        saveFormData();
-    });
-
-    // Save form data on input change
     const form = document.getElementById('clientForm');
+    
+    const maritalStatus = document.getElementById('maritalStatus');
+    if (maritalStatus) maritalStatus.addEventListener('change', handleMaritalStatusChange);
+
+    const hasChildren = document.getElementById('hasChildren');
+    if (hasChildren) hasChildren.addEventListener('change', handleChildrenChange);
+
+    const additionalIdType = document.getElementById('additionalIdType');
+    if (additionalIdType) additionalIdType.addEventListener('change', handleAdditionalIdChange);
+
+    const partnerAdditionalIdType = document.getElementById('partnerAdditionalIdType');
+    if (partnerAdditionalIdType) partnerAdditionalIdType.addEventListener('change', handlePartnerAdditionalIdChange);
+
+    const servicePurposeRadios = document.querySelectorAll('input[name="servicePurpose"]');
+    servicePurposeRadios.forEach(radio => radio.addEventListener('change', handleServicePurposeChange));
+
+    const partnerEmploymentRadios = document.querySelectorAll('input[name="partnerEmployment"]');
+    partnerEmploymentRadios.forEach(radio => radio.addEventListener('change', handlePartnerEmploymentChange));
+
+    const businessAtHome = document.getElementById('businessAtHome');
+    if (businessAtHome) businessAtHome.addEventListener('change', handleBusinessAtHomeChange);
+
+    const partnerBusinessAtHome = document.getElementById('partnerBusinessAtHome');
+    if (partnerBusinessAtHome) partnerBusinessAtHome.addEventListener('change', handlePartnerBusinessAtHomeChange);
+
+    const documentMethod = document.getElementById('documentMethod');
+    if (documentMethod) documentMethod.addEventListener('change', handleDocumentMethodChange);
+
+    const partnerDocumentMethod = document.getElementById('partnerDocumentMethod');
+    if (partnerDocumentMethod) partnerDocumentMethod.addEventListener('change', handlePartnerDocumentMethodChange);
+
+    const wealthDeclaration = document.getElementById('wealthDeclaration');
+    if (wealthDeclaration) wealthDeclaration.addEventListener('change', handleWealthDeclarationChange);
+
     form.addEventListener('input', saveFormData);
     form.addEventListener('change', saveFormData);
 }
 
-// Update UI based on current step
+function handleMaritalStatusChange() {
+    const maritalStatus = document.getElementById('maritalStatus').value;
+    const sections = ['partnerSection', 'partnerContactSection', 'partnerIdSection', 'partnerEmploymentSection'];
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = maritalStatus === 'partner' ? 'block' : 'none';
+    });
+    saveFormData();
+}
+
+function handleChildrenChange() {
+    const hasChildren = document.getElementById('hasChildren').checked;
+    document.getElementById('childrenSection').style.display = hasChildren ? 'block' : 'none';
+    saveFormData();
+}
+
+function handleAdditionalIdChange() {
+    const type = document.getElementById('additionalIdType').value;
+    document.getElementById('parentIdSection').style.display = type === 'parentId' ? 'block' : 'none';
+    document.getElementById('licenseSection').style.display = type === 'license' ? 'block' : 'none';
+    document.getElementById('passportSection').style.display = type === 'passport' ? 'block' : 'none';
+    saveFormData();
+}
+
+function handlePartnerAdditionalIdChange() {
+    const type = document.getElementById('partnerAdditionalIdType').value;
+    document.getElementById('partnerParentIdSection').style.display = type === 'parentId' ? 'block' : 'none';
+    document.getElementById('partnerLicenseSection').style.display = type === 'license' ? 'block' : 'none';
+    document.getElementById('partnerPassportSection').style.display = type === 'passport' ? 'block' : 'none';
+    saveFormData();
+}
+
+function handleServicePurposeChange() {
+    const purpose = document.querySelector('input[name="servicePurpose"]:checked')?.value;
+    const myBusinessSection = document.getElementById('myBusinessSection');
+    const newBusinessFields = document.getElementById('newBusinessFields');
+
+    if (purpose === 'newBusiness' || purpose === 'existingBusiness' || purpose === 'shareholder') {
+        myBusinessSection.style.display = 'block';
+        newBusinessFields.style.display = purpose === 'newBusiness' ? 'block' : 'none';
+    } else {
+        myBusinessSection.style.display = 'none';
+        newBusinessFields.style.display = 'none';
+    }
+    saveFormData();
+}
+
+function handlePartnerEmploymentChange() {
+    const employment = document.querySelector('input[name="partnerEmployment"]:checked')?.value;
+    const partnerBusinessSection = document.getElementById('partnerBusinessSection');
+    partnerBusinessSection.style.display = (employment === 'businessOwner' || employment === 'openingBusiness') ? 'block' : 'none';
+    saveFormData();
+}
+
+function handleBusinessAtHomeChange() {
+    const atHome = document.getElementById('businessAtHome').value;
+    document.getElementById('businessAddressSection').style.display = atHome === 'no' ? 'block' : 'none';
+    saveFormData();
+}
+
+function handlePartnerBusinessAtHomeChange() {
+    const atHome = document.getElementById('partnerBusinessAtHome').value;
+    document.getElementById('partnerBusinessAddressSection').style.display = atHome === 'no' ? 'block' : 'none';
+    saveFormData();
+}
+
+function handleDocumentMethodChange() {
+    const method = document.getElementById('documentMethod').value;
+    document.getElementById('otherSoftwareSection').style.display = method === 'other' ? 'block' : 'none';
+    saveFormData();
+}
+
+function handlePartnerDocumentMethodChange() {
+    const method = document.getElementById('partnerDocumentMethod').value;
+    document.getElementById('partnerOtherSoftwareSection').style.display = method === 'other' ? 'block' : 'none';
+    saveFormData();
+}
+
+function handleWealthDeclarationChange() {
+    const declaration = document.getElementById('wealthDeclaration').value;
+    document.getElementById('wealthDeclarationFileSection').style.display = declaration === 'yes' ? 'block' : 'none';
+    saveFormData();
+}
+
 function updateUI() {
-    // Update step indicators
     document.querySelectorAll('.step-item').forEach((item, index) => {
         const stepNum = index + 1;
         item.classList.remove('active', 'completed');
-        
-        if (stepNum === currentStep) {
-            item.classList.add('active');
-        } else if (stepNum < currentStep) {
+        if (stepNum === currentStep) item.classList.add('active');
+        else if (stepNum < currentStep) {
             item.classList.add('completed');
             item.querySelector('.step-circle').innerHTML = '✓';
         } else {
@@ -62,52 +151,28 @@ function updateUI() {
         }
     });
 
-    // Update step lines
     document.querySelectorAll('.step-line').forEach((line, index) => {
-        if (index + 1 < currentStep) {
-            line.classList.add('completed');
-        } else {
-            line.classList.remove('completed');
-        }
+        line.classList.toggle('completed', index + 1 < currentStep);
     });
 
-    // Show/hide form steps
     document.querySelectorAll('.form-step').forEach((step, index) => {
-        step.classList.remove('active');
-        if (index + 1 === currentStep) {
-            step.classList.add('active');
-        }
+        step.classList.toggle('active', index + 1 === currentStep);
     });
 
-    // Update navigation buttons
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    
-    prevBtn.style.display = currentStep === 1 ? 'none' : 'flex';
-    
-    if (currentStep === totalSteps) {
-        nextBtn.innerHTML = 'שלח שאלון <span>→</span>';
-    } else {
-        nextBtn.innerHTML = 'המשך <span>→</span>';
-    }
+    document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : 'flex';
+    document.getElementById('nextBtn').innerHTML = currentStep === totalSteps ? 'שלח שאלון <span>→</span>' : 'המשך <span>→</span>';
 }
 
-// Navigate to next step
 async function nextStep() {
-    const form = document.getElementById('clientForm');
-    
-    // Validate current step
     const currentStepElement = document.getElementById(`step${currentStep}`);
-    const inputs = currentStepElement.querySelectorAll('input[required], select[required], textarea[required]');
+    const inputs = currentStepElement.querySelectorAll('input[required], select[required]');
     
     let isValid = true;
     inputs.forEach(input => {
-        if (!input.value && !input.disabled) {
+        if (input.offsetParent !== null && !input.value) {
             isValid = false;
             input.style.borderColor = '#ef4444';
-            setTimeout(() => {
-                input.style.borderColor = '';
-            }, 2000);
+            setTimeout(() => input.style.borderColor = '', 2000);
         }
     });
 
@@ -116,37 +181,21 @@ async function nextStep() {
         return;
     }
 
-    // Check service purposes in step 2
-    if (currentStep === 2) {
-        const purposes = document.querySelectorAll('input[name="purposes"]:checked');
-        if (purposes.length === 0) {
-            alert('נא לבחור לפחות סוג שירות אחד');
-            return;
-        }
-    }
-
-    // Show loading
     const nextBtn = document.getElementById('nextBtn');
     nextBtn.classList.add('loading');
     nextBtn.disabled = true;
 
     try {
-        // Send data to webhook
-        const formData = collectFormData();
-        await sendToWebhook(currentStep, formData);
-
-        // If last step, show success message
+        await sendToWebhook(currentStep, collectFormData());
         if (currentStep === totalSteps) {
             document.getElementById('formNav').style.display = 'none';
             document.getElementById('successMessage').style.display = 'block';
         } else {
-            // Move to next step
             currentStep++;
             updateUI();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     } catch (error) {
-        console.error('Error sending data:', error);
         alert('אירעה שגיאה בשליחת הנתונים. אנא נסה שנית.');
     } finally {
         nextBtn.classList.remove('loading');
@@ -154,7 +203,6 @@ async function nextStep() {
     }
 }
 
-// Navigate to previous step
 function previousStep() {
     if (currentStep > 1) {
         currentStep--;
@@ -163,156 +211,139 @@ function previousStep() {
     }
 }
 
-// Collect form data
 function collectFormData() {
     const form = document.getElementById('clientForm');
     const formData = new FormData(form);
     const data = {};
 
-    // Convert FormData to object
     for (let [key, value] of formData.entries()) {
-        if (key === 'purposes') {
-            if (!data.purposes) data.purposes = [];
-            data.purposes.push(value);
-        } else {
-            data[key] = value;
-        }
+        if (value instanceof File && value.size === 0) continue;
+        data[key] = value;
     }
 
-    // Add checkboxes
-    data.hasChildren = document.getElementById('hasChildren').checked;
-    data.preferPhone = document.getElementById('preferPhone').checked;
-    data.hasBusiness = document.getElementById('hasBusiness').checked;
-    data.agreeNotifications = document.getElementById('agreeNotifications')?.checked;
+    data.hasChildren = document.getElementById('hasChildren')?.checked || false;
+    data.preferPhone = document.getElementById('preferPhone')?.checked || false;
+    data.agreeNotifications = document.getElementById('agreeNotifications')?.checked || false;
+
+    const servicePurpose = document.querySelector('input[name="servicePurpose"]:checked');
+    if (servicePurpose) data.servicePurpose = servicePurpose.value;
+
+    const partnerEmployment = document.querySelector('input[name="partnerEmployment"]:checked');
+    if (partnerEmployment) data.partnerEmployment = partnerEmployment.value;
 
     return data;
 }
 
-// Send data to webhook
 async function sendToWebhook(step, data) {
-    const webhookUrl = WEBHOOKS[`step${step}`];
-    
-    // Organize data by step
-    let stepData = {};
+    let webhookUrl, stepData = {};
     
     if (step === 1) {
+        webhookUrl = WEBHOOKS.step1;
         stepData = {
             personalInfo: {
-                firstName: data.firstName,
-                lastName: data.lastName,
-                gender: data.gender,
-                idNumber: data.idNumber,
-                birthDate: data.birthDate,
-                maritalStatus: data.maritalStatus,
-                hasChildren: data.hasChildren,
-                numberOfChildren: data.numberOfChildren || null
+                firstName: data.firstName, lastName: data.lastName, gender: data.gender,
+                idNumber: data.idNumber, birthDate: data.birthDate, maritalStatus: data.maritalStatus,
+                hasChildren: data.hasChildren, numberOfChildren: data.numberOfChildren || null,
+                partnerName: data.partnerName || null, partnerIdNumber: data.partnerIdNumber || null,
+                partnerBirthDate: data.partnerBirthDate || null
             },
             contactInfo: {
-                phone: data.phone,
-                email: data.email,
-                preferPhone: data.preferPhone
+                phone: data.phone, email: data.email, preferPhone: data.preferPhone,
+                partnerPhone: data.partnerPhone || null, partnerEmail: data.partnerEmail || null,
+                homePhone: data.homePhone || null, address: data.address
             },
-            identificationInfo: {}
+            identificationInfo: {
+                additionalIdType: data.additionalIdType, parentIdNumber: data.parentIdNumber || null,
+                licenseNumber: data.licenseNumber || null, passportNumber: data.passportNumber || null,
+                partnerAdditionalIdType: data.partnerAdditionalIdType || null,
+                partnerParentIdNumber: data.partnerParentIdNumber || null,
+                partnerLicenseNumber: data.partnerLicenseNumber || null,
+                partnerPassportNumber: data.partnerPassportNumber || null
+            }
         };
     } else if (step === 2) {
+        webhookUrl = WEBHOOKS.step2;
         stepData = {
-            serviceType: {
-                purposes: data.purposes || []
-            },
+            serviceInfo: { servicePurpose: data.servicePurpose, partnerEmployment: data.partnerEmployment || null },
             businessInfo: {
-                hasBusiness: data.hasBusiness,
-                businessName: data.businessName || null,
-                businessField: data.businessField || null,
-                businessType: data.businessType || null,
-                businessAddress: data.businessAddress || null
+                businessName: data.businessName || null, businessField: data.businessField || null,
+                businessType: data.businessType || null, isSmallBusiness: data.isSmallBusiness || null,
+                ownershipType: data.ownershipType || null, businessAtHome: data.businessAtHome || null,
+                businessAddress: data.businessAddress || null, businessOffering: data.businessOffering || null,
+                hasEmployees: data.hasEmployees || null, documentMethod: data.documentMethod || null,
+                otherSoftwareName: data.otherSoftwareName || null, softwareUsername: data.softwareUsername || null,
+                businessStartDate: data.businessStartDate || null, planningEmployees: data.planningEmployees || null,
+                expectedRevenue: data.expectedRevenue || null, chosenBusinessName: data.chosenBusinessName || null
+            },
+            partnerBusinessInfo: {
+                partnerBusinessName: data.partnerBusinessName || null, partnerBusinessField: data.partnerBusinessField || null,
+                partnerBusinessType: data.partnerBusinessType || null, partnerIsSmallBusiness: data.partnerIsSmallBusiness || null,
+                partnerOwnershipType: data.partnerOwnershipType || null, partnerBusinessAtHome: data.partnerBusinessAtHome || null,
+                partnerBusinessAddress: data.partnerBusinessAddress || null, partnerBusinessOffering: data.partnerBusinessOffering || null,
+                partnerHasEmployees: data.partnerHasEmployees || null, partnerDocumentMethod: data.partnerDocumentMethod || null,
+                partnerOtherSoftwareName: data.partnerOtherSoftwareName || null, partnerSoftwareUsername: data.partnerSoftwareUsername || null
             }
         };
-    } else if (step === 3) {
+    } else {
+        webhookUrl = WEBHOOKS.final;
         stepData = {
             financialInfo: {
-                wealthDeclaration: data.wealthDeclaration || null,
-                bankName: data.bankName || null,
-                branchNumber: data.branchNumber || null,
-                accountNumber: data.accountNumber || null,
+                wealthDeclaration: data.wealthDeclaration || null, bankName: data.bankName || null,
+                branchNumber: data.branchNumber || null, accountNumber: data.accountNumber || null,
                 accountHolder: data.accountHolder || null
             },
-            feedbackInfo: {
-                agreeNotifications: data.agreeNotifications,
-                feedback: data.feedback || null
-            }
+            feedbackInfo: { agreeNotifications: data.agreeNotifications, feedback: data.feedback || null }
         };
     }
 
     const response = await fetch(webhookUrl, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(stepData)
     });
 
-    if (!response.ok) {
-        throw new Error('Webhook request failed');
-    }
-
+    if (!response.ok) throw new Error('Webhook failed');
     return response;
 }
 
-// Save form data to sessionStorage
 function saveFormData() {
-    const data = collectFormData();
-    sessionStorage.setItem('formData', JSON.stringify(data));
+    sessionStorage.setItem('formData', JSON.stringify(collectFormData()));
     sessionStorage.setItem('currentStep', currentStep);
 }
 
-// Load form data from sessionStorage
 function loadFormData() {
-    const savedData = sessionStorage.getItem('formData');
     const savedStep = sessionStorage.getItem('currentStep');
+    if (savedStep) currentStep = parseInt(savedStep);
     
-    if (savedStep) {
-        currentStep = parseInt(savedStep);
-    }
-    
+    const savedData = sessionStorage.getItem('formData');
     if (savedData) {
         const data = JSON.parse(savedData);
         const form = document.getElementById('clientForm');
         
-        // Fill form fields
         Object.keys(data).forEach(key => {
             const input = form.querySelector(`[name="${key}"]`);
-            if (input) {
-                if (input.type === 'checkbox') {
-                    input.checked = data[key];
-                } else if (input.type === 'file') {
-                    // Skip file inputs
-                } else {
-                    input.value = data[key];
-                }
+            if (input && input.type !== 'file') {
+                if (input.type === 'checkbox') input.checked = data[key];
+                else if (input.type === 'radio' && input.value === data[key]) input.checked = true;
+                else if (input.type !== 'radio') input.value = data[key];
             }
         });
 
-        // Handle special checkboxes
-        if (data.hasChildren) {
-            document.getElementById('hasChildren').checked = true;
-            document.getElementById('childrenSection').style.display = 'block';
-        }
-        if (data.hasBusiness) {
-            document.getElementById('hasBusiness').checked = true;
-            document.getElementById('businessSection').style.display = 'block';
-        }
-
-        // Handle purposes (multiple checkboxes)
-        if (data.purposes && Array.isArray(data.purposes)) {
-            data.purposes.forEach(purpose => {
-                const checkbox = document.getElementById(purpose);
-                if (checkbox) checkbox.checked = true;
-            });
-        }
+        // Trigger handlers
+        if (data.maritalStatus) handleMaritalStatusChange();
+        if (data.hasChildren) handleChildrenChange();
+        if (data.additionalIdType) handleAdditionalIdChange();
+        if (data.partnerAdditionalIdType) handlePartnerAdditionalIdChange();
+        if (data.servicePurpose) handleServicePurposeChange();
+        if (data.partnerEmployment) handlePartnerEmploymentChange();
+        if (data.businessAtHome) handleBusinessAtHomeChange();
+        if (data.partnerBusinessAtHome) handlePartnerBusinessAtHomeChange();
+        if (data.documentMethod) handleDocumentMethodChange();
+        if (data.partnerDocumentMethod) handlePartnerDocumentMethodChange();
+        if (data.wealthDeclaration) handleWealthDeclarationChange();
     }
 }
 
-// Reset form
 function resetForm() {
     sessionStorage.clear();
     location.reload();
