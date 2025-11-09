@@ -1,8 +1,8 @@
 // Webhook URLs
 const WEBHOOKS = {
-    step1: 'https://n8n.link-up.co.il/webhook/client-intake-step1',
-    step2: 'https://n8n.link-up.co.il/webhook/client-intake-step2',
-    step3: 'https://n8n.link-up.co.il/webhook/client-intake-final'
+    step1: 'https://n8n.chasida.biz/webhook/client-intake-step1',
+    step2: 'https://n8n.chasida.biz/webhook/client-intake-step2',
+    step3: 'https://n8n.chasida.biz/webhook/client-intake-final'
 };
 
 let currentStep = 1;
@@ -20,6 +20,7 @@ function setupEventListeners() {
     // Marital status change
     const maritalStatus = document.querySelector('[name="maritalStatus"]');
     maritalStatus.addEventListener('change', function() {
+        togglePartnerSection();
         saveFormData();
     });
 
@@ -31,18 +32,226 @@ function setupEventListeners() {
         saveFormData();
     });
 
-    // Has business checkbox
-    const hasBusiness = document.getElementById('hasBusiness');
-    hasBusiness.addEventListener('change', function() {
-        document.getElementById('businessSection').style.display = 
-            this.checked ? 'block' : 'none';
+    // Additional ID method
+    const idMethod = document.querySelector('[name="additionalIdMethod"]');
+    idMethod.addEventListener('change', function() {
+        toggleAdditionalIdFields('client');
         saveFormData();
     });
+
+    // Partner additional ID method
+    const partnerIdMethod = document.querySelector('[name="partnerAdditionalIdMethod"]');
+    if (partnerIdMethod) {
+        partnerIdMethod.addEventListener('change', function() {
+            toggleAdditionalIdFields('partner');
+            saveFormData();
+        });
+    }
+
+    // Service purpose
+    const servicePurpose = document.querySelectorAll('[name="servicePurpose"]');
+    servicePurpose.forEach(radio => {
+        radio.addEventListener('change', function() {
+            toggleBusinessSection();
+            saveFormData();
+        });
+    });
+
+    // Partner employment status
+    const partnerEmployment = document.querySelectorAll('[name="partnerEmployment"]');
+    partnerEmployment.forEach(radio => {
+        radio.addEventListener('change', function() {
+            togglePartnerBusinessSection();
+            saveFormData();
+        });
+    });
+
+    // Business location
+    const businessAtHome = document.querySelector('[name="businessAtHome"]');
+    if (businessAtHome) {
+        businessAtHome.addEventListener('change', function() {
+            toggleBusinessLocation();
+            saveFormData();
+        });
+    }
+
+    // Partner business location
+    const partnerBusinessAtHome = document.querySelector('[name="partnerBusinessAtHome"]');
+    if (partnerBusinessAtHome) {
+        partnerBusinessAtHome.addEventListener('change', function() {
+            togglePartnerBusinessLocation();
+            saveFormData();
+        });
+    }
+
+    // Document method
+    const docMethod = document.querySelector('[name="documentMethod"]');
+    if (docMethod) {
+        docMethod.addEventListener('change', function() {
+            toggleDocumentMethodFields();
+            saveFormData();
+        });
+    }
+
+    // Partner document method
+    const partnerDocMethod = document.querySelector('[name="partnerDocumentMethod"]');
+    if (partnerDocMethod) {
+        partnerDocMethod.addEventListener('change', function() {
+            togglePartnerDocumentMethodFields();
+            saveFormData();
+        });
+    }
+
+    // New business fields
+    const isNewBusiness = document.querySelector('[name="isNewBusiness"]');
+    if (isNewBusiness) {
+        isNewBusiness.addEventListener('change', function() {
+            toggleNewBusinessFields();
+            saveFormData();
+        });
+    }
+
+    // Partner new business fields
+    const partnerIsNewBusiness = document.querySelector('[name="partnerIsNewBusiness"]');
+    if (partnerIsNewBusiness) {
+        partnerIsNewBusiness.addEventListener('change', function() {
+            togglePartnerNewBusinessFields();
+            saveFormData();
+        });
+    }
 
     // Save form data on input change
     const form = document.getElementById('clientForm');
     form.addEventListener('input', saveFormData);
     form.addEventListener('change', saveFormData);
+}
+
+// Toggle partner section
+function togglePartnerSection() {
+    const maritalStatus = document.querySelector('[name="maritalStatus"]').value;
+    const partnerSection = document.getElementById('partnerSection');
+    const partnerContactSection = document.getElementById('partnerContactSection');
+    const partnerIdSection = document.getElementById('partnerIdSection');
+    const partnerEmploymentSection = document.getElementById('partnerEmploymentSection');
+    
+    if (maritalStatus === 'partner') {
+        if (partnerSection) partnerSection.style.display = 'block';
+        if (partnerContactSection) partnerContactSection.style.display = 'block';
+        if (partnerIdSection) partnerIdSection.style.display = 'block';
+        if (partnerEmploymentSection) partnerEmploymentSection.style.display = 'block';
+    } else {
+        if (partnerSection) partnerSection.style.display = 'none';
+        if (partnerContactSection) partnerContactSection.style.display = 'none';
+        if (partnerIdSection) partnerIdSection.style.display = 'none';
+        if (partnerEmploymentSection) partnerEmploymentSection.style.display = 'none';
+    }
+}
+
+// Toggle additional ID fields
+function toggleAdditionalIdFields(type) {
+    const prefix = type === 'partner' ? 'partner' : '';
+    const selectName = type === 'partner' ? 'partnerAdditionalIdMethod' : 'additionalIdMethod';
+    const method = document.querySelector(`[name="${selectName}"]`).value;
+    
+    const parentId = document.getElementById(`${prefix}ParentIdSection`);
+    const license = document.getElementById(`${prefix}LicenseSection`);
+    const passport = document.getElementById(`${prefix}PassportSection`);
+    
+    if (parentId) parentId.style.display = 'none';
+    if (license) license.style.display = 'none';
+    if (passport) passport.style.display = 'none';
+    
+    if (method === 'parentId' && parentId) parentId.style.display = 'block';
+    if (method === 'license' && license) license.style.display = 'block';
+    if (method === 'passport' && passport) passport.style.display = 'block';
+}
+
+// Toggle business section
+function toggleBusinessSection() {
+    const purpose = document.querySelector('[name="servicePurpose"]:checked')?.value;
+    const businessSection = document.getElementById('businessDetailsSection');
+    
+    if (businessSection) {
+        if (purpose === 'existingBusiness' || purpose === 'newBusiness' || purpose === 'shareholder') {
+            businessSection.style.display = 'block';
+        } else {
+            businessSection.style.display = 'none';
+        }
+    }
+}
+
+// Toggle partner business section
+function togglePartnerBusinessSection() {
+    const employment = document.querySelector('[name="partnerEmployment"]:checked')?.value;
+    const partnerBusinessSection = document.getElementById('partnerBusinessDetailsSection');
+    
+    if (partnerBusinessSection) {
+        if (employment === 'businessOwner' || employment === 'openingBusiness' || employment === 'shareholder') {
+            partnerBusinessSection.style.display = 'block';
+        } else {
+            partnerBusinessSection.style.display = 'none';
+        }
+    }
+}
+
+// Toggle business location
+function toggleBusinessLocation() {
+    const atHome = document.querySelector('[name="businessAtHome"]:checked')?.value;
+    const locationSection = document.getElementById('businessLocationSection');
+    
+    if (locationSection) {
+        locationSection.style.display = atHome === 'no' ? 'block' : 'none';
+    }
+}
+
+// Toggle partner business location
+function togglePartnerBusinessLocation() {
+    const atHome = document.querySelector('[name="partnerBusinessAtHome"]:checked')?.value;
+    const locationSection = document.getElementById('partnerBusinessLocationSection');
+    
+    if (locationSection) {
+        locationSection.style.display = atHome === 'no' ? 'block' : 'none';
+    }
+}
+
+// Toggle document method fields
+function toggleDocumentMethodFields() {
+    const method = document.querySelector('[name="documentMethod"]:checked')?.value;
+    const otherSoftwareSection = document.getElementById('otherSoftwareSection');
+    
+    if (otherSoftwareSection) {
+        otherSoftwareSection.style.display = method === 'other' ? 'block' : 'none';
+    }
+}
+
+// Toggle partner document method fields
+function togglePartnerDocumentMethodFields() {
+    const method = document.querySelector('[name="partnerDocumentMethod"]:checked')?.value;
+    const partnerOtherSoftwareSection = document.getElementById('partnerOtherSoftwareSection');
+    
+    if (partnerOtherSoftwareSection) {
+        partnerOtherSoftwareSection.style.display = method === 'other' ? 'block' : 'none';
+    }
+}
+
+// Toggle new business fields
+function toggleNewBusinessFields() {
+    const isNew = document.querySelector('[name="isNewBusiness"]:checked')?.value;
+    const newBusinessSection = document.getElementById('newBusinessFieldsSection');
+    
+    if (newBusinessSection) {
+        newBusinessSection.style.display = isNew === 'yes' ? 'block' : 'none';
+    }
+}
+
+// Toggle partner new business fields
+function togglePartnerNewBusinessFields() {
+    const isNew = document.querySelector('[name="partnerIsNewBusiness"]:checked')?.value;
+    const partnerNewBusinessSection = document.getElementById('partnerNewBusinessFieldsSection');
+    
+    if (partnerNewBusinessSection) {
+        partnerNewBusinessSection.style.display = isNew === 'yes' ? 'block' : 'none';
+    }
 }
 
 // Update UI based on current step
@@ -116,11 +325,11 @@ async function nextStep() {
         return;
     }
 
-    // Check service purposes in step 2
+    // Check service purpose in step 2
     if (currentStep === 2) {
-        const purposes = document.querySelectorAll('input[name="purposes"]:checked');
-        if (purposes.length === 0) {
-            alert('נא לבחור לפחות סוג שירות אחד');
+        const purpose = document.querySelector('input[name="servicePurpose"]:checked');
+        if (!purpose) {
+            alert('נא לבחור למה ניגשת לקבל שירות');
             return;
         }
     }
@@ -171,18 +380,12 @@ function collectFormData() {
 
     // Convert FormData to object
     for (let [key, value] of formData.entries()) {
-        if (key === 'purposes') {
-            if (!data.purposes) data.purposes = [];
-            data.purposes.push(value);
-        } else {
-            data[key] = value;
-        }
+        data[key] = value;
     }
 
     // Add checkboxes
-    data.hasChildren = document.getElementById('hasChildren').checked;
-    data.preferPhone = document.getElementById('preferPhone').checked;
-    data.hasBusiness = document.getElementById('hasBusiness').checked;
+    data.hasChildren = document.getElementById('hasChildren')?.checked;
+    data.preferSMS = document.getElementById('preferSMS')?.checked;
     data.agreeNotifications = document.getElementById('agreeNotifications')?.checked;
 
     return data;

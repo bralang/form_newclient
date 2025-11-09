@@ -53,7 +53,7 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>מין *</label>
+                                <label>מגדר *</label>
                                 <select name="gender" required>
                                     <option value="">בחר/י</option>
                                     <option value="male">זכר</option>
@@ -61,7 +61,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>תעודת זהות *</label>
+                                <label>מספר זהות *</label>
                                 <input type="text" name="idNumber" required>
                             </div>
                         </div>
@@ -71,19 +71,17 @@
                                 <input type="date" name="birthDate" required>
                             </div>
                             <div class="form-group">
-                                <label>מצב משפחתי *</label>
+                                <label>מצב אישי *</label>
                                 <select name="maritalStatus" required>
                                     <option value="">בחר/י</option>
-                                    <option value="single">רווק/ה</option>
-                                    <option value="married">נשוי/אה</option>
-                                    <option value="divorced">גרוש/ה</option>
-                                    <option value="widowed">אלמן/ה</option>
+                                    <option value="single">יחיד</option>
+                                    <option value="partner">בן זוג</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-group checkbox-group">
                             <input type="checkbox" id="hasChildren" name="hasChildren">
-                            <label for="hasChildren">יש לי ילדים</label>
+                            <label for="hasChildren">האם יש ילדים</label>
                         </div>
                         <div id="childrenSection" style="display: none;">
                             <div class="form-group">
@@ -93,29 +91,164 @@
                         </div>
                     </div>
 
+                    <!-- Partner Details -->
+                    <div class="form-section" id="partnerSection" style="display: none;">
+                        <h3 class="section-title">פרטי בן/בת הזוג</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>שם בן/בת הזוג *</label>
+                                <input type="text" name="partnerName">
+                            </div>
+                            <div class="form-group">
+                                <label>מספר זהות בן/בת הזוג *</label>
+                                <input type="text" name="partnerIdNumber">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>תאריך לידה בן/בת הזוג *</label>
+                            <input type="date" name="partnerBirthDate">
+                        </div>
+                    </div>
+
                     <div class="form-section">
                         <h3 class="section-title">פרטי התקשרות</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>טלפון נייד *</label>
+                                <label>טלפון *</label>
                                 <input type="tel" name="phone" required>
                             </div>
                             <div class="form-group">
-                                <label>דוא"ל *</label>
+                                <label>מייל *</label>
                                 <input type="email" name="email" required>
                             </div>
                         </div>
                         <div class="form-group checkbox-group">
-                            <input type="checkbox" id="preferPhone" name="preferPhone">
-                            <label for="preferPhone">מעדיף/ה ליצור קשר בטלפון על פני דוא"ל</label>
+                            <input type="checkbox" id="preferSMS" name="preferSMS">
+                            <label for="preferSMS">הזמינות שלי למייל נמוכה, מעדיף לקבל הודעות ממערכת טלפונית במקום במייל</label>
+                        </div>
+                    </div>
+
+                    <!-- Partner Contact Details -->
+                    <div class="form-section" id="partnerContactSection" style="display: none;">
+                        <h3 class="section-title">פרטי התקשרות של בן/בת הזוג</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>טלפון של בן/ת הזוג</label>
+                                <input type="tel" name="partnerPhone">
+                            </div>
+                            <div class="form-group">
+                                <label>מייל של בן/ת הזוג</label>
+                                <input type="email" name="partnerEmail">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>טלפון בבית</label>
+                            <input type="tel" name="homePhone">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">כתובת מגורים</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>רחוב *</label>
+                                <input type="text" name="street" required>
+                            </div>
+                            <div class="form-group">
+                                <label>מספר בית *</label>
+                                <input type="text" name="houseNumber" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>עיר *</label>
+                            <input type="text" name="city" required>
                         </div>
                     </div>
 
                     <div class="form-section">
                         <h3 class="section-title">מסמכי זיהוי</h3>
                         <div class="form-group">
-                            <label>העלאת תעודת זהות</label>
-                            <input type="file" name="idDocument" accept="image/*,.pdf">
+                            <label>צילום ת.ז. + ספח *</label>
+                            <input type="file" name="idDocument" accept="image/*,.pdf" required>
+                        </div>
+                        <div class="form-group">
+                            <label>אמצעי זיהוי נוסף *</label>
+                            <select name="additionalIdMethod" required>
+                                <option value="">בחר/י</option>
+                                <option value="parentId">מספר זהות של אחד ההורים</option>
+                                <option value="license">רשיון</option>
+                                <option value="passport">דרכון ישראלי</option>
+                            </select>
+                        </div>
+                        <div id="parentIdSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מספר זהות של הורה</label>
+                                <input type="text" name="parentIdNumber">
+                            </div>
+                        </div>
+                        <div id="licenseSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מספר רשיון</label>
+                                <input type="text" name="licenseNumber">
+                            </div>
+                            <div class="form-group">
+                                <label>צילום רשיון</label>
+                                <input type="file" name="licenseDocument" accept="image/*,.pdf">
+                            </div>
+                        </div>
+                        <div id="passportSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מספר דרכון</label>
+                                <input type="text" name="passportNumber">
+                            </div>
+                            <div class="form-group">
+                                <label>צילום דרכון</label>
+                                <input type="file" name="passportDocument" accept="image/*,.pdf">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Partner ID Documents -->
+                    <div class="form-section" id="partnerIdSection" style="display: none;">
+                        <h3 class="section-title">מסמכי זיהוי בן/בת הזוג</h3>
+                        <div class="form-group">
+                            <label>צילום ת.ז. בן/בת הזוג + ספח</label>
+                            <input type="file" name="partnerIdDocument" accept="image/*,.pdf">
+                        </div>
+                        <div class="form-group">
+                            <label>אמצעי זיהוי נוסף בן/בת הזוג</label>
+                            <select name="partnerAdditionalIdMethod">
+                                <option value="">בחר/י</option>
+                                <option value="parentId">מספר זהות של אחד ההורים</option>
+                                <option value="license">רשיון</option>
+                                <option value="passport">דרכון ישראלי</option>
+                            </select>
+                        </div>
+                        <div id="partnerParentIdSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מספר זהות של הורה</label>
+                                <input type="text" name="partnerParentIdNumber">
+                            </div>
+                        </div>
+                        <div id="partnerLicenseSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מספר רשיון</label>
+                                <input type="text" name="partnerLicenseNumber">
+                            </div>
+                            <div class="form-group">
+                                <label>צילום רשיון</label>
+                                <input type="file" name="partnerLicenseDocument" accept="image/*,.pdf">
+                            </div>
+                        </div>
+                        <div id="partnerPassportSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מספר דרכון</label>
+                                <input type="text" name="partnerPassportNumber">
+                            </div>
+                            <div class="form-group">
+                                <label>צילום דרכון</label>
+                                <input type="file" name="partnerPassportDocument" accept="image/*,.pdf">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -123,55 +256,392 @@
                 <!-- Step 2: Business Info -->
                 <div class="form-step" id="step2">
                     <div class="form-section">
-                        <h3 class="section-title">סוג השירות המבוקש</h3>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="bookkeeping" name="purposes" value="bookkeeping">
-                                <label for="bookkeeping">ניהול ספרים</label>
+                        <h3 class="section-title">בשביל מה ניגשתי לקבל שירות *</h3>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="servicePurpose" value="newBusiness" required>
+                                <span>הקמת עסק חדש</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="servicePurpose" value="existingBusiness">
+                                <span>יש לי עסק קיים</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="servicePurpose" value="shareholder">
+                                <span>אני בעל מניות בחברה</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="servicePurpose" value="employeeOnly">
+                                <span>אני שכיר בלבד עבור החזר מס</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Partner Employment Status -->
+                    <div class="form-section" id="partnerEmploymentSection" style="display: none;">
+                        <h3 class="section-title">מצב התעסוקתי של בן/בת זוגך</h3>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="partnerEmployment" value="notWorking">
+                                <span>לא עובד</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="partnerEmployment" value="employee">
+                                <span>שכיר</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="partnerEmployment" value="businessOwner">
+                                <span>בעל עסק</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="partnerEmployment" value="openingBusiness">
+                                <span>מעוניין לפתוח עסק</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="partnerEmployment" value="shareholder">
+                                <span>בעל מניות בחברה</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Business Details -->
+                    <div class="form-section" id="businessDetailsSection" style="display: none;">
+                        <h3 class="section-title">פרטי העסק שלך</h3>
+                        <div class="form-group">
+                            <label>שם העסק</label>
+                            <input type="text" name="businessName">
+                        </div>
+                        <div class="form-group">
+                            <label>תחום העיסוק</label>
+                            <input type="text" name="businessField">
+                        </div>
+                        <div class="form-group">
+                            <label>סוג העסק</label>
+                            <select name="businessType">
+                                <option value="">בחר/י</option>
+                                <option value="פטור">פטור</option>
+                                <option value="מורשה">מורשה</option>
+                                <option value="חברה">חברה</option>
+                                <option value="עמותה">עמותה</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>האם אתה עוסק זעיר</label>
+                            <select name="isSmallBusiness">
+                                <option value="">בחר/י</option>
+                                <option value="yes">כן</option>
+                                <option value="no">לא</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>האם אתה בעלים יחיד או בשותפות</label>
+                            <select name="ownershipType">
+                                <option value="">בחר/י</option>
+                                <option value="sole">בעלים יחיד</option>
+                                <option value="partnership">שותפות</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>נסח חברה</label>
+                            <input type="file" name="companyDocument" accept=".pdf,.doc,.docx">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>האם העסק מתנהל מהבית</label>
+                            <div class="radio-inline">
+                                <label class="radio-option">
+                                    <input type="radio" name="businessAtHome" value="yes">
+                                    <span>כן</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="businessAtHome" value="no">
+                                    <span>לא</span>
+                                </label>
                             </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="taxReturns" name="purposes" value="taxReturns">
-                                <label for="taxReturns">הגשת דוחות</label>
+                        </div>
+                        
+                        <div id="businessLocationSection" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>כתובת העסק - רחוב</label>
+                                    <input type="text" name="businessStreet">
+                                </div>
+                                <div class="form-group">
+                                    <label>מספר</label>
+                                    <input type="text" name="businessHouseNumber">
+                                </div>
                             </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="taxPlanning" name="purposes" value="taxPlanning">
-                                <label for="taxPlanning">תכנון מס</label>
+                            <div class="form-group">
+                                <label>עיר</label>
+                                <input type="text" name="businessCity">
                             </div>
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="payroll" name="purposes" value="payroll">
-                                <label for="payroll">ניהול שכר</label>
+                            <div class="form-group">
+                                <label>הסכם שכירות לעסק</label>
+                                <input type="file" name="rentalAgreement" accept=".pdf,.doc,.docx">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>האם העסק נותן שירות או מוכר מוצרים</label>
+                            <select name="businessOffering">
+                                <option value="">בחר/י</option>
+                                <option value="service">שירות</option>
+                                <option value="products">מוצרים</option>
+                                <option value="both">שניהם</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>האם העסק מעסיק עובדים</label>
+                            <select name="hasEmployees">
+                                <option value="">בחר/י</option>
+                                <option value="yes">כן</option>
+                                <option value="no">לא</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>באיזה אופן אתם מפיקים מסמכים בעסק (קבלות וכדו')</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="documentMethod" value="summit">
+                                    <span>סאמיט - התוכנה המומלצת על ידינו</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="documentMethod" value="summitTransfer">
+                                    <span>אני מעוניין להעביר את הפעילות שלי לסאמיט כדי להנות מהתממשקות למערכת הנה״ח שבמשרד, נא צרו איתי קשר לטיפול בענין</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="documentMethod" value="manual">
+                                    <span>ידני</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="documentMethod" value="other">
+                                    <span>תוכנה אחרת</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="otherSoftwareSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מה התוכנה</label>
+                                <input type="text" name="softwareName">
+                            </div>
+                            <div class="form-group">
+                                <label>שם משתמש</label>
+                                <input type="text" name="softwareUsername">
+                            </div>
+                            <div class="form-group">
+                                <label>סיסמא</label>
+                                <input type="password" name="softwarePassword">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>האם זה עסק חדש</label>
+                            <div class="radio-inline">
+                                <label class="radio-option">
+                                    <input type="radio" name="isNewBusiness" value="yes">
+                                    <span>כן</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="isNewBusiness" value="no">
+                                    <span>לא</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="newBusinessFieldsSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מתי התחילה הפעילות העסקית</label>
+                                <input type="date" name="businessStartDate">
+                            </div>
+                            <div class="form-group">
+                                <label>האם מתכנן עובדים</label>
+                                <select name="planningEmployees">
+                                    <option value="">בחר/י</option>
+                                    <option value="yes">כן</option>
+                                    <option value="no">לא</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>מה המחזור הצפוי בעסק השנה</label>
+                                <input type="text" name="expectedRevenue">
+                            </div>
+                            <div class="form-group">
+                                <label>שם העסק שבחרת</label>
+                                <input type="text" name="chosenBusinessName">
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-section">
-                        <h3 class="section-title">פרטי העסק שלך</h3>
-                        <div class="form-group checkbox-group">
-                            <input type="checkbox" id="hasBusiness" name="hasBusiness">
-                            <label for="hasBusiness">יש לי עסק</label>
+                    <!-- Partner Business Details -->
+                    <div class="form-section" id="partnerBusinessDetailsSection" style="display: none;">
+                        <h3 class="section-title">פרטי העסק של בן/בת זוגך</h3>
+                        <div class="form-group">
+                            <label>שם העסק</label>
+                            <input type="text" name="partnerBusinessName">
                         </div>
-                        <div id="businessSection" style="display: none;">
-                            <div class="form-group">
-                                <label>שם העסק</label>
-                                <input type="text" name="businessName">
+                        <div class="form-group">
+                            <label>תחום העיסוק</label>
+                            <input type="text" name="partnerBusinessField">
+                        </div>
+                        <div class="form-group">
+                            <label>סוג העסק</label>
+                            <select name="partnerBusinessType">
+                                <option value="">בחר/י</option>
+                                <option value="פטור">פטור</option>
+                                <option value="מורשה">מורשה</option>
+                                <option value="חברה">חברה</option>
+                                <option value="עמותה">עמותה</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>האם עוסק זעיר</label>
+                            <select name="partnerIsSmallBusiness">
+                                <option value="">בחר/י</option>
+                                <option value="yes">כן</option>
+                                <option value="no">לא</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>בעלים יחיד או בשותפות</label>
+                            <select name="partnerOwnershipType">
+                                <option value="">בחר/י</option>
+                                <option value="sole">בעלים יחיד</option>
+                                <option value="partnership">שותפות</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>נסח חברה</label>
+                            <input type="file" name="partnerCompanyDocument" accept=".pdf,.doc,.docx">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>האם העסק מתנהל מהבית</label>
+                            <div class="radio-inline">
+                                <label class="radio-option">
+                                    <input type="radio" name="partnerBusinessAtHome" value="yes">
+                                    <span>כן</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="partnerBusinessAtHome" value="no">
+                                    <span>לא</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="partnerBusinessLocationSection" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>כתובת העסק - רחוב</label>
+                                    <input type="text" name="partnerBusinessStreet">
+                                </div>
+                                <div class="form-group">
+                                    <label>מספר</label>
+                                    <input type="text" name="partnerBusinessHouseNumber">
+                                </div>
                             </div>
                             <div class="form-group">
-                                <label>תחום העיסוק</label>
-                                <input type="text" name="businessField">
+                                <label>עיר</label>
+                                <input type="text" name="partnerBusinessCity">
                             </div>
                             <div class="form-group">
-                                <label>סוג העסק</label>
-                                <select name="businessType">
+                                <label>הסכם שכירות לעסק</label>
+                                <input type="file" name="partnerRentalAgreement" accept=".pdf,.doc,.docx">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>האם העסק נותן שירות או מוכר מוצרים</label>
+                            <select name="partnerBusinessOffering">
+                                <option value="">בחר/י</option>
+                                <option value="service">שירות</option>
+                                <option value="products">מוצרים</option>
+                                <option value="both">שניהם</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>האם העסק מעסיק עובדים</label>
+                            <select name="partnerHasEmployees">
+                                <option value="">בחר/י</option>
+                                <option value="yes">כן</option>
+                                <option value="no">לא</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>באיזה אופן מפיקים מסמכים בעסק</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="partnerDocumentMethod" value="summit">
+                                    <span>סאמיט</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="partnerDocumentMethod" value="summitTransfer">
+                                    <span>מעוניין להעביר לסאמיט</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="partnerDocumentMethod" value="manual">
+                                    <span>ידני</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="partnerDocumentMethod" value="other">
+                                    <span>תוכנה אחרת</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="partnerOtherSoftwareSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מה התוכנה</label>
+                                <input type="text" name="partnerSoftwareName">
+                            </div>
+                            <div class="form-group">
+                                <label>שם משתמש</label>
+                                <input type="text" name="partnerSoftwareUsername">
+                            </div>
+                            <div class="form-group">
+                                <label>סיסמא</label>
+                                <input type="password" name="partnerSoftwarePassword">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>האם זה עסק חדש</label>
+                            <div class="radio-inline">
+                                <label class="radio-option">
+                                    <input type="radio" name="partnerIsNewBusiness" value="yes">
+                                    <span>כן</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="partnerIsNewBusiness" value="no">
+                                    <span>לא</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="partnerNewBusinessFieldsSection" style="display: none;">
+                            <div class="form-group">
+                                <label>מתי התחילה הפעילות העסקית</label>
+                                <input type="date" name="partnerBusinessStartDate">
+                            </div>
+                            <div class="form-group">
+                                <label>האם מתכנן עובדים</label>
+                                <select name="partnerPlanningEmployees">
                                     <option value="">בחר/י</option>
-                                    <option value="עוסק מורשה">עוסק מורשה</option>
-                                    <option value="חברה בע״מ">חברה בע״מ</option>
-                                    <option value="שותפות">שותפות</option>
-                                    <option value="עמותה">עמותה</option>
+                                    <option value="yes">כן</option>
+                                    <option value="no">לא</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>כתובת העסק</label>
-                                <input type="text" name="businessAddress">
+                                <label>מה המחזור הצפוי בעסק השנה</label>
+                                <input type="text" name="partnerExpectedRevenue">
+                            </div>
+                            <div class="form-group">
+                                <label>שם העסק שבחרת</label>
+                                <input type="text" name="partnerChosenBusinessName">
                             </div>
                         </div>
                     </div>
@@ -182,21 +652,28 @@
                     <div class="form-section">
                         <h3 class="section-title">מידע פיננסי</h3>
                         <div class="form-group">
-                            <label>הצהרת הון</label>
+                            <label>האם הגשתם בעבר הצהרת הון</label>
                             <select name="wealthDeclaration">
                                 <option value="">בחר/י</option>
-                                <option value="submitted">הוגשה</option>
-                                <option value="not_submitted">לא הוגשה</option>
-                                <option value="not_required">לא נדרש</option>
+                                <option value="yes">כן</option>
+                                <option value="no">לא</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label>העתק הצהרת הון</label>
+                            <input type="file" name="wealthDeclarationDocument" accept=".pdf,.doc,.docx">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">פרטי חשבון בנק</h3>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>שם הבנק</label>
+                                <label>בנק</label>
                                 <input type="text" name="bankName">
                             </div>
                             <div class="form-group">
-                                <label>מספר סניף</label>
+                                <label>סניף</label>
                                 <input type="text" name="branchNumber">
                             </div>
                         </div>
@@ -206,9 +683,13 @@
                                 <input type="text" name="accountNumber">
                             </div>
                             <div class="form-group">
-                                <label>בעל החשבון</label>
+                                <label>שם בעל חשבון</label>
                                 <input type="text" name="accountHolder">
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label>צילום צ'ק או אישור ניהול חשבון</label>
+                            <input type="file" name="bankDocument" accept="image/*,.pdf">
                         </div>
                     </div>
 
@@ -216,10 +697,10 @@
                         <h3 class="section-title">משוב</h3>
                         <div class="form-group checkbox-group">
                             <input type="checkbox" id="agreeNotifications" name="agreeNotifications" required>
-                            <label for="agreeNotifications">אני מסכים/ה לקבל עדכונים ותזכורות *</label>
+                            <label for="agreeNotifications">אני מאשר הרשמה לקבלת הודעות *</label>
                         </div>
                         <div class="form-group">
-                            <label>הערות נוספות</label>
+                            <label>נשמח לקבל משוב על מילוי השאלון - האם היה ברור ונח או שנשארו לך שאלות</label>
                             <textarea name="feedback" rows="4" placeholder="שתף/י אותנו בהערות או שאלות..."></textarea>
                         </div>
                     </div>
