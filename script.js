@@ -142,7 +142,10 @@ function setupEventListeners() {
 
 // Toggle partner section
 function togglePartnerSection() {
-    const maritalStatus = document.querySelector('[name="maritalStatus"]').value;
+    const maritalStatusElement = document.querySelector('[name="maritalStatus"]');
+    if (!maritalStatusElement) return;
+    
+    const maritalStatus = maritalStatusElement.value;
     const partnerSection = document.getElementById('partnerSection');
     const partnerContactSection = document.getElementById('partnerContactSection');
     const partnerIdSection = document.getElementById('partnerIdSection');
@@ -165,8 +168,10 @@ function togglePartnerSection() {
 function toggleAdditionalIdFields(type) {
     const prefix = type === 'partner' ? 'partner' : '';
     const selectName = type === 'partner' ? 'partnerAdditionalIdMethod' : 'additionalIdMethod';
-    const method = document.querySelector(`[name="${selectName}"]`).value;
+    const methodElement = document.querySelector(`[name="${selectName}"]`);
+    if (!methodElement) return;
     
+    const method = methodElement.value;
     const parentId = document.getElementById(`${prefix}ParentIdSection`);
     const license = document.getElementById(`${prefix}LicenseSection`);
     const passport = document.getElementById(`${prefix}PassportSection`);
@@ -389,6 +394,8 @@ function previousStep() {
 // Collect form data
 function collectFormData() {
     const form = document.getElementById('clientForm');
+    if (!form) return {};
+    
     const formData = new FormData(form);
     const data = {};
 
@@ -397,10 +404,14 @@ function collectFormData() {
         data[key] = value;
     }
 
-    // Add checkboxes
-    data.hasChildren = document.getElementById('hasChildren')?.checked;
-    data.preferSMS = document.getElementById('preferSMS')?.checked;
-    data.agreeNotifications = document.getElementById('agreeNotifications')?.checked;
+    // Add checkboxes with null checks
+    const hasChildren = document.getElementById('hasChildren');
+    const preferSMS = document.getElementById('preferSMS');
+    const agreeNotifications = document.getElementById('agreeNotifications');
+    
+    data.hasChildren = hasChildren ? hasChildren.checked : false;
+    data.preferSMS = preferSMS ? preferSMS.checked : false;
+    data.agreeNotifications = agreeNotifications ? agreeNotifications.checked : false;
 
     return data;
 }
@@ -477,9 +488,13 @@ async function sendToWebhook(step, data) {
 
 // Save form data to sessionStorage
 function saveFormData() {
-    const data = collectFormData();
-    sessionStorage.setItem('formData', JSON.stringify(data));
-    sessionStorage.setItem('currentStep', currentStep);
+    try {
+        const data = collectFormData();
+        sessionStorage.setItem('formData', JSON.stringify(data));
+        sessionStorage.setItem('currentStep', currentStep);
+    } catch (error) {
+        console.error('Error saving form data:', error);
+    }
 }
 
 // Load form data from sessionStorage
