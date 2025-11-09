@@ -19,18 +19,24 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupEventListeners() {
     // Marital status change
     const maritalStatus = document.querySelector('[name="maritalStatus"]');
-    maritalStatus.addEventListener('change', function() {
-        togglePartnerSection();
-        saveFormData();
-    });
+    if (maritalStatus) {
+        maritalStatus.addEventListener('change', function() {
+            togglePartnerSection();
+            saveFormData();
+        });
+    }
 
     // Has children checkbox
     const hasChildren = document.getElementById('hasChildren');
-    hasChildren.addEventListener('change', function() {
-        document.getElementById('childrenSection').style.display = 
-            this.checked ? 'block' : 'none';
-        saveFormData();
-    });
+    if (hasChildren) {
+        hasChildren.addEventListener('change', function() {
+            const childrenSection = document.getElementById('childrenSection');
+            if (childrenSection) {
+                childrenSection.style.display = this.checked ? 'block' : 'none';
+            }
+            saveFormData();
+        });
+    }
 
     // Additional ID method
     const idMethod = document.querySelector('[name="additionalIdMethod"]');
@@ -128,8 +134,10 @@ function setupEventListeners() {
 
     // Save form data on input change
     const form = document.getElementById('clientForm');
-    form.addEventListener('input', saveFormData);
-    form.addEventListener('change', saveFormData);
+    if (form) {
+        form.addEventListener('input', saveFormData);
+        form.addEventListener('change', saveFormData);
+    }
 }
 
 // Toggle partner section
