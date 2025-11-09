@@ -510,6 +510,8 @@ function loadFormData() {
         const data = JSON.parse(savedData);
         const form = document.getElementById('clientForm');
         
+        if (!form) return;
+        
         // Fill form fields
         Object.keys(data).forEach(key => {
             const input = form.querySelector(`[name="${key}"]`);
@@ -524,14 +526,18 @@ function loadFormData() {
             }
         });
 
-        // Handle special checkboxes
+        // Handle special checkboxes with null checks
         if (data.hasChildren) {
-            document.getElementById('hasChildren').checked = true;
-            document.getElementById('childrenSection').style.display = 'block';
+            const hasChildrenEl = document.getElementById('hasChildren');
+            const childrenSectionEl = document.getElementById('childrenSection');
+            if (hasChildrenEl) hasChildrenEl.checked = true;
+            if (childrenSectionEl) childrenSectionEl.style.display = 'block';
         }
         if (data.hasBusiness) {
-            document.getElementById('hasBusiness').checked = true;
-            document.getElementById('businessSection').style.display = 'block';
+            const hasBusinessEl = document.getElementById('hasBusiness');
+            const businessSectionEl = document.getElementById('businessSection');
+            if (hasBusinessEl) hasBusinessEl.checked = true;
+            if (businessSectionEl) businessSectionEl.style.display = 'block';
         }
 
         // Handle purposes (multiple checkboxes)
