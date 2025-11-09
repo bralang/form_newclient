@@ -13,7 +13,7 @@ export const Step1PersonalAndContact = () => {
   const handleNext = async () => {
     setLoading(true);
     const success = await sendToWebhook(
-      "https://n8n.chasida.biz/webhook/client-intake-step1",
+      "https://n8n.link-up.co.il/webhook/client-intake-step1",
       { personalInfo, contactInfo, identificationInfo }
     );
     setLoading(false);
