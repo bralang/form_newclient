@@ -1,8 +1,8 @@
 // Webhook URLs
 const WEBHOOKS = {
-    step1: 'https://n8n.link-up.co.il/webhook/client-intake-step1',
-    step2: 'https://n8n.link-up.co.il/webhook/client-intake-step2',
-    step3: 'https://n8n.link-up.co.il/webhook/client-intake-final'
+    step1: 'https://n8n.chasida.biz/webhook/client-intake-step1',
+    step2: 'https://n8n.chasida.biz/webhook/client-intake-step2',
+    step3: 'https://n8n.chasida.biz/webhook/client-intake-final'
 };
 
 let currentStep = 1;
