@@ -104,7 +104,10 @@ function handleServicePurposeChange() {
 function handlePartnerEmploymentChange() {
     const employment = document.querySelector('input[name="partnerEmployment"]:checked')?.value;
     const partnerBusinessSection = document.getElementById('partnerBusinessSection');
+    const partnerNewBusinessFields = document.getElementById('partnerNewBusinessFields');
+    
     partnerBusinessSection.style.display = (employment === 'businessOwner' || employment === 'openingBusiness') ? 'block' : 'none';
+    partnerNewBusinessFields.style.display = employment === 'openingBusiness' ? 'block' : 'none';
     saveFormData();
 }
 
@@ -272,8 +275,9 @@ async function sendToWebhook(step, data) {
                 businessAddress: data.businessAddress || null, businessOffering: data.businessOffering || null,
                 hasEmployees: data.hasEmployees || null, documentMethod: data.documentMethod || null,
                 otherSoftwareName: data.otherSoftwareName || null, softwareUsername: data.softwareUsername || null,
-                businessStartDate: data.businessStartDate || null, planningEmployees: data.planningEmployees || null,
-                expectedRevenue: data.expectedRevenue || null, chosenBusinessName: data.chosenBusinessName || null
+                softwarePassword: data.softwarePassword || null, businessStartDate: data.businessStartDate || null,
+                planningEmployees: data.planningEmployees || null, expectedRevenue: data.expectedRevenue || null,
+                chosenBusinessName: data.chosenBusinessName || null
             },
             partnerBusinessInfo: {
                 partnerBusinessName: data.partnerBusinessName || null, partnerBusinessField: data.partnerBusinessField || null,
@@ -281,7 +285,10 @@ async function sendToWebhook(step, data) {
                 partnerOwnershipType: data.partnerOwnershipType || null, partnerBusinessAtHome: data.partnerBusinessAtHome || null,
                 partnerBusinessAddress: data.partnerBusinessAddress || null, partnerBusinessOffering: data.partnerBusinessOffering || null,
                 partnerHasEmployees: data.partnerHasEmployees || null, partnerDocumentMethod: data.partnerDocumentMethod || null,
-                partnerOtherSoftwareName: data.partnerOtherSoftwareName || null, partnerSoftwareUsername: data.partnerSoftwareUsername || null
+                partnerOtherSoftwareName: data.partnerOtherSoftwareName || null, partnerSoftwareUsername: data.partnerSoftwareUsername || null,
+                partnerSoftwarePassword: data.partnerSoftwarePassword || null, partnerBusinessStartDate: data.partnerBusinessStartDate || null,
+                partnerPlanningEmployees: data.partnerPlanningEmployees || null, partnerExpectedRevenue: data.partnerExpectedRevenue || null,
+                partnerChosenBusinessName: data.partnerChosenBusinessName || null
             }
         };
     } else {
@@ -342,6 +349,9 @@ function loadFormData() {
         if (data.partnerDocumentMethod) handlePartnerDocumentMethodChange();
         if (data.wealthDeclaration) handleWealthDeclarationChange();
     }
+    
+    // Re-trigger section visibility after loading
+    updateUI();
 }
 
 function resetForm() {
