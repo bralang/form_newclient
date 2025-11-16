@@ -59,6 +59,7 @@
                                     <option value="">בחר/י</option>
                                     <option value="male">זכר</option>
                                     <option value="female">נקבה</option>
+                                    <option value="other">אחר</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -147,9 +148,27 @@
                             <label>טלפון בבית</label>
                             <input type="tel" name="homePhone">
                         </div>
-                        <div class="form-group">
-                            <label>כתובת מגורים (רחוב, מספר, עיר) *</label>
-                            <input type="text" name="address" required placeholder="רחוב הדוגמא 123, תל אביב">
+                        
+                        <h4 class="subsection-title">כתובת מגורים</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>רחוב</label>
+                                <input type="text" name="street">
+                            </div>
+                            <div class="form-group">
+                                <label>מספר בית</label>
+                                <input type="text" name="houseNumber">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>עיר</label>
+                                <input type="text" name="city">
+                            </div>
+                            <div class="form-group">
+                                <label>מיקוד</label>
+                                <input type="text" name="postalCode">
+                            </div>
                         </div>
                     </div>
 
