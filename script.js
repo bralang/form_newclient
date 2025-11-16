@@ -243,26 +243,18 @@ async function sendToWebhook(step, data) {
     if (step === 1) {
         webhookUrl = WEBHOOKS.step1;
         stepData = {
-            personalInfo: {
-                firstName: data.firstName, lastName: data.lastName, gender: data.gender,
-                idNumber: data.idNumber, birthDate: data.birthDate, maritalStatus: data.maritalStatus,
-                hasChildren: data.hasChildren, numberOfChildren: data.numberOfChildren || null,
-                partnerName: data.partnerName || null, partnerIdNumber: data.partnerIdNumber || null,
-                partnerBirthDate: data.partnerBirthDate || null
-            },
-            contactInfo: {
-                phone: data.phone, email: data.email, preferPhone: data.preferPhone,
-                partnerPhone: data.partnerPhone || null, partnerEmail: data.partnerEmail || null,
-                homePhone: data.homePhone || null, address: data.address
-            },
-            identificationInfo: {
-                additionalIdType: data.additionalIdType, parentIdNumber: data.parentIdNumber || null,
-                licenseNumber: data.licenseNumber || null, passportNumber: data.passportNumber || null,
-                partnerAdditionalIdType: data.partnerAdditionalIdType || null,
-                partnerParentIdNumber: data.partnerParentIdNumber || null,
-                partnerLicenseNumber: data.partnerLicenseNumber || null,
-                partnerPassportNumber: data.partnerPassportNumber || null
-            }
+            first_name: data.firstName,
+            last_name: data.lastName,
+            gender: data.gender,
+            mobile: data.phone || null,
+            email: data.email || null,
+            phone: data.homePhone || null,
+            street: data.street || null,
+            house_number: data.houseNumber || null,
+            city: data.city || null,
+            postal_code: data.postalCode || null,
+            birth_date: data.birthDate || null,
+            marital_status: data.maritalStatus === 'single' ? 'single' : data.maritalStatus === 'partner' ? 'married' : data.maritalStatus || null
         };
     } else if (step === 2) {
         webhookUrl = WEBHOOKS.step2;
