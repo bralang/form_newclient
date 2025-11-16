@@ -303,14 +303,22 @@ async function sendToWebhook(step, data) {
                 chosenBusinessName: data.chosenBusinessName || null
             },
             partnerBusinessInfo: {
-                partnerBusinessName: data.partnerBusinessName || null, partnerBusinessField: data.partnerBusinessField || null,
-                partnerBusinessType: data.partnerBusinessType || null, partnerIsSmallBusiness: data.partnerIsSmallBusiness || null,
-                partnerOwnershipType: data.partnerOwnershipType || null, partnerBusinessAtHome: data.partnerBusinessAtHome || null,
-                partnerBusinessAddress: data.partnerBusinessAddress || null, partnerBusinessOffering: data.partnerBusinessOffering || null,
-                partnerHasEmployees: data.partnerHasEmployees || null, partnerDocumentMethod: data.partnerDocumentMethod || null,
-                partnerOtherSoftwareName: data.partnerOtherSoftwareName || null, partnerSoftwareUsername: data.partnerSoftwareUsername || null,
-                partnerSoftwarePassword: data.partnerSoftwarePassword || null, partnerBusinessStartDate: data.partnerBusinessStartDate || null,
-                partnerPlanningEmployees: data.partnerPlanningEmployees || null, partnerExpectedRevenue: data.partnerExpectedRevenue || null,
+                business_name: data.partnerBusinessName || null,
+                industry_type: data.partnerBusinessField || null,
+                business_type_value: data.partnerBusinessType || null,
+                start_date: data.partnerBusinessStartDate || null,
+                street: data.partnerBusinessAddress || null,
+                is_home_based: data.partnerBusinessAtHome === 'true' || data.partnerBusinessAtHome === true || false,
+                has_employees: data.partnerHasEmployees === 'true' || data.partnerHasEmployees === true || false,
+                partnerIsSmallBusiness: data.partnerIsSmallBusiness || null,
+                partnerOwnershipType: data.partnerOwnershipType || null,
+                partnerBusinessOffering: data.partnerBusinessOffering || null,
+                partnerDocumentMethod: data.partnerDocumentMethod || null,
+                partnerOtherSoftwareName: data.partnerOtherSoftwareName || null,
+                partnerSoftwareUsername: data.partnerSoftwareUsername || null,
+                partnerSoftwarePassword: data.partnerSoftwarePassword || null,
+                partnerPlanningEmployees: data.partnerPlanningEmployees || null,
+                partnerExpectedRevenue: data.partnerExpectedRevenue || null,
                 partnerChosenBusinessName: data.partnerChosenBusinessName || null
             }
         };
