@@ -277,6 +277,19 @@ async function sendToWebhook(step, data) {
     } else if (step === 2) {
         webhookUrl = WEBHOOKS.step2;
         stepData = {
+            // פרטי איש קשר עיקריים
+            first_name: data.firstName || null,
+            last_name: data.lastName || null,
+            id_number: data.idNumber || null,
+            mobile: data.phone || null,
+            phone: data.homePhone || null,
+            email: data.email || null,
+            // פרטי בן זוג (אם קיים)
+            partner_name: data.partnerName || null,
+            partner_id_number: data.partnerIdNumber || null,
+            partner_phone: data.partnerPhone || null,
+            partner_email: data.partnerEmail || null,
+            // פרטי השירות והעסק
             serviceInfo: { servicePurpose: data.servicePurpose, partnerEmployment: data.partnerEmployment || null },
             businessInfo: {
                 businessName: data.businessName || null, businessField: data.businessField || null,
