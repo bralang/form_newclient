@@ -255,7 +255,6 @@ async function sendToWebhook(step, data) {
             postal_code: data.postalCode || null,
             birth_date: data.birthDate || null,
             marital_status: data.maritalStatus === 'single' ? 'single' : data.maritalStatus === 'partner' ? 'married' : data.maritalStatus || null,
-            // All other fields from the form
             id_number: data.idNumber || null,
             has_children: data.hasChildren || false,
             number_of_children: data.numberOfChildren || null,
@@ -277,60 +276,68 @@ async function sendToWebhook(step, data) {
     } else if (step === 2) {
         webhookUrl = WEBHOOKS.step2;
         stepData = {
-            // פרטי איש קשר עיקריים
-            first_name: data.firstName || null,
-            last_name: data.lastName || null,
-            id_number: data.idNumber || null,
-            mobile: data.phone || null,
-            phone: data.homePhone || null,
-            email: data.email || null,
-            // פרטי בן זוג (אם קיים)
-            partner_name: data.partnerName || null,
-            partner_id_number: data.partnerIdNumber || null,
-            partner_phone: data.partnerPhone || null,
-            partner_email: data.partnerEmail || null,
-            // פרטי השירות והעסק
-            serviceInfo: { servicePurpose: data.servicePurpose, partnerEmployment: data.partnerEmployment || null },
-            businessInfo: {
-                businessName: data.businessName || null, businessField: data.businessField || null,
-                businessType: data.businessType || null, isSmallBusiness: data.isSmallBusiness || null,
-                ownershipType: data.ownershipType || null, businessAtHome: data.businessAtHome || null,
-                businessAddress: data.businessAddress || null, businessOffering: data.businessOffering || null,
-                hasEmployees: data.hasEmployees || null, documentMethod: data.documentMethod || null,
-                otherSoftwareName: data.otherSoftwareName || null, softwareUsername: data.softwareUsername || null,
-                softwarePassword: data.softwarePassword || null, businessStartDate: data.businessStartDate || null,
-                planningEmployees: data.planningEmployees || null, expectedRevenue: data.expectedRevenue || null,
-                chosenBusinessName: data.chosenBusinessName || null
+            owner: {
+                first_name: data.firstName || null,
+                last_name: data.lastName || null,
+                id_number: data.idNumber || null,
+                phone: data.homePhone || null,
+                mobile: data.phone || null,
+                email: data.email || null
+            },
+            partner: {
+                first_name: data.partnerName ? data.partnerName.split(' ')[0] : null,
+                last_name: data.partnerName ? data.partnerName.split(' ').slice(1).join(' ') || null : null,
+                id_number: data.partnerIdNumber || null,
+                phone: data.partnerPhone || null,
+                email: data.partnerEmail || null
+            },
+            ownerBusinessInfo: {
+                business_name: data.businessName || null,
+                industry_type: data.businessField || null,
+                business_type_value: data.businessType || null,
+                start_date: data.businessStartDate || null,
+                street: data.businessAddress || null,
+                is_home_based: data.businessAtHome === 'yes' || data.businessAtHome === true || false,
+                has_employees: data.hasEmployees === 'yes' || data.hasEmployees === true || false,
+                document_method: data.documentMethod || null,
+                other_software_name: data.otherSoftwareName || null,
+                software_username: data.softwareUsername || null,
+                software_password: data.softwarePassword || null,
+                planning_employees: data.planningEmployees || null,
+                expected_revenue: data.expectedRevenue || null,
+                chosen_business_name: data.chosenBusinessName || null
             },
             partnerBusinessInfo: {
-                business_name: data.partnerBusinessName || null,
-                industry_type: data.partnerBusinessField || null,
-                business_type_value: data.partnerBusinessType || null,
-                start_date: data.partnerBusinessStartDate || null,
-                street: data.partnerBusinessAddress || null,
-                is_home_based: data.partnerBusinessAtHome === 'true' || data.partnerBusinessAtHome === true || false,
-                has_employees: data.partnerHasEmployees === 'true' || data.partnerHasEmployees === true || false,
-                partnerIsSmallBusiness: data.partnerIsSmallBusiness || null,
-                partnerOwnershipType: data.partnerOwnershipType || null,
-                partnerBusinessOffering: data.partnerBusinessOffering || null,
-                partnerDocumentMethod: data.partnerDocumentMethod || null,
-                partnerOtherSoftwareName: data.partnerOtherSoftwareName || null,
-                partnerSoftwareUsername: data.partnerSoftwareUsername || null,
-                partnerSoftwarePassword: data.partnerSoftwarePassword || null,
-                partnerPlanningEmployees: data.partnerPlanningEmployees || null,
-                partnerExpectedRevenue: data.partnerExpectedRevenue || null,
-                partnerChosenBusinessName: data.partnerChosenBusinessName || null
+                partner_business_name: data.partnerBusinessName || null,
+                partner_industry_type: data.partnerBusinessField || null,
+                partner_business_type_value: data.partnerBusinessType || null,
+                partner_start_date: data.partnerBusinessStartDate || null,
+                partner_street: data.partnerBusinessAddress || null,
+                partner_is_home_based: data.partnerBusinessAtHome === 'yes' || data.partnerBusinessAtHome === true || false,
+                partner_has_employees: data.partnerHasEmployees === 'yes' || data.partnerHasEmployees === true || false,
+                partner_document_method: data.partnerDocumentMethod || null,
+                partner_other_software_name: data.partnerOtherSoftwareName || null,
+                partner_software_username: data.partnerSoftwareUsername || null,
+                partner_software_password: data.partnerSoftwarePassword || null,
+                partner_planning_employees: data.partnerPlanningEmployees || null,
+                partner_expected_revenue: data.partnerExpectedRevenue || null,
+                partner_chosen_business_name: data.partnerChosenBusinessName || null
             }
         };
     } else {
         webhookUrl = WEBHOOKS.final;
         stepData = {
             financialInfo: {
-                wealthDeclaration: data.wealthDeclaration || null, bankName: data.bankName || null,
-                branchNumber: data.branchNumber || null, accountNumber: data.accountNumber || null,
+                wealthDeclaration: data.wealthDeclaration || null,
+                bankName: data.bankName || null,
+                branchNumber: data.branchNumber || null,
+                accountNumber: data.accountNumber || null,
                 accountHolder: data.accountHolder || null
             },
-            feedbackInfo: { agreeNotifications: data.agreeNotifications, feedback: data.feedback || null }
+            feedbackInfo: {
+                agreeNotifications: data.agreeNotifications,
+                feedback: data.feedback || null
+            }
         };
     }
 
@@ -381,7 +388,6 @@ function loadFormData() {
         if (data.wealthDeclaration) handleWealthDeclarationChange();
     }
     
-    // Re-trigger section visibility after loading
     updateUI();
 }
 
