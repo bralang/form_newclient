@@ -254,7 +254,25 @@ async function sendToWebhook(step, data) {
             city: data.city || null,
             postal_code: data.postalCode || null,
             birth_date: data.birthDate || null,
-            marital_status: data.maritalStatus === 'single' ? 'single' : data.maritalStatus === 'partner' ? 'married' : data.maritalStatus || null
+            marital_status: data.maritalStatus === 'single' ? 'single' : data.maritalStatus === 'partner' ? 'married' : data.maritalStatus || null,
+            // All other fields from the form
+            id_number: data.idNumber || null,
+            has_children: data.hasChildren || false,
+            number_of_children: data.numberOfChildren || null,
+            partner_name: data.partnerName || null,
+            partner_id_number: data.partnerIdNumber || null,
+            partner_birth_date: data.partnerBirthDate || null,
+            prefer_phone: data.preferPhone || false,
+            partner_phone: data.partnerPhone || null,
+            partner_email: data.partnerEmail || null,
+            additional_id_type: data.additionalIdType || null,
+            parent_id_number: data.parentIdNumber || null,
+            license_number: data.licenseNumber || null,
+            passport_number: data.passportNumber || null,
+            partner_additional_id_type: data.partnerAdditionalIdType || null,
+            partner_parent_id_number: data.partnerParentIdNumber || null,
+            partner_license_number: data.partnerLicenseNumber || null,
+            partner_passport_number: data.partnerPassportNumber || null
         };
     } else if (step === 2) {
         webhookUrl = WEBHOOKS.step2;
