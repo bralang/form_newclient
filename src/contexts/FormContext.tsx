@@ -47,25 +47,30 @@ export interface ServiceType {
 
 export interface BusinessInfo {
   businessName?: string;
-  businessField?: string;
-  businessType?: "exempt" | "authorized" | "company" | "association" | "";
-  isSmallBusiness?: boolean;
-  ownershipType?: "sole" | "partnership" | "";
-  companyRegistrationFile?: File;
-  isHomeOffice?: boolean;
+  businessNumber?: string; // מספר עוסק או ח.פ.
+  businessType?: "sole_proprietorship" | "partnership" | "company" | "";
+  industryType?: string; // תחום העיסוק
+  startDate?: string;
+  endDate?: string; // תאריך סגירת העסק
   businessAddress?: {
     street: string;
     number: string;
     city: string;
   };
-  leaseAgreementFile?: File;
-  businessModel?: "service" | "products" | "";
+  isHomeOffice?: boolean;
+  hasInventory?: boolean; // האם יש מלאי
   hasEmployees?: boolean;
+  reportingFrequency?: "monthly" | "bimonthly" | ""; // תדירות דיווח מע״מ
+  assignedEmployeeId?: string; // מנהל תיק לקוח
+  status?: "active" | "inactive" | "closed" | "";
+  notes?: string; // הערות כלליות
+  // שדות נוספים שנשארים
+  companyRegistrationFile?: File;
+  leaseAgreementFile?: File;
   documentSystem?: "summit" | "manual" | "other" | "";
   otherSystemName?: string;
   otherSystemUsername?: string;
   otherSystemPassword?: string;
-  startDate?: string;
   planningEmployees?: boolean;
   expectedRevenue?: string;
 }
