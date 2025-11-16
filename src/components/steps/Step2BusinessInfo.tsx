@@ -43,14 +43,47 @@ export const Step2BusinessInfo = () => {
 
   const handleNext = async () => {
     setLoading(true);
+    const mappedSpouseBusinessInfo = mapBusinessDataForWebhook(spouseBusinessInfo, "spouse_");
     const success = await sendToWebhook(
       "https://n8n.link-up.co.il/webhook/client-intake-step2",
-      { serviceType, businessInfo, spouseBusinessInfo }
+      { serviceType, businessInfo, spouseBusinessInfo: mappedSpouseBusinessInfo }
     );
     setLoading(false);
     if (success) {
       setCurrentStep(3);
     }
+  };
+
+  const mapBusinessDataForWebhook = (info: any, prefix: string = "") => {
+    const mapped: any = {};
+    
+    // שדות שנשארים כמו שהם
+    if (prefix === "spouse_") {
+      mapped.partnerIsSmallBusiness = info.isSmallBusiness;
+      mapped.partnerOwnershipType = info.ownershipType;
+      mapped.partnerBusinessOffering = info.businessOffering;
+      mapped.partnerDocumentMethod = info.documentMethod;
+      mapped.partnerOtherSoftwareName = info.otherSoftwareName;
+      mapped.partnerSoftwareUsername = info.softwareUsername;
+      mapped.partnerSoftwarePassword = info.softwarePassword;
+      mapped.partnerPlanningEmployees = info.planningEmployees;
+      mapped.partnerExpectedRevenue = info.expectedRevenue;
+      mapped.partnerChosenBusinessName = info.chosenBusinessName;
+      
+      // שדות עם שם שונה
+      mapped.business_name = info.businessName;
+      mapped.industry_type = info.businessField;
+      mapped.business_type_value = info.businessType;
+      mapped.start_date = info.startDate;
+      mapped.street = info.businessAddress?.street;
+      mapped.is_home_based = info.isHomeOffice || false;
+      mapped.has_employees = info.hasEmployees || false;
+    } else {
+      // עבור המשתמש הראשי
+      Object.assign(mapped, info);
+    }
+    
+    return mapped;
   };
 
   const renderBusinessFields = (info: any, setInfo: any, prefix: string = "") => (
@@ -67,36 +100,24 @@ export const Step2BusinessInfo = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`${prefix}businessNumber`}>מספר עוסק או ח.פ.</Label>
+          <Label htmlFor={`${prefix}businessField`}>תחום עיסוק</Label>
           <Input
-            id={`${prefix}businessNumber`}
-            value={info.businessNumber || ""}
-            onChange={(e) => setInfo({ businessNumber: e.target.value })}
-            required
+            id={`${prefix}businessField`}
+            value={info.businessField || ""}
+            onChange={(e) => setInfo({ businessField: e.target.value })}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor={`${prefix}industryType`}>תחום עיסוק</Label>
-          <Input
-            id={`${prefix}industryType`}
-            value={info.industryType || ""}
-            onChange={(e) => setInfo({ industryType: e.target.value })}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor={`${prefix}startDate`}>תאריך פתיחת העסק</Label>
-          <Input
-            id={`${prefix}startDate`}
-            type="date"
-            value={info.startDate || ""}
-            onChange={(e) => setInfo({ startDate: e.target.value })}
-            required
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor={`${prefix}startDate`}>תאריך פתיחת העסק</Label>
+        <Input
+          id={`${prefix}startDate`}
+          type="date"
+          value={info.startDate || ""}
+          onChange={(e) => setInfo({ startDate: e.target.value })}
+          required
+        />
       </div>
 
       <div className="space-y-2">
@@ -204,87 +225,158 @@ export const Step2BusinessInfo = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex items-center space-x-2 space-x-reverse">
-          <Checkbox
-            id={`${prefix}hasInventory`}
-            checked={info.hasInventory}
-            onCheckedChange={(checked) => setInfo({ hasInventory: checked as boolean })}
-          />
-          <Label htmlFor={`${prefix}hasInventory`}>האם יש מלאי</Label>
-        </div>
-
-        <div className="flex items-center space-x-2 space-x-reverse">
-          <Checkbox
-            id={`${prefix}hasEmployees`}
-            checked={info.hasEmployees}
-            onCheckedChange={(checked) => setInfo({ hasEmployees: checked as boolean })}
-          />
-          <Label htmlFor={`${prefix}hasEmployees`}>האם יש עובדים</Label>
-        </div>
-      </div>
-
       <div className="space-y-2">
-        <Label>תדירות דיווח מע״מ</Label>
+        <Label>האם זה עסק קטן?</Label>
         <RadioGroup
-          value={info.reportingFrequency || ""}
-          onValueChange={(value: any) => setInfo({ reportingFrequency: value })}
+          value={info.isSmallBusiness ? "yes" : info.isSmallBusiness === false ? "no" : ""}
+          onValueChange={(value: any) => setInfo({ isSmallBusiness: value === "yes" })}
           className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="monthly" id={`${prefix}monthly`} />
-            <Label htmlFor={`${prefix}monthly`}>חודשי</Label>
+            <RadioGroupItem value="yes" id={`${prefix}smallYes`} />
+            <Label htmlFor={`${prefix}smallYes`}>כן</Label>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="bimonthly" id={`${prefix}bimonthly`} />
-            <Label htmlFor={`${prefix}bimonthly`}>דו-חודשי</Label>
+            <RadioGroupItem value="no" id={`${prefix}smallNo`} />
+            <Label htmlFor={`${prefix}smallNo`}>לא</Label>
           </div>
         </RadioGroup>
       </div>
 
       <div className="space-y-2">
-        <Label>סטטוס העסק</Label>
+        <Label>סוג הבעלות</Label>
         <RadioGroup
-          value={info.status || "active"}
-          onValueChange={(value: any) => setInfo({ status: value })}
+          value={info.ownershipType || ""}
+          onValueChange={(value: any) => setInfo({ ownershipType: value })}
+          className="flex flex-row-reverse gap-4 justify-end"
+        >
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <RadioGroupItem value="sole" id={`${prefix}sole`} />
+            <Label htmlFor={`${prefix}sole`}>יחיד</Label>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <RadioGroupItem value="partnership" id={`${prefix}ownershipPartnership`} />
+            <Label htmlFor={`${prefix}ownershipPartnership`}>שותפות</Label>
+          </div>
+        </RadioGroup>
+      </div>
+
+      <div className="space-y-2">
+        <Label>מה העסק מציע?</Label>
+        <RadioGroup
+          value={info.businessOffering || ""}
+          onValueChange={(value: any) => setInfo({ businessOffering: value })}
           className="flex flex-wrap flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="active" id={`${prefix}active`} />
-            <Label htmlFor={`${prefix}active`}>פעיל</Label>
+            <RadioGroupItem value="products" id={`${prefix}products`} />
+            <Label htmlFor={`${prefix}products`}>מוצרים</Label>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="inactive" id={`${prefix}inactive`} />
-            <Label htmlFor={`${prefix}inactive`}>לא פעיל</Label>
+            <RadioGroupItem value="services" id={`${prefix}services`} />
+            <Label htmlFor={`${prefix}services`}>שירותים</Label>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="closed" id={`${prefix}closed`} />
-            <Label htmlFor={`${prefix}closed`}>סגור</Label>
+            <RadioGroupItem value="both" id={`${prefix}both`} />
+            <Label htmlFor={`${prefix}both`}>שניהם</Label>
           </div>
         </RadioGroup>
       </div>
 
-      {info.status === "closed" && (
-        <div className="space-y-2">
-          <Label htmlFor={`${prefix}endDate`}>תאריך סגירת העסק</Label>
-          <Input
-            id={`${prefix}endDate`}
-            type="date"
-            value={info.endDate || ""}
-            onChange={(e) => setInfo({ endDate: e.target.value })}
-          />
+      <div className="flex items-center space-x-2 space-x-reverse">
+        <Checkbox
+          id={`${prefix}hasEmployees`}
+          checked={info.hasEmployees}
+          onCheckedChange={(checked) => setInfo({ hasEmployees: checked as boolean })}
+        />
+        <Label htmlFor={`${prefix}hasEmployees`}>האם יש עובדים</Label>
+      </div>
+
+      <div className="space-y-2">
+        <Label>שיטת תיעוד</Label>
+        <RadioGroup
+          value={info.documentMethod || ""}
+          onValueChange={(value: any) => setInfo({ documentMethod: value })}
+          className="flex flex-wrap flex-row-reverse gap-4 justify-end"
+        >
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <RadioGroupItem value="summit" id={`${prefix}summit`} />
+            <Label htmlFor={`${prefix}summit`}>סאמיט</Label>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <RadioGroupItem value="manual" id={`${prefix}manual`} />
+            <Label htmlFor={`${prefix}manual`}>ידני</Label>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <RadioGroupItem value="software" id={`${prefix}software`} />
+            <Label htmlFor={`${prefix}software`}>תוכנה אחרת</Label>
+          </div>
+        </RadioGroup>
+      </div>
+
+      {info.documentMethod === "software" && (
+        <div className="space-y-4 mr-6">
+          <div className="space-y-2">
+            <Label htmlFor={`${prefix}otherSoftwareName`}>שם התוכנה</Label>
+            <Input
+              id={`${prefix}otherSoftwareName`}
+              value={info.otherSoftwareName || ""}
+              onChange={(e) => setInfo({ otherSoftwareName: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={`${prefix}softwareUsername`}>שם משתמש</Label>
+            <Input
+              id={`${prefix}softwareUsername`}
+              value={info.softwareUsername || ""}
+              onChange={(e) => setInfo({ softwareUsername: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={`${prefix}softwarePassword`}>סיסמה</Label>
+            <Input
+              id={`${prefix}softwarePassword`}
+              type="password"
+              value={info.softwarePassword || ""}
+              onChange={(e) => setInfo({ softwarePassword: e.target.value })}
+            />
+          </div>
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor={`${prefix}notes`}>הערות כלליות</Label>
-        <Input
-          id={`${prefix}notes`}
-          value={info.notes || ""}
-          onChange={(e) => setInfo({ notes: e.target.value })}
-          placeholder="הערות נוספות על העסק"
-        />
-      </div>
+      {isNewBusiness && (
+        <>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <Checkbox
+              id={`${prefix}planningEmployees`}
+              checked={info.planningEmployees}
+              onCheckedChange={(checked) => setInfo({ planningEmployees: checked as boolean })}
+            />
+            <Label htmlFor={`${prefix}planningEmployees`}>מתכנן להעסיק עובדים</Label>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={`${prefix}expectedRevenue`}>הכנסה צפויה (בשנה הראשונה)</Label>
+            <Input
+              id={`${prefix}expectedRevenue`}
+              value={info.expectedRevenue || ""}
+              onChange={(e) => setInfo({ expectedRevenue: e.target.value })}
+              placeholder="לדוגמה: 100,000 ₪"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={`${prefix}chosenBusinessName`}>שם העסק שבחרת</Label>
+            <Input
+              id={`${prefix}chosenBusinessName`}
+              value={info.chosenBusinessName || ""}
+              onChange={(e) => setInfo({ chosenBusinessName: e.target.value })}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 

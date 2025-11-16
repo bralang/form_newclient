@@ -47,32 +47,28 @@ export interface ServiceType {
 
 export interface BusinessInfo {
   businessName?: string;
-  businessNumber?: string; // מספר עוסק או ח.פ.
+  businessField?: string;
   businessType?: "sole_proprietorship" | "partnership" | "company" | "";
-  industryType?: string; // תחום העיסוק
   startDate?: string;
-  endDate?: string; // תאריך סגירת העסק
   businessAddress?: {
     street: string;
     number: string;
     city: string;
   };
   isHomeOffice?: boolean;
-  hasInventory?: boolean; // האם יש מלאי
+  isSmallBusiness?: boolean;
+  ownershipType?: "sole" | "partnership" | "";
+  businessOffering?: "products" | "services" | "both" | "";
   hasEmployees?: boolean;
-  reportingFrequency?: "monthly" | "bimonthly" | ""; // תדירות דיווח מע״מ
-  assignedEmployeeId?: string; // מנהל תיק לקוח
-  status?: "active" | "inactive" | "closed" | "";
-  notes?: string; // הערות כלליות
-  // שדות נוספים שנשארים
   companyRegistrationFile?: File;
   leaseAgreementFile?: File;
-  documentSystem?: "summit" | "manual" | "other" | "";
-  otherSystemName?: string;
-  otherSystemUsername?: string;
-  otherSystemPassword?: string;
+  documentMethod?: "summit" | "manual" | "software" | "";
+  otherSoftwareName?: string;
+  softwareUsername?: string;
+  softwarePassword?: string;
   planningEmployees?: boolean;
   expectedRevenue?: string;
+  chosenBusinessName?: string;
 }
 
 export interface FinancialInfo {
