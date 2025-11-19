@@ -189,7 +189,7 @@ async function nextStep() {
     nextBtn.disabled = true;
 
     try {
-        await sendToWebhook(currentStep, collectFormData());
+        await sendToWebhook(currentStep, await collectFormData());
         if (currentStep === totalSteps) {
             document.getElementById('formNav').style.display = 'none';
             document.getElementById('successMessage').style.display = 'block';
@@ -214,13 +214,37 @@ function previousStep() {
     }
 }
 
-function collectFormData() {
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+async function collectFormData() {
     const form = document.getElementById('clientForm');
     const formData = new FormData(form);
     const data = {};
 
+    const fileInputNames = [
+        'idDocument', 'licenseDocument', 'passportDocument',
+        'partnerIdDocument', 'partnerLicenseDocument', 'partnerPassportDocument',
+        'companyArticles', 'leaseAgreement',
+        'partnerCompanyArticles', 'partnerLeaseAgreement',
+        'wealthDeclarationFile', 'bankDocument'
+    ];
+
     for (let [key, value] of formData.entries()) {
-        if (value instanceof File && value.size === 0) continue;
+        if (value instanceof File) {
+            if (value.size > 0 && fileInputNames.includes(key)) {
+                data[key] = await fileToBase64(value);
+                data[key + '_filename'] = value.name;
+                data[key + '_type'] = value.type;
+            }
+            continue;
+        }
         data[key] = value;
     }
 
@@ -401,7 +425,16 @@ async function sendToWebhook(step, data) {
 
 async function saveFormData() {
     const formData = await collectFormData();
-    sessionStorage.setItem('formData', JSON.stringify(formData));
+    const dataToSave = { ...formData };
+    
+    // Don't save Base64 files to sessionStorage (too large)
+    const fileKeys = Object.keys(dataToSave).filter(key => 
+        key.endsWith('_filename') || key.endsWith('_type') || 
+        (typeof dataToSave[key] === 'string' && dataToSave[key].startsWith('data:'))
+    );
+    fileKeys.forEach(key => delete dataToSave[key]);
+    
+    sessionStorage.setItem('formData', JSON.stringify(dataToSave));
     sessionStorage.setItem('currentStep', currentStep);
 }
 
