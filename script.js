@@ -271,7 +271,25 @@ async function sendToWebhook(step, data) {
             partner_additional_id_type: data.partnerAdditionalIdType || null,
             partner_parent_id_number: data.partnerParentIdNumber || null,
             partner_license_number: data.partnerLicenseNumber || null,
-            partner_passport_number: data.partnerPassportNumber || null
+            partner_passport_number: data.partnerPassportNumber || null,
+            id_document: data.idDocument || null,
+            id_document_filename: data.idDocument_filename || null,
+            id_document_type: data.idDocument_type || null,
+            license_document: data.licenseDocument || null,
+            license_document_filename: data.licenseDocument_filename || null,
+            license_document_type: data.licenseDocument_type || null,
+            passport_document: data.passportDocument || null,
+            passport_document_filename: data.passportDocument_filename || null,
+            passport_document_type: data.passportDocument_type || null,
+            partner_id_document: data.partnerIdDocument || null,
+            partner_id_document_filename: data.partnerIdDocument_filename || null,
+            partner_id_document_type: data.partnerIdDocument_type || null,
+            partner_license_document: data.partnerLicenseDocument || null,
+            partner_license_document_filename: data.partnerLicenseDocument_filename || null,
+            partner_license_document_type: data.partnerLicenseDocument_type || null,
+            partner_passport_document: data.partnerPassportDocument || null,
+            partner_passport_document_filename: data.partnerPassportDocument_filename || null,
+            partner_passport_document_type: data.partnerPassportDocument_type || null
         };
     } else if (step === 2) {
         webhookUrl = WEBHOOKS.step2;
@@ -311,7 +329,13 @@ async function sendToWebhook(step, data) {
                 software_password: data.softwarePassword || null,
                 planning_employees: data.planningEmployees || null,
                 expected_revenue: data.expectedRevenue || null,
-                chosen_business_name: data.chosenBusinessName || null
+                chosen_business_name: data.chosenBusinessName || null,
+                company_articles: data.companyArticles || null,
+                company_articles_filename: data.companyArticles_filename || null,
+                company_articles_type: data.companyArticles_type || null,
+                lease_agreement: data.leaseAgreement || null,
+                lease_agreement_filename: data.leaseAgreement_filename || null,
+                lease_agreement_type: data.leaseAgreement_type || null
             },
             partnerBusinessInfo: {
                 partner_business_name: data.partnerBusinessName || null,
@@ -333,7 +357,13 @@ async function sendToWebhook(step, data) {
                 partner_software_password: data.partnerSoftwarePassword || null,
                 partner_planning_employees: data.partnerPlanningEmployees || null,
                 partner_expected_revenue: data.partnerExpectedRevenue || null,
-                partner_chosen_business_name: data.partnerChosenBusinessName || null
+                partner_chosen_business_name: data.partnerChosenBusinessName || null,
+                partner_company_articles: data.partnerCompanyArticles || null,
+                partner_company_articles_filename: data.partnerCompanyArticles_filename || null,
+                partner_company_articles_type: data.partnerCompanyArticles_type || null,
+                partner_lease_agreement: data.partnerLeaseAgreement || null,
+                partner_lease_agreement_filename: data.partnerLeaseAgreement_filename || null,
+                partner_lease_agreement_type: data.partnerLeaseAgreement_type || null
             }
         };
     } else {
@@ -341,10 +371,16 @@ async function sendToWebhook(step, data) {
         stepData = {
             financialInfo: {
                 wealthDeclaration: data.wealthDeclaration || null,
+                wealth_declaration_file: data.wealthDeclarationFile || null,
+                wealth_declaration_file_filename: data.wealthDeclarationFile_filename || null,
+                wealth_declaration_file_type: data.wealthDeclarationFile_type || null,
                 bankName: data.bankName || null,
                 branchNumber: data.branchNumber || null,
                 accountNumber: data.accountNumber || null,
-                accountHolder: data.accountHolder || null
+                accountHolder: data.accountHolder || null,
+                bank_document: data.bankDocument || null,
+                bank_document_filename: data.bankDocument_filename || null,
+                bank_document_type: data.bankDocument_type || null
             },
             feedbackInfo: {
                 agreeNotifications: data.agreeNotifications,
@@ -363,8 +399,9 @@ async function sendToWebhook(step, data) {
     return response;
 }
 
-function saveFormData() {
-    sessionStorage.setItem('formData', JSON.stringify(collectFormData()));
+async function saveFormData() {
+    const formData = await collectFormData();
+    sessionStorage.setItem('formData', JSON.stringify(formData));
     sessionStorage.setItem('currentStep', currentStep);
 }
 
