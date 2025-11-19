@@ -318,6 +318,7 @@ async function sendToWebhook(step, data) {
     } else if (step === 2) {
         webhookUrl = WEBHOOKS.step2;
         stepData = {
+            service_purpose: data.servicePurpose || null,
             owner: {
                 first_name: data.firstName || null,
                 last_name: data.lastName || null,
@@ -331,7 +332,8 @@ async function sendToWebhook(step, data) {
                 last_name: data.partnerName ? data.partnerName.split(' ').slice(1).join(' ') || null : null,
                 id_number: data.partnerIdNumber || null,
                 phone: data.partnerPhone || null,
-                email: data.partnerEmail || null
+                email: data.partnerEmail || null,
+                employment_status: data.partnerEmployment || null
             },
             ownerBusinessInfo: {
                 business_name: data.businessName || null,
@@ -393,6 +395,23 @@ async function sendToWebhook(step, data) {
     } else {
         webhookUrl = WEBHOOKS.final;
         stepData = {
+            personalInfo: {
+                first_name: data.firstName || null,
+                last_name: data.lastName || null,
+                id_number: data.idNumber || null,
+                mobile: data.phone || null,
+                email: data.email || null,
+                partner_name: data.partnerName || null,
+                partner_id_number: data.partnerIdNumber || null
+            },
+            businessInfo: {
+                business_name: data.businessName || null,
+                business_number: data.businessNumber || null,
+                business_type: data.businessType || null,
+                partner_business_name: data.partnerBusinessName || null,
+                partner_business_number: data.partnerBusinessNumber || null,
+                partner_business_type: data.partnerBusinessType || null
+            },
             financialInfo: {
                 wealthDeclaration: data.wealthDeclaration || null,
                 wealth_declaration_file: data.wealthDeclarationFile || null,
