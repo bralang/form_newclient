@@ -324,6 +324,10 @@
                                 <input type="text" name="businessName">
                             </div>
                             <div class="form-group">
+                                <label>מספר עסק (ח.פ / ע.מ)</label>
+                                <input type="text" name="businessNumber">
+                            </div>
+                            <div class="form-group">
                                 <label>תחום העיסוק</label>
                                 <input type="text" name="businessField">
                             </div>
@@ -366,9 +370,19 @@
                                 </select>
                             </div>
                             <div id="businessAddressSection" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>רחוב</label>
+                                        <input type="text" name="businessStreet">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>מספר בית</label>
+                                        <input type="text" name="businessHouseNumber">
+                                    </div>
+                                </div>
                                 <div class="form-group">
-                                    <label>כתובת העסק (רחוב, מספר, עיר)</label>
-                                    <input type="text" name="businessAddress">
+                                    <label>עיר</label>
+                                    <input type="text" name="businessCity">
                                 </div>
                                 <div class="form-group">
                                     <label>הסכם שכירות לעסק</label>
@@ -382,6 +396,14 @@
                                     <option value="service">שירות</option>
                                     <option value="products">מוצרים</option>
                                     <option value="both">שניהם</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>האם יש מלאי בעסק</label>
+                                <select name="hasInventory">
+                                    <option value="">בחר/י</option>
+                                    <option value="yes">כן</option>
+                                    <option value="no">לא</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -455,6 +477,10 @@
                                 <input type="text" name="partnerBusinessName">
                             </div>
                             <div class="form-group">
+                                <label>מספר עסק (ח.פ / ע.מ)</label>
+                                <input type="text" name="partnerBusinessNumber">
+                            </div>
+                            <div class="form-group">
                                 <label>תחום העיסוק</label>
                                 <input type="text" name="partnerBusinessField">
                             </div>
@@ -497,9 +523,19 @@
                                 </select>
                             </div>
                             <div id="partnerBusinessAddressSection" style="display: none;">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>רחוב</label>
+                                        <input type="text" name="partnerBusinessStreet">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>מספר בית</label>
+                                        <input type="text" name="partnerBusinessHouseNumber">
+                                    </div>
+                                </div>
                                 <div class="form-group">
-                                    <label>כתובת העסק (רחוב, מספר, עיר)</label>
-                                    <input type="text" name="partnerBusinessAddress">
+                                    <label>עיר</label>
+                                    <input type="text" name="partnerBusinessCity">
                                 </div>
                                 <div class="form-group">
                                     <label>הסכם שכירות לעסק</label>
@@ -513,6 +549,14 @@
                                     <option value="service">שירות</option>
                                     <option value="products">מוצרים</option>
                                     <option value="both">שניהם</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>האם יש מלאי בעסק</label>
+                                <select name="partnerHasInventory">
+                                    <option value="">בחר/י</option>
+                                    <option value="yes">כן</option>
+                                    <option value="no">לא</option>
                                 </select>
                             </div>
                             <div class="form-group">
