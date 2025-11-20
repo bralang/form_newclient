@@ -319,6 +319,10 @@ async function sendToWebhook(step, data) {
         webhookUrl = WEBHOOKS.step2;
         stepData = {
             service_purpose: data.servicePurpose || null,
+            new_business: data.servicePurpose === 'newBusiness' ? true : false,
+            tax_return: data.servicePurpose === 'taxReturn' ? true : false,
+            accounting: data.servicePurpose === 'accounting' ? true : false,
+            business_closure: data.servicePurpose === 'businessClosure' ? true : false,
             owner: {
                 first_name: data.firstName || null,
                 last_name: data.lastName || null,
@@ -401,6 +405,10 @@ async function sendToWebhook(step, data) {
                 id_number: data.idNumber || null,
                 mobile: data.phone || null,
                 email: data.email || null,
+                street: data.street || null,
+                house_number: data.houseNumber || null,
+                city: data.city || null,
+                postal_code: data.postalCode || null,
                 partner_name: data.partnerName || null,
                 partner_id_number: data.partnerIdNumber || null
             },
@@ -413,10 +421,11 @@ async function sendToWebhook(step, data) {
                 partner_business_type: data.partnerBusinessType || null
             },
             financialInfo: {
-                wealthDeclaration: data.wealthDeclaration || null,
-                wealth_declaration_file: data.wealthDeclarationFile || null,
-                wealth_declaration_file_filename: data.wealthDeclarationFile_filename || null,
-                wealth_declaration_file_type: data.wealthDeclarationFile_type || null,
+                Capital_Declaration_Submitted: data.wealthDeclaration || null,
+                Capital_Declaration_File: data.wealthDeclarationFile || null,
+                Capital_Declaration_File_filename: data.wealthDeclarationFile_filename || null,
+                Capital_Declaration_File_type: data.wealthDeclarationFile_type || null,
+                Capital_Declaration_Date: data.wealthDeclarationDate || null,
                 bankName: data.bankName || null,
                 branchNumber: data.branchNumber || null,
                 accountNumber: data.accountNumber || null,
