@@ -50,6 +50,12 @@ function setupEventListeners() {
     const wealthDeclaration = document.getElementById('wealthDeclaration');
     if (wealthDeclaration) wealthDeclaration.addEventListener('change', handleWealthDeclarationChange);
 
+    const businessType = document.getElementById('businessType');
+    if (businessType) businessType.addEventListener('change', handleBusinessTypeChange);
+
+    const partnerBusinessType = document.getElementById('partnerBusinessType');
+    if (partnerBusinessType) partnerBusinessType.addEventListener('change', handlePartnerBusinessTypeChange);
+
     form.addEventListener('input', saveFormData);
     form.addEventListener('change', saveFormData);
 }
@@ -138,6 +144,18 @@ function handlePartnerDocumentMethodChange() {
 function handleWealthDeclarationChange() {
     const declaration = document.getElementById('wealthDeclaration').value;
     document.getElementById('wealthDeclarationFileSection').style.display = declaration === 'yes' ? 'block' : 'none';
+    saveFormData();
+}
+
+function handleBusinessTypeChange() {
+    const type = document.getElementById('businessType').value;
+    document.getElementById('companyArticlesSection').style.display = type === 'company' ? 'block' : 'none';
+    saveFormData();
+}
+
+function handlePartnerBusinessTypeChange() {
+    const type = document.getElementById('partnerBusinessType').value;
+    document.getElementById('partnerCompanyArticlesSection').style.display = type === 'company' ? 'block' : 'none';
     saveFormData();
 }
 
@@ -507,6 +525,8 @@ function loadFormData() {
         if (data.documentMethod) handleDocumentMethodChange();
         if (data.partnerDocumentMethod) handlePartnerDocumentMethodChange();
         if (data.wealthDeclaration) handleWealthDeclarationChange();
+        if (data.businessType) handleBusinessTypeChange();
+        if (data.partnerBusinessType) handlePartnerBusinessTypeChange();
     }
     
     updateUI();
