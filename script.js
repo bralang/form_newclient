@@ -62,7 +62,7 @@ function setupEventListeners() {
 
 function handleMaritalStatusChange() {
     const maritalStatus = document.getElementById('maritalStatus').value;
-    const sections = ['partnerSection', 'partnerContactSection', 'partnerIdSection', 'partnerEmploymentSection'];
+    const sections = ['partnerSection', 'partnerIdSection', 'partnerEmploymentSection'];
     sections.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = maritalStatus === 'partner' ? 'block' : 'none';
@@ -209,8 +209,17 @@ async function nextStep() {
     try {
         await sendToWebhook(currentStep, await collectFormData());
         if (currentStep === totalSteps) {
+            // Show success message as separate step
+            document.querySelectorAll('.form-step').forEach(step => step.style.display = 'none');
+            document.getElementById('successStep').style.display = 'block';
             document.getElementById('formNav').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'block';
+            
+            // Update progress to completed
+            document.querySelectorAll('.step-item').forEach(item => {
+                item.classList.remove('active');
+                item.classList.add('completed');
+                item.querySelector('.step-circle').innerHTML = '✓';
+            });
         } else {
             currentStep++;
             updateUI();
@@ -530,9 +539,4 @@ function loadFormData() {
     }
     
     updateUI();
-}
-
-function resetForm() {
-    sessionStorage.clear();
-    location.reload();
 }
