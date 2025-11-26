@@ -59,7 +59,6 @@
                                     <option value="">בחר/י</option>
                                     <option value="male">זכר</option>
                                     <option value="female">נקבה</option>
-                                    <option value="other">אחר</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -67,6 +66,23 @@
                                 <input type="text" name="idNumber" required>
                             </div>
                         </div>
+                        
+                        <!-- Contact Info -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>טלפון *</label>
+                                <input type="tel" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label>מייל *</label>
+                                <input type="email" name="email" required>
+                            </div>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="preferPhone" name="preferPhone">
+                            <label for="preferPhone">הזמינות שלי למייל נמוכה, מעדיף לקבל הודעות ממערכת טלפונית במקום במייל<br><small style="color: #6b7280;">שים לב! כרגע בפיתוח עדין לא בשימוש מידי.</small></label>
+                        </div>
+                        
                         <div class="form-row">
                             <div class="form-group">
                                 <label>תאריך לידה *</label>
@@ -109,29 +125,7 @@
                                 <label>תאריך לידה בן/בת הזוג</label>
                                 <input type="date" name="partnerBirthDate">
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Contact Info -->
-                    <div class="form-section">
-                        <h3 class="section-title">פרטי התקשרות</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>טלפון *</label>
-                                <input type="tel" name="phone" required>
-                            </div>
-                            <div class="form-group">
-                                <label>מייל *</label>
-                                <input type="email" name="email" required>
-                            </div>
-                        </div>
-                        <div class="form-group checkbox-group">
-                            <input type="checkbox" id="preferPhone" name="preferPhone">
-                            <label for="preferPhone">הזמינות שלי למייל נמוכה, מעדיף לקבל הודעות ממערכת טלפונית במקום במייל</label>
-                        </div>
-                        
-                        <div id="partnerContactSection" style="display: none;">
-                            <h4 class="subsection-title">פרטי התקשרות בן/בת הזוג</h4>
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>טלפון של בן/ת הזוג</label>
@@ -143,6 +137,11 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Address Info -->
+                    <div class="form-section">
+                        <h3 class="section-title">פרטי מגורים ויצירת קשר</h3>
 
                         <div class="form-group">
                             <label>טלפון בבית</label>
@@ -318,7 +317,7 @@
                     <!-- My Business Details -->
                     <div id="myBusinessSection" style="display: none;">
                         <div class="form-section">
-                            <h3 class="section-title">פרטי העסק שלך</h3>
+                            <h3 class="section-title" style="position: sticky; top: 0; background: white; z-index: 10; padding: 1rem 0; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb;">פרטי העסק שלך</h3>
                             <div class="form-group">
                                 <label>שם העסק</label>
                                 <input type="text" name="businessName">
@@ -473,7 +472,7 @@
                     <!-- Partner Business Details -->
                     <div id="partnerBusinessSection" style="display: none;">
                         <div class="form-section">
-                            <h3 class="section-title">פרטי העסק של בן זוגך</h3>
+                            <h3 class="section-title" style="position: sticky; top: 0; background: white; z-index: 10; padding: 1rem 0; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb;">פרטי העסק של בן הזוג</h3>
                             <div class="form-group">
                                 <label>שם העסק</label>
                                 <input type="text" name="partnerBusinessName">
@@ -627,7 +626,7 @@
                 <!-- Step 3: Financial & Feedback -->
                 <div class="form-step" id="step3">
                     <div class="form-section">
-                        <h3 class="section-title">הצהרת הון ופרטי בנק</h3>
+                        <h3 class="section-title">פרטים נוספים</h3>
                         <div class="form-group">
                             <label>האם הגשתם בעבר הצהרת הון</label>
                             <select name="wealthDeclaration" id="wealthDeclaration">
@@ -682,11 +681,14 @@
                         </div>
                     </div>
 
-                    <div id="successMessage" style="display: none;" class="success-message">
+                </div>
+                
+                <!-- Success Message - Separate Step -->
+                <div class="form-step" id="successStep" style="display: none;">
+                    <div id="successMessage" class="success-message">
                         <div class="success-icon">✓</div>
                         <h3>השאלון נשלח בהצלחה!</h3>
                         <p>תודה על מילוי הפרטים. ניצור איתך קשר בקרוב.</p>
-                        <button type="button" onclick="resetForm()" class="btn-primary">מלא שאלון חדש</button>
                     </div>
                 </div>
 
