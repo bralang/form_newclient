@@ -220,6 +220,8 @@ async function nextStep() {
                 item.classList.add('completed');
                 item.querySelector('.step-circle').innerHTML = '✓';
             });
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
             currentStep++;
             updateUI();
