@@ -210,9 +210,22 @@ async function nextStep() {
         await sendToWebhook(currentStep, await collectFormData());
         if (currentStep === totalSteps) {
             // Show success message as separate step
-            document.querySelectorAll('.form-step').forEach(step => step.style.display = 'none');
-            document.getElementById('successStep').style.display = 'block';
-            document.getElementById('formNav').style.display = 'none';
+            const steps = document.querySelectorAll('.form-step');
+            steps.forEach(step => {
+                step.classList.remove('active');
+                step.style.display = 'none';
+            });
+
+            const successStep = document.getElementById('successStep');
+            if (successStep) {
+                successStep.classList.add('active');
+                successStep.style.display = 'block';
+            }
+
+            const formNav = document.getElementById('formNav');
+            if (formNav) {
+                formNav.style.display = 'none';
+            }
             
             // Update progress to completed
             document.querySelectorAll('.step-item').forEach(item => {
