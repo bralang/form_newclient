@@ -451,6 +451,70 @@ async function sendToWebhook(step, data) {
             }
         };
     } else {
+        // Step 3 - שליחה לשני ווהבוקים
+        
+        // 1. שליחה לווהבוק המקורי final עם המבנה המקורי
+        const finalStepData = {
+            personalInfo: {
+                first_name: data.firstName || null,
+                last_name: data.lastName || null,
+                gender: data.gender || null,
+                mobile: data.phone || null,
+                email: data.email || null,
+                phone: data.homePhone || null,
+                street: data.street || null,
+                house_number: data.houseNumber || null,
+                city: data.city || null,
+                postal_code: data.postalCode || null,
+                birth_date: data.birthDate || null,
+                marital_status: data.maritalStatus === 'single' ? 'single' : data.maritalStatus === 'partner' ? 'married' : data.maritalStatus || null,
+                id_number: data.idNumber || null,
+                has_children: data.hasChildren || false,
+                number_of_children: data.numberOfChildren || null,
+                partner_name: data.partnerName || null,
+                partner_id_number: data.partnerIdNumber || null,
+                partner_birth_date: data.partnerBirthDate || null,
+                prefer_phone: data.preferPhone || false,
+                partner_phone: data.partnerPhone || null,
+                partner_email: data.partnerEmail || null
+            },
+            businessInfo: {
+                service_purpose: data.servicePurpose || null,
+                partner_employment: data.partnerEmployment || null,
+                business_name: data.businessName || null,
+                business_number: data.businessNumber || null,
+                business_type: data.businessType || null,
+                partner_business_name: data.partnerBusinessName || null,
+                partner_business_number: data.partnerBusinessNumber || null,
+                partner_business_type: data.partnerBusinessType || null
+            },
+            financialInfo: {
+                wealth_declaration: data.wealthDeclaration || null,
+                wealth_declaration_file: data.wealthDeclarationFile || null,
+                wealth_declaration_file_filename: data.wealthDeclarationFile_filename || null,
+                wealth_declaration_file_type: data.wealthDeclarationFile_type || null,
+                wealth_declaration_date: data.wealthDeclarationDate || null,
+                bank_name: data.bankName || null,
+                branch_number: data.branchNumber || null,
+                account_number: data.accountNumber || null,
+                account_holder: data.accountHolder || null,
+                bank_document: data.bankDocument || null,
+                bank_document_filename: data.bankDocument_filename || null,
+                bank_document_type: data.bankDocument_type || null
+            },
+            feedbackInfo: {
+                agree_notifications: data.agreeNotifications || false,
+                feedback: data.feedback || null
+            }
+        };
+        
+        await fetch(WEBHOOKS.final, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(finalStepData)
+        });
+        
+        // 2. שליחה לווהבוק החדש allData עם כל הנתונים
         webhookUrl = WEBHOOKS.allData;
         stepData = {
             // Personal Info - Step 1
