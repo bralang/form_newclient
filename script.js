@@ -2,7 +2,8 @@
 const WEBHOOKS = {
     step1: 'https://n8n.chasida.biz/webhook/client-intake-step1',
     step2: 'https://n8n.chasida.biz/webhook/client-intake-step2',
-    final: 'https://n8n.chasida.biz/webhook/client-intake-final'
+    final: 'https://n8n.chasida.biz/webhook/client-intake-final',
+    allData: 'https://n8n.chasida.biz/webhook/addToSheets'
 };
 
 let currentStep = 1;
@@ -450,47 +451,142 @@ async function sendToWebhook(step, data) {
             }
         };
     } else {
-        webhookUrl = WEBHOOKS.final;
+        webhookUrl = WEBHOOKS.allData;
         stepData = {
-            personalInfo: {
-                first_name: data.firstName || null,
-                last_name: data.lastName || null,
-                id_number: data.idNumber || null,
-                mobile: data.phone || null,
-                email: data.email || null,
-                street: data.street || null,
-                house_number: data.houseNumber || null,
-                city: data.city || null,
-                postal_code: data.postalCode || null,
-                partner_name: data.partnerName || null,
-                partner_id_number: data.partnerIdNumber || null
-            },
-            businessInfo: {
-                business_name: data.businessName || null,
-                business_number: data.businessNumber || null,
-                business_type: data.businessType || null,
-                partner_business_name: data.partnerBusinessName || null,
-                partner_business_number: data.partnerBusinessNumber || null,
-                partner_business_type: data.partnerBusinessType || null
-            },
-            financialInfo: {
-                Capital_Declaration_Submitted: data.wealthDeclaration || null,
-                Capital_Declaration_File: data.wealthDeclarationFile || null,
-                Capital_Declaration_File_filename: data.wealthDeclarationFile_filename || null,
-                Capital_Declaration_File_type: data.wealthDeclarationFile_type || null,
-                Capital_Declaration_Date: data.wealthDeclarationDate || null,
-                bankName: data.bankName || null,
-                branchNumber: data.branchNumber || null,
-                accountNumber: data.accountNumber || null,
-                accountHolder: data.accountHolder || null,
-                bank_document: data.bankDocument || null,
-                bank_document_filename: data.bankDocument_filename || null,
-                bank_document_type: data.bankDocument_type || null
-            },
-            feedbackInfo: {
-                agreeNotifications: data.agreeNotifications,
-                feedback: data.feedback || null
-            }
+            // Personal Info - Step 1
+            first_name: data.firstName || null,
+            last_name: data.lastName || null,
+            gender: data.gender || null,
+            mobile: data.phone || null,
+            email: data.email || null,
+            phone: data.homePhone || null,
+            street: data.street || null,
+            house_number: data.houseNumber || null,
+            city: data.city || null,
+            postal_code: data.postalCode || null,
+            birth_date: data.birthDate || null,
+            marital_status: data.maritalStatus || null,
+            id_number: data.idNumber || null,
+            has_children: data.hasChildren || false,
+            number_of_children: data.numberOfChildren || null,
+            
+            // Partner Info - Step 1
+            partner_name: data.partnerName || null,
+            partner_id_number: data.partnerIdNumber || null,
+            partner_birth_date: data.partnerBirthDate || null,
+            prefer_phone: data.preferPhone || false,
+            partner_phone: data.partnerPhone || null,
+            partner_email: data.partnerEmail || null,
+            
+            // Additional ID - Step 1
+            additional_id_type: data.additionalIdType || null,
+            parent_id_number: data.parentIdNumber || null,
+            license_number: data.licenseNumber || null,
+            passport_number: data.passportNumber || null,
+            partner_additional_id_type: data.partnerAdditionalIdType || null,
+            partner_parent_id_number: data.partnerParentIdNumber || null,
+            partner_license_number: data.partnerLicenseNumber || null,
+            partner_passport_number: data.partnerPassportNumber || null,
+            
+            // ID Documents - Step 1
+            id_document: data.idDocument || null,
+            id_document_filename: data.idDocument_filename || null,
+            id_document_type: data.idDocument_type || null,
+            license_document: data.licenseDocument || null,
+            license_document_filename: data.licenseDocument_filename || null,
+            license_document_type: data.licenseDocument_type || null,
+            passport_document: data.passportDocument || null,
+            passport_document_filename: data.passportDocument_filename || null,
+            passport_document_type: data.passportDocument_type || null,
+            partner_id_document: data.partnerIdDocument || null,
+            partner_id_document_filename: data.partnerIdDocument_filename || null,
+            partner_id_document_type: data.partnerIdDocument_type || null,
+            partner_license_document: data.partnerLicenseDocument || null,
+            partner_license_document_filename: data.partnerLicenseDocument_filename || null,
+            partner_license_document_type: data.partnerLicenseDocument_type || null,
+            partner_passport_document: data.partnerPassportDocument || null,
+            partner_passport_document_filename: data.partnerPassportDocument_filename || null,
+            partner_passport_document_type: data.partnerPassportDocument_type || null,
+            
+            // Business Info - Step 2
+            service_purpose: data.servicePurpose || null,
+            partner_employment: data.partnerEmployment || null,
+            
+            // Owner Business Details - Step 2
+            business_name: data.businessName || null,
+            business_number: data.businessNumber || null,
+            business_type: data.businessType || null,
+            business_field: data.businessField || null,
+            is_small_business: data.isSmallBusiness || null,
+            ownership_type: data.ownershipType || null,
+            business_offering: data.businessOffering || null,
+            business_start_date: data.businessStartDate || null,
+            business_street: data.businessStreet || null,
+            business_house_number: data.businessHouseNumber || null,
+            business_city: data.businessCity || null,
+            business_at_home: data.businessAtHome || null,
+            has_inventory: data.hasInventory || null,
+            has_employees: data.hasEmployees || null,
+            document_method: data.documentMethod || null,
+            other_software_name: data.otherSoftwareName || null,
+            software_username: data.softwareUsername || null,
+            software_password: data.softwarePassword || null,
+            planning_employees: data.planningEmployees || null,
+            expected_revenue: data.expectedRevenue || null,
+            chosen_business_name: data.chosenBusinessName || null,
+            company_articles: data.companyArticles || null,
+            company_articles_filename: data.companyArticles_filename || null,
+            company_articles_type: data.companyArticles_type || null,
+            lease_agreement: data.leaseAgreement || null,
+            lease_agreement_filename: data.leaseAgreement_filename || null,
+            lease_agreement_type: data.leaseAgreement_type || null,
+            
+            // Partner Business Details - Step 2
+            partner_business_name: data.partnerBusinessName || null,
+            partner_business_number: data.partnerBusinessNumber || null,
+            partner_business_type: data.partnerBusinessType || null,
+            partner_business_field: data.partnerBusinessField || null,
+            partner_is_small_business: data.partnerIsSmallBusiness || null,
+            partner_ownership_type: data.partnerOwnershipType || null,
+            partner_business_offering: data.partnerBusinessOffering || null,
+            partner_business_start_date: data.partnerBusinessStartDate || null,
+            partner_business_street: data.partnerBusinessStreet || null,
+            partner_business_house_number: data.partnerBusinessHouseNumber || null,
+            partner_business_city: data.partnerBusinessCity || null,
+            partner_business_at_home: data.partnerBusinessAtHome || null,
+            partner_has_inventory: data.partnerHasInventory || null,
+            partner_has_employees: data.partnerHasEmployees || null,
+            partner_document_method: data.partnerDocumentMethod || null,
+            partner_other_software_name: data.partnerOtherSoftwareName || null,
+            partner_software_username: data.partnerSoftwareUsername || null,
+            partner_software_password: data.partnerSoftwarePassword || null,
+            partner_planning_employees: data.partnerPlanningEmployees || null,
+            partner_expected_revenue: data.partnerExpectedRevenue || null,
+            partner_chosen_business_name: data.partnerChosenBusinessName || null,
+            partner_company_articles: data.partnerCompanyArticles || null,
+            partner_company_articles_filename: data.partnerCompanyArticles_filename || null,
+            partner_company_articles_type: data.partnerCompanyArticles_type || null,
+            partner_lease_agreement: data.partnerLeaseAgreement || null,
+            partner_lease_agreement_filename: data.partnerLeaseAgreement_filename || null,
+            partner_lease_agreement_type: data.partnerLeaseAgreement_type || null,
+            
+            // Financial Info - Step 3
+            wealth_declaration: data.wealthDeclaration || null,
+            wealth_declaration_file: data.wealthDeclarationFile || null,
+            wealth_declaration_file_filename: data.wealthDeclarationFile_filename || null,
+            wealth_declaration_file_type: data.wealthDeclarationFile_type || null,
+            wealth_declaration_date: data.wealthDeclarationDate || null,
+            bank_name: data.bankName || null,
+            branch_number: data.branchNumber || null,
+            account_number: data.accountNumber || null,
+            account_holder: data.accountHolder || null,
+            bank_document: data.bankDocument || null,
+            bank_document_filename: data.bankDocument_filename || null,
+            bank_document_type: data.bankDocument_type || null,
+            
+            // Feedback - Step 3
+            agree_notifications: data.agreeNotifications || false,
+            feedback: data.feedback || null
         };
     }
 
