@@ -1,5 +1,9 @@
-// Webhook URL - Send all data only at the end
-const WEBHOOK_URL = 'https://n8n.chasida.biz/webhook/addToShits';
+// Webhook URLs
+const WEBHOOKS = {
+    step1: 'https://n8n.chasida.biz/webhook/client-intake-step1',
+    step2: 'https://n8n.chasida.biz/webhook/client-intake-step2',
+    final: 'https://n8n.chasida.biz/webhook/client-intake-final'
+};
 
 let currentStep = 1;
 const totalSteps = 3;
@@ -203,11 +207,7 @@ async function nextStep() {
     nextBtn.disabled = true;
 
     try {
-        // Only send data on final step
-        if (currentStep === totalSteps) {
-            await sendToWebhook(await collectFormData());
-        }
-        
+        await sendToWebhook(currentStep, await collectFormData());
         if (currentStep === totalSteps) {
             // Show success message as separate step
             const steps = document.querySelectorAll('.form-step');
@@ -303,149 +303,201 @@ async function collectFormData() {
     return data;
 }
 
-async function sendToWebhook(data) {
-    // Send ALL form data at once
-    const completeData = {
-        // Personal Information (Step 1)
-        firstName: data.firstName || null,
-        lastName: data.lastName || null,
-        gender: data.gender || null,
-        phone: data.phone || null,
-        email: data.email || null,
-        homePhone: data.homePhone || null,
-        street: data.street || null,
-        houseNumber: data.houseNumber || null,
-        city: data.city || null,
-        postalCode: data.postalCode || null,
-        birthDate: data.birthDate || null,
-        maritalStatus: data.maritalStatus || null,
-        idNumber: data.idNumber || null,
-        hasChildren: data.hasChildren || false,
-        numberOfChildren: data.numberOfChildren || null,
-        
-        // Partner Information (Step 1)
-        partnerName: data.partnerName || null,
-        partnerIdNumber: data.partnerIdNumber || null,
-        partnerBirthDate: data.partnerBirthDate || null,
-        preferPhone: data.preferPhone || false,
-        partnerPhone: data.partnerPhone || null,
-        partnerEmail: data.partnerEmail || null,
-        
-        // Additional ID Information (Step 1)
-        additionalIdType: data.additionalIdType || null,
-        parentIdNumber: data.parentIdNumber || null,
-        licenseNumber: data.licenseNumber || null,
-        passportNumber: data.passportNumber || null,
-        partnerAdditionalIdType: data.partnerAdditionalIdType || null,
-        partnerParentIdNumber: data.partnerParentIdNumber || null,
-        partnerLicenseNumber: data.partnerLicenseNumber || null,
-        partnerPassportNumber: data.partnerPassportNumber || null,
-        
-        // Document Files (Step 1)
-        idDocument: data.idDocument || null,
-        idDocument_filename: data.idDocument_filename || null,
-        idDocument_type: data.idDocument_type || null,
-        licenseDocument: data.licenseDocument || null,
-        licenseDocument_filename: data.licenseDocument_filename || null,
-        licenseDocument_type: data.licenseDocument_type || null,
-        passportDocument: data.passportDocument || null,
-        passportDocument_filename: data.passportDocument_filename || null,
-        passportDocument_type: data.passportDocument_type || null,
-        partnerIdDocument: data.partnerIdDocument || null,
-        partnerIdDocument_filename: data.partnerIdDocument_filename || null,
-        partnerIdDocument_type: data.partnerIdDocument_type || null,
-        partnerLicenseDocument: data.partnerLicenseDocument || null,
-        partnerLicenseDocument_filename: data.partnerLicenseDocument_filename || null,
-        partnerLicenseDocument_type: data.partnerLicenseDocument_type || null,
-        partnerPassportDocument: data.partnerPassportDocument || null,
-        partnerPassportDocument_filename: data.partnerPassportDocument_filename || null,
-        partnerPassportDocument_type: data.partnerPassportDocument_type || null,
-        
-        // Service Information (Step 2)
-        servicePurpose: data.servicePurpose || null,
-        partnerEmployment: data.partnerEmployment || null,
-        
-        // Owner Business Information (Step 2)
-        businessName: data.businessName || null,
-        businessNumber: data.businessNumber || null,
-        businessType: data.businessType || null,
-        businessField: data.businessField || null,
-        isSmallBusiness: data.isSmallBusiness || null,
-        ownershipType: data.ownershipType || null,
-        businessOffering: data.businessOffering || null,
-        businessStartDate: data.businessStartDate || null,
-        businessStreet: data.businessStreet || null,
-        businessHouseNumber: data.businessHouseNumber || null,
-        businessCity: data.businessCity || null,
-        businessAtHome: data.businessAtHome || null,
-        hasInventory: data.hasInventory || null,
-        hasEmployees: data.hasEmployees || null,
-        documentMethod: data.documentMethod || null,
-        otherSoftwareName: data.otherSoftwareName || null,
-        softwareUsername: data.softwareUsername || null,
-        softwarePassword: data.softwarePassword || null,
-        planningEmployees: data.planningEmployees || null,
-        expectedRevenue: data.expectedRevenue || null,
-        chosenBusinessName: data.chosenBusinessName || null,
-        companyArticles: data.companyArticles || null,
-        companyArticles_filename: data.companyArticles_filename || null,
-        companyArticles_type: data.companyArticles_type || null,
-        leaseAgreement: data.leaseAgreement || null,
-        leaseAgreement_filename: data.leaseAgreement_filename || null,
-        leaseAgreement_type: data.leaseAgreement_type || null,
-        
-        // Partner Business Information (Step 2)
-        partnerBusinessName: data.partnerBusinessName || null,
-        partnerBusinessNumber: data.partnerBusinessNumber || null,
-        partnerBusinessType: data.partnerBusinessType || null,
-        partnerBusinessField: data.partnerBusinessField || null,
-        partnerIsSmallBusiness: data.partnerIsSmallBusiness || null,
-        partnerOwnershipType: data.partnerOwnershipType || null,
-        partnerBusinessOffering: data.partnerBusinessOffering || null,
-        partnerBusinessStartDate: data.partnerBusinessStartDate || null,
-        partnerBusinessStreet: data.partnerBusinessStreet || null,
-        partnerBusinessHouseNumber: data.partnerBusinessHouseNumber || null,
-        partnerBusinessCity: data.partnerBusinessCity || null,
-        partnerBusinessAtHome: data.partnerBusinessAtHome || null,
-        partnerHasInventory: data.partnerHasInventory || null,
-        partnerHasEmployees: data.partnerHasEmployees || null,
-        partnerDocumentMethod: data.partnerDocumentMethod || null,
-        partnerOtherSoftwareName: data.partnerOtherSoftwareName || null,
-        partnerSoftwareUsername: data.partnerSoftwareUsername || null,
-        partnerSoftwarePassword: data.partnerSoftwarePassword || null,
-        partnerPlanningEmployees: data.partnerPlanningEmployees || null,
-        partnerExpectedRevenue: data.partnerExpectedRevenue || null,
-        partnerChosenBusinessName: data.partnerChosenBusinessName || null,
-        partnerCompanyArticles: data.partnerCompanyArticles || null,
-        partnerCompanyArticles_filename: data.partnerCompanyArticles_filename || null,
-        partnerCompanyArticles_type: data.partnerCompanyArticles_type || null,
-        partnerLeaseAgreement: data.partnerLeaseAgreement || null,
-        partnerLeaseAgreement_filename: data.partnerLeaseAgreement_filename || null,
-        partnerLeaseAgreement_type: data.partnerLeaseAgreement_type || null,
-        
-        // Financial Information (Step 3)
-        wealthDeclaration: data.wealthDeclaration || null,
-        wealthDeclarationFile: data.wealthDeclarationFile || null,
-        wealthDeclarationFile_filename: data.wealthDeclarationFile_filename || null,
-        wealthDeclarationFile_type: data.wealthDeclarationFile_type || null,
-        wealthDeclarationDate: data.wealthDeclarationDate || null,
-        bankName: data.bankName || null,
-        branchNumber: data.branchNumber || null,
-        accountNumber: data.accountNumber || null,
-        accountHolder: data.accountHolder || null,
-        bankDocument: data.bankDocument || null,
-        bankDocument_filename: data.bankDocument_filename || null,
-        bankDocument_type: data.bankDocument_type || null,
-        
-        // Feedback Information (Step 3)
-        agreeNotifications: data.agreeNotifications || false,
-        feedback: data.feedback || null
-    };
+async function sendToWebhook(step, data) {
+    let webhookUrl, stepData = {};
+    
+    if (step === 1) {
+        webhookUrl = WEBHOOKS.step1;
+        stepData = {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            gender: data.gender,
+            mobile: data.phone || null,
+            email: data.email || null,
+            phone: data.homePhone || null,
+            street: data.street || null,
+            house_number: data.houseNumber || null,
+            city: data.city || null,
+            postal_code: data.postalCode || null,
+            birth_date: data.birthDate || null,
+            marital_status: data.maritalStatus === 'single' ? 'single' : data.maritalStatus === 'partner' ? 'married' : data.maritalStatus || null,
+            id_number: data.idNumber || null,
+            has_children: data.hasChildren || false,
+            number_of_children: data.numberOfChildren || null,
+            partner_name: data.partnerName || null,
+            partner_id_number: data.partnerIdNumber || null,
+            partner_birth_date: data.partnerBirthDate || null,
+            prefer_phone: data.preferPhone || false,
+            partner_phone: data.partnerPhone || null,
+            partner_email: data.partnerEmail || null,
+            additional_id_type: data.additionalIdType || null,
+            parent_id_number: data.parentIdNumber || null,
+            license_number: data.licenseNumber || null,
+            passport_number: data.passportNumber || null,
+            partner_additional_id_type: data.partnerAdditionalIdType || null,
+            partner_parent_id_number: data.partnerParentIdNumber || null,
+            partner_license_number: data.partnerLicenseNumber || null,
+            partner_passport_number: data.partnerPassportNumber || null,
+            id_document: data.idDocument || null,
+            id_document_filename: data.idDocument_filename || null,
+            id_document_type: data.idDocument_type || null,
+            license_document: data.licenseDocument || null,
+            license_document_filename: data.licenseDocument_filename || null,
+            license_document_type: data.licenseDocument_type || null,
+            passport_document: data.passportDocument || null,
+            passport_document_filename: data.passportDocument_filename || null,
+            passport_document_type: data.passportDocument_type || null,
+            partner_id_document: data.partnerIdDocument || null,
+            partner_id_document_filename: data.partnerIdDocument_filename || null,
+            partner_id_document_type: data.partnerIdDocument_type || null,
+            partner_license_document: data.partnerLicenseDocument || null,
+            partner_license_document_filename: data.partnerLicenseDocument_filename || null,
+            partner_license_document_type: data.partnerLicenseDocument_type || null,
+            partner_passport_document: data.partnerPassportDocument || null,
+            partner_passport_document_filename: data.partnerPassportDocument_filename || null,
+            partner_passport_document_type: data.partnerPassportDocument_type || null
+        };
+    } else if (step === 2) {
+        webhookUrl = WEBHOOKS.step2;
+        stepData = {
+            service_purpose: data.servicePurpose || null,
+            new_business: data.servicePurpose === 'newBusiness' ? true : false,
+            existing_business: data.servicePurpose === 'existingBusiness' ? true : false,
+            shareholder: data.servicePurpose === 'shareholder' ? true : false,
+            employee_only_tax_return: data.servicePurpose === 'employeeOnly' ? true : false,
+            owner: {
+                first_name: data.firstName || null,
+                last_name: data.lastName || null,
+                id_number: data.idNumber || null,
+                phone: data.homePhone || null,
+                mobile: data.phone || null,
+                email: data.email || null
+            },
+            partner: {
+                first_name: data.partnerName ? data.partnerName.split(' ')[0] : null,
+                last_name: data.partnerName ? data.partnerName.split(' ').slice(1).join(' ') || null : null,
+                id_number: data.partnerIdNumber || null,
+                phone: data.partnerPhone || null,
+                email: data.partnerEmail || null,
+                employment_status: data.partnerEmployment || null,
+                is_unemployed: data.partnerEmployment === 'unemployed' ? true : false,
+                is_employee: data.partnerEmployment === 'employee' ? true : false,
+                is_business_owner: data.partnerEmployment === 'businessOwner' ? true : false,
+                is_opening_business: data.partnerEmployment === 'openingBusiness' ? true : false,
+                is_shareholder: data.partnerEmployment === 'shareholder' ? true : false
+            },
+            ownerBusinessInfo: {
+                business_name: data.businessName || null,
+                business_number: data.businessNumber || null,
+                business_type: data.businessType || null,
+                business_field: data.businessField || null,
+                is_small_business: data.isSmallBusiness || null,
+                ownership_type: data.ownershipType || null,
+                business_offering: data.businessOffering || null,
+                start_date: data.businessStartDate || null,
+                end_date: null,
+                street: data.businessStreet || null,
+                house_number: data.businessHouseNumber || null,
+                city: data.businessCity || null,
+                is_home_based: data.businessAtHome === 'yes' ? true : data.businessAtHome === 'no' ? false : null,
+                has_inventory: data.hasInventory === 'yes' ? true : data.hasInventory === 'no' ? false : null,
+                has_employees: data.hasEmployees === 'yes' ? true : data.hasEmployees === 'no' ? false : null,
+                reporting_frequency: null,
+                document_method: data.documentMethod || null,
+                other_software_name: data.otherSoftwareName || null,
+                software_username: data.softwareUsername || null,
+                software_password: data.softwarePassword || null,
+                planning_employees: data.planningEmployees || null,
+                expected_revenue: data.expectedRevenue || null,
+                chosen_business_name: data.chosenBusinessName || null,
+                company_articles: data.companyArticles || null,
+                company_articles_filename: data.companyArticles_filename || null,
+                company_articles_type: data.companyArticles_type || null,
+                lease_agreement: data.leaseAgreement || null,
+                lease_agreement_filename: data.leaseAgreement_filename || null,
+                lease_agreement_type: data.leaseAgreement_type || null
+            },
+            partnerBusinessInfo: {
+                partner_business_name: data.partnerBusinessName || null,
+                partner_business_number: data.partnerBusinessNumber || null,
+                partner_business_type: data.partnerBusinessType || null,
+                partner_business_field: data.partnerBusinessField || null,
+                partner_is_small_business: data.partnerIsSmallBusiness || null,
+                partner_ownership_type: data.partnerOwnershipType || null,
+                partner_business_offering: data.partnerBusinessOffering || null,
+                partner_start_date: data.partnerBusinessStartDate || null,
+                partner_end_date: null,
+                partner_street: data.partnerBusinessStreet || null,
+                partner_house_number: data.partnerBusinessHouseNumber || null,
+                partner_city: data.partnerBusinessCity || null,
+                partner_is_home_based: data.partnerBusinessAtHome === 'yes' ? true : data.partnerBusinessAtHome === 'no' ? false : null,
+                partner_has_inventory: data.partnerHasInventory === 'yes' ? true : data.partnerHasInventory === 'no' ? false : null,
+                partner_has_employees: data.partnerHasEmployees === 'yes' ? true : data.partnerHasEmployees === 'no' ? false : null,
+                partner_reporting_frequency: null,
+                partner_document_method: data.partnerDocumentMethod || null,
+                partner_other_software_name: data.partnerOtherSoftwareName || null,
+                partner_software_username: data.partnerSoftwareUsername || null,
+                partner_software_password: data.partnerSoftwarePassword || null,
+                partner_planning_employees: data.partnerPlanningEmployees || null,
+                partner_expected_revenue: data.partnerExpectedRevenue || null,
+                partner_chosen_business_name: data.partnerChosenBusinessName || null,
+                partner_company_articles: data.partnerCompanyArticles || null,
+                partner_company_articles_filename: data.partnerCompanyArticles_filename || null,
+                partner_company_articles_type: data.partnerCompanyArticles_type || null,
+                partner_lease_agreement: data.partnerLeaseAgreement || null,
+                partner_lease_agreement_filename: data.partnerLeaseAgreement_filename || null,
+                partner_lease_agreement_type: data.partnerLeaseAgreement_type || null
+            }
+        };
+    } else {
+        webhookUrl = WEBHOOKS.final;
+        stepData = {
+            personalInfo: {
+                first_name: data.firstName || null,
+                last_name: data.lastName || null,
+                id_number: data.idNumber || null,
+                mobile: data.phone || null,
+                email: data.email || null,
+                street: data.street || null,
+                house_number: data.houseNumber || null,
+                city: data.city || null,
+                postal_code: data.postalCode || null,
+                partner_name: data.partnerName || null,
+                partner_id_number: data.partnerIdNumber || null
+            },
+            businessInfo: {
+                business_name: data.businessName || null,
+                business_number: data.businessNumber || null,
+                business_type: data.businessType || null,
+                partner_business_name: data.partnerBusinessName || null,
+                partner_business_number: data.partnerBusinessNumber || null,
+                partner_business_type: data.partnerBusinessType || null
+            },
+            financialInfo: {
+                Capital_Declaration_Submitted: data.wealthDeclaration || null,
+                Capital_Declaration_File: data.wealthDeclarationFile || null,
+                Capital_Declaration_File_filename: data.wealthDeclarationFile_filename || null,
+                Capital_Declaration_File_type: data.wealthDeclarationFile_type || null,
+                Capital_Declaration_Date: data.wealthDeclarationDate || null,
+                bankName: data.bankName || null,
+                branchNumber: data.branchNumber || null,
+                accountNumber: data.accountNumber || null,
+                accountHolder: data.accountHolder || null,
+                bank_document: data.bankDocument || null,
+                bank_document_filename: data.bankDocument_filename || null,
+                bank_document_type: data.bankDocument_type || null
+            },
+            feedbackInfo: {
+                agreeNotifications: data.agreeNotifications,
+                feedback: data.feedback || null
+            }
+        };
+    }
 
-    const response = await fetch(WEBHOOK_URL, {
+    const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(completeData)
+        body: JSON.stringify(stepData)
     });
 
     if (!response.ok) throw new Error('Webhook failed');
