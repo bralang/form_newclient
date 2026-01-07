@@ -160,8 +160,8 @@ export const Step2BusinessInfo = () => {
         <div className="flex items-center space-x-2 space-x-reverse">
           <Checkbox
             id={`${prefix}isHomeOffice`}
-            checked={info.isHomeOffice}
-            onCheckedChange={(checked) => setInfo({ isHomeOffice: checked as boolean })}
+            checked={Boolean(info.isHomeOffice)}
+            onCheckedChange={(checked) => setInfo({ isHomeOffice: checked === true })}
           />
           <Label htmlFor={`${prefix}isHomeOffice`}>העסק מתנהל מהבית</Label>
         </div>
@@ -286,8 +286,8 @@ export const Step2BusinessInfo = () => {
       <div className="flex items-center space-x-2 space-x-reverse">
         <Checkbox
           id={`${prefix}hasEmployees`}
-          checked={info.hasEmployees}
-          onCheckedChange={(checked) => setInfo({ hasEmployees: checked as boolean })}
+          checked={Boolean(info.hasEmployees)}
+          onCheckedChange={(checked) => setInfo({ hasEmployees: checked === true })}
         />
         <Label htmlFor={`${prefix}hasEmployees`}>האם יש עובדים</Label>
       </div>
@@ -351,8 +351,8 @@ export const Step2BusinessInfo = () => {
           <div className="flex items-center space-x-2 space-x-reverse">
             <Checkbox
               id={`${prefix}planningEmployees`}
-              checked={info.planningEmployees}
-              onCheckedChange={(checked) => setInfo({ planningEmployees: checked as boolean })}
+              checked={Boolean(info.planningEmployees)}
+              onCheckedChange={(checked) => setInfo({ planningEmployees: checked === true })}
             />
             <Label htmlFor={`${prefix}planningEmployees`}>מתכנן להעסיק עובדים</Label>
           </div>

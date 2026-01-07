@@ -279,9 +279,9 @@ export const Step3FinancialAndFeedback = () => {
           <div className="flex items-start space-x-2 space-x-reverse">
             <Checkbox
               id="agreeToNotifications"
-              checked={feedbackInfo.agreeToNotifications}
+              checked={Boolean(feedbackInfo.agreeToNotifications)}
               onCheckedChange={(checked) =>
-                setFeedbackInfo({ agreeToNotifications: checked as boolean })
+                setFeedbackInfo({ agreeToNotifications: checked === true })
               }
             />
             <div className="space-y-1">

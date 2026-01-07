@@ -140,8 +140,16 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [serviceType, setServiceTypeState] = useState<ServiceType>({
     purposes: [],
   });
-  const [businessInfo, setBusinessInfoState] = useState<BusinessInfo>({});
-  const [spouseBusinessInfo, setSpouseBusinessInfoState] = useState<BusinessInfo>({});
+  const [businessInfo, setBusinessInfoState] = useState<BusinessInfo>({
+    isHomeOffice: false,
+    hasEmployees: false,
+    planningEmployees: false,
+  });
+  const [spouseBusinessInfo, setSpouseBusinessInfoState] = useState<BusinessInfo>({
+    isHomeOffice: false,
+    hasEmployees: false,
+    planningEmployees: false,
+  });
   const [financialInfo, setFinancialInfoState] = useState<FinancialInfo>({
     hasWealthDeclaration: false,
   });
@@ -151,25 +159,54 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load from sessionStorage on mount
   useEffect(() => {
-    const savedStep = sessionStorage.getItem("formStep");
-    const savedPersonalInfo = sessionStorage.getItem("personalInfo");
-    const savedContactInfo = sessionStorage.getItem("contactInfo");
-    const savedIdentificationInfo = sessionStorage.getItem("identificationInfo");
-    const savedServiceType = sessionStorage.getItem("serviceType");
-    const savedBusinessInfo = sessionStorage.getItem("businessInfo");
-    const savedSpouseBusinessInfo = sessionStorage.getItem("spouseBusinessInfo");
-    const savedFinancialInfo = sessionStorage.getItem("financialInfo");
-    const savedFeedbackInfo = sessionStorage.getItem("feedbackInfo");
+    const safeParse = <T,>(raw: string | null): T | null => {
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw) as T;
+      } catch {
+        return null;
+      }
+    };
 
-    if (savedStep) setCurrentStep(parseInt(savedStep));
-    if (savedPersonalInfo) setPersonalInfoState(JSON.parse(savedPersonalInfo));
-    if (savedContactInfo) setContactInfoState(JSON.parse(savedContactInfo));
-    if (savedIdentificationInfo) setIdentificationInfoState(JSON.parse(savedIdentificationInfo));
-    if (savedServiceType) setServiceTypeState(JSON.parse(savedServiceType));
-    if (savedBusinessInfo) setBusinessInfoState(JSON.parse(savedBusinessInfo));
-    if (savedSpouseBusinessInfo) setSpouseBusinessInfoState(JSON.parse(savedSpouseBusinessInfo));
-    if (savedFinancialInfo) setFinancialInfoState(JSON.parse(savedFinancialInfo));
-    if (savedFeedbackInfo) setFeedbackInfoState(JSON.parse(savedFeedbackInfo));
+    try {
+      const savedStep = sessionStorage.getItem("formStep");
+
+      const savedPersonalInfo = safeParse<PersonalInfo>(sessionStorage.getItem("personalInfo"));
+      const savedContactInfo = safeParse<ContactInfo>(sessionStorage.getItem("contactInfo"));
+      const savedIdentificationInfo = safeParse<IdentificationInfo>(
+        sessionStorage.getItem("identificationInfo")
+      );
+      const savedServiceType = safeParse<ServiceType>(sessionStorage.getItem("serviceType"));
+      const savedBusinessInfo = safeParse<BusinessInfo>(sessionStorage.getItem("businessInfo"));
+      const savedSpouseBusinessInfo = safeParse<BusinessInfo>(sessionStorage.getItem("spouseBusinessInfo"));
+      const savedFinancialInfo = safeParse<FinancialInfo>(sessionStorage.getItem("financialInfo"));
+      const savedFeedbackInfo = safeParse<FeedbackInfo>(sessionStorage.getItem("feedbackInfo"));
+
+      if (savedStep) {
+        const step = Number(savedStep);
+        setCurrentStep(Number.isFinite(step) && step >= 1 && step <= 3 ? step : 1);
+      }
+
+      if (savedPersonalInfo) setPersonalInfoState(savedPersonalInfo);
+      if (savedContactInfo) setContactInfoState(savedContactInfo);
+      if (savedIdentificationInfo) setIdentificationInfoState(savedIdentificationInfo);
+
+      if (savedServiceType) {
+        setServiceTypeState({
+          ...savedServiceType,
+          purposes: Array.isArray(savedServiceType.purposes) ? savedServiceType.purposes : [],
+        });
+      }
+
+      if (savedBusinessInfo) setBusinessInfoState(savedBusinessInfo);
+      if (savedSpouseBusinessInfo) setSpouseBusinessInfoState(savedSpouseBusinessInfo);
+      if (savedFinancialInfo) setFinancialInfoState(savedFinancialInfo);
+      if (savedFeedbackInfo) setFeedbackInfoState(savedFeedbackInfo);
+    } catch (e) {
+      console.error("Failed loading form from sessionStorage:", e);
+      sessionStorage.clear();
+      setCurrentStep(1);
+    }
   }, []);
 
   // Save to sessionStorage on change
@@ -186,7 +223,16 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [contactInfo]);
 
   useEffect(() => {
-    sessionStorage.setItem("identificationInfo", JSON.stringify(identificationInfo));
+    // Files can't be reliably persisted in sessionStorage. We only persist the serializable fields.
+    const {
+      idCardFile,
+      additionalIdFile,
+      spouseIdCardFile,
+      spouseAdditionalIdFile,
+      ...serializable
+    } = identificationInfo as any;
+
+    sessionStorage.setItem("identificationInfo", JSON.stringify(serializable));
   }, [identificationInfo]);
 
   useEffect(() => {
@@ -202,7 +248,9 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [spouseBusinessInfo]);
 
   useEffect(() => {
-    sessionStorage.setItem("financialInfo", JSON.stringify(financialInfo));
+    // Files can't be reliably persisted in sessionStorage. Persist serializable fields only.
+    const { wealthDeclarationFile, bankConfirmationFile, ...serializable } = financialInfo as any;
+    sessionStorage.setItem("financialInfo", JSON.stringify(serializable));
   }, [financialInfo]);
 
   useEffect(() => {
@@ -242,6 +290,9 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendToWebhook = async (url: string, data: any): Promise<boolean> => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -249,19 +300,30 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
+        signal: controller.signal,
       });
 
-      if (response.status === 200) {
+      const responseText = await response.text().catch(() => "");
+
+      if (response.ok) {
         toast.success("הנתונים נשלחו בהצלחה");
         return true;
-      } else {
-        toast.error("שגיאה בשליחת הנתונים");
-        return false;
       }
-    } catch (error) {
-      console.error("Webhook error:", error);
-      toast.error("שגיאה בחיבור לשרת");
+
+      console.error("Webhook non-OK response:", {
+        url,
+        status: response.status,
+        body: responseText,
+      });
+      toast.error(`שגיאה בשליחת הנתונים (סטטוס ${response.status})`);
       return false;
+    } catch (error: any) {
+      const isAbort = error?.name === "AbortError";
+      console.error("Webhook error:", error);
+      toast.error(isAbort ? "פג זמן החיבור לשרת" : "שגיאה בחיבור לשרת");
+      return false;
+    } finally {
+      clearTimeout(timeout);
     }
   };
 
