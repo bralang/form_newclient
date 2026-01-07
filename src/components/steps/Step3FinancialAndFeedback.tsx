@@ -7,9 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export const Step3FinancialAndFeedback = () => {
   const {
+    personalInfo,
+    contactInfo,
+    serviceType,
+    businessInfo,
     financialInfo,
     setFinancialInfo,
     feedbackInfo,
@@ -22,14 +27,53 @@ export const Step3FinancialAndFeedback = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const success = await sendToWebhook(
-      "https://n8n.link-up.co.il/webhook/client-intake-final",
-      { financialInfo, feedbackInfo }
-    );
-    setLoading(false);
-    if (success) {
+    try {
+      // שליחה של הדף האחרון (כמו שהיה)
+      const success = await sendToWebhook(
+        "https://n8n.link-up.co.il/webhook/client-intake-final",
+        { financialInfo, feedbackInfo }
+      );
+
+      if (!success) return;
+
+      // שליחת webhook של המייל (sendGmail)
+      const businessCount =
+        (serviceType.purposes?.some((p) => ["new_business", "existing_business"].includes(p))
+          ? 1
+          : 0) + (serviceType.spouseEmploymentStatus === "business_owner" ? 1 : 0);
+
+      const gmailData = {
+        client_name: `${personalInfo.firstName || ""} ${personalInfo.lastName || ""}`.trim(),
+        phone: contactInfo.phone || null,
+        email: contactInfo.email || null,
+        business_count: businessCount,
+        business_name: businessInfo.businessName || null,
+        business_type: businessInfo.businessType || null,
+      };
+
+      try {
+        console.log("Sending to sendGmail...", gmailData);
+        const res = await fetch("https://n8n.chasida.biz/webhook/sendGmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(gmailData),
+        });
+        console.log("sendGmail response:", res.status);
+
+        if (!res.ok) {
+          throw new Error(`sendGmail failed: ${res.status}`);
+        }
+
+        toast.success("המייל נשלח בהצלחה");
+      } catch (e) {
+        console.error("sendGmail error:", e);
+        toast.error("שגיאה בשליחת המייל (ייתכן חסימת CORS ב-n8n)");
+      }
+
       setSubmitted(true);
       sessionStorage.clear();
+    } finally {
+      setLoading(false);
     }
   };
 
