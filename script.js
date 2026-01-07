@@ -3,7 +3,8 @@ const WEBHOOKS = {
     step1: 'https://n8n.chasida.biz/webhook/client-intake-step1',
     step2: 'https://n8n.chasida.biz/webhook/client-intake-step2',
     final: 'https://n8n.chasida.biz/webhook/client-intake-final',
-    allData: 'https://n8n.chasida.biz/webhook/addToSheets'
+    allData: 'https://n8n.chasida.biz/webhook/addToSheets',
+    sendGmail: 'https://n8n.chasida.biz/webhook/sendGmail'
 };
 
 let currentStep = 1;
@@ -512,6 +513,25 @@ async function sendToWebhook(step, data) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(finalStepData)
+        });
+        
+        // 2. שליחה לווהבוק sendGmail עם סיכום הלקוח
+        const businessCount = (data.servicePurpose === 'existingBusiness' || data.servicePurpose === 'newBusiness' ? 1 : 0) + 
+                              (data.partnerEmployment === 'existingBusiness' || data.partnerEmployment === 'newBusiness' ? 1 : 0);
+        
+        const gmailData = {
+            client_name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+            phone: data.phone || null,
+            email: data.email || null,
+            business_count: businessCount,
+            business_name: data.businessName || null,
+            business_type: data.businessType || null
+        };
+        
+        await fetch(WEBHOOKS.sendGmail, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(gmailData)
         });
         
         // 2. שליחה לווהבוק החדש allData עם כל הנתונים
