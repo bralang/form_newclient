@@ -11,6 +11,7 @@ export const Step1PersonalAndContact = () => {
   const [loading, setLoading] = useState(false);
 
   const handleNext = async () => {
+    console.log("Step1: Next clicked");
     setLoading(true);
     const success = await sendToWebhook(
       "https://n8n.link-up.co.il/webhook/client-intake-step1",
