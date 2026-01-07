@@ -509,11 +509,18 @@ async function sendToWebhook(step, data) {
             }
         };
         
-        await fetch(WEBHOOKS.final, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(finalStepData)
-        });
+        // 1. שליחה לווהבוק final
+        console.log('Sending to WEBHOOKS.final...', finalStepData);
+        try {
+            const finalResponse = await fetch(WEBHOOKS.final, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalStepData)
+            });
+            console.log('WEBHOOKS.final response:', finalResponse.status);
+        } catch (error) {
+            console.error('Error sending to WEBHOOKS.final:', error);
+        }
         
         // 2. שליחה לווהבוק sendGmail עם סיכום הלקוח
         const businessCount = (data.servicePurpose === 'existingBusiness' || data.servicePurpose === 'newBusiness' ? 1 : 0) + 
@@ -528,11 +535,17 @@ async function sendToWebhook(step, data) {
             business_type: data.businessType || null
         };
         
-        await fetch(WEBHOOKS.sendGmail, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(gmailData)
-        });
+        console.log('Sending to WEBHOOKS.sendGmail...', gmailData);
+        try {
+            const gmailResponse = await fetch(WEBHOOKS.sendGmail, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(gmailData)
+            });
+            console.log('WEBHOOKS.sendGmail response:', gmailResponse.status);
+        } catch (error) {
+            console.error('Error sending to WEBHOOKS.sendGmail:', error);
+        }
         
         // 2. שליחה לווהבוק החדש allData עם כל הנתונים
         webhookUrl = WEBHOOKS.allData;
