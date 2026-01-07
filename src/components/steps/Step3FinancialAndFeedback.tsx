@@ -16,6 +16,7 @@ export const Step3FinancialAndFeedback = () => {
     contactInfo,
     serviceType,
     businessInfo,
+    spouseBusinessInfo,
     financialInfo,
     setFinancialInfo,
     feedbackInfo,
@@ -26,6 +27,73 @@ export const Step3FinancialAndFeedback = () => {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const buildGmailData = () => {
+    const hasMainBusiness = serviceType.purposes?.some((p) =>
+      ["new_business", "existing_business", "shareholder"].includes(p)
+    );
+    const spouseHasBusiness = serviceType.spouseEmploymentStatus === "business_owner";
+
+    const businessCount = (hasMainBusiness ? 1 : 0) + (spouseHasBusiness ? 1 : 0);
+
+    const businessTypeLabelMap: Record<string, string> = {
+      sole_proprietorship: "עוסק מורשה",
+      partnership: "שותפות",
+      company: "חברה",
+    };
+
+    const clientName = `${personalInfo.firstName || ""} ${personalInfo.lastName || ""}`.trim();
+
+    const main = hasMainBusiness ? businessInfo : null;
+    const spouse = spouseHasBusiness ? spouseBusinessInfo : null;
+
+    const normalizeBusiness = (info: any) => {
+      const typeValue = (info?.businessType as string) || "";
+      const typeLabel = businessTypeLabelMap[typeValue] || typeValue || "";
+      return {
+        name: (info?.businessName as string) || "",
+        typeValue,
+        typeLabel,
+      };
+    };
+
+    const mainN = normalizeBusiness(main);
+    const spouseN = normalizeBusiness(spouse);
+
+    const hasMainDetails = Boolean(mainN.name || mainN.typeValue);
+    const hasSpouseDetails = Boolean(spouseN.name || spouseN.typeValue);
+
+    // אם הלקוח לא מילא עסק אבל בן/בת הזוג כן — נשלח את זה במקום "סתם" ריק
+    const primary = hasMainDetails ? mainN : hasSpouseDetails ? spouseN : null;
+
+    const lines: string[] = [
+      `שם הלקוח: ${clientName || "-"}`,
+      `טלפון: ${contactInfo.phone || "-"}`,
+      `מייל: ${contactInfo.email || "-"}`,
+      `מספר עסקים: ${businessCount}`,
+      `שם העסק: ${primary?.name || "-"}`,
+      `סוג העסק: ${primary?.typeLabel || "-"}`,
+    ];
+
+    // אם יש שני עסקים – מוסיפים גם את השני כדי שלא יהיה בלבול
+    if (businessCount === 2) {
+      const secondary = hasMainDetails ? spouseN : mainN;
+      if (secondary?.name || secondary?.typeLabel) {
+        lines.push(`שם העסק 2: ${secondary.name || "-"}`);
+        lines.push(`סוג העסק 2: ${secondary.typeLabel || "-"}`);
+      }
+    }
+
+    return {
+      client_name: clientName || null,
+      phone: contactInfo.phone || null,
+      email: contactInfo.email || null,
+      business_count: businessCount,
+      business_name: primary?.name || null,
+      business_type: primary?.typeValue || null,
+      business_type_label: primary?.typeLabel || null,
+      formatted_text: lines.join("\n"),
+    };
+  };
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -37,46 +105,8 @@ export const Step3FinancialAndFeedback = () => {
 
       if (!success) return;
 
-      // שליחת webhook של המייל (sendGmail)
-      const hasMainBusiness = serviceType.purposes?.some((p) =>
-        ["new_business", "existing_business", "shareholder"].includes(p)
-      );
-
-      const businessCount = (hasMainBusiness ? 1 : 0) +
-        (serviceType.spouseEmploymentStatus === "business_owner" ? 1 : 0);
-
-      const businessTypeLabelMap: Record<string, string> = {
-        sole_proprietorship: "עוסק מורשה",
-        partnership: "שותפות",
-        company: "חברה",
-      };
-
-      const clientName = `${personalInfo.firstName || ""} ${personalInfo.lastName || ""}`.trim();
-      const businessTypeValue = businessInfo.businessType || "";
-      const businessTypeLabel = businessTypeLabelMap[businessTypeValue] || businessTypeValue || "";
-
-      const formattedText = [
-        `שם הלקוח: ${clientName || "-"}`,
-        `טלפון: ${contactInfo.phone || "-"}`,
-        `מייל: ${contactInfo.email || "-"}`,
-        `מספר עסקים: ${businessCount}`,
-        `שם העסק: ${businessInfo.businessName || "-"}`,
-        `סוג העסק: ${businessTypeLabel || "-"}`,
-      ].join("\n");
-
-      const gmailData = {
-        // שדות מובנים (לנוחות ב-n8n)
-        client_name: clientName || null,
-        phone: contactInfo.phone || null,
-        email: contactInfo.email || null,
-        business_count: businessCount,
-        business_name: businessInfo.businessName || null,
-        business_type: businessTypeValue || null,
-        business_type_label: businessTypeLabel || null,
-
-        // שדה טקסט מוכן להדבקה/מייל
-        formatted_text: formattedText,
-      };
+      // שליחת webhook של המייל (sendGmail) עם הנתונים האמיתיים מהטופס
+      const gmailData = buildGmailData();
 
       try {
         const { data, error } = await supabase.functions.invoke("send-gmail-proxy", {
@@ -85,7 +115,9 @@ export const Step3FinancialAndFeedback = () => {
 
         if (error) throw new Error(error.message);
         if (!data?.ok) {
-          throw new Error(`n8n error (status ${data?.upstream_status ?? "?"}): ${data?.upstream_body ?? ""}`);
+          throw new Error(
+            `n8n error (status ${data?.upstream_status ?? "?"}): ${data?.upstream_body ?? ""}`
+          );
         }
 
         toast.success("המייל נשלח בהצלחה");
@@ -271,6 +303,12 @@ export const Step3FinancialAndFeedback = () => {
             onChange={(e) => setFeedbackInfo({ feedback: e.target.value })}
             rows={5}
           />
+        </div>
+
+        {/* תצוגה מקדימה של מה שנשלח ל-sendGmail */}
+        <div className="space-y-2">
+          <Label>מה יישלח במייל (sendGmail)</Label>
+          <Textarea value={buildGmailData().formatted_text || ""} readOnly rows={8} />
         </div>
       </div>
 
