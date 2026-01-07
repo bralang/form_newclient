@@ -543,8 +543,13 @@ async function sendToWebhook(step, data) {
                 body: JSON.stringify(gmailData)
             });
             console.log('WEBHOOKS.sendGmail response:', gmailResponse.status);
+
+            if (!gmailResponse.ok) {
+                alert(`שליחת המייל נכשלה (סטטוס ${gmailResponse.status}). בדקי ב-n8n אם ה-webhook פעיל ומחזיר 200.`);
+            }
         } catch (error) {
             console.error('Error sending to WEBHOOKS.sendGmail:', error);
+            alert('שליחת המייל נכשלה (שגיאת רשת/CORS). בדקי ב-n8n שה-webhook מאפשר בקשות מהדפדפן.');
         }
         
         // 2. שליחה לווהבוק החדש allData עם כל הנתונים
