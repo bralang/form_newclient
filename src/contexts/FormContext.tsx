@@ -348,6 +348,11 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const sendToWebhook = async (url: string, data: any): Promise<boolean> => {
     const N8N_PREFIX = "https://n8n.link-up.co.il/webhook/";
 
+    console.log("sendToWebhook called", {
+      url,
+      via: url.startsWith(N8N_PREFIX) ? "n8n-proxy" : "direct",
+    });
+
     try {
       // Prefer backend proxy for n8n to avoid CORS/network flakiness from the browser
       if (url.startsWith(N8N_PREFIX)) {
@@ -355,6 +360,12 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const { data: res, error } = await supabase.functions.invoke("n8n-proxy", {
           body: { name, payload: data },
+        });
+
+        console.log("n8n-proxy result", {
+          name,
+          ok: Boolean(res?.ok),
+          upstream_status: res?.upstream_status,
         });
 
         if (error) throw new Error(error.message);

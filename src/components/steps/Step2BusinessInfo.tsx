@@ -42,6 +42,7 @@ export const Step2BusinessInfo = () => {
   const spouseHasBusiness = serviceType.spouseEmploymentStatus === "business_owner";
 
   const handleNext = async () => {
+    console.log("Step2: Next clicked");
     setLoading(true);
     const mappedSpouseBusinessInfo = mapBusinessDataForWebhook(spouseBusinessInfo, "spouse_");
     const success = await sendToWebhook(

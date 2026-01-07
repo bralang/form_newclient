@@ -95,6 +95,7 @@ export const Step3FinancialAndFeedback = () => {
     };
   };
   const handleSubmit = async () => {
+    console.log("Step3: Submit clicked");
     setLoading(true);
 
     // 1) שולחים את ה-webhook של הסיום (כמו שהיה) — אבל לא חוסמים את sendGmail אם זה נכשל
@@ -102,6 +103,8 @@ export const Step3FinancialAndFeedback = () => {
       "https://n8n.link-up.co.il/webhook/client-intake-final",
       { financialInfo, feedbackInfo }
     );
+
+    console.log("Step3: final webhook success?", finalSuccess);
 
     // 2) שולחים sendGmail עם הנתונים האמיתיים מהטופס
     const gmailData = buildGmailData();
