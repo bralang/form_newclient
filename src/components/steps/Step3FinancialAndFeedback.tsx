@@ -96,38 +96,39 @@ export const Step3FinancialAndFeedback = () => {
   };
   const handleSubmit = async () => {
     setLoading(true);
+
+    // 1) שולחים את ה-webhook של הסיום (כמו שהיה) — אבל לא חוסמים את sendGmail אם זה נכשל
+    const finalSuccess = await sendToWebhook(
+      "https://n8n.link-up.co.il/webhook/client-intake-final",
+      { financialInfo, feedbackInfo }
+    );
+
+    // 2) שולחים sendGmail עם הנתונים האמיתיים מהטופס
+    const gmailData = buildGmailData();
+
     try {
-      // שליחה של הדף האחרון (כמו שהיה)
-      const success = await sendToWebhook(
-        "https://n8n.link-up.co.il/webhook/client-intake-final",
-        { financialInfo, feedbackInfo }
-      );
+      const { data, error } = await supabase.functions.invoke("send-gmail-proxy", {
+        body: gmailData,
+      });
 
-      if (!success) return;
+      if (error) throw new Error(error.message);
+      if (!data?.ok) {
+        throw new Error(
+          `n8n error (status ${data?.upstream_status ?? "?"}): ${data?.upstream_body ?? ""}`
+        );
+      }
 
-      // שליחת webhook של המייל (sendGmail) עם הנתונים האמיתיים מהטופס
-      const gmailData = buildGmailData();
-
-      try {
-        const { data, error } = await supabase.functions.invoke("send-gmail-proxy", {
-          body: gmailData,
-        });
-
-        if (error) throw new Error(error.message);
-        if (!data?.ok) {
-          throw new Error(
-            `n8n error (status ${data?.upstream_status ?? "?"}): ${data?.upstream_body ?? ""}`
-          );
-        }
-
+      if (!finalSuccess) {
+        toast.warning("המייל נשלח, אבל שליחת טופס הסיום נכשלה");
+      } else {
         toast.success("המייל נשלח בהצלחה");
-      } catch (e: any) {
-        console.error("sendGmail error:", e);
-        toast.error("שגיאה בשליחת המייל: " + (e.message || "Unknown"));
       }
 
       setSubmitted(true);
       sessionStorage.clear();
+    } catch (e: any) {
+      console.error("sendGmail error:", e);
+      toast.error("שגיאה בשליחת המייל: " + (e.message || "Unknown"));
     } finally {
       setLoading(false);
     }
