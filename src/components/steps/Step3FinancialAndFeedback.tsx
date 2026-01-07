@@ -38,29 +38,54 @@ export const Step3FinancialAndFeedback = () => {
       if (!success) return;
 
       // שליחת webhook של המייל (sendGmail)
-      const businessCount =
-        (serviceType.purposes?.some((p) => ["new_business", "existing_business"].includes(p))
-          ? 1
-          : 0) + (serviceType.spouseEmploymentStatus === "business_owner" ? 1 : 0);
+      const hasMainBusiness = serviceType.purposes?.some((p) =>
+        ["new_business", "existing_business", "shareholder"].includes(p)
+      );
+
+      const businessCount = (hasMainBusiness ? 1 : 0) +
+        (serviceType.spouseEmploymentStatus === "business_owner" ? 1 : 0);
+
+      const businessTypeLabelMap: Record<string, string> = {
+        sole_proprietorship: "עוסק מורשה",
+        partnership: "שותפות",
+        company: "חברה",
+      };
+
+      const clientName = `${personalInfo.firstName || ""} ${personalInfo.lastName || ""}`.trim();
+      const businessTypeValue = businessInfo.businessType || "";
+      const businessTypeLabel = businessTypeLabelMap[businessTypeValue] || businessTypeValue || "";
+
+      const formattedText = [
+        `שם הלקוח: ${clientName || "-"}`,
+        `טלפון: ${contactInfo.phone || "-"}`,
+        `מייל: ${contactInfo.email || "-"}`,
+        `מספר עסקים: ${businessCount}`,
+        `שם העסק: ${businessInfo.businessName || "-"}`,
+        `סוג העסק: ${businessTypeLabel || "-"}`,
+      ].join("\n");
 
       const gmailData = {
-        client_name: `${personalInfo.firstName || ""} ${personalInfo.lastName || ""}`.trim(),
+        // שדות מובנים (לנוחות ב-n8n)
+        client_name: clientName || null,
         phone: contactInfo.phone || null,
         email: contactInfo.email || null,
         business_count: businessCount,
         business_name: businessInfo.businessName || null,
-        business_type: businessInfo.businessType || null,
+        business_type: businessTypeValue || null,
+        business_type_label: businessTypeLabel || null,
+
+        // שדה טקסט מוכן להדבקה/מייל
+        formatted_text: formattedText,
       };
 
       try {
-        console.log("Sending to sendGmail via proxy...", gmailData);
         const { data, error } = await supabase.functions.invoke("send-gmail-proxy", {
           body: gmailData,
         });
-        console.log("sendGmail proxy response:", data, error);
 
-        if (error) {
-          throw new Error(error.message);
+        if (error) throw new Error(error.message);
+        if (!data?.ok) {
+          throw new Error(`n8n error (status ${data?.upstream_status ?? "?"}): ${data?.upstream_body ?? ""}`);
         }
 
         toast.success("המייל נשלח בהצלחה");
