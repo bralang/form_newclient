@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Step3FinancialAndFeedback = () => {
   const {
@@ -52,22 +53,20 @@ export const Step3FinancialAndFeedback = () => {
       };
 
       try {
-        console.log("Sending to sendGmail...", gmailData);
-        const res = await fetch("https://n8n.chasida.biz/webhook/sendGmail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(gmailData),
+        console.log("Sending to sendGmail via proxy...", gmailData);
+        const { data, error } = await supabase.functions.invoke("send-gmail-proxy", {
+          body: gmailData,
         });
-        console.log("sendGmail response:", res.status);
+        console.log("sendGmail proxy response:", data, error);
 
-        if (!res.ok) {
-          throw new Error(`sendGmail failed: ${res.status}`);
+        if (error) {
+          throw new Error(error.message);
         }
 
         toast.success("המייל נשלח בהצלחה");
-      } catch (e) {
+      } catch (e: any) {
         console.error("sendGmail error:", e);
-        toast.error("שגיאה בשליחת המייל (ייתכן חסימת CORS ב-n8n)");
+        toast.error("שגיאה בשליחת המייל: " + (e.message || "Unknown"));
       }
 
       setSubmitted(true);
