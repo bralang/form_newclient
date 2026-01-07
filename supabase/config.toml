@@ -1,1 +1,4 @@
 project_id = "phnpccfiumwywwcnuwlw"
+
+[functions.send-gmail-proxy]
+verify_jwt = false
