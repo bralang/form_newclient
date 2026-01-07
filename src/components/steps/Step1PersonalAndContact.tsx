@@ -118,7 +118,7 @@ export const Step1PersonalAndContact = () => {
               id="hasChildren"
               checked={personalInfo.hasChildren}
               onCheckedChange={(checked) =>
-                setPersonalInfo({ hasChildren: checked as boolean })
+                setPersonalInfo({ hasChildren: checked === true })
               }
             />
             <Label htmlFor="hasChildren">יש לי ילדים</Label>
@@ -211,7 +211,7 @@ export const Step1PersonalAndContact = () => {
             id="preferPhoneOverEmail"
             checked={contactInfo.preferPhoneOverEmail}
             onCheckedChange={(checked) =>
-              setContactInfo({ preferPhoneOverEmail: checked as boolean })
+              setContactInfo({ preferPhoneOverEmail: checked === true })
             }
           />
           <Label htmlFor="preferPhoneOverEmail">

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface PersonalInfo {
   firstName: string;
@@ -168,6 +169,8 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    const asBool = (v: unknown) => v === true || v === "true";
+
     try {
       const savedStep = sessionStorage.getItem("formStep");
 
@@ -187,8 +190,30 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentStep(Number.isFinite(step) && step >= 1 && step <= 3 ? step : 1);
       }
 
-      if (savedPersonalInfo) setPersonalInfoState(savedPersonalInfo);
-      if (savedContactInfo) setContactInfoState(savedContactInfo);
+      if (savedPersonalInfo) {
+        setPersonalInfoState((prev) => ({
+          ...prev,
+          ...savedPersonalInfo,
+          gender:
+            savedPersonalInfo.gender === "male" || savedPersonalInfo.gender === "female"
+              ? savedPersonalInfo.gender
+              : "",
+          maritalStatus:
+            savedPersonalInfo.maritalStatus === "single" || savedPersonalInfo.maritalStatus === "married"
+              ? savedPersonalInfo.maritalStatus
+              : "",
+          hasChildren: asBool((savedPersonalInfo as any).hasChildren),
+        }));
+      }
+
+      if (savedContactInfo) {
+        setContactInfoState((prev) => ({
+          ...prev,
+          ...savedContactInfo,
+          preferPhoneOverEmail: asBool((savedContactInfo as any).preferPhoneOverEmail),
+        }));
+      }
+
       if (savedIdentificationInfo) setIdentificationInfoState(savedIdentificationInfo);
 
       if (savedServiceType) {
@@ -198,10 +223,41 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
       }
 
-      if (savedBusinessInfo) setBusinessInfoState(savedBusinessInfo);
-      if (savedSpouseBusinessInfo) setSpouseBusinessInfoState(savedSpouseBusinessInfo);
-      if (savedFinancialInfo) setFinancialInfoState(savedFinancialInfo);
-      if (savedFeedbackInfo) setFeedbackInfoState(savedFeedbackInfo);
+      if (savedBusinessInfo) {
+        setBusinessInfoState((prev) => ({
+          ...prev,
+          ...savedBusinessInfo,
+          isHomeOffice: asBool((savedBusinessInfo as any).isHomeOffice),
+          hasEmployees: asBool((savedBusinessInfo as any).hasEmployees),
+          planningEmployees: asBool((savedBusinessInfo as any).planningEmployees),
+        }));
+      }
+
+      if (savedSpouseBusinessInfo) {
+        setSpouseBusinessInfoState((prev) => ({
+          ...prev,
+          ...savedSpouseBusinessInfo,
+          isHomeOffice: asBool((savedSpouseBusinessInfo as any).isHomeOffice),
+          hasEmployees: asBool((savedSpouseBusinessInfo as any).hasEmployees),
+          planningEmployees: asBool((savedSpouseBusinessInfo as any).planningEmployees),
+        }));
+      }
+
+      if (savedFinancialInfo) {
+        setFinancialInfoState((prev) => ({
+          ...prev,
+          ...savedFinancialInfo,
+          hasWealthDeclaration: asBool((savedFinancialInfo as any).hasWealthDeclaration),
+        }));
+      }
+
+      if (savedFeedbackInfo) {
+        setFeedbackInfoState((prev) => ({
+          ...prev,
+          ...savedFeedbackInfo,
+          agreeToNotifications: asBool((savedFeedbackInfo as any).agreeToNotifications),
+        }));
+      }
     } catch (e) {
       console.error("Failed loading form from sessionStorage:", e);
       sessionStorage.clear();
@@ -290,40 +346,72 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const sendToWebhook = async (url: string, data: any): Promise<boolean> => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const N8N_PREFIX = "https://n8n.link-up.co.il/webhook/";
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        signal: controller.signal,
-      });
+      // Prefer backend proxy for n8n to avoid CORS/network flakiness from the browser
+      if (url.startsWith(N8N_PREFIX)) {
+        const name = url.slice(N8N_PREFIX.length);
 
-      const responseText = await response.text().catch(() => "");
+        const { data: res, error } = await supabase.functions.invoke("n8n-proxy", {
+          body: { name, payload: data },
+        });
 
-      if (response.ok) {
+        if (error) throw new Error(error.message);
+        if (!res?.ok) {
+          console.error("Webhook non-OK response (proxy):", {
+            url,
+            status: res?.upstream_status,
+            body: res?.upstream_body,
+          });
+          toast.error(`שגיאה בשליחת הנתונים (סטטוס ${res?.upstream_status ?? "?"})`);
+          return false;
+        }
+
         toast.success("הנתונים נשלחו בהצלחה");
         return true;
       }
 
-      console.error("Webhook non-OK response:", {
-        url,
-        status: response.status,
-        body: responseText,
-      });
-      toast.error(`שגיאה בשליחת הנתונים (סטטוס ${response.status})`);
-      return false;
+      // Fallback: direct call
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+          signal: controller.signal,
+        });
+
+        const responseText = await response.text().catch(() => "");
+
+        if (response.ok) {
+          toast.success("הנתונים נשלחו בהצלחה");
+          return true;
+        }
+
+        console.error("Webhook non-OK response:", {
+          url,
+          status: response.status,
+          body: responseText,
+        });
+        toast.error(`שגיאה בשליחת הנתונים (סטטוס ${response.status})`);
+        return false;
+      } catch (error: any) {
+        const isAbort = error?.name === "AbortError";
+        console.error("Webhook error:", error);
+        toast.error(isAbort ? "פג זמן החיבור לשרת" : "שגיאה בחיבור לשרת");
+        return false;
+      } finally {
+        clearTimeout(timeout);
+      }
     } catch (error: any) {
-      const isAbort = error?.name === "AbortError";
-      console.error("Webhook error:", error);
-      toast.error(isAbort ? "פג זמן החיבור לשרת" : "שגיאה בחיבור לשרת");
+      console.error("Webhook proxy error:", error);
+      toast.error("שגיאה בחיבור לשרת");
       return false;
-    } finally {
-      clearTimeout(timeout);
     }
   };
 
