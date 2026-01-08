@@ -5,7 +5,16 @@ const corsHeaders = {
 
 const N8N_WEBHOOK_URL = "https://n8n.chasida.biz/webhook/sendGmail";
 
+const BUSINESS_TYPE_HE: Record<string, string> = {
+  exempt: "פטור",
+  authorized: "מורשה",
+  licensed: "מורשה",
+  company: "חברה",
+  nonprofit: "עמותה",
+};
+
 type Payload = {
+  ref?: unknown;
   client_name?: unknown;
   phone?: unknown;
   email?: unknown;
@@ -47,14 +56,21 @@ Deno.serve(async (req: Request) => {
     const raw = (await req.json()) as Payload;
 
     // Validate & normalize (minimal, no PII logging)
+    const businessTypeRaw = asString(raw.business_type, 50);
+    const businessTypeLabelRaw = asString(raw.business_type_label, 50);
+    const businessTypeHebrew =
+      businessTypeLabelRaw ??
+      (businessTypeRaw ? BUSINESS_TYPE_HE[businessTypeRaw] ?? businessTypeRaw : null);
+
     const payload = {
+      ref: asString((raw as any).ref, 200),
       client_name: asString(raw.client_name, 200),
       phone: asString(raw.phone, 50),
       email: asString(raw.email, 255),
       business_count: asNumber(raw.business_count) ?? 0,
       business_name: asString(raw.business_name, 200),
-      business_type: asString(raw.business_type, 50),
-      business_type_label: asString(raw.business_type_label, 50),
+      business_type: businessTypeHebrew,
+      business_type_label: businessTypeHebrew,
       formatted_text: asString(raw.formatted_text, 4000),
     };
 

@@ -8,6 +8,7 @@ const N8N_ENDPOINTS: Record<string, string> = {
   "client-intake-step1": "https://n8n.link-up.co.il/webhook/client-intake-step1",
   "client-intake-step2": "https://n8n.link-up.co.il/webhook/client-intake-step2",
   "client-intake-final": "https://n8n.link-up.co.il/webhook/client-intake-final",
+  "chasida-client-intake-step1": "https://n8n.chasida.biz/webhook/client-intake-step1",
 };
 
 type RequestBody = {
