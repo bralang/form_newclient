@@ -129,16 +129,20 @@ export const Step2BusinessInfo = () => {
           className="flex flex-wrap flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="sole_proprietorship" id={`${prefix}sole_proprietorship`} />
-            <Label htmlFor={`${prefix}sole_proprietorship`}>עוסק מורשה</Label>
+            <RadioGroupItem value="exempt" id={`${prefix}exempt`} />
+            <Label htmlFor={`${prefix}exempt`}>פטור</Label>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="partnership" id={`${prefix}partnership`} />
-            <Label htmlFor={`${prefix}partnership`}>שותפות</Label>
+            <RadioGroupItem value="authorized" id={`${prefix}authorized`} />
+            <Label htmlFor={`${prefix}authorized`}>מורשה</Label>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="company" id={`${prefix}company`} />
             <Label htmlFor={`${prefix}company`}>חברה</Label>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <RadioGroupItem value="nonprofit" id={`${prefix}nonprofit`} />
+            <Label htmlFor={`${prefix}nonprofit`}>עמותה</Label>
           </div>
         </RadioGroup>
       </div>

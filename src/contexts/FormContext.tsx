@@ -50,7 +50,7 @@ export interface ServiceType {
 export interface BusinessInfo {
   businessName?: string;
   businessField?: string;
-  businessType?: "sole_proprietorship" | "partnership" | "company" | "";
+  businessType?: "exempt" | "authorized" | "company" | "nonprofit" | "";
   startDate?: string;
   businessAddress?: {
     street: string;
