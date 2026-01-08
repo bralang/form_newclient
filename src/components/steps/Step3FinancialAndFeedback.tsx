@@ -317,6 +317,12 @@ export const Step3FinancialAndFeedback = () => {
           <Label>מה יישלח במייל (sendGmail)</Label>
           <Textarea value={buildGmailData().formatted_text || ""} readOnly rows={8} />
         </div>
+
+        {/* תצוגה מקדימה של ה-JSON שנשלח (כדי לוודא ref וסוג עסק) */}
+        <div className="space-y-2">
+          <Label>ה-JSON שנשלח (sendGmail)</Label>
+          <Textarea value={JSON.stringify(buildGmailData(), null, 2)} readOnly rows={10} />
+        </div>
       </div>
 
       <div className="flex justify-between items-center mt-8 pt-6 border-t border-border">

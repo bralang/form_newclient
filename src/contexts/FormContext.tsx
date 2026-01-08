@@ -50,7 +50,7 @@ export interface ServiceType {
 export interface BusinessInfo {
   businessName?: string;
   businessField?: string;
-  businessType?: "exempt" | "authorized" | "company" | "nonprofit" | "";
+  businessType?: "exempt" | "authorized" | "licensed" | "company" | "nonprofit" | "";
   startDate?: string;
   businessAddress?: {
     street: string;
@@ -198,19 +198,20 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (savedPersonalInfo) {
-        setPersonalInfoState((prev) => ({
-          ...prev,
-          ...savedPersonalInfo,
-          gender:
-            savedPersonalInfo.gender === "male" || savedPersonalInfo.gender === "female"
-              ? savedPersonalInfo.gender
-              : "",
-          maritalStatus:
-            savedPersonalInfo.maritalStatus === "single" || savedPersonalInfo.maritalStatus === "married"
-              ? savedPersonalInfo.maritalStatus
-              : "",
-          hasChildren: asBool((savedPersonalInfo as any).hasChildren),
-        }));
+        setPersonalInfoState((prev) => {
+          // If the user already typed something before hydration finished, keep their current values.
+          const merged = { ...savedPersonalInfo, ...prev } as PersonalInfo;
+
+          return {
+            ...merged,
+            gender: merged.gender === "male" || merged.gender === "female" ? merged.gender : "",
+            maritalStatus:
+              merged.maritalStatus === "single" || merged.maritalStatus === "married"
+                ? merged.maritalStatus
+                : "",
+            hasChildren: asBool((merged as any).hasChildren),
+          };
+        });
       }
 
       if (savedContactInfo) {
@@ -235,13 +236,15 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (savedBusinessInfo) {
-        setBusinessInfoState((prev) => ({
-          ...prev,
-          ...savedBusinessInfo,
-          isHomeOffice: asBool((savedBusinessInfo as any).isHomeOffice),
-          hasEmployees: asBool((savedBusinessInfo as any).hasEmployees),
-          planningEmployees: asBool((savedBusinessInfo as any).planningEmployees),
-        }));
+        setBusinessInfoState((prev) => {
+          const merged = { ...savedBusinessInfo, ...prev } as BusinessInfo;
+          return {
+            ...merged,
+            isHomeOffice: asBool((merged as any).isHomeOffice),
+            hasEmployees: asBool((merged as any).hasEmployees),
+            planningEmployees: asBool((merged as any).planningEmployees),
+          };
+        });
       }
 
       if (savedSpouseBusinessInfo) {
