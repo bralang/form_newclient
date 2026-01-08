@@ -376,18 +376,33 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       silent?: boolean;
     }
   ): Promise<boolean> => {
-    const N8N_PREFIX = "https://n8n.link-up.co.il/webhook/";
+    const N8N_ROUTES = [
+      {
+        prefix: "https://n8n.link-up.co.il/webhook/",
+        toName: (path: string) => path,
+      },
+      {
+        prefix: "https://n8n.chasida.biz/webhook/",
+        // We keep the allowlist key format used by the backend proxy.
+        // Example: client-intake-step1 -> chasida-client-intake-step1
+        toName: (path: string) => `chasida-${path}`,
+      },
+    ] as const;
+
     const notify = !options?.silent;
+
+    const route = N8N_ROUTES.find((r) => url.startsWith(r.prefix));
 
     console.log("sendToWebhook called", {
       url,
-      via: url.startsWith(N8N_PREFIX) ? "n8n-proxy" : "direct",
+      via: route ? "n8n-proxy" : "direct",
     });
 
     try {
       // Prefer backend proxy for n8n to avoid CORS/network flakiness from the browser
-      if (url.startsWith(N8N_PREFIX)) {
-        const name = url.slice(N8N_PREFIX.length);
+      if (route) {
+        const path = url.slice(route.prefix.length);
+        const name = route.toName(path);
 
         const { data: res, error } = await supabase.functions.invoke("n8n-proxy", {
           body: { name, payload: data },
