@@ -90,7 +90,7 @@ export const Step3FinancialAndFeedback = () => {
       email: contactInfo.email || null,
       business_count: businessCount,
       business_name: primary?.name || null,
-      business_type: primary?.typeValue || null,
+      business_type: primary?.typeLabel || null,
       business_type_label: primary?.typeLabel || null,
       formatted_text: lines.join("\n"),
     };

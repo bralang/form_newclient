@@ -15,7 +15,7 @@ export const Step1PersonalAndContact = () => {
     setLoading(true);
     const success = await sendToWebhook(
       "https://n8n.link-up.co.il/webhook/client-intake-step1",
-      { personalInfo, contactInfo, identificationInfo }
+      { personalInfo, contactInfo, identificationInfo, ref: personalInfo.ref || null }
     );
     setLoading(false);
     if (success) {
