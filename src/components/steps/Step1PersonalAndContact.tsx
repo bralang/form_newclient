@@ -31,6 +31,15 @@ export const Step1PersonalAndContact = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
+            <Label htmlFor="ref">Ref</Label>
+            <Input
+              id="ref"
+              value={personalInfo.ref || ""}
+              onChange={(e) => setPersonalInfo({ ref: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="firstName">שם פרטי *</Label>
             <Input
               id="firstName"
