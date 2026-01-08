@@ -44,7 +44,7 @@ export const Step1PersonalAndContact = () => {
 
     // 2) ה-webhook הנוסף שביקשת (נשלח דרך הפרוקסי כדי להימנע מבעיות CORS)
     const extraOk = await sendToWebhook(
-      "https://n8n.link-up.co.il/webhook/chasida-client-intake-step1",
+      "https://n8n.chasida.biz/webhook/client-intake-step1",
       payload,
       { silent: true }
     );
