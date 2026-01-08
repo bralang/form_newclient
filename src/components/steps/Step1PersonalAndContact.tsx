@@ -4,12 +4,14 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormNavigation } from "@/components/FormNavigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export const Step1PersonalAndContact = () => {
   const { personalInfo, setPersonalInfo, contactInfo, setContactInfo, identificationInfo, setIdentificationInfo, setCurrentStep, sendToWebhook } = useFormContext();
   const [loading, setLoading] = useState(false);
+  const additionalIdFieldsRef = useRef<HTMLDivElement | null>(null);
+  const spouseAdditionalIdFieldsRef = useRef<HTMLDivElement | null>(null);
 
   const handleNext = async () => {
     console.log("Step1: Next clicked");
@@ -374,21 +376,38 @@ export const Step1PersonalAndContact = () => {
           <div className="space-y-4">
             <Label>אמצעי זיהוי נוסף</Label>
             <RadioGroup
-              value={identificationInfo.additionalIdType || ""}
-              onValueChange={(value: any) => setIdentificationInfo({ additionalIdType: value })}
+              value={identificationInfo.additionalIdType || undefined}
+              onValueChange={(value: any) =>
+                setIdentificationInfo({ additionalIdType: value === "" ? undefined : value })
+              }
               className="space-y-3"
             >
-              <div className="flex items-center space-x-2 space-x-reverse">
+              <div
+                className="flex items-center space-x-2 space-x-reverse cursor-pointer"
+                onClick={() => setIdentificationInfo({ additionalIdType: "parentId" })}
+              >
                 <RadioGroupItem value="parentId" id="parentId" />
-                <Label htmlFor="parentId">מספר זהות של אחד ההורים</Label>
+                <Label htmlFor="parentId" className="cursor-pointer">
+                  מספר זהות של אחד ההורים
+                </Label>
               </div>
-              <div className="flex items-center space-x-2 space-x-reverse">
+              <div
+                className="flex items-center space-x-2 space-x-reverse cursor-pointer"
+                onClick={() => setIdentificationInfo({ additionalIdType: "license" })}
+              >
                 <RadioGroupItem value="license" id="license" />
-                <Label htmlFor="license">רישיון נהיגה</Label>
+                <Label htmlFor="license" className="cursor-pointer">
+                  רישיון נהיגה
+                </Label>
               </div>
-              <div className="flex items-center space-x-2 space-x-reverse">
+              <div
+                className="flex items-center space-x-2 space-x-reverse cursor-pointer"
+                onClick={() => setIdentificationInfo({ additionalIdType: "passport" })}
+              >
                 <RadioGroupItem value="passport" id="passport" />
-                <Label htmlFor="passport">דרכון ישראלי</Label>
+                <Label htmlFor="passport" className="cursor-pointer">
+                  דרכון ישראלי
+                </Label>
               </div>
             </RadioGroup>
 
@@ -442,23 +461,38 @@ export const Step1PersonalAndContact = () => {
             <div className="space-y-4">
               <Label>אמצעי זיהוי נוסף</Label>
               <RadioGroup
-                value={identificationInfo.spouseAdditionalIdType || ""}
+                value={identificationInfo.spouseAdditionalIdType || undefined}
                 onValueChange={(value: any) =>
-                  setIdentificationInfo({ spouseAdditionalIdType: value })
+                  setIdentificationInfo({ spouseAdditionalIdType: value === "" ? undefined : value })
                 }
                 className="space-y-3"
               >
-                <div className="flex items-center space-x-2 space-x-reverse">
+                <div
+                  className="flex items-center space-x-2 space-x-reverse cursor-pointer"
+                  onClick={() => setIdentificationInfo({ spouseAdditionalIdType: "parentId" })}
+                >
                   <RadioGroupItem value="parentId" id="spouseParentId" />
-                  <Label htmlFor="spouseParentId">מספר זהות של אחד ההורים</Label>
+                  <Label htmlFor="spouseParentId" className="cursor-pointer">
+                    מספר זהות של אחד ההורים
+                  </Label>
                 </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
+                <div
+                  className="flex items-center space-x-2 space-x-reverse cursor-pointer"
+                  onClick={() => setIdentificationInfo({ spouseAdditionalIdType: "license" })}
+                >
                   <RadioGroupItem value="license" id="spouseLicense" />
-                  <Label htmlFor="spouseLicense">רישיון נהיגה</Label>
+                  <Label htmlFor="spouseLicense" className="cursor-pointer">
+                    רישיון נהיגה
+                  </Label>
                 </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
+                <div
+                  className="flex items-center space-x-2 space-x-reverse cursor-pointer"
+                  onClick={() => setIdentificationInfo({ spouseAdditionalIdType: "passport" })}
+                >
                   <RadioGroupItem value="passport" id="spousePassport" />
-                  <Label htmlFor="spousePassport">דרכון ישראלי</Label>
+                  <Label htmlFor="spousePassport" className="cursor-pointer">
+                    דרכון ישראלי
+                  </Label>
                 </div>
               </RadioGroup>
 
