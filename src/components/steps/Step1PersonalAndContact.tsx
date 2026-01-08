@@ -17,24 +17,21 @@ export const Step1PersonalAndContact = () => {
     console.log("Step1: Next clicked");
     setLoading(true);
 
-    const personalInfoForWebhook = {
-      firstName: personalInfo.firstName,
-      lastName: personalInfo.lastName,
-      gender: personalInfo.gender,
-      idNumber: personalInfo.idNumber,
-      ref: personalInfo.ref || null,
-      birthDate: personalInfo.birthDate,
-      maritalStatus: personalInfo.maritalStatus,
-      hasChildren: personalInfo.hasChildren,
-      numberOfChildren: personalInfo.numberOfChildren ?? null,
-      spouseName: personalInfo.spouseName ?? null,
-      spouseIdNumber: personalInfo.spouseIdNumber ?? null,
-      spouseBirthDate: personalInfo.spouseBirthDate ?? null,
-    };
-
     const payload = {
       ref: personalInfo.ref || null,
-      personalInfo: personalInfoForWebhook,
+      personalInfo: {
+        firstName: personalInfo.firstName,
+        lastName: personalInfo.lastName,
+        gender: personalInfo.gender,
+        idNumber: personalInfo.idNumber,
+        birthDate: personalInfo.birthDate,
+        maritalStatus: personalInfo.maritalStatus,
+        hasChildren: personalInfo.hasChildren,
+        numberOfChildren: personalInfo.numberOfChildren ?? null,
+        spouseName: personalInfo.spouseName ?? null,
+        spouseIdNumber: personalInfo.spouseIdNumber ?? null,
+        spouseBirthDate: personalInfo.spouseBirthDate ?? null,
+      },
       contactInfo,
       identificationInfo,
     };
