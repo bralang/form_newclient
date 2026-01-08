@@ -223,9 +223,19 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (savedIdentificationInfo) {
+        const normalizeIdType = (v: unknown) =>
+          v === "parentId" || v === "license" || v === "passport" ? v : undefined;
+
         // Prevent rare race: user selects an option before sessionStorage hydration finishes.
-        // If that happens, we keep the user's current selection (prev) and only fill missing values from storage.
-        setIdentificationInfoState((prev) => ({ ...savedIdentificationInfo, ...prev }));
+        // Keep user's current selection (prev) and only fill missing values from storage.
+        setIdentificationInfoState((prev) => {
+          const merged = { ...savedIdentificationInfo, ...prev } as IdentificationInfo;
+          return {
+            ...merged,
+            additionalIdType: normalizeIdType((merged as any).additionalIdType),
+            spouseAdditionalIdType: normalizeIdType((merged as any).spouseAdditionalIdType),
+          };
+        });
       }
 
       if (savedServiceType) {
