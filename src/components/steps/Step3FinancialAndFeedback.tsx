@@ -37,7 +37,7 @@ export const Step3FinancialAndFeedback = () => {
 
     const businessTypeLabelMap: Record<string, string> = {
       exempt: "פטור",
-      authorized: "מורשה",
+      licensed: "מורשה",
       company: "חברה",
       nonprofit: "עמותה",
     };
@@ -85,6 +85,7 @@ export const Step3FinancialAndFeedback = () => {
     }
 
     return {
+      ref: personalInfo.ref || null,
       client_name: clientName || null,
       phone: contactInfo.phone || null,
       email: contactInfo.email || null,
