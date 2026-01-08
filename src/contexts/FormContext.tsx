@@ -14,6 +14,7 @@ export interface PersonalInfo {
   spouseName?: string;
   spouseIdNumber?: string;
   spouseBirthDate?: string;
+  ref?: string;
 }
 
 export interface ContactInfo {
