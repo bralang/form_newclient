@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormNavigation } from "@/components/FormNavigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export const Step1PersonalAndContact = () => {
   const { personalInfo, setPersonalInfo, contactInfo, setContactInfo, identificationInfo, setIdentificationInfo, setCurrentStep, sendToWebhook } = useFormContext();
@@ -13,12 +14,49 @@ export const Step1PersonalAndContact = () => {
   const handleNext = async () => {
     console.log("Step1: Next clicked");
     setLoading(true);
-    const success = await sendToWebhook(
+
+    const personalInfoForWebhook = {
+      firstName: personalInfo.firstName,
+      lastName: personalInfo.lastName,
+      gender: personalInfo.gender,
+      idNumber: personalInfo.idNumber,
+      ref: personalInfo.ref || null,
+      birthDate: personalInfo.birthDate,
+      maritalStatus: personalInfo.maritalStatus,
+      hasChildren: personalInfo.hasChildren,
+      numberOfChildren: personalInfo.numberOfChildren ?? null,
+      spouseName: personalInfo.spouseName ?? null,
+      spouseIdNumber: personalInfo.spouseIdNumber ?? null,
+      spouseBirthDate: personalInfo.spouseBirthDate ?? null,
+    };
+
+    const payload = {
+      ref: personalInfo.ref || null,
+      personalInfo: personalInfoForWebhook,
+      contactInfo,
+      identificationInfo,
+    };
+
+    // 1) ה-webhook המקורי (כמו שהיה)
+    const mainOk = await sendToWebhook(
       "https://n8n.link-up.co.il/webhook/client-intake-step1",
-      { personalInfo, contactInfo, identificationInfo, ref: personalInfo.ref || null }
+      payload
     );
+
+    // 2) ה-webhook הנוסף שביקשת (נשלח דרך הפרוקסי כדי להימנע מבעיות CORS)
+    const extraOk = await sendToWebhook(
+      "https://n8n.link-up.co.il/webhook/chasida-client-intake-step1",
+      payload,
+      { silent: true }
+    );
+
     setLoading(false);
-    if (success) {
+
+    if (!extraOk) {
+      toast.error("שגיאה בשליחה ל-webhook הנוסף");
+    }
+
+    if (mainOk) {
       setCurrentStep(2);
     }
   };

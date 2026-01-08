@@ -109,7 +109,13 @@ interface FormContextType {
   setFinancialInfo: (data: Partial<FinancialInfo>) => void;
   feedbackInfo: FeedbackInfo;
   setFeedbackInfo: (data: Partial<FeedbackInfo>) => void;
-  sendToWebhook: (url: string, data: any) => Promise<boolean>;
+  sendToWebhook: (
+    url: string,
+    data: any,
+    options?: {
+      silent?: boolean;
+    }
+  ) => Promise<boolean>;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
@@ -346,8 +352,15 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setFeedbackInfoState((prev) => ({ ...prev, ...data }));
   };
 
-  const sendToWebhook = async (url: string, data: any): Promise<boolean> => {
+  const sendToWebhook = async (
+    url: string,
+    data: any,
+    options?: {
+      silent?: boolean;
+    }
+  ): Promise<boolean> => {
     const N8N_PREFIX = "https://n8n.link-up.co.il/webhook/";
+    const notify = !options?.silent;
 
     console.log("sendToWebhook called", {
       url,
@@ -376,11 +389,13 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
             status: res?.upstream_status,
             body: res?.upstream_body,
           });
-          toast.error(`שגיאה בשליחת הנתונים (סטטוס ${res?.upstream_status ?? "?"})`);
+          if (notify) {
+            toast.error(`שגיאה בשליחת הנתונים (סטטוס ${res?.upstream_status ?? "?"})`);
+          }
           return false;
         }
 
-        toast.success("הנתונים נשלחו בהצלחה");
+        if (notify) toast.success("הנתונים נשלחו בהצלחה");
         return true;
       }
 
@@ -401,7 +416,7 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const responseText = await response.text().catch(() => "");
 
         if (response.ok) {
-          toast.success("הנתונים נשלחו בהצלחה");
+          if (notify) toast.success("הנתונים נשלחו בהצלחה");
           return true;
         }
 
@@ -410,19 +425,19 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
           status: response.status,
           body: responseText,
         });
-        toast.error(`שגיאה בשליחת הנתונים (סטטוס ${response.status})`);
+        if (notify) toast.error(`שגיאה בשליחת הנתונים (סטטוס ${response.status})`);
         return false;
       } catch (error: any) {
         const isAbort = error?.name === "AbortError";
         console.error("Webhook error:", error);
-        toast.error(isAbort ? "פג זמן החיבור לשרת" : "שגיאה בחיבור לשרת");
+        if (notify) toast.error(isAbort ? "פג זמן החיבור לשרת" : "שגיאה בחיבור לשרת");
         return false;
       } finally {
         clearTimeout(timeout);
       }
     } catch (error: any) {
       console.error("Webhook proxy error:", error);
-      toast.error("שגיאה בחיבור לשרת");
+      if (notify) toast.error("שגיאה בחיבור לשרת");
       return false;
     }
   };
