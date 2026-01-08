@@ -221,7 +221,11 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }));
       }
 
-      if (savedIdentificationInfo) setIdentificationInfoState(savedIdentificationInfo);
+      if (savedIdentificationInfo) {
+        // Prevent rare race: user selects an option before sessionStorage hydration finishes.
+        // If that happens, we keep the user's current selection (prev) and only fill missing values from storage.
+        setIdentificationInfoState((prev) => ({ ...savedIdentificationInfo, ...prev }));
+      }
 
       if (savedServiceType) {
         setServiceTypeState({
