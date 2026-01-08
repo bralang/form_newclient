@@ -36,9 +36,10 @@ export const Step3FinancialAndFeedback = () => {
     const businessCount = (hasMainBusiness ? 1 : 0) + (spouseHasBusiness ? 1 : 0);
 
     const businessTypeLabelMap: Record<string, string> = {
-      sole_proprietorship: "עוסק מורשה",
-      partnership: "שותפות",
+      exempt: "פטור",
+      authorized: "מורשה",
       company: "חברה",
+      nonprofit: "עמותה",
     };
 
     const clientName = `${personalInfo.firstName || ""} ${personalInfo.lastName || ""}`.trim();
