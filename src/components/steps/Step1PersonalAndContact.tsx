@@ -207,6 +207,16 @@ export const Step1PersonalAndContact = () => {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="ref">מקור הפניה</Label>
+          <Input
+            id="ref"
+            value={personalInfo.ref || ""}
+            onChange={(e) => setPersonalInfo({ ref: e.target.value })}
+            placeholder="לדוגמה: גוגל, פייסבוק, חבר..."
+          />
+        </div>
+
         <div className="flex items-center space-x-2 space-x-reverse">
           <Checkbox
             id="preferPhoneOverEmail"
@@ -301,17 +311,8 @@ export const Step1PersonalAndContact = () => {
             </div>
           </div>
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="ref">מקור הפניה</Label>
-          <Input
-            id="ref"
-            value={personalInfo.ref || ""}
-            onChange={(e) => setPersonalInfo({ ref: e.target.value })}
-            placeholder="לדוגמה: גוגל, פייסבוק, חבר..."
-          />
-        </div>
       </div>
+
 
       {/* Identification Section */}
       <div className="space-y-6 pt-6 border-t border-border">

@@ -526,13 +526,21 @@ async function sendToWebhook(step, data) {
         const businessCount = (data.servicePurpose === 'existingBusiness' || data.servicePurpose === 'newBusiness' ? 1 : 0) + 
                               (data.partnerEmployment === 'existingBusiness' || data.partnerEmployment === 'newBusiness' ? 1 : 0);
         
+        const businessTypeLabelMap = {
+            exempt: 'פטור',
+            licensed: 'מורשה',
+            company: 'חברה',
+            association: 'עמותה'
+        };
+
         const gmailData = {
             client_name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
             phone: data.phone || null,
             email: data.email || null,
             business_count: businessCount,
             business_name: data.businessName || null,
-            business_type: data.businessType || null
+            business_type: data.businessType ? (businessTypeLabelMap[data.businessType] || data.businessType) : null,
+            business_type_raw: data.businessType || null
         };
         
         console.log('Sending to WEBHOOKS.sendGmail...', gmailData);
