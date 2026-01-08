@@ -8,7 +8,16 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export const Step1PersonalAndContact = () => {
-  const { personalInfo, setPersonalInfo, contactInfo, setContactInfo, identificationInfo, setIdentificationInfo, setCurrentStep, sendToWebhook } = useFormContext();
+  const {
+    personalInfo,
+    setPersonalInfo,
+    contactInfo,
+    setContactInfo,
+    identificationInfo,
+    setIdentificationInfo,
+    setCurrentStep,
+    sendToWebhook,
+  } = useFormContext();
   const [loading, setLoading] = useState(false);
   const additionalIdFieldsRef = useRef<HTMLDivElement | null>(null);
   const spouseAdditionalIdFieldsRef = useRef<HTMLDivElement | null>(null);
@@ -31,23 +40,19 @@ export const Step1PersonalAndContact = () => {
         spouseName: personalInfo.spouseName ?? null,
         spouseIdNumber: personalInfo.spouseIdNumber ?? null,
         spouseBirthDate: personalInfo.spouseBirthDate ?? null,
+        ref: personalInfo.ref ?? null,
       },
       contactInfo,
       identificationInfo,
     };
 
     // 1) ה-webhook המקורי (כמו שהיה)
-    const mainOk = await sendToWebhook(
-      "https://n8n.link-up.co.il/webhook/client-intake-step1",
-      payload
-    );
+    const mainOk = await sendToWebhook("https://n8n.link-up.co.il/webhook/client-intake-step1", payload);
 
     // 2) ה-webhook הנוסף שביקשת (נשלח דרך הפרוקסי כדי להימנע מבעיות CORS)
-    const extraOk = await sendToWebhook(
-      "https://n8n.chasida.biz/webhook/client-intake-step1",
-      payload,
-      { silent: true }
-    );
+    const extraOk = await sendToWebhook("https://n8n.chasida.biz/webhook/client-intake-step1", payload, {
+      silent: true,
+    });
 
     setLoading(false);
 
@@ -134,9 +139,7 @@ export const Step1PersonalAndContact = () => {
           <Label>מצב אישי *</Label>
           <RadioGroup
             value={personalInfo.maritalStatus}
-            onValueChange={(value: "single" | "married") =>
-              setPersonalInfo({ maritalStatus: value })
-            }
+            onValueChange={(value: "single" | "married") => setPersonalInfo({ maritalStatus: value })}
             className="flex flex-row-reverse gap-4 justify-end"
           >
             <div className="flex items-center space-x-2 space-x-reverse">
@@ -155,9 +158,7 @@ export const Step1PersonalAndContact = () => {
             <Checkbox
               id="hasChildren"
               checked={personalInfo.hasChildren}
-              onCheckedChange={(checked) =>
-                setPersonalInfo({ hasChildren: checked === true })
-              }
+              onCheckedChange={(checked) => setPersonalInfo({ hasChildren: checked === true })}
             />
             <Label htmlFor="hasChildren">יש לי ילדים</Label>
           </div>
@@ -170,9 +171,7 @@ export const Step1PersonalAndContact = () => {
                 type="number"
                 min="0"
                 value={personalInfo.numberOfChildren || ""}
-                onChange={(e) =>
-                  setPersonalInfo({ numberOfChildren: parseInt(e.target.value) || undefined })
-                }
+                onChange={(e) => setPersonalInfo({ numberOfChildren: parseInt(e.target.value) || undefined })}
               />
             </div>
           )}
@@ -258,13 +257,9 @@ export const Step1PersonalAndContact = () => {
           <Checkbox
             id="preferPhoneOverEmail"
             checked={contactInfo.preferPhoneOverEmail}
-            onCheckedChange={(checked) =>
-              setContactInfo({ preferPhoneOverEmail: checked === true })
-            }
+            onCheckedChange={(checked) => setContactInfo({ preferPhoneOverEmail: checked === true })}
           />
-          <Label htmlFor="preferPhoneOverEmail">
-            הזמינות שלי למייל נמוכה, מעדיף לקבל הודעות טלפוניות במקום במייל
-          </Label>
+          <Label htmlFor="preferPhoneOverEmail">הזמינות שלי למייל נמוכה, מעדיף לקבל הודעות טלפוניות במקום במייל</Label>
         </div>
 
         {personalInfo.maritalStatus === "married" && (
@@ -350,7 +345,6 @@ export const Step1PersonalAndContact = () => {
         </div>
       </div>
 
-
       {/* Identification Section */}
       <div className="space-y-6 pt-6 border-t border-border">
         <h2 className="text-2xl font-bold text-foreground">מסמכים וזיהוי</h2>
@@ -364,9 +358,7 @@ export const Step1PersonalAndContact = () => {
               id="idCardFile"
               type="file"
               accept="image/*,.pdf"
-              onChange={(e) =>
-                setIdentificationInfo({ idCardFile: e.target.files?.[0] || undefined })
-              }
+              onChange={(e) => setIdentificationInfo({ idCardFile: e.target.files?.[0] || undefined })}
             />
           </div>
 
@@ -415,9 +407,7 @@ export const Step1PersonalAndContact = () => {
                   <Input
                     id="additionalIdNumber"
                     value={identificationInfo.additionalIdNumber || ""}
-                    onChange={(e) =>
-                      setIdentificationInfo({ additionalIdNumber: e.target.value })
-                    }
+                    onChange={(e) => setIdentificationInfo({ additionalIdNumber: e.target.value })}
                   />
                 </div>
 
@@ -428,9 +418,7 @@ export const Step1PersonalAndContact = () => {
                       id="additionalIdFile"
                       type="file"
                       accept="image/*,.pdf"
-                      onChange={(e) =>
-                        setIdentificationInfo({ additionalIdFile: e.target.files?.[0] || undefined })
-                      }
+                      onChange={(e) => setIdentificationInfo({ additionalIdFile: e.target.files?.[0] || undefined })}
                     />
                   </div>
                 )}
@@ -449,9 +437,7 @@ export const Step1PersonalAndContact = () => {
                 id="spouseIdCardFile"
                 type="file"
                 accept="image/*,.pdf"
-                onChange={(e) =>
-                  setIdentificationInfo({ spouseIdCardFile: e.target.files?.[0] || undefined })
-                }
+                onChange={(e) => setIdentificationInfo({ spouseIdCardFile: e.target.files?.[0] || undefined })}
               />
             </div>
 
@@ -500,9 +486,7 @@ export const Step1PersonalAndContact = () => {
                     <Input
                       id="spouseAdditionalIdNumber"
                       value={identificationInfo.spouseAdditionalIdNumber || ""}
-                      onChange={(e) =>
-                        setIdentificationInfo({ spouseAdditionalIdNumber: e.target.value })
-                      }
+                      onChange={(e) => setIdentificationInfo({ spouseAdditionalIdNumber: e.target.value })}
                     />
                   </div>
 
