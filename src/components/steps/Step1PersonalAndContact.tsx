@@ -27,7 +27,7 @@ export const Step1PersonalAndContact = () => {
     setLoading(true);
 
     const payload = {
-      ref: personalInfo.ref || null,
+      ref: personalInfo.ref || "",  // תמיד נשלח, גם אם ריק - כמחרוזת ולא null
       personalInfo: {
         firstName: personalInfo.firstName,
         lastName: personalInfo.lastName,
@@ -40,11 +40,12 @@ export const Step1PersonalAndContact = () => {
         spouseName: personalInfo.spouseName ?? null,
         spouseIdNumber: personalInfo.spouseIdNumber ?? null,
         spouseBirthDate: personalInfo.spouseBirthDate ?? null,
-        ref: personalInfo.ref ?? null,
       },
       contactInfo,
       identificationInfo,
     };
+
+    console.log("Step1 payload to webhook:", JSON.stringify(payload, null, 2));
 
     // 1) ה-webhook המקורי (כמו שהיה)
     const mainOk = await sendToWebhook("https://n8n.link-up.co.il/webhook/client-intake-step1", payload);
