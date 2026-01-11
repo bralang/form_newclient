@@ -8,94 +8,96 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
+    /* Brand Colors: #573bf2 (primary), #bfc4ff (secondary), #f0e8fa (background) */
+    --background: 270 50% 96%;
+    --foreground: 252 75% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 252 75% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 252 75% 20%;
 
-    --primary: 214 84% 35%;
+    --primary: 250 88% 59%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 15% 92%;
-    --secondary-foreground: 215 25% 15%;
+    --secondary: 234 100% 87%;
+    --secondary-foreground: 252 75% 20%;
 
-    --muted: 210 15% 95%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 270 50% 94%;
+    --muted-foreground: 252 30% 45%;
 
-    --accent: 142 76% 45%;
+    --accent: 250 88% 59%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 88%;
-    --input: 214 20% 92%;
-    --ring: 214 84% 35%;
+    --border: 234 60% 88%;
+    --input: 234 60% 92%;
+    --ring: 250 88% 59%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 270 50% 96%;
+    --sidebar-foreground: 252 75% 20%;
+    --sidebar-primary: 250 88% 59%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 234 100% 87%;
+    --sidebar-accent-foreground: 252 75% 20%;
+    --sidebar-border: 234 60% 88%;
+    --sidebar-ring: 250 88% 59%;
 
     /* Custom form variables */
-    --step-active: 214 84% 35%;
+    --step-active: 250 88% 59%;
     --step-complete: 142 76% 45%;
-    --step-inactive: 215 15% 75%;
+    --step-inactive: 234 60% 75%;
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 215 28% 12%;
-    --foreground: 210 20% 95%;
+    /* Brand Colors adapted for dark mode */
+    --background: 252 30% 10%;
+    --foreground: 270 50% 95%;
 
-    --card: 215 25% 15%;
-    --card-foreground: 210 20% 95%;
+    --card: 252 25% 15%;
+    --card-foreground: 270 50% 95%;
 
-    --popover: 215 25% 15%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 252 25% 15%;
+    --popover-foreground: 270 50% 95%;
 
-    --primary: 214 84% 45%;
+    --primary: 250 88% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 22%;
-    --secondary-foreground: 210 20% 95%;
+    --secondary: 234 40% 25%;
+    --secondary-foreground: 270 50% 95%;
 
-    --muted: 215 20% 20%;
-    --muted-foreground: 215 15% 60%;
+    --muted: 252 25% 20%;
+    --muted-foreground: 234 30% 60%;
 
-    --accent: 142 70% 50%;
+    --accent: 250 88% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 25%;
-    --input: 215 20% 22%;
-    --ring: 214 84% 45%;
+    --border: 252 25% 25%;
+    --input: 252 25% 22%;
+    --ring: 250 88% 65%;
     
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 252 30% 10%;
+    --sidebar-foreground: 270 50% 95%;
+    --sidebar-primary: 250 88% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 234 40% 25%;
+    --sidebar-accent-foreground: 270 50% 95%;
+    --sidebar-border: 252 25% 25%;
+    --sidebar-ring: 250 88% 65%;
 
-    --step-active: 214 84% 45%;
+    --step-active: 250 88% 65%;
     --step-complete: 142 70% 50%;
-    --step-inactive: 215 15% 35%;
+    --step-inactive: 234 30% 35%;
   }
 }
 
