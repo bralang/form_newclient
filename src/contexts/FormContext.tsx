@@ -439,7 +439,7 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const response = await fetch(url, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json; charset=utf-8",
           },
           body: JSON.stringify(data),
           signal: controller.signal,

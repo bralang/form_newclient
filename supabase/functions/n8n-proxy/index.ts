@@ -56,7 +56,7 @@ Deno.serve(async (req: Request) => {
 
     const upstream = await fetch(targetUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify(raw.payload ?? {}),
     });
 
