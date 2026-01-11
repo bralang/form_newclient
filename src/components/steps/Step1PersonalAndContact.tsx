@@ -40,6 +40,7 @@ export const Step1PersonalAndContact = () => {
         spouseName: personalInfo.spouseName ?? null,
         spouseIdNumber: personalInfo.spouseIdNumber ?? null,
         spouseBirthDate: personalInfo.spouseBirthDate ?? null,
+        ref: personalInfo.ref || "",  // גם כאן למקרה ש-n8n מחפש בתוך personalInfo
       },
       contactInfo,
       identificationInfo,
