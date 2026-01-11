@@ -65,6 +65,18 @@ export const Step1PersonalAndContact = () => {
     }
   };
 
+  useEffect(() => {
+    if (identificationInfo.additionalIdType) {
+      additionalIdFieldsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [identificationInfo.additionalIdType]);
+
+  useEffect(() => {
+    if (identificationInfo.spouseAdditionalIdType) {
+      spouseAdditionalIdFieldsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [identificationInfo.spouseAdditionalIdType]);
+
   return (
     <div className="space-y-8">
       {/* Personal Info Section */}
@@ -365,7 +377,7 @@ export const Step1PersonalAndContact = () => {
           <div className="space-y-4">
             <Label>אמצעי זיהוי נוסף</Label>
             <RadioGroup
-              value={identificationInfo.additionalIdType || undefined}
+              value={identificationInfo.additionalIdType ?? ""}
               onValueChange={(value: any) =>
                 setIdentificationInfo({ additionalIdType: value === "" ? undefined : value })
               }
@@ -401,7 +413,7 @@ export const Step1PersonalAndContact = () => {
             </RadioGroup>
 
             {identificationInfo.additionalIdType && (
-              <div className="space-y-4 mr-6">
+              <div ref={additionalIdFieldsRef} className="space-y-4 mr-6">
                 <div className="space-y-2">
                   <Label htmlFor="additionalIdNumber">מספר</Label>
                   <Input
@@ -444,7 +456,7 @@ export const Step1PersonalAndContact = () => {
             <div className="space-y-4">
               <Label>אמצעי זיהוי נוסף</Label>
               <RadioGroup
-                value={identificationInfo.spouseAdditionalIdType || undefined}
+                value={identificationInfo.spouseAdditionalIdType ?? ""}
                 onValueChange={(value: any) =>
                   setIdentificationInfo({ spouseAdditionalIdType: value === "" ? undefined : value })
                 }
@@ -480,7 +492,7 @@ export const Step1PersonalAndContact = () => {
               </RadioGroup>
 
               {identificationInfo.spouseAdditionalIdType && (
-                <div className="space-y-4 mr-6">
+                <div ref={spouseAdditionalIdFieldsRef} className="space-y-4 mr-6">
                   <div className="space-y-2">
                     <Label htmlFor="spouseAdditionalIdNumber">מספר</Label>
                     <Input
