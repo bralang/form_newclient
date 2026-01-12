@@ -10,6 +10,15 @@ const WEBHOOKS = {
 let currentStep = 1;
 const totalSteps = 3;
 
+function getRefFromUrl() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('ref') || '';
+    } catch (e) {
+        return '';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     loadFormData();
     updateUI();
@@ -310,7 +319,9 @@ async function sendToWebhook(step, data) {
     
     if (step === 1) {
         webhookUrl = WEBHOOKS.step1;
+        const refFromUrl = getRefFromUrl();
         stepData = {
+            ref: refFromUrl,
             first_name: data.firstName,
             last_name: data.lastName,
             gender: data.gender,
