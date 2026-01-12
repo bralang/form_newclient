@@ -363,6 +363,14 @@ async function sendToWebhook(step, data) {
     if (step === 1) {
         webhookUrl = WEBHOOKS.step1;
         const refFromUrl = getRefFromUrl();
+
+        console.log('[DEBUG step1] url parts', {
+            href: window.location.href,
+            search: window.location.search,
+            hash: window.location.hash,
+            refFromUrl
+        });
+
         stepData = {
             ref: refFromUrl || null,
             first_name: data.firstName,
@@ -413,6 +421,8 @@ async function sendToWebhook(step, data) {
             partner_passport_document_filename: data.partnerPassportDocument_filename || null,
             partner_passport_document_type: data.partnerPassportDocument_type || null
         };
+
+        console.log('[DEBUG step1] payload (includes ref)', stepData);
     } else if (step === 2) {
         webhookUrl = WEBHOOKS.step2;
         stepData = {
