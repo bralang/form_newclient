@@ -11,9 +11,34 @@ let currentStep = 1;
 const totalSteps = 3;
 
 function getRefFromUrl() {
+    const pickRef = (params) => {
+        if (!params) return '';
+        // Prefer exact match
+        const direct = params.get('ref');
+        if (direct) return direct;
+
+        // Fallback: case-insensitive match (Ref/REF/etc.)
+        for (const [k, v] of params.entries()) {
+            if ((k || '').toLowerCase() === 'ref' && v) return v;
+        }
+
+        return '';
+    };
+
     try {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('ref') || '';
+        const fromSearch = pickRef(new URLSearchParams(window.location.search));
+        if (fromSearch) return fromSearch;
+
+        // Support links that put query params after the hash (e.g. /#/form?ref=...)
+        const hash = window.location.hash || '';
+        const qIndex = hash.indexOf('?');
+        if (qIndex >= 0) {
+            const hashQuery = hash.slice(qIndex + 1);
+            const fromHash = pickRef(new URLSearchParams(hashQuery));
+            if (fromHash) return fromHash;
+        }
+
+        return '';
     } catch (e) {
         return '';
     }
@@ -339,7 +364,7 @@ async function sendToWebhook(step, data) {
         webhookUrl = WEBHOOKS.step1;
         const refFromUrl = getRefFromUrl();
         stepData = {
-            ref: refFromUrl,
+            ref: refFromUrl || null,
             first_name: data.firstName,
             last_name: data.lastName,
             gender: data.gender,
