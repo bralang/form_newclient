@@ -4,7 +4,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormNavigation } from "@/components/FormNavigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 export const Step1PersonalAndContact = () => {
@@ -21,13 +22,17 @@ export const Step1PersonalAndContact = () => {
   const [loading, setLoading] = useState(false);
   const additionalIdFieldsRef = useRef<HTMLDivElement | null>(null);
   const spouseAdditionalIdFieldsRef = useRef<HTMLDivElement | null>(null);
+  const [searchParams] = useSearchParams();
+  
+  // קריאת ref מה-URL (לדוגמה: ?ref=עיתון)
+  const refFromUrl = useMemo(() => searchParams.get("ref") || "", [searchParams]);
 
   const handleNext = async () => {
     console.log("Step1: Next clicked");
     setLoading(true);
 
     const payload = {
-      ref: personalInfo.ref || "",  // תמיד נשלח, גם אם ריק - כמחרוזת ולא null
+      ref: refFromUrl,  // נקרא מה-URL בלבד
       personalInfo: {
         firstName: personalInfo.firstName,
         lastName: personalInfo.lastName,
@@ -40,7 +45,7 @@ export const Step1PersonalAndContact = () => {
         spouseName: personalInfo.spouseName ?? null,
         spouseIdNumber: personalInfo.spouseIdNumber ?? null,
         spouseBirthDate: personalInfo.spouseBirthDate ?? null,
-        ref: personalInfo.ref || "",  // גם כאן למקרה ש-n8n מחפש בתוך personalInfo
+        ref: refFromUrl,  // גם כאן למקרה ש-n8n מחפש בתוך personalInfo
       },
       contactInfo,
       identificationInfo,
@@ -257,15 +262,6 @@ export const Step1PersonalAndContact = () => {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="ref">מקור הפניה</Label>
-          <Input
-            id="ref"
-            value={personalInfo.ref || ""}
-            onChange={(e) => setPersonalInfo({ ref: e.target.value })}
-            placeholder="לדוגמה: גוגל, פייסבוק, חבר..."
-          />
-        </div>
 
         <div className="flex items-center space-x-2 space-x-reverse">
           <Checkbox
