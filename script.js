@@ -88,10 +88,28 @@ function handleChildrenChange() {
 }
 
 function handleAdditionalIdChange() {
-    const type = document.getElementById('additionalIdType').value;
-    document.getElementById('parentIdSection').style.display = type === 'parentId' ? 'block' : 'none';
-    document.getElementById('licenseSection').style.display = type === 'license' ? 'block' : 'none';
-    document.getElementById('passportSection').style.display = type === 'passport' ? 'block' : 'none';
+    const selectEl = document.getElementById('additionalIdType');
+    const type = selectEl ? selectEl.value : '';
+    
+    const parentIdSection = document.getElementById('parentIdSection');
+    const licenseSection = document.getElementById('licenseSection');
+    const passportSection = document.getElementById('passportSection');
+    
+    if (parentIdSection) parentIdSection.style.display = type === 'parentId' ? 'block' : 'none';
+    if (licenseSection) licenseSection.style.display = type === 'license' ? 'block' : 'none';
+    if (passportSection) passportSection.style.display = type === 'passport' ? 'block' : 'none';
+    
+    // Scroll to the opened section
+    setTimeout(() => {
+        if (type === 'parentId' && parentIdSection) {
+            parentIdSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (type === 'license' && licenseSection) {
+            licenseSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else if (type === 'passport' && passportSection) {
+            passportSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, 100);
+    
     saveFormData();
 }
 
