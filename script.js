@@ -11,7 +11,7 @@ let currentStep = 1;
 const totalSteps = 3;
 
 function getRefFromUrl() {
-    const pickRef = (params) => {
+    const readFromParams = (params) => {
         if (!params) return '';
         // Prefer exact match
         const direct = params.get('ref');
@@ -25,26 +25,48 @@ function getRefFromUrl() {
         return '';
     };
 
-    try {
-        const fromSearch = pickRef(new URLSearchParams(window.location.search));
-        if (fromSearch) return fromSearch;
-
-        // Support links that put query params after the hash (e.g. /#/form?ref=...)
+    const fromHashQuery = () => {
         const hash = window.location.hash || '';
         const qIndex = hash.indexOf('?');
-        if (qIndex >= 0) {
-            const hashQuery = hash.slice(qIndex + 1);
-            const fromHash = pickRef(new URLSearchParams(hashQuery));
-            if (fromHash) return fromHash;
-        }
+        if (qIndex < 0) return '';
+        const hashQuery = hash.slice(qIndex + 1);
+        return readFromParams(new URLSearchParams(hashQuery));
+    };
 
-        return '';
+    const fromHrefRegex = () => {
+        const href = window.location.href || '';
+        const m = href.match(/[?&#]ref=([^&#]+)/i);
+        if (!m || !m[1]) return '';
+        try {
+            return decodeURIComponent(m[1].replace(/\+/g, ' '));
+        } catch {
+            return m[1];
+        }
+    };
+
+    try {
+        // Most reliable: parse the full href (covers cases where location.search is unexpectedly empty)
+        const url = new URL(window.location.href);
+        const fromSearch = readFromParams(url.searchParams);
+        if (fromSearch) return fromSearch;
+
+        const fromHash = fromHashQuery();
+        if (fromHash) return fromHash;
+
+        const fromRegex = fromHrefRegex();
+        if (fromRegex) return fromRegex;
+
+        return sessionStorage.getItem('ref') || '';
     } catch (e) {
-        return '';
+        return sessionStorage.getItem('ref') || '';
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Persist ref early so it survives internal navigation / reloads
+    const ref = getRefFromUrl();
+    if (ref) sessionStorage.setItem('ref', ref);
+
     loadFormData();
     updateUI();
     setupEventListeners();
