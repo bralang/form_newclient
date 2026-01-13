@@ -136,13 +136,33 @@ function handleChildrenChange() {
 }
 
 function handleAdditionalIdChange() {
-    const parentChecked = document.getElementById('additionalIdParent')?.checked || false;
-    const licenseChecked = document.getElementById('additionalIdLicense')?.checked || false;
-    const passportChecked = document.getElementById('additionalIdPassport')?.checked || false;
+    console.log('handleAdditionalIdChange called');
+    
+    const parentCheckbox = document.getElementById('additionalIdParent');
+    const licenseCheckbox = document.getElementById('additionalIdLicense');
+    const passportCheckbox = document.getElementById('additionalIdPassport');
+    
+    console.log('Checkboxes found:', {
+        parent: parentCheckbox,
+        license: licenseCheckbox,
+        passport: passportCheckbox
+    });
+    
+    const parentChecked = parentCheckbox?.checked || false;
+    const licenseChecked = licenseCheckbox?.checked || false;
+    const passportChecked = passportCheckbox?.checked || false;
+    
+    console.log('Checked states:', { parentChecked, licenseChecked, passportChecked });
     
     const parentIdSection = document.getElementById('parentIdSection');
     const licenseSection = document.getElementById('licenseSection');
     const passportSection = document.getElementById('passportSection');
+    
+    console.log('Sections found:', {
+        parentIdSection,
+        licenseSection,
+        passportSection
+    });
     
     if (parentIdSection) parentIdSection.style.display = parentChecked ? 'block' : 'none';
     if (licenseSection) licenseSection.style.display = licenseChecked ? 'block' : 'none';
