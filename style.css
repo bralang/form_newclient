@@ -60,6 +60,12 @@ body {
 .checkbox-group input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #667eea; }
 .checkbox-group label { cursor: pointer; margin: 0; }
 
+.checkbox-group-vertical { display: flex; flex-direction: column; gap: 0.75rem; }
+.checkbox-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; transition: all 0.3s; cursor: pointer; }
+.checkbox-item:hover { background: #f9fafb; border-color: #667eea; }
+.checkbox-item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #667eea; }
+.checkbox-item label { cursor: pointer; margin: 0; font-weight: 500; color: #374151; }
+
 .radio-group { display: flex; flex-direction: column; gap: 0.75rem; }
 .radio-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 8px; transition: all 0.3s; cursor: pointer; }
 .radio-item:hover { background: #f9fafb; border-color: #667eea; }
