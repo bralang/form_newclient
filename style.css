@@ -105,6 +105,22 @@ body {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* File input: show selected file names */
+.selected-files {
+    margin-top: 0.35rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.selected-files ul {
+    margin: 0;
+    padding-right: 1.25rem;
+}
+
+.selected-files li {
+    line-height: 1.4;
+}
+
 @media (max-width: 768px) {
     body { padding: 1rem 0.5rem; }
     .logo { font-size: 2rem; }

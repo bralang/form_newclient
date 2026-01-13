@@ -72,31 +72,84 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
 });
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function setupFileNamePreviews() {
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+
+    fileInputs.forEach((input) => {
+        if (!(input instanceof HTMLInputElement)) return;
+
+        const parent = input.parentElement;
+        if (!parent) return;
+
+        let preview = parent.querySelector(`.selected-files[data-for="${input.name}"]`);
+        if (!preview) {
+            preview = document.createElement('div');
+            preview.className = 'selected-files';
+            preview.dataset.for = input.name || '';
+            preview.setAttribute('aria-live', 'polite');
+            input.insertAdjacentElement('afterend', preview);
+        }
+
+        const render = () => {
+            const files = input.files ? Array.from(input.files) : [];
+            if (files.length === 0) {
+                preview.innerHTML = '';
+                return;
+            }
+
+            const items = files.map((f) => `<li>${escapeHtml(f.name)}</li>`).join('');
+            preview.innerHTML = `<ul>${items}</ul>`;
+        };
+
+        input.addEventListener('change', render);
+        render();
+    });
+}
+
 function setupEventListeners() {
     const form = document.getElementById('clientForm');
-    
+    if (!form) return;
+
     const maritalStatus = document.getElementById('maritalStatus');
     if (maritalStatus) maritalStatus.addEventListener('change', handleMaritalStatusChange);
 
     const hasChildren = document.getElementById('hasChildren');
     if (hasChildren) hasChildren.addEventListener('change', handleChildrenChange);
 
-    // Additional ID checkboxes - using direct ID selection for reliability
+    // Additional ID checkboxes - direct listeners
     const additionalIdParent = document.getElementById('additionalIdParent');
     const additionalIdLicense = document.getElementById('additionalIdLicense');
     const additionalIdPassport = document.getElementById('additionalIdPassport');
-    
+
     if (additionalIdParent) additionalIdParent.addEventListener('change', handleAdditionalIdChange);
     if (additionalIdLicense) additionalIdLicense.addEventListener('change', handleAdditionalIdChange);
     if (additionalIdPassport) additionalIdPassport.addEventListener('change', handleAdditionalIdChange);
-    
+
     const partnerAdditionalIdParent = document.getElementById('partnerAdditionalIdParent');
     const partnerAdditionalIdLicense = document.getElementById('partnerAdditionalIdLicense');
     const partnerAdditionalIdPassport = document.getElementById('partnerAdditionalIdPassport');
-    
+
     if (partnerAdditionalIdParent) partnerAdditionalIdParent.addEventListener('change', handlePartnerAdditionalIdChange);
     if (partnerAdditionalIdLicense) partnerAdditionalIdLicense.addEventListener('change', handlePartnerAdditionalIdChange);
     if (partnerAdditionalIdPassport) partnerAdditionalIdPassport.addEventListener('change', handlePartnerAdditionalIdChange);
+
+    // Extra safety: delegated handler (covers clicks that don't hit the direct listener for any reason)
+    form.addEventListener('change', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+
+        if (t.matches('input[name="additionalIdTypes"]')) handleAdditionalIdChange();
+        if (t.matches('input[name="partnerAdditionalIdTypes"]')) handlePartnerAdditionalIdChange();
+    });
 
     const servicePurposeRadios = document.querySelectorAll('input[name="servicePurpose"]');
     servicePurposeRadios.forEach(radio => radio.addEventListener('change', handleServicePurposeChange));
@@ -127,10 +180,18 @@ function setupEventListeners() {
 
     form.addEventListener('input', saveFormData);
     form.addEventListener('change', saveFormData);
+
+    // Initialize UI states
+    setupFileNamePreviews();
+    handleAdditionalIdChange();
+    handlePartnerAdditionalIdChange();
 }
 
 function handleMaritalStatusChange() {
-    const maritalStatus = document.getElementById('maritalStatus').value;
+    const maritalStatusEl = document.getElementById('maritalStatus');
+    if (!maritalStatusEl) return;
+
+    const maritalStatus = maritalStatusEl.value;
     const sections = ['partnerSection', 'partnerIdSection', 'partnerEmploymentSection'];
     sections.forEach(id => {
         const el = document.getElementById(id);
@@ -140,44 +201,28 @@ function handleMaritalStatusChange() {
 }
 
 function handleChildrenChange() {
-    const hasChildren = document.getElementById('hasChildren').checked;
-    document.getElementById('childrenSection').style.display = hasChildren ? 'block' : 'none';
+    const hasChildrenEl = document.getElementById('hasChildren');
+    const childrenSection = document.getElementById('childrenSection');
+    if (!hasChildrenEl || !childrenSection) return;
+
+    const hasChildren = hasChildrenEl.checked;
+    childrenSection.style.display = hasChildren ? 'block' : 'none';
     saveFormData();
 }
 
 function handleAdditionalIdChange() {
-    console.log('handleAdditionalIdChange called');
-    
-    const parentCheckbox = document.getElementById('additionalIdParent');
-    const licenseCheckbox = document.getElementById('additionalIdLicense');
-    const passportCheckbox = document.getElementById('additionalIdPassport');
-    
-    console.log('Checkboxes found:', {
-        parent: parentCheckbox,
-        license: licenseCheckbox,
-        passport: passportCheckbox
-    });
-    
-    const parentChecked = parentCheckbox?.checked || false;
-    const licenseChecked = licenseCheckbox?.checked || false;
-    const passportChecked = passportCheckbox?.checked || false;
-    
-    console.log('Checked states:', { parentChecked, licenseChecked, passportChecked });
-    
+    const parentChecked = document.getElementById('additionalIdParent')?.checked || false;
+    const licenseChecked = document.getElementById('additionalIdLicense')?.checked || false;
+    const passportChecked = document.getElementById('additionalIdPassport')?.checked || false;
+
     const parentIdSection = document.getElementById('parentIdSection');
     const licenseSection = document.getElementById('licenseSection');
     const passportSection = document.getElementById('passportSection');
-    
-    console.log('Sections found:', {
-        parentIdSection,
-        licenseSection,
-        passportSection
-    });
-    
+
     if (parentIdSection) parentIdSection.style.display = parentChecked ? 'block' : 'none';
     if (licenseSection) licenseSection.style.display = licenseChecked ? 'block' : 'none';
     if (passportSection) passportSection.style.display = passportChecked ? 'block' : 'none';
-    
+
     saveFormData();
 }
 
@@ -398,6 +443,17 @@ async function collectFormData() {
     data.hasChildren = document.getElementById('hasChildren')?.checked || false;
     data.preferPhone = document.getElementById('preferPhone')?.checked || false;
     data.agreeNotifications = document.getElementById('agreeNotifications')?.checked || false;
+
+    // Multi-checkbox values (new additional ID UI)
+    const additionalIdTypes = Array.from(document.querySelectorAll('input[name="additionalIdTypes"]:checked')).map(el => el.value);
+    const partnerAdditionalIdTypes = Array.from(document.querySelectorAll('input[name="partnerAdditionalIdTypes"]:checked')).map(el => el.value);
+
+    data.additionalIdTypes = additionalIdTypes;
+    data.partnerAdditionalIdTypes = partnerAdditionalIdTypes;
+
+    // Backward-compatible single string (used by existing webhook mapping)
+    data.additionalIdType = additionalIdTypes.join(', ') || '';
+    data.partnerAdditionalIdType = partnerAdditionalIdTypes.join(', ') || '';
 
     const servicePurpose = document.querySelector('input[name="servicePurpose"]:checked');
     if (servicePurpose) data.servicePurpose = servicePurpose.value;
@@ -843,36 +899,54 @@ async function saveFormData() {
 function loadFormData() {
     const savedStep = sessionStorage.getItem('currentStep');
     if (savedStep) currentStep = parseInt(savedStep);
-    
+
     const savedData = sessionStorage.getItem('formData');
     if (savedData) {
         const data = JSON.parse(savedData);
         const form = document.getElementById('clientForm');
-        
+        if (!form) return;
+
         Object.keys(data).forEach(key => {
+            // Special case: multi-checkbox fields
+            if (key === 'additionalIdTypes' || key === 'partnerAdditionalIdTypes') {
+                const values = Array.isArray(data[key])
+                    ? data[key]
+                    : (typeof data[key] === 'string'
+                        ? data[key].split(',').map(s => s.trim()).filter(Boolean)
+                        : []);
+
+                const checkboxes = form.querySelectorAll(`[name="${key}"]`);
+                checkboxes.forEach((cb) => {
+                    if (cb instanceof HTMLInputElement && cb.type === 'checkbox') {
+                        cb.checked = values.includes(cb.value);
+                    }
+                });
+                return;
+            }
+
             const input = form.querySelector(`[name="${key}"]`);
             if (input && input.type !== 'file') {
-                if (input.type === 'checkbox') input.checked = data[key];
+                if (input.type === 'checkbox') input.checked = !!data[key];
                 else if (input.type === 'radio' && input.value === data[key]) input.checked = true;
                 else if (input.type !== 'radio') input.value = data[key];
             }
         });
 
-        // Trigger handlers
-        if (data.maritalStatus) handleMaritalStatusChange();
-        if (data.hasChildren) handleChildrenChange();
-        if (data.additionalIdType) handleAdditionalIdChange();
-        if (data.partnerAdditionalIdType) handlePartnerAdditionalIdChange();
-        if (data.servicePurpose) handleServicePurposeChange();
-        if (data.partnerEmployment) handlePartnerEmploymentChange();
-        if (data.businessAtHome) handleBusinessAtHomeChange();
-        if (data.partnerBusinessAtHome) handlePartnerBusinessAtHomeChange();
-        if (data.documentMethod) handleDocumentMethodChange();
-        if (data.partnerDocumentMethod) handlePartnerDocumentMethodChange();
-        if (data.wealthDeclaration) handleWealthDeclarationChange();
-        if (data.businessType) handleBusinessTypeChange();
-        if (data.partnerBusinessType) handlePartnerBusinessTypeChange();
+        // Trigger handlers (safe to call even if nothing selected)
+        handleMaritalStatusChange();
+        handleChildrenChange();
+        handleAdditionalIdChange();
+        handlePartnerAdditionalIdChange();
+        handleServicePurposeChange();
+        handlePartnerEmploymentChange();
+        handleBusinessAtHomeChange();
+        handlePartnerBusinessAtHomeChange();
+        handleDocumentMethodChange();
+        handlePartnerDocumentMethodChange();
+        handleWealthDeclarationChange();
+        handleBusinessTypeChange();
+        handlePartnerBusinessTypeChange();
     }
-    
+
     updateUI();
 }
