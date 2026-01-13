@@ -142,6 +142,26 @@ function setupEventListeners() {
     if (partnerAdditionalIdLicense) partnerAdditionalIdLicense.addEventListener('change', handlePartnerAdditionalIdChange);
     if (partnerAdditionalIdPassport) partnerAdditionalIdPassport.addEventListener('change', handlePartnerAdditionalIdChange);
 
+    // Make the entire checkbox "card" clickable (not just the tiny checkbox/label)
+    // This prevents cases where the checkbox appears "selected" to the user but no change event fires.
+    form.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const item = target.closest('.checkbox-item');
+        if (!item) return;
+
+        // If the click was directly on the checkbox itself, let the browser handle it
+        const clickedOnInput = target.matches('input[type="checkbox"]');
+        if (clickedOnInput) return;
+
+        const cb = item.querySelector('input[type="checkbox"]');
+        if (!(cb instanceof HTMLInputElement)) return;
+
+        cb.checked = !cb.checked;
+        cb.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
     // Extra safety: delegated handler (covers clicks that don't hit the direct listener for any reason)
     form.addEventListener('change', (e) => {
         const t = e.target;
@@ -211,34 +231,38 @@ function handleChildrenChange() {
 }
 
 function handleAdditionalIdChange() {
-    const parentChecked = document.getElementById('additionalIdParent')?.checked || false;
-    const licenseChecked = document.getElementById('additionalIdLicense')?.checked || false;
-    const passportChecked = document.getElementById('additionalIdPassport')?.checked || false;
+    const selected = new Set(
+        Array.from(document.querySelectorAll('input[name="additionalIdTypes"]:checked'))
+            .filter((el) => el instanceof HTMLInputElement)
+            .map((el) => el.value)
+    );
 
     const parentIdSection = document.getElementById('parentIdSection');
     const licenseSection = document.getElementById('licenseSection');
     const passportSection = document.getElementById('passportSection');
 
-    if (parentIdSection) parentIdSection.style.display = parentChecked ? 'block' : 'none';
-    if (licenseSection) licenseSection.style.display = licenseChecked ? 'block' : 'none';
-    if (passportSection) passportSection.style.display = passportChecked ? 'block' : 'none';
+    if (parentIdSection) parentIdSection.style.display = selected.has('parentId') ? 'block' : 'none';
+    if (licenseSection) licenseSection.style.display = selected.has('license') ? 'block' : 'none';
+    if (passportSection) passportSection.style.display = selected.has('passport') ? 'block' : 'none';
 
     saveFormData();
 }
 
 function handlePartnerAdditionalIdChange() {
-    const parentChecked = document.getElementById('partnerAdditionalIdParent')?.checked || false;
-    const licenseChecked = document.getElementById('partnerAdditionalIdLicense')?.checked || false;
-    const passportChecked = document.getElementById('partnerAdditionalIdPassport')?.checked || false;
-    
+    const selected = new Set(
+        Array.from(document.querySelectorAll('input[name="partnerAdditionalIdTypes"]:checked'))
+            .filter((el) => el instanceof HTMLInputElement)
+            .map((el) => el.value)
+    );
+
     const partnerParentIdSection = document.getElementById('partnerParentIdSection');
     const partnerLicenseSection = document.getElementById('partnerLicenseSection');
     const partnerPassportSection = document.getElementById('partnerPassportSection');
-    
-    if (partnerParentIdSection) partnerParentIdSection.style.display = parentChecked ? 'block' : 'none';
-    if (partnerLicenseSection) partnerLicenseSection.style.display = licenseChecked ? 'block' : 'none';
-    if (partnerPassportSection) partnerPassportSection.style.display = passportChecked ? 'block' : 'none';
-    
+
+    if (partnerParentIdSection) partnerParentIdSection.style.display = selected.has('parentId') ? 'block' : 'none';
+    if (partnerLicenseSection) partnerLicenseSection.style.display = selected.has('license') ? 'block' : 'none';
+    if (partnerPassportSection) partnerPassportSection.style.display = selected.has('passport') ? 'block' : 'none';
+
     saveFormData();
 }
 
