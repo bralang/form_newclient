@@ -231,37 +231,47 @@ function handleChildrenChange() {
 }
 
 function handleAdditionalIdChange() {
-    const selected = new Set(
-        Array.from(document.querySelectorAll('input[name="additionalIdTypes"]:checked'))
-            .filter((el) => el instanceof HTMLInputElement)
-            .map((el) => el.value)
-    );
+    // Get checkbox states directly by ID
+    var parentCb = document.getElementById('additionalIdParent');
+    var licenseCb = document.getElementById('additionalIdLicense');
+    var passportCb = document.getElementById('additionalIdPassport');
+    
+    var parentChecked = parentCb && parentCb.checked;
+    var licenseChecked = licenseCb && licenseCb.checked;
+    var passportChecked = passportCb && passportCb.checked;
 
-    const parentIdSection = document.getElementById('parentIdSection');
-    const licenseSection = document.getElementById('licenseSection');
-    const passportSection = document.getElementById('passportSection');
+    // Get sections
+    var parentIdSection = document.getElementById('parentIdSection');
+    var licenseSection = document.getElementById('licenseSection');
+    var passportSection = document.getElementById('passportSection');
 
-    if (parentIdSection) parentIdSection.style.display = selected.has('parentId') ? 'block' : 'none';
-    if (licenseSection) licenseSection.style.display = selected.has('license') ? 'block' : 'none';
-    if (passportSection) passportSection.style.display = selected.has('passport') ? 'block' : 'none';
+    // Toggle visibility
+    if (parentIdSection) parentIdSection.style.display = parentChecked ? 'block' : 'none';
+    if (licenseSection) licenseSection.style.display = licenseChecked ? 'block' : 'none';
+    if (passportSection) passportSection.style.display = passportChecked ? 'block' : 'none';
 
     saveFormData();
 }
 
 function handlePartnerAdditionalIdChange() {
-    const selected = new Set(
-        Array.from(document.querySelectorAll('input[name="partnerAdditionalIdTypes"]:checked'))
-            .filter((el) => el instanceof HTMLInputElement)
-            .map((el) => el.value)
-    );
+    // Get checkbox states directly by ID
+    var parentCb = document.getElementById('partnerAdditionalIdParent');
+    var licenseCb = document.getElementById('partnerAdditionalIdLicense');
+    var passportCb = document.getElementById('partnerAdditionalIdPassport');
+    
+    var parentChecked = parentCb && parentCb.checked;
+    var licenseChecked = licenseCb && licenseCb.checked;
+    var passportChecked = passportCb && passportCb.checked;
 
-    const partnerParentIdSection = document.getElementById('partnerParentIdSection');
-    const partnerLicenseSection = document.getElementById('partnerLicenseSection');
-    const partnerPassportSection = document.getElementById('partnerPassportSection');
+    // Get sections
+    var partnerParentIdSection = document.getElementById('partnerParentIdSection');
+    var partnerLicenseSection = document.getElementById('partnerLicenseSection');
+    var partnerPassportSection = document.getElementById('partnerPassportSection');
 
-    if (partnerParentIdSection) partnerParentIdSection.style.display = selected.has('parentId') ? 'block' : 'none';
-    if (partnerLicenseSection) partnerLicenseSection.style.display = selected.has('license') ? 'block' : 'none';
-    if (partnerPassportSection) partnerPassportSection.style.display = selected.has('passport') ? 'block' : 'none';
+    // Toggle visibility
+    if (partnerParentIdSection) partnerParentIdSection.style.display = parentChecked ? 'block' : 'none';
+    if (partnerLicenseSection) partnerLicenseSection.style.display = licenseChecked ? 'block' : 'none';
+    if (partnerPassportSection) partnerPassportSection.style.display = passportChecked ? 'block' : 'none';
 
     saveFormData();
 }
