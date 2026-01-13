@@ -81,11 +81,12 @@ function setupEventListeners() {
     const hasChildren = document.getElementById('hasChildren');
     if (hasChildren) hasChildren.addEventListener('change', handleChildrenChange);
 
-    const additionalIdType = document.getElementById('additionalIdType');
-    if (additionalIdType) additionalIdType.addEventListener('change', handleAdditionalIdChange);
+    // Additional ID checkboxes
+    const additionalIdCheckboxes = document.querySelectorAll('input[name="additionalIdTypes"]');
+    additionalIdCheckboxes.forEach(cb => cb.addEventListener('change', handleAdditionalIdChange));
 
-    const partnerAdditionalIdType = document.getElementById('partnerAdditionalIdType');
-    if (partnerAdditionalIdType) partnerAdditionalIdType.addEventListener('change', handlePartnerAdditionalIdChange);
+    const partnerAdditionalIdCheckboxes = document.querySelectorAll('input[name="partnerAdditionalIdTypes"]');
+    partnerAdditionalIdCheckboxes.forEach(cb => cb.addEventListener('change', handlePartnerAdditionalIdChange));
 
     const servicePurposeRadios = document.querySelectorAll('input[name="servicePurpose"]');
     servicePurposeRadios.forEach(radio => radio.addEventListener('change', handleServicePurposeChange));
@@ -135,36 +136,34 @@ function handleChildrenChange() {
 }
 
 function handleAdditionalIdChange() {
-    const selectEl = document.getElementById('additionalIdType');
-    const type = selectEl ? selectEl.value : '';
+    const parentChecked = document.getElementById('additionalIdParent')?.checked || false;
+    const licenseChecked = document.getElementById('additionalIdLicense')?.checked || false;
+    const passportChecked = document.getElementById('additionalIdPassport')?.checked || false;
     
     const parentIdSection = document.getElementById('parentIdSection');
     const licenseSection = document.getElementById('licenseSection');
     const passportSection = document.getElementById('passportSection');
     
-    if (parentIdSection) parentIdSection.style.display = type === 'parentId' ? 'block' : 'none';
-    if (licenseSection) licenseSection.style.display = type === 'license' ? 'block' : 'none';
-    if (passportSection) passportSection.style.display = type === 'passport' ? 'block' : 'none';
-    
-    // Scroll to the opened section
-    setTimeout(() => {
-        if (type === 'parentId' && parentIdSection) {
-            parentIdSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else if (type === 'license' && licenseSection) {
-            licenseSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else if (type === 'passport' && passportSection) {
-            passportSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    }, 100);
+    if (parentIdSection) parentIdSection.style.display = parentChecked ? 'block' : 'none';
+    if (licenseSection) licenseSection.style.display = licenseChecked ? 'block' : 'none';
+    if (passportSection) passportSection.style.display = passportChecked ? 'block' : 'none';
     
     saveFormData();
 }
 
 function handlePartnerAdditionalIdChange() {
-    const type = document.getElementById('partnerAdditionalIdType').value;
-    document.getElementById('partnerParentIdSection').style.display = type === 'parentId' ? 'block' : 'none';
-    document.getElementById('partnerLicenseSection').style.display = type === 'license' ? 'block' : 'none';
-    document.getElementById('partnerPassportSection').style.display = type === 'passport' ? 'block' : 'none';
+    const parentChecked = document.getElementById('partnerAdditionalIdParent')?.checked || false;
+    const licenseChecked = document.getElementById('partnerAdditionalIdLicense')?.checked || false;
+    const passportChecked = document.getElementById('partnerAdditionalIdPassport')?.checked || false;
+    
+    const partnerParentIdSection = document.getElementById('partnerParentIdSection');
+    const partnerLicenseSection = document.getElementById('partnerLicenseSection');
+    const partnerPassportSection = document.getElementById('partnerPassportSection');
+    
+    if (partnerParentIdSection) partnerParentIdSection.style.display = parentChecked ? 'block' : 'none';
+    if (partnerLicenseSection) partnerLicenseSection.style.display = licenseChecked ? 'block' : 'none';
+    if (partnerPassportSection) partnerPassportSection.style.display = passportChecked ? 'block' : 'none';
+    
     saveFormData();
 }
 

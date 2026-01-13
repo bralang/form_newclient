@@ -157,18 +157,18 @@
               <h4 class="subsection-title">כתובת מגורים</h4>
               <div class="form-row">
                 <div class="form-group">
-                  <label>רחוב</label>
-                  <input type="text" name="street" />
+                  <label>רחוב *</label>
+                  <input type="text" name="street" required />
                 </div>
                 <div class="form-group">
-                  <label>מספר בית</label>
-                  <input type="text" name="houseNumber" />
+                  <label>מספר בית *</label>
+                  <input type="text" name="houseNumber" required />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
-                  <label>עיר</label>
-                  <input type="text" name="city" />
+                  <label>עיר *</label>
+                  <input type="text" name="city" required />
                 </div>
                 <div class="form-group">
                   <label>מיקוד</label>
@@ -182,16 +182,25 @@
               <h3 class="section-title">מסמכי זיהוי</h3>
               <div class="form-group">
                 <label>צילום ת.ז. + ספח *</label>
-                <input type="file" name="idDocument" accept="image/*,.pdf" required />
+                <input type="file" name="idDocument" accept="image/*,.pdf" required multiple />
+                <small style="color: #6b7280;">ניתן לבחור מספר קבצים</small>
               </div>
               <div class="form-group">
                 <label>אמצעי זיהוי נוסף *</label>
-                <select name="additionalIdType" id="additionalIdType" required>
-                  <option value="">בחר/י</option>
-                  <option value="parentId">מספר זהות של אחד ההורים</option>
-                  <option value="license">רשיון</option>
-                  <option value="passport">דרכון ישראלי</option>
-                </select>
+                <div class="checkbox-group-vertical">
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="additionalIdParent" name="additionalIdTypes" value="parentId" />
+                    <label for="additionalIdParent">מספר זהות של אחד ההורים</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="additionalIdLicense" name="additionalIdTypes" value="license" />
+                    <label for="additionalIdLicense">רשיון</label>
+                  </div>
+                  <div class="checkbox-item">
+                    <input type="checkbox" id="additionalIdPassport" name="additionalIdTypes" value="passport" />
+                    <label for="additionalIdPassport">דרכון ישראלי</label>
+                  </div>
+                </div>
               </div>
               <div id="parentIdSection" style="display: none;">
                 <div class="form-group">
@@ -206,7 +215,7 @@
                 </div>
                 <div class="form-group">
                   <label>צילום רשיון</label>
-                  <input type="file" name="licenseDocument" accept="image/*,.pdf" />
+                  <input type="file" name="licenseDocument" accept="image/*,.pdf" multiple />
                 </div>
               </div>
               <div id="passportSection" style="display: none;">
@@ -216,7 +225,7 @@
                 </div>
                 <div class="form-group">
                   <label>צילום דרכון</label>
-                  <input type="file" name="passportDocument" accept="image/*,.pdf" />
+                  <input type="file" name="passportDocument" accept="image/*,.pdf" multiple />
                 </div>
               </div>
 
@@ -225,16 +234,25 @@
                 <h4 class="subsection-title">מסמכי זיהוי בן/בת הזוג</h4>
                 <div class="form-group">
                   <label>צילום ת.ז. בן זוג + ספח</label>
-                  <input type="file" name="partnerIdDocument" accept="image/*,.pdf" />
+                  <input type="file" name="partnerIdDocument" accept="image/*,.pdf" multiple />
+                  <small style="color: #6b7280;">ניתן לבחור מספר קבצים</small>
                 </div>
                 <div class="form-group">
                   <label>אמצעי זיהוי נוסף בן זוג</label>
-                  <select name="partnerAdditionalIdType" id="partnerAdditionalIdType">
-                    <option value="">בחר/י</option>
-                    <option value="parentId">מספר זהות של אחד ההורים</option>
-                    <option value="license">רשיון</option>
-                    <option value="passport">דרכון ישראלי</option>
-                  </select>
+                  <div class="checkbox-group-vertical">
+                    <div class="checkbox-item">
+                      <input type="checkbox" id="partnerAdditionalIdParent" name="partnerAdditionalIdTypes" value="parentId" />
+                      <label for="partnerAdditionalIdParent">מספר זהות של אחד ההורים</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input type="checkbox" id="partnerAdditionalIdLicense" name="partnerAdditionalIdTypes" value="license" />
+                      <label for="partnerAdditionalIdLicense">רשיון</label>
+                    </div>
+                    <div class="checkbox-item">
+                      <input type="checkbox" id="partnerAdditionalIdPassport" name="partnerAdditionalIdTypes" value="passport" />
+                      <label for="partnerAdditionalIdPassport">דרכון ישראלי</label>
+                    </div>
+                  </div>
                 </div>
                 <div id="partnerParentIdSection" style="display: none;">
                   <div class="form-group">
@@ -249,7 +267,7 @@
                   </div>
                   <div class="form-group">
                     <label>צילום רשיון</label>
-                    <input type="file" name="partnerLicenseDocument" accept="image/*,.pdf" />
+                    <input type="file" name="partnerLicenseDocument" accept="image/*,.pdf" multiple />
                   </div>
                 </div>
                 <div id="partnerPassportSection" style="display: none;">
@@ -259,7 +277,7 @@
                   </div>
                   <div class="form-group">
                     <label>צילום דרכון</label>
-                    <input type="file" name="partnerPassportDocument" accept="image/*,.pdf" />
+                    <input type="file" name="partnerPassportDocument" accept="image/*,.pdf" multiple />
                   </div>
                 </div>
               </div>
