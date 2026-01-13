@@ -81,12 +81,22 @@ function setupEventListeners() {
     const hasChildren = document.getElementById('hasChildren');
     if (hasChildren) hasChildren.addEventListener('change', handleChildrenChange);
 
-    // Additional ID checkboxes
-    const additionalIdCheckboxes = document.querySelectorAll('input[name="additionalIdTypes"]');
-    additionalIdCheckboxes.forEach(cb => cb.addEventListener('change', handleAdditionalIdChange));
-
-    const partnerAdditionalIdCheckboxes = document.querySelectorAll('input[name="partnerAdditionalIdTypes"]');
-    partnerAdditionalIdCheckboxes.forEach(cb => cb.addEventListener('change', handlePartnerAdditionalIdChange));
+    // Additional ID checkboxes - using direct ID selection for reliability
+    const additionalIdParent = document.getElementById('additionalIdParent');
+    const additionalIdLicense = document.getElementById('additionalIdLicense');
+    const additionalIdPassport = document.getElementById('additionalIdPassport');
+    
+    if (additionalIdParent) additionalIdParent.addEventListener('change', handleAdditionalIdChange);
+    if (additionalIdLicense) additionalIdLicense.addEventListener('change', handleAdditionalIdChange);
+    if (additionalIdPassport) additionalIdPassport.addEventListener('change', handleAdditionalIdChange);
+    
+    const partnerAdditionalIdParent = document.getElementById('partnerAdditionalIdParent');
+    const partnerAdditionalIdLicense = document.getElementById('partnerAdditionalIdLicense');
+    const partnerAdditionalIdPassport = document.getElementById('partnerAdditionalIdPassport');
+    
+    if (partnerAdditionalIdParent) partnerAdditionalIdParent.addEventListener('change', handlePartnerAdditionalIdChange);
+    if (partnerAdditionalIdLicense) partnerAdditionalIdLicense.addEventListener('change', handlePartnerAdditionalIdChange);
+    if (partnerAdditionalIdPassport) partnerAdditionalIdPassport.addEventListener('change', handlePartnerAdditionalIdChange);
 
     const servicePurposeRadios = document.querySelectorAll('input[name="servicePurpose"]');
     servicePurposeRadios.forEach(radio => radio.addEventListener('change', handleServicePurposeChange));
