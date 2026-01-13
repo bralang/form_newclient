@@ -32,14 +32,22 @@ export interface ContactInfo {
 }
 
 export interface IdentificationInfo {
-  idCardFile?: File;
-  additionalIdType?: "parentId" | "license" | "passport" | "";
+  idCardFiles?: File[];
+  additionalIdTypes?: ("parentId" | "license" | "passport")[];
   additionalIdNumber?: string;
   additionalIdFile?: File;
-  spouseIdCardFile?: File;
-  spouseAdditionalIdType?: "parentId" | "license" | "passport" | "";
+  licenseNumber?: string;
+  licenseFile?: File;
+  passportNumber?: string;
+  passportFile?: File;
+  spouseIdCardFiles?: File[];
+  spouseAdditionalIdTypes?: ("parentId" | "license" | "passport")[];
   spouseAdditionalIdNumber?: string;
   spouseAdditionalIdFile?: File;
+  spouseLicenseNumber?: string;
+  spouseLicenseFile?: File;
+  spousePassportNumber?: string;
+  spousePassportFile?: File;
 }
 
 export interface ServiceType {
@@ -223,8 +231,10 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (savedIdentificationInfo) {
-        const normalizeIdType = (v: unknown) =>
-          v === "parentId" || v === "license" || v === "passport" ? v : undefined;
+        const normalizeIdTypes = (v: unknown): ("parentId" | "license" | "passport")[] => {
+          if (!Array.isArray(v)) return [];
+          return v.filter((x) => x === "parentId" || x === "license" || x === "passport");
+        };
 
         // Prevent rare race: user selects an option before sessionStorage hydration finishes.
         // Keep user's current selection (prev) and only fill missing values from storage.
@@ -232,8 +242,8 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const merged = { ...savedIdentificationInfo, ...prev } as IdentificationInfo;
           return {
             ...merged,
-            additionalIdType: normalizeIdType((merged as any).additionalIdType),
-            spouseAdditionalIdType: normalizeIdType((merged as any).spouseAdditionalIdType),
+            additionalIdTypes: normalizeIdTypes((merged as any).additionalIdTypes),
+            spouseAdditionalIdTypes: normalizeIdTypes((merged as any).spouseAdditionalIdTypes),
           };
         });
       }
