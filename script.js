@@ -371,12 +371,20 @@ function handlePartnerBusinessBankAccountChange() {
 }
 
 function updateUI() {
-    // Update timeline items (vertical progress)
-    document.querySelectorAll('.timeline-item').forEach((item, index) => {
+    document.querySelectorAll('.step-item').forEach((item, index) => {
         const stepNum = index + 1;
         item.classList.remove('active', 'completed');
         if (stepNum === currentStep) item.classList.add('active');
-        else if (stepNum < currentStep) item.classList.add('completed');
+        else if (stepNum < currentStep) {
+            item.classList.add('completed');
+            item.querySelector('.step-circle').innerHTML = '✓';
+        } else {
+            item.querySelector('.step-circle').innerHTML = stepNum;
+        }
+    });
+
+    document.querySelectorAll('.step-line').forEach((line, index) => {
+        line.classList.toggle('completed', index + 1 < currentStep);
     });
 
     document.querySelectorAll('.form-step').forEach((step, index) => {
@@ -431,9 +439,10 @@ async function nextStep() {
             }
             
             // Update progress to completed
-            document.querySelectorAll('.timeline-item').forEach(item => {
+            document.querySelectorAll('.step-item').forEach(item => {
                 item.classList.remove('active');
                 item.classList.add('completed');
+                item.querySelector('.step-circle').innerHTML = '✓';
             });
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
