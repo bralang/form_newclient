@@ -17,48 +17,90 @@ body {
 
 .progress-container {
     margin-bottom: 2rem;
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+    background: rgba(255,255,255,0.1);
+    padding: 1.5rem;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
 }
 
 .progress-steps {
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px 12px 0 0; backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
 .contact-support {
     background: rgba(255,255,255,0.15);
-    padding: 0.75rem 1.5rem;
-    border-radius: 0 0 12px 12px;
-    backdrop-filter: blur(10px);
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 180px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.support-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .support-text {
     color: white;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     margin-bottom: 0.5rem;
-    font-weight: 500;
+    font-weight: 600;
+    line-height: 1.3;
 }
 
 .support-details {
     display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
 }
 
 .support-link {
     color: white;
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     opacity: 0.9;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
 .support-link:hover {
     opacity: 1;
     text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .progress-container {
+        flex-direction: column;
+    }
+    .contact-support {
+        min-width: auto;
+        flex-direction: row;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .support-icon {
+        margin-bottom: 0;
+    }
+    .support-details {
+        flex-direction: row;
+        gap: 1rem;
+    }
 }
 
 .step-item { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; color: rgba(255,255,255,0.6); transition: all 0.3s; }
