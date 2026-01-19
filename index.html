@@ -16,21 +16,35 @@
         <p class="subtitle">אנא מלא את הפרטים הבאים</p>
       </div>
 
-      <!-- Progress Steps -->
-      <div class="progress-steps">
-        <div class="step-item active" data-step="1">
-          <div class="step-circle">1</div>
-          <span class="step-title">פרטים אישיים וזיהוי</span>
+      <!-- Progress Steps with Contact Info -->
+      <div class="progress-container">
+        <div class="progress-steps">
+          <div class="step-item active" data-step="1">
+            <div class="step-circle">1</div>
+            <span class="step-title">מילוי פרטים אישיים</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="2">
+            <div class="step-circle">2</div>
+            <span class="step-title">העלאת מסמכי זיהוי</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="3">
+            <div class="step-circle">3</div>
+            <span class="step-title">פרטי עסק ושירות</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step-item" data-step="4">
+            <div class="step-circle">4</div>
+            <span class="step-title">לסיום</span>
+          </div>
         </div>
-        <div class="step-line"></div>
-        <div class="step-item" data-step="2">
-          <div class="step-circle">2</div>
-          <span class="step-title">פרטי עסק ושירות</span>
-        </div>
-        <div class="step-line"></div>
-        <div class="step-item" data-step="3">
-          <div class="step-circle">3</div>
-          <span class="step-title">פרטים נוספים</span>
+        <div class="contact-support">
+          <p class="support-text">אנחנו כאן לסיוע במילוי השאלון</p>
+          <div class="support-details">
+            <a href="tel:0533160990" class="support-link">📞 0533160990</a>
+            <a href="mailto:l0533160990@gmail.com" class="support-link">✉️ l0533160990@gmail.com</a>
+          </div>
         </div>
       </div>
 
@@ -176,7 +190,10 @@
                 </div>
               </div>
             </div>
+          </div>
 
+          <!-- Step 2: Identification Documents & Personal Bank -->
+          <div class="form-step" id="step2">
             <!-- Identification Documents -->
             <div class="form-section">
               <h3 class="section-title">מסמכי זיהוי</h3>
@@ -282,10 +299,39 @@
                 </div>
               </div>
             </div>
+
+            <!-- Personal Bank Details -->
+            <div class="form-section">
+              <h3 class="section-title">פרטי חשבון בנק אישי</h3>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>בנק</label>
+                  <input type="text" name="bankName" />
+                </div>
+                <div class="form-group">
+                  <label>סניף</label>
+                  <input type="text" name="branchNumber" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>מספר חשבון</label>
+                  <input type="text" name="accountNumber" />
+                </div>
+                <div class="form-group">
+                  <label>שם בעל חשבון</label>
+                  <input type="text" name="accountHolder" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>צילום צ'ק או אישור ניהול חשבון</label>
+                <input type="file" name="bankDocument" accept="image/*,.pdf" />
+              </div>
+            </div>
           </div>
 
-          <!-- Step 2: Service & Business Info -->
-          <div class="form-step" id="step2">
+          <!-- Step 3: Service & Business Info -->
+          <div class="form-step" id="step3">
             <!-- Service Purpose -->
             <div class="form-section">
               <h3 class="section-title">בשביל מה ניגשתי לקבל שירות</h3>
@@ -474,6 +520,43 @@
                     <input type="password" name="softwarePassword" />
                   </div>
                 </div>
+
+                <!-- Business Bank Account -->
+                <div class="form-group">
+                  <label>האם יש חשבון בנק נפרד לעסק?</label>
+                  <select name="hasBusinessBankAccount" id="hasBusinessBankAccount">
+                    <option value="">בחר/י</option>
+                    <option value="yes">כן</option>
+                    <option value="no">לא</option>
+                  </select>
+                </div>
+                <div id="businessBankAccountSection" style="display: none;">
+                  <h4 class="subsection-title">פרטי חשבון בנק עסקי</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>בנק עסקי</label>
+                      <input type="text" name="businessBankName" />
+                    </div>
+                    <div class="form-group">
+                      <label>סניף</label>
+                      <input type="text" name="businessBranchNumber" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>מספר חשבון</label>
+                      <input type="text" name="businessAccountNumber" />
+                    </div>
+                    <div class="form-group">
+                      <label>שם בעל חשבון</label>
+                      <input type="text" name="businessAccountHolder" />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>צילום צ'ק או אישור ניהול חשבון עסקי</label>
+                    <input type="file" name="businessBankDocument" accept="image/*,.pdf" />
+                  </div>
+                </div>
               </div>
 
               <!-- New Business Additional Fields -->
@@ -641,6 +724,43 @@
                   </div>
                 </div>
 
+                <!-- Partner Business Bank Account -->
+                <div class="form-group">
+                  <label>האם יש חשבון בנק נפרד לעסק של בן/בת הזוג?</label>
+                  <select name="partnerHasBusinessBankAccount" id="partnerHasBusinessBankAccount">
+                    <option value="">בחר/י</option>
+                    <option value="yes">כן</option>
+                    <option value="no">לא</option>
+                  </select>
+                </div>
+                <div id="partnerBusinessBankAccountSection" style="display: none;">
+                  <h4 class="subsection-title">פרטי חשבון בנק עסקי של בן/בת הזוג</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>בנק עסקי</label>
+                      <input type="text" name="partnerBusinessBankName" />
+                    </div>
+                    <div class="form-group">
+                      <label>סניף</label>
+                      <input type="text" name="partnerBusinessBranchNumber" />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>מספר חשבון</label>
+                      <input type="text" name="partnerBusinessAccountNumber" />
+                    </div>
+                    <div class="form-group">
+                      <label>שם בעל חשבון</label>
+                      <input type="text" name="partnerBusinessAccountHolder" />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>צילום צ'ק או אישור ניהול חשבון עסקי</label>
+                    <input type="file" name="partnerBusinessBankDocument" accept="image/*,.pdf" />
+                  </div>
+                </div>
+
                 <!-- Partner New Business Additional Fields -->
                 <div id="partnerNewBusinessFields" style="display: none;">
                   <h4 class="subsection-title">פרטים נוספים לעסק חדש</h4>
@@ -669,8 +789,8 @@
             </div>
           </div>
 
-          <!-- Step 3: Financial & Feedback -->
-          <div class="form-step" id="step3">
+          <!-- Step 4: Finish (Wealth Declaration & Feedback) -->
+          <div class="form-step" id="step4">
             <div class="form-section">
               <h3 class="section-title">פרטים נוספים</h3>
               <div class="form-group">
@@ -686,32 +806,6 @@
                   <label>העתק הצהרת הון</label>
                   <input type="file" name="wealthDeclarationFile" accept=".pdf,.doc,.docx" />
                 </div>
-              </div>
-
-              <h4 class="subsection-title">פרטי חשבון בנק</h4>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>בנק</label>
-                  <input type="text" name="bankName" />
-                </div>
-                <div class="form-group">
-                  <label>סניף</label>
-                  <input type="text" name="branchNumber" />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>מספר חשבון</label>
-                  <input type="text" name="accountNumber" />
-                </div>
-                <div class="form-group">
-                  <label>שם בעל חשבון</label>
-                  <input type="text" name="accountHolder" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label>צילום צ'ק או אישור ניהול חשבון</label>
-                <input type="file" name="bankDocument" accept="image/*,.pdf" />
               </div>
             </div>
 
