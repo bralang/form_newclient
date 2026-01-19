@@ -8,7 +8,7 @@ const WEBHOOKS = {
 };
 
 let currentStep = 1;
-const totalSteps = 3;
+const totalSteps = 4;
 
 function getRefFromUrl() {
     const readFromParams = (params) => {
@@ -198,6 +198,13 @@ function setupEventListeners() {
     const partnerBusinessType = document.getElementById('partnerBusinessType');
     if (partnerBusinessType) partnerBusinessType.addEventListener('change', handlePartnerBusinessTypeChange);
 
+    // Business bank account listeners
+    const hasBusinessBankAccount = document.getElementById('hasBusinessBankAccount');
+    if (hasBusinessBankAccount) hasBusinessBankAccount.addEventListener('change', handleBusinessBankAccountChange);
+
+    const partnerHasBusinessBankAccount = document.getElementById('partnerHasBusinessBankAccount');
+    if (partnerHasBusinessBankAccount) partnerHasBusinessBankAccount.addEventListener('change', handlePartnerBusinessBankAccountChange);
+
     form.addEventListener('input', saveFormData);
     form.addEventListener('change', saveFormData);
 
@@ -205,6 +212,8 @@ function setupEventListeners() {
     setupFileNamePreviews();
     handleAdditionalIdChange();
     handlePartnerAdditionalIdChange();
+    handleBusinessBankAccountChange();
+    handlePartnerBusinessBankAccountChange();
 }
 
 function handleMaritalStatusChange() {
@@ -343,6 +352,24 @@ function handlePartnerBusinessTypeChange() {
     saveFormData();
 }
 
+function handleBusinessBankAccountChange() {
+    const hasBankAccount = document.getElementById('hasBusinessBankAccount');
+    const section = document.getElementById('businessBankAccountSection');
+    if (hasBankAccount && section) {
+        section.style.display = hasBankAccount.value === 'yes' ? 'block' : 'none';
+    }
+    saveFormData();
+}
+
+function handlePartnerBusinessBankAccountChange() {
+    const hasBankAccount = document.getElementById('partnerHasBusinessBankAccount');
+    const section = document.getElementById('partnerBusinessBankAccountSection');
+    if (hasBankAccount && section) {
+        section.style.display = hasBankAccount.value === 'yes' ? 'block' : 'none';
+    }
+    saveFormData();
+}
+
 function updateUI() {
     document.querySelectorAll('.step-item').forEach((item, index) => {
         const stepNum = index + 1;
@@ -459,7 +486,8 @@ async function collectFormData() {
         'partnerIdDocument', 'partnerLicenseDocument', 'partnerPassportDocument',
         'companyArticles', 'leaseAgreement',
         'partnerCompanyArticles', 'partnerLeaseAgreement',
-        'wealthDeclarationFile', 'bankDocument'
+        'wealthDeclarationFile', 'bankDocument',
+        'businessBankDocument', 'partnerBusinessBankDocument'
     ];
 
     for (let [key, value] of formData.entries()) {
@@ -502,6 +530,7 @@ async function sendToWebhook(step, data) {
     let webhookUrl, stepData = {};
     
     if (step === 1) {
+        // Step 1: Personal info only (no ID documents now)
         webhookUrl = WEBHOOKS.step1;
         const refFromUrl = getRefFromUrl();
 
@@ -534,7 +563,17 @@ async function sendToWebhook(step, data) {
             partner_birth_date: data.partnerBirthDate || null,
             prefer_phone: data.preferPhone || false,
             partner_phone: data.partnerPhone || null,
-            partner_email: data.partnerEmail || null,
+            partner_email: data.partnerEmail || null
+        };
+
+        console.log('[DEBUG step1] payload', stepData);
+    } else if (step === 2) {
+        // Step 2: ID documents + personal bank
+        webhookUrl = WEBHOOKS.step1; // Still sending to step1 webhook since it's identity related
+        stepData = {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            id_number: data.idNumber || null,
             additional_id_type: data.additionalIdType || null,
             parent_id_number: data.parentIdNumber || null,
             license_number: data.licenseNumber || null,
@@ -560,11 +599,18 @@ async function sendToWebhook(step, data) {
             partner_license_document_type: data.partnerLicenseDocument_type || null,
             partner_passport_document: data.partnerPassportDocument || null,
             partner_passport_document_filename: data.partnerPassportDocument_filename || null,
-            partner_passport_document_type: data.partnerPassportDocument_type || null
+            partner_passport_document_type: data.partnerPassportDocument_type || null,
+            // Personal bank details
+            bank_name: data.bankName || null,
+            branch_number: data.branchNumber || null,
+            account_number: data.accountNumber || null,
+            account_holder: data.accountHolder || null,
+            bank_document: data.bankDocument || null,
+            bank_document_filename: data.bankDocument_filename || null,
+            bank_document_type: data.bankDocument_type || null
         };
-
-        console.log('[DEBUG step1] payload (includes ref)', stepData);
-    } else if (step === 2) {
+    } else if (step === 3) {
+        // Step 3: Business info
         webhookUrl = WEBHOOKS.step2;
         stepData = {
             service_purpose: data.servicePurpose || null,
@@ -622,7 +668,16 @@ async function sendToWebhook(step, data) {
                 company_articles_type: data.companyArticles_type || null,
                 lease_agreement: data.leaseAgreement || null,
                 lease_agreement_filename: data.leaseAgreement_filename || null,
-                lease_agreement_type: data.leaseAgreement_type || null
+                lease_agreement_type: data.leaseAgreement_type || null,
+                // Business bank account
+                has_business_bank_account: data.hasBusinessBankAccount || null,
+                business_bank_name: data.businessBankName || null,
+                business_branch_number: data.businessBranchNumber || null,
+                business_account_number: data.businessAccountNumber || null,
+                business_account_holder: data.businessAccountHolder || null,
+                business_bank_document: data.businessBankDocument || null,
+                business_bank_document_filename: data.businessBankDocument_filename || null,
+                business_bank_document_type: data.businessBankDocument_type || null
             },
             partnerBusinessInfo: {
                 partner_business_name: data.partnerBusinessName || null,
@@ -653,13 +708,22 @@ async function sendToWebhook(step, data) {
                 partner_company_articles_type: data.partnerCompanyArticles_type || null,
                 partner_lease_agreement: data.partnerLeaseAgreement || null,
                 partner_lease_agreement_filename: data.partnerLeaseAgreement_filename || null,
-                partner_lease_agreement_type: data.partnerLeaseAgreement_type || null
+                partner_lease_agreement_type: data.partnerLeaseAgreement_type || null,
+                // Partner business bank account
+                partner_has_business_bank_account: data.partnerHasBusinessBankAccount || null,
+                partner_business_bank_name: data.partnerBusinessBankName || null,
+                partner_business_branch_number: data.partnerBusinessBranchNumber || null,
+                partner_business_account_number: data.partnerBusinessAccountNumber || null,
+                partner_business_account_holder: data.partnerBusinessAccountHolder || null,
+                partner_business_bank_document: data.partnerBusinessBankDocument || null,
+                partner_business_bank_document_filename: data.partnerBusinessBankDocument_filename || null,
+                partner_business_bank_document_type: data.partnerBusinessBankDocument_type || null
             }
         };
     } else {
-        // Step 3 - שליחה לשני ווהבוקים
+        // Step 4 - Final step: send to multiple webhooks
         
-        // 1. שליחה לווהבוק המקורי final עם המבנה המקורי
+        // 1. Send to final webhook with original structure
         const finalStepData = {
             personalInfo: {
                 first_name: data.firstName || null,
@@ -692,7 +756,18 @@ async function sendToWebhook(step, data) {
                 business_type: data.businessType || null,
                 partner_business_name: data.partnerBusinessName || null,
                 partner_business_number: data.partnerBusinessNumber || null,
-                partner_business_type: data.partnerBusinessType || null
+                partner_business_type: data.partnerBusinessType || null,
+                // Business bank account info
+                has_business_bank_account: data.hasBusinessBankAccount || null,
+                business_bank_name: data.businessBankName || null,
+                business_branch_number: data.businessBranchNumber || null,
+                business_account_number: data.businessAccountNumber || null,
+                business_account_holder: data.businessAccountHolder || null,
+                partner_has_business_bank_account: data.partnerHasBusinessBankAccount || null,
+                partner_business_bank_name: data.partnerBusinessBankName || null,
+                partner_business_branch_number: data.partnerBusinessBranchNumber || null,
+                partner_business_account_number: data.partnerBusinessAccountNumber || null,
+                partner_business_account_holder: data.partnerBusinessAccountHolder || null
             },
             financialInfo: {
                 wealth_declaration: data.wealthDeclaration || null,
@@ -714,7 +789,7 @@ async function sendToWebhook(step, data) {
             }
         };
         
-        // 1. שליחה לווהבוק final
+        // 1. Send to final webhook
         console.log('Sending to WEBHOOKS.final...', finalStepData);
         try {
             const finalResponse = await fetch(WEBHOOKS.final, {
@@ -727,7 +802,7 @@ async function sendToWebhook(step, data) {
             console.error('Error sending to WEBHOOKS.final:', error);
         }
         
-        // 2. שליחה לווהבוק sendGmail עם סיכום הלקוח
+        // 2. Send to sendGmail webhook with client summary
         const businessCount = (data.servicePurpose === 'existingBusiness' || data.servicePurpose === 'newBusiness' ? 1 : 0) + 
                               (data.partnerEmployment === 'existingBusiness' || data.partnerEmployment === 'newBusiness' ? 1 : 0);
         
@@ -765,7 +840,7 @@ async function sendToWebhook(step, data) {
             alert('שליחת המייל נכשלה (שגיאת רשת/CORS). בדקי ב-n8n שה-webhook מאפשר בקשות מהדפדפן.');
         }
         
-        // 2. שליחה לווהבוק החדש allData עם כל הנתונים
+        // 3. Send to allData webhook with all data
         webhookUrl = WEBHOOKS.allData;
         stepData = {
             // Personal Info - Step 1
@@ -793,7 +868,7 @@ async function sendToWebhook(step, data) {
             partner_phone: data.partnerPhone || null,
             partner_email: data.partnerEmail || null,
             
-            // Additional ID - Step 1
+            // Additional ID - Step 2
             additional_id_type: data.additionalIdType || null,
             parent_id_number: data.parentIdNumber || null,
             license_number: data.licenseNumber || null,
@@ -803,7 +878,7 @@ async function sendToWebhook(step, data) {
             partner_license_number: data.partnerLicenseNumber || null,
             partner_passport_number: data.partnerPassportNumber || null,
             
-            // ID Documents - Step 1
+            // ID Documents - Step 2
             id_document: data.idDocument || null,
             id_document_filename: data.idDocument_filename || null,
             id_document_type: data.idDocument_type || null,
@@ -823,11 +898,20 @@ async function sendToWebhook(step, data) {
             partner_passport_document_filename: data.partnerPassportDocument_filename || null,
             partner_passport_document_type: data.partnerPassportDocument_type || null,
             
-            // Business Info - Step 2
+            // Personal Bank - Step 2
+            bank_name: data.bankName || null,
+            branch_number: data.branchNumber || null,
+            account_number: data.accountNumber || null,
+            account_holder: data.accountHolder || null,
+            bank_document: data.bankDocument || null,
+            bank_document_filename: data.bankDocument_filename || null,
+            bank_document_type: data.bankDocument_type || null,
+            
+            // Business Info - Step 3
             service_purpose: data.servicePurpose || null,
             partner_employment: data.partnerEmployment || null,
             
-            // Owner Business Details - Step 2
+            // Owner Business Details - Step 3
             business_name: data.businessName || null,
             business_number: data.businessNumber || null,
             business_type: data.businessType || null,
@@ -856,7 +940,17 @@ async function sendToWebhook(step, data) {
             lease_agreement_filename: data.leaseAgreement_filename || null,
             lease_agreement_type: data.leaseAgreement_type || null,
             
-            // Partner Business Details - Step 2
+            // Owner Business Bank Account - Step 3
+            has_business_bank_account: data.hasBusinessBankAccount || null,
+            business_bank_name: data.businessBankName || null,
+            business_branch_number: data.businessBranchNumber || null,
+            business_account_number: data.businessAccountNumber || null,
+            business_account_holder: data.businessAccountHolder || null,
+            business_bank_document: data.businessBankDocument || null,
+            business_bank_document_filename: data.businessBankDocument_filename || null,
+            business_bank_document_type: data.businessBankDocument_type || null,
+            
+            // Partner Business Details - Step 3
             partner_business_name: data.partnerBusinessName || null,
             partner_business_number: data.partnerBusinessNumber || null,
             partner_business_type: data.partnerBusinessType || null,
@@ -885,21 +979,24 @@ async function sendToWebhook(step, data) {
             partner_lease_agreement_filename: data.partnerLeaseAgreement_filename || null,
             partner_lease_agreement_type: data.partnerLeaseAgreement_type || null,
             
-            // Financial Info - Step 3
+            // Partner Business Bank Account - Step 3
+            partner_has_business_bank_account: data.partnerHasBusinessBankAccount || null,
+            partner_business_bank_name: data.partnerBusinessBankName || null,
+            partner_business_branch_number: data.partnerBusinessBranchNumber || null,
+            partner_business_account_number: data.partnerBusinessAccountNumber || null,
+            partner_business_account_holder: data.partnerBusinessAccountHolder || null,
+            partner_business_bank_document: data.partnerBusinessBankDocument || null,
+            partner_business_bank_document_filename: data.partnerBusinessBankDocument_filename || null,
+            partner_business_bank_document_type: data.partnerBusinessBankDocument_type || null,
+            
+            // Financial Info - Step 4
             wealth_declaration: data.wealthDeclaration || null,
             wealth_declaration_file: data.wealthDeclarationFile || null,
             wealth_declaration_file_filename: data.wealthDeclarationFile_filename || null,
             wealth_declaration_file_type: data.wealthDeclarationFile_type || null,
             wealth_declaration_date: data.wealthDeclarationDate || null,
-            bank_name: data.bankName || null,
-            branch_number: data.branchNumber || null,
-            account_number: data.accountNumber || null,
-            account_holder: data.accountHolder || null,
-            bank_document: data.bankDocument || null,
-            bank_document_filename: data.bankDocument_filename || null,
-            bank_document_type: data.bankDocument_type || null,
             
-            // Feedback - Step 3
+            // Feedback - Step 4
             agree_notifications: data.agreeNotifications || false,
             feedback: data.feedback || null
         };
@@ -980,6 +1077,8 @@ function loadFormData() {
         handleWealthDeclarationChange();
         handleBusinessTypeChange();
         handlePartnerBusinessTypeChange();
+        handleBusinessBankAccountChange();
+        handlePartnerBusinessBankAccountChange();
     }
 
     updateUI();

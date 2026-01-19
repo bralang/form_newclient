@@ -15,9 +15,50 @@ body {
 .title { font-size: 1.8rem; font-weight: 600; margin-bottom: 0.5rem; }
 .subtitle { font-size: 1rem; opacity: 0.9; }
 
+.progress-container {
+    margin-bottom: 2rem;
+}
+
 .progress-steps {
-    display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;
-    background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px; backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 12px 12px 0 0; backdrop-filter: blur(10px);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.contact-support {
+    background: rgba(255,255,255,0.15);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 0 12px 12px;
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+
+.support-text {
+    color: white;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.support-details {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.support-link {
+    color: white;
+    text-decoration: none;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+}
+
+.support-link:hover {
+    opacity: 1;
+    text-decoration: underline;
 }
 
 .step-item { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; color: rgba(255,255,255,0.6); transition: all 0.3s; }
@@ -31,8 +72,8 @@ body {
 .step-item.active .step-circle { background: white; color: #667eea; box-shadow: 0 0 0 4px rgba(255,255,255,0.3); }
 .step-item.completed .step-circle { background: #4ade80; color: white; }
 
-.step-title { font-size: 0.85rem; text-align: center; font-weight: 500; }
-.step-line { width: 80px; height: 2px; background: rgba(255,255,255,0.3); margin: 0 1rem; transition: all 0.3s; }
+.step-title { font-size: 0.85rem; text-align: center; font-weight: 500; max-width: 100px; }
+.step-line { width: 40px; height: 2px; background: rgba(255,255,255,0.3); margin: 0 0.5rem; transition: all 0.3s; flex-shrink: 0; }
 .step-line.completed { background: #4ade80; }
 
 .form-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
@@ -126,8 +167,12 @@ body {
     .logo { font-size: 2rem; }
     .title { font-size: 1.5rem; }
     .form-row { grid-template-columns: 1fr; }
-    .progress-steps { padding: 1rem; overflow-x: auto; }
-    .step-line { width: 40px; margin: 0 0.5rem; }
-    .step-title { font-size: 0.75rem; }
+    .progress-steps { padding: 1rem; overflow-x: auto; flex-wrap: nowrap; }
+    .step-line { width: 20px; margin: 0 0.25rem; }
+    .step-title { font-size: 0.7rem; max-width: 70px; }
+    .step-circle { width: 32px; height: 32px; font-size: 0.9rem; }
     .form-card { padding: 1.5rem; }
+    .contact-support { padding: 0.5rem 1rem; }
+    .support-details { gap: 1rem; }
+    .support-link { font-size: 0.8rem; }
 }
