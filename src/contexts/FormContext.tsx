@@ -79,6 +79,15 @@ export interface BusinessInfo {
   planningEmployees?: boolean;
   expectedRevenue?: string;
   chosenBusinessName?: string;
+  // Business bank account fields
+  hasSeparateBankAccount?: boolean;
+  businessBankDetails?: {
+    bank: string;
+    branch: string;
+    accountNumber: string;
+    accountHolder: string;
+  };
+  businessBankConfirmationFile?: File;
 }
 
 export interface FinancialInfo {
@@ -96,6 +105,10 @@ export interface FinancialInfo {
 export interface FeedbackInfo {
   agreeToNotifications: boolean;
   feedback?: string;
+  openQuestion?: string;
+  hasScheduledMeeting?: boolean;
+  preferredMeetingDate?: string;
+  personalQuestion?: string;
 }
 
 interface FormContextType {
@@ -202,7 +215,7 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (savedStep) {
         const step = Number(savedStep);
-        setCurrentStep(Number.isFinite(step) && step >= 1 && step <= 3 ? step : 1);
+        setCurrentStep(Number.isFinite(step) && step >= 1 && step <= 4 ? step : 1);
       }
 
       if (savedPersonalInfo) {

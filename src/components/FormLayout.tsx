@@ -3,9 +3,10 @@ import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 
 const steps = [
-  { number: 1, title: "פרטים אישיים וזיהוי" },
-  { number: 2, title: "פרטי עסק ושירות" },
-  { number: 3, title: "מידע פיננסי ומשוב" },
+  { number: 1, title: "המטרה המשותפת" },
+  { number: 2, title: "מידע נחוץ" },
+  { number: 3, title: "עדכון מסמכים" },
+  { number: 4, title: "סיום" },
 ];
 
 interface FormLayoutProps {
