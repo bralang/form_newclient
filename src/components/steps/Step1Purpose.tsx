@@ -114,6 +114,24 @@ export const Step1Purpose = () => {
         </RadioGroup>
       </div>
 
+      <div className="space-y-2">
+        <Label>האם זה עסק זעיר?</Label>
+        <RadioGroup
+          value={info.isSmallBusiness === true ? "micro" : info.isSmallBusiness === false ? "regular" : ""}
+          onValueChange={(value: any) => setInfo({ isSmallBusiness: value === "micro" })}
+          className="flex flex-row-reverse gap-4 justify-end"
+        >
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <RadioGroupItem value="micro" id={`${prefix}microYes`} />
+            <Label htmlFor={`${prefix}microYes`}>כן - עסק זעיר</Label>
+          </div>
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <RadioGroupItem value="regular" id={`${prefix}microNo`} />
+            <Label htmlFor={`${prefix}microNo`}>לא - עסק רגיל</Label>
+          </div>
+        </RadioGroup>
+      </div>
+
       {info.businessType === "company" && (
         <div className="space-y-2">
           <Label htmlFor={`${prefix}companyRegistrationFile`}>נסח חברה</Label>
@@ -205,12 +223,12 @@ export const Step1Purpose = () => {
           className="flex flex-row-reverse gap-4 justify-end"
         >
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="yes" id={`${prefix}smallYes`} />
-            <Label htmlFor={`${prefix}smallYes`}>כן</Label>
+            <RadioGroupItem value="yes" id={`${prefix}smallBusinessYes`} />
+            <Label htmlFor={`${prefix}smallBusinessYes`}>כן</Label>
           </div>
           <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="no" id={`${prefix}smallNo`} />
-            <Label htmlFor={`${prefix}smallNo`}>לא</Label>
+            <RadioGroupItem value="no" id={`${prefix}smallBusinessNo`} />
+            <Label htmlFor={`${prefix}smallBusinessNo`}>לא</Label>
           </div>
         </RadioGroup>
       </div>
@@ -362,6 +380,9 @@ export const Step1Purpose = () => {
         </p>
         <p className="text-muted-foreground">
           יחד נבנה את הבסיס החזק ביותר לעתיד הפיננסי שלך.
+        </p>
+        <p className="text-sm text-primary font-medium mt-4">
+          🤝 אנחנו כאן לסיוע גם כשגוגלים
         </p>
       </div>
 
