@@ -44,14 +44,14 @@ export const Step1Purpose = () => {
   const handleNext = async () => {
     console.log("Step1Purpose: Next clicked");
     setLoading(true);
-    const success = await sendToWebhook(
+    // Send to webhook silently - don't block progression if it fails
+    sendToWebhook(
       "https://n8n.link-up.co.il/webhook/client-intake-step1-purpose",
-      { serviceType, businessInfo, spouseBusinessInfo }
+      { serviceType, businessInfo, spouseBusinessInfo },
+      { silent: true }
     );
     setLoading(false);
-    if (success) {
-      setCurrentStep(2);
-    }
+    setCurrentStep(2);
   };
 
   const renderBusinessFields = (info: any, setInfo: any, prefix: string = "") => (
