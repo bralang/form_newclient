@@ -191,6 +191,9 @@ export const Step4Completion = () => {
         <p className="text-sm text-muted-foreground">
           נציג מהצוות שלנו יצור איתכם קשר בהקדם כדי להמשיך את התהליך.
         </p>
+        <p className="text-sm text-primary font-medium mt-2">
+          🤝 אנחנו כאן לסיוע גם כשגוגלים
+        </p>
       </div>
 
       {/* Meeting Scheduling */}
