@@ -9,8 +9,8 @@ import { useState } from "react";
 const PURPOSES = [
   { id: "new_business", label: "עבור עסק חדש" },
   { id: "existing_business", label: "עבור עסק קיים" },
-  { id: "nonprofit", label: "ניהול עמותה או פתיחת עמותה חדשה" },
-  { id: "company", label: "בעלות מניות בחברה או פתיחת חברה חדשה" },
+  { id: "nonprofit", label: "אני מנהל עמותה או רוצה לפתוח עמותה חדשה" },
+  { id: "company", label: "אני בעל מניות בחברה או רוצה לפתוח חברה" },
   { id: "tax_refund", label: "להחזר מס" },
 ];
 
@@ -36,16 +36,14 @@ export const Step1Purpose = () => {
   const toggleSpousePurpose = (id: string) => {
     const cur = serviceType.spousePurposes;
     setServiceType({
-      spousePurposes: cur.includes(id)
-        ? cur.filter((p) => p !== id)
-        : [...cur, id],
+      spousePurposes: cur.includes(id) ? cur.filter((p) => p !== id) : [...cur, id],
     });
   };
 
   const handleNext = async () => {
     setPersonalInfo({ step1CompletedAt: new Date().toISOString() });
     setLoading(true);
-    sendToWebhook(
+    await sendToWebhook(
       "https://n8n.chasida.biz/webhook/client-intake-step1",
       { personalInfo, serviceType },
       { silent: true }
@@ -56,21 +54,24 @@ export const Step1Purpose = () => {
 
   return (
     <div className="space-y-8">
-      {/* Marketing text placeholder */}
-      <div className="text-center p-6 bg-gradient-to-r from-primary/10 to-secondary/30 rounded-lg">
-        <h2 className="text-2xl font-bold text-foreground mb-4">
+      {/* Section Title */}
+      <div>
+        <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
           המטרה המשותפת שלנו
         </h2>
-        <p className="text-lg text-muted-foreground">
+        <div className="h-1 w-20 bg-primary rounded-full" />
+      </div>
+
+      {/* Marketing text placeholder */}
+      <div className="p-5 bg-gradient-to-r from-primary/5 to-secondary/20 rounded-xl border border-primary/10">
+        <p className="text-muted-foreground text-center">
           מקום לטקסט שיווקי שיבוא בהמשך
         </p>
       </div>
 
       {/* Basic Info */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">פרטים בסיסיים</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
             <Label htmlFor="firstName">שם פרטי *</Label>
             <Input
@@ -89,7 +90,7 @@ export const Step1Purpose = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
             <Label htmlFor="email">מייל *</Label>
             <Input
@@ -130,7 +131,7 @@ export const Step1Purpose = () => {
         </div>
 
         {isMarried && (
-          <div className="space-y-2">
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
             <Label htmlFor="spouseName">שם בן/בת הזוג *</Label>
             <Input
               id="spouseName"
@@ -142,22 +143,21 @@ export const Step1Purpose = () => {
       </div>
 
       {/* Purpose Selection */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">למה באתם?</h2>
+      <div className="space-y-5">
+        <h3 className="text-xl font-bold text-foreground">למה באת?</h3>
 
         {isMarried ? (
-          /* Table view for married couple */
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse rounded-lg overflow-hidden">
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-primary/10">
-                  <th className="p-3 text-right text-muted-foreground font-medium">
+                  <th className="p-3 text-right text-muted-foreground font-medium text-sm">
                     מטרה
                   </th>
-                  <th className="p-3 text-center font-bold text-primary">
+                  <th className="p-3 text-center font-bold text-primary text-sm">
                     {personalInfo.firstName || "אני"}
                   </th>
-                  <th className="p-3 text-center font-bold text-primary">
+                  <th className="p-3 text-center font-bold text-primary text-sm">
                     {personalInfo.spouseName || "בן/בת זוג"}
                   </th>
                 </tr>
@@ -166,8 +166,8 @@ export const Step1Purpose = () => {
                 {PURPOSES.map((purpose, idx) => (
                   <tr
                     key={purpose.id}
-                    className={`border-b border-border/50 ${
-                      idx % 2 === 0 ? "bg-muted/20" : ""
+                    className={`border-b border-border/50 transition-colors hover:bg-muted/30 ${
+                      idx % 2 === 0 ? "bg-muted/10" : ""
                     }`}
                   >
                     <td className="p-3 text-sm font-medium">{purpose.label}</td>
@@ -182,12 +182,8 @@ export const Step1Purpose = () => {
                     <td className="p-3 text-center">
                       <div className="flex justify-center">
                         <Checkbox
-                          checked={serviceType.spousePurposes.includes(
-                            purpose.id
-                          )}
-                          onCheckedChange={() =>
-                            toggleSpousePurpose(purpose.id)
-                          }
+                          checked={serviceType.spousePurposes.includes(purpose.id)}
+                          onCheckedChange={() => toggleSpousePurpose(purpose.id)}
                         />
                       </div>
                     </td>
@@ -197,22 +193,19 @@ export const Step1Purpose = () => {
             </table>
           </div>
         ) : (
-          /* Simple checkboxes for single */
-          <div className="space-y-3">
+          <div className="space-y-2">
             {PURPOSES.map((purpose) => (
-              <div
+              <label
                 key={purpose.id}
-                className="flex items-center space-x-2 space-x-reverse"
+                className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors"
               >
                 <Checkbox
                   id={purpose.id}
                   checked={serviceType.userPurposes.includes(purpose.id)}
                   onCheckedChange={() => toggleUserPurpose(purpose.id)}
                 />
-                <Label htmlFor={purpose.id} className="cursor-pointer">
-                  {purpose.label}
-                </Label>
-              </div>
+                <span className="text-sm font-medium">{purpose.label}</span>
+              </label>
             ))}
           </div>
         )}

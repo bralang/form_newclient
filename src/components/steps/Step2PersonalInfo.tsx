@@ -26,10 +26,9 @@ export const Step2PersonalInfo = () => {
   const isMarried = personalInfo.maritalStatus === "married";
   const gender = detailedInfo.gender;
   const hasAnyPurpose =
-    serviceType.userPurposes.length > 0 ||
-    serviceType.spousePurposes.length > 0;
+    serviceType.userPurposes.length > 0 || serviceType.spousePurposes.length > 0;
 
-  // Auto-set spouse gender to opposite when user sets gender
+  // Auto-set spouse gender to opposite
   useEffect(() => {
     if (detailedInfo.gender && !spouseInfo.gender) {
       setSpouseInfo({
@@ -37,13 +36,6 @@ export const Step2PersonalInfo = () => {
       });
     }
   }, [detailedInfo.gender]);
-
-  // Auto-fill business number from ID
-  useEffect(() => {
-    if (detailedInfo.idNumber) {
-      // This will be used by the business section
-    }
-  }, [detailedInfo.idNumber]);
 
   const maritalOptions = isMarried
     ? [
@@ -68,7 +60,7 @@ export const Step2PersonalInfo = () => {
 
   const handleNext = async () => {
     setLoading(true);
-    sendToWebhook(
+    await sendToWebhook(
       "https://n8n.chasida.biz/webhook/client-intake-step2",
       { personalInfo, detailedInfo, spouseInfo, serviceType },
       { silent: true }
@@ -78,7 +70,7 @@ export const Step2PersonalInfo = () => {
   };
 
   const handleSendEmailList = async () => {
-    sendToWebhook(
+    await sendToWebhook(
       "https://n8n.chasida.biz/webhook/send-document-list",
       { email: personalInfo.email, personalInfo, serviceType },
       { silent: false }
@@ -87,14 +79,9 @@ export const Step2PersonalInfo = () => {
 
   const handleSendReminder = async () => {
     if (!reminderDate) return;
-    sendToWebhook(
+    await sendToWebhook(
       "https://n8n.chasida.biz/webhook/send-reminder",
-      {
-        phone: personalInfo.phone,
-        reminderDate,
-        personalInfo,
-        serviceType,
-      },
+      { phone: personalInfo.phone, reminderDate, personalInfo, serviceType },
       { silent: false }
     );
   };
@@ -102,20 +89,21 @@ export const Step2PersonalInfo = () => {
   return (
     <div className="space-y-8">
       {/* Section Header */}
-      <div className="text-center p-4 bg-muted/50 rounded-lg">
-        <h2 className="text-xl font-bold text-foreground">
+      <div>
+        <h2 className="text-2xl md:text-3xl font-bold text-primary mb-1">
           מידע נחוץ כדי להרוויח את השירות שלנו
         </h2>
-        <p className="text-sm text-muted-foreground mt-2">פרטים שלכם</p>
+        <p className="text-muted-foreground">פרטים שלכם</p>
+        <div className="h-1 w-20 bg-primary rounded-full mt-2" />
       </div>
 
       {/* ─── User Personal Details ─── */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">
-          פרטים אישיים - {personalInfo.firstName || "שלי"}
-        </h2>
+      <div className="space-y-5">
+        <h3 className="text-xl font-bold text-foreground">
+          פרטים אישיים – <span className="text-primary">{personalInfo.firstName || "שלי"}</span>
+        </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
             <Label htmlFor="idNumber">ת.ז. *</Label>
             <Input
@@ -136,32 +124,33 @@ export const Step2PersonalInfo = () => {
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label>מגדר *</Label>
-          <RadioGroup
-            value={detailedInfo.gender}
-            onValueChange={(v: any) => setDetailedInfo({ gender: v })}
-            className="flex flex-row-reverse gap-4 justify-end"
-          >
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="male" id="genderMale" />
-              <Label htmlFor="genderMale">זכר</Label>
-            </div>
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="female" id="genderFemale" />
-              <Label htmlFor="genderFemale">נקבה</Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="birthDate">תאריך לידה *</Label>
-          <Input
-            id="birthDate"
-            type="date"
-            value={detailedInfo.birthDate}
-            onChange={(e) => setDetailedInfo({ birthDate: e.target.value })}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <Label>מגדר *</Label>
+            <RadioGroup
+              value={detailedInfo.gender}
+              onValueChange={(v: any) => setDetailedInfo({ gender: v })}
+              className="flex flex-row-reverse gap-4 justify-end"
+            >
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <RadioGroupItem value="male" id="genderMale" />
+                <Label htmlFor="genderMale">זכר</Label>
+              </div>
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <RadioGroupItem value="female" id="genderFemale" />
+                <Label htmlFor="genderFemale">נקבה</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="birthDate">תאריך לידה *</Label>
+            <Input
+              id="birthDate"
+              type="date"
+              value={detailedInfo.birthDate}
+              onChange={(e) => setDetailedInfo({ birthDate: e.target.value })}
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -178,20 +167,12 @@ export const Step2PersonalInfo = () => {
           <Label>מצב משפחתי מפורט</Label>
           <RadioGroup
             value={detailedInfo.detailedMaritalStatus}
-            onValueChange={(v: any) =>
-              setDetailedInfo({ detailedMaritalStatus: v })
-            }
-            className="flex flex-wrap flex-row-reverse gap-4 justify-end"
+            onValueChange={(v: any) => setDetailedInfo({ detailedMaritalStatus: v })}
+            className="flex flex-wrap flex-row-reverse gap-3 justify-end"
           >
             {maritalOptions.map((opt) => (
-              <div
-                key={opt.value}
-                className="flex items-center space-x-2 space-x-reverse"
-              >
-                <RadioGroupItem
-                  value={opt.value}
-                  id={`marital_${opt.value}`}
-                />
+              <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
+                <RadioGroupItem value={opt.value} id={`marital_${opt.value}`} />
                 <Label htmlFor={`marital_${opt.value}`}>{opt.label}</Label>
               </div>
             ))}
@@ -199,24 +180,16 @@ export const Step2PersonalInfo = () => {
         </div>
 
         {/* Additional ID */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <Label>אמצעי זיהוי נוסף</Label>
           <RadioGroup
             value={detailedInfo.additionalIdType}
-            onValueChange={(v: any) =>
-              setDetailedInfo({ additionalIdType: v })
-            }
-            className="flex flex-wrap flex-row-reverse gap-4 justify-end"
+            onValueChange={(v: any) => setDetailedInfo({ additionalIdType: v })}
+            className="flex flex-wrap flex-row-reverse gap-3 justify-end"
           >
             {additionalIdOptions.map((opt) => (
-              <div
-                key={opt.value}
-                className="flex items-center space-x-2 space-x-reverse"
-              >
-                <RadioGroupItem
-                  value={opt.value}
-                  id={`addId_${opt.value}`}
-                />
+              <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
+                <RadioGroupItem value={opt.value} id={`addId_${opt.value}`} />
                 <Label htmlFor={`addId_${opt.value}`}>{opt.label}</Label>
               </div>
             ))}
@@ -228,30 +201,21 @@ export const Step2PersonalInfo = () => {
               <Input
                 id="parentIdNum"
                 value={detailedInfo.additionalIdNumber}
-                onChange={(e) =>
-                  setDetailedInfo({ additionalIdNumber: e.target.value })
-                }
+                onChange={(e) => setDetailedInfo({ additionalIdNumber: e.target.value })}
               />
             </div>
           )}
-          {(detailedInfo.additionalIdType === "license" ||
-            detailedInfo.additionalIdType === "passport") && (
+          {(detailedInfo.additionalIdType === "license" || detailedInfo.additionalIdType === "passport") && (
             <div className="space-y-2 mr-6">
               <Label htmlFor="addIdNum">
-                {detailedInfo.additionalIdType === "license"
-                  ? "מספר רישיון"
-                  : "מספר דרכון"}
+                {detailedInfo.additionalIdType === "license" ? "מספר רישיון" : "מספר דרכון"}
               </Label>
               <Input
                 id="addIdNum"
                 value={detailedInfo.additionalIdNumber}
-                onChange={(e) =>
-                  setDetailedInfo({ additionalIdNumber: e.target.value })
-                }
+                onChange={(e) => setDetailedInfo({ additionalIdNumber: e.target.value })}
               />
-              <p className="text-xs text-muted-foreground">
-                העלאת הטפסים תתבצע בשלב 3
-              </p>
+              <p className="text-xs text-muted-foreground">העלאת הטפסים תתבצע בשלב 3</p>
             </div>
           )}
         </div>
@@ -259,12 +223,12 @@ export const Step2PersonalInfo = () => {
 
       {/* ─── Spouse Personal Details ─── */}
       {isMarried && (
-        <div className="space-y-6 pt-6 border-t border-border">
-          <h2 className="text-2xl font-bold text-foreground">
-            פרטים אישיים - {personalInfo.spouseName || "בן/בת הזוג"}
-          </h2>
+        <div className="space-y-5 pt-6 border-t border-border">
+          <h3 className="text-xl font-bold text-foreground">
+            פרטים אישיים – <span className="text-primary">{personalInfo.spouseName || "בן/בת הזוג"}</span>
+          </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <Label htmlFor="spouseId">ת.ז. *</Label>
               <Input
@@ -285,7 +249,7 @@ export const Step2PersonalInfo = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <Label htmlFor="spousePhone">טלפון</Label>
               <Input
@@ -297,10 +261,7 @@ export const Step2PersonalInfo = () => {
             </div>
             <div className="space-y-2">
               <Label>
-                מגדר{" "}
-                <span className="text-xs text-muted-foreground">
-                  (אוטומטי - ניתן לשנות)
-                </span>
+                מגדר <span className="text-xs text-muted-foreground">(אוטומטי – ניתן לשנות)</span>
               </Label>
               <RadioGroup
                 value={spouseInfo.gender}
@@ -320,27 +281,17 @@ export const Step2PersonalInfo = () => {
           </div>
 
           {/* Spouse Additional ID */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Label>אמצעי זיהוי נוסף</Label>
             <RadioGroup
               value={spouseInfo.additionalIdType}
-              onValueChange={(v: any) =>
-                setSpouseInfo({ additionalIdType: v })
-              }
-              className="flex flex-wrap flex-row-reverse gap-4 justify-end"
+              onValueChange={(v: any) => setSpouseInfo({ additionalIdType: v })}
+              className="flex flex-wrap flex-row-reverse gap-3 justify-end"
             >
               {additionalIdOptions.map((opt) => (
-                <div
-                  key={opt.value}
-                  className="flex items-center space-x-2 space-x-reverse"
-                >
-                  <RadioGroupItem
-                    value={opt.value}
-                    id={`spouseAddId_${opt.value}`}
-                  />
-                  <Label htmlFor={`spouseAddId_${opt.value}`}>
-                    {opt.label}
-                  </Label>
+                <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value={opt.value} id={`spouseAddId_${opt.value}`} />
+                  <Label htmlFor={`spouseAddId_${opt.value}`}>{opt.label}</Label>
                 </div>
               ))}
             </RadioGroup>
@@ -351,30 +302,21 @@ export const Step2PersonalInfo = () => {
                 <Input
                   id="spouseParentIdNum"
                   value={spouseInfo.additionalIdNumber}
-                  onChange={(e) =>
-                    setSpouseInfo({ additionalIdNumber: e.target.value })
-                  }
+                  onChange={(e) => setSpouseInfo({ additionalIdNumber: e.target.value })}
                 />
               </div>
             )}
-            {(spouseInfo.additionalIdType === "license" ||
-              spouseInfo.additionalIdType === "passport") && (
+            {(spouseInfo.additionalIdType === "license" || spouseInfo.additionalIdType === "passport") && (
               <div className="space-y-2 mr-6">
                 <Label htmlFor="spouseAddIdNum">
-                  {spouseInfo.additionalIdType === "license"
-                    ? "מספר רישיון"
-                    : "מספר דרכון"}
+                  {spouseInfo.additionalIdType === "license" ? "מספר רישיון" : "מספר דרכון"}
                 </Label>
                 <Input
                   id="spouseAddIdNum"
                   value={spouseInfo.additionalIdNumber}
-                  onChange={(e) =>
-                    setSpouseInfo({ additionalIdNumber: e.target.value })
-                  }
+                  onChange={(e) => setSpouseInfo({ additionalIdNumber: e.target.value })}
                 />
-                <p className="text-xs text-muted-foreground">
-                  העלאת הטפסים תתבצע בשלב 3
-                </p>
+                <p className="text-xs text-muted-foreground">העלאת הטפסים תתבצע בשלב 3</p>
               </div>
             )}
           </div>
@@ -394,26 +336,25 @@ export const Step2PersonalInfo = () => {
       {/* ─── Business Details Section ─── */}
       {hasAnyPurpose && (
         <div className="pt-8">
-          <div className="h-2 bg-gradient-to-l from-primary/30 to-secondary/50 rounded-full mb-8" />
+          <div className="h-1 bg-gradient-to-l from-primary/40 to-secondary/60 rounded-full mb-8" />
           <Step2BusinessInfo />
         </div>
       )}
 
       {/* ─── Ending Text for Step 2 ─── */}
-      <div className="space-y-6 pt-6 border-t border-border">
-        <div className="p-6 bg-primary/10 rounded-lg border border-primary/20">
-          <h3 className="font-semibold text-lg text-foreground mb-3">
+      <div className="space-y-5 pt-6 border-t border-border">
+        <div className="p-5 bg-primary/5 rounded-xl border border-primary/15">
+          <h3 className="font-bold text-lg text-foreground mb-3">
             📋 כדי להתקדם עליך להכין את עצמך לשלב 3
           </h3>
-          <p className="text-muted-foreground text-sm mb-4">
-            ניתן להעלות כאן בשאלון טפסים במיידי, או להשאיר כך את השאלון ולהכין
-            את המסמכים הנדרשים.
+          <p className="text-muted-foreground text-sm mb-5">
+            ניתן להעלות כאן בשאלון טפסים במיידי, או להשאיר כך את השאלון ולהכין את המסמכים הנדרשים.
           </p>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
             <Button variant="outline" size="sm" onClick={handleSendEmailList}>
               <Mail className="ml-2 h-4 w-4" />
-              קבלת רשימה למייל
+              אני רוצה לקבל רשימה למייל
             </Button>
 
             <div className="flex items-center gap-2">
