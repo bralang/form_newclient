@@ -188,23 +188,29 @@ export const Step2PersonalInfo = () => {
           </RadioGroup>
         </div>
 
-        {/* Additional ID */}
+        {/* Additional ID - multi-select */}
         <div className="space-y-3">
           <Label>אמצעי זיהוי נוסף</Label>
-          <RadioGroup
-            value={detailedInfo.additionalIdType}
-            onValueChange={(v: any) => setDetailedInfo({ additionalIdType: v })}
-            className="flex flex-wrap flex-row-reverse gap-3 justify-end"
-          >
+          <div className="flex flex-wrap flex-row-reverse gap-3 justify-end">
             {additionalIdOptions.map((opt) => (
               <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
-                <RadioGroupItem value={opt.value} id={`addId_${opt.value}`} />
+                <Checkbox
+                  id={`addId_${opt.value}`}
+                  checked={detailedInfo.additionalIdTypes.includes(opt.value as any)}
+                  onCheckedChange={(checked) => {
+                    const current = detailedInfo.additionalIdTypes || [];
+                    const updated = checked
+                      ? [...current, opt.value]
+                      : current.filter((v) => v !== opt.value);
+                    setDetailedInfo({ additionalIdTypes: updated as any });
+                  }}
+                />
                 <Label htmlFor={`addId_${opt.value}`}>{opt.label}</Label>
               </div>
             ))}
-          </RadioGroup>
+          </div>
 
-          {detailedInfo.additionalIdType === "parentId" && (
+          {detailedInfo.additionalIdTypes.includes("parentId") && (
             <div className="space-y-2 mr-6">
               <Label htmlFor="parentIdNum">מספר ת.ז. של ההורה</Label>
               <Input
@@ -214,15 +220,23 @@ export const Step2PersonalInfo = () => {
               />
             </div>
           )}
-          {(detailedInfo.additionalIdType === "license" || detailedInfo.additionalIdType === "passport") && (
+          {detailedInfo.additionalIdTypes.includes("license") && (
             <div className="space-y-2 mr-6">
-              <Label htmlFor="addIdNum">
-                {detailedInfo.additionalIdType === "license" ? "מספר רישיון" : "מספר דרכון"}
-              </Label>
+              <Label htmlFor="licenseNum">מספר רישיון</Label>
               <Input
-                id="addIdNum"
-                value={detailedInfo.additionalIdNumber}
-                onChange={(e) => setDetailedInfo({ additionalIdNumber: e.target.value })}
+                id="licenseNum"
+                value={detailedInfo.additionalLicenseNumber}
+                onChange={(e) => setDetailedInfo({ additionalLicenseNumber: e.target.value })}
+              />
+            </div>
+          )}
+          {detailedInfo.additionalIdTypes.includes("passport") && (
+            <div className="space-y-2 mr-6">
+              <Label htmlFor="passportNum">מספר דרכון</Label>
+              <Input
+                id="passportNum"
+                value={detailedInfo.additionalPassportNumber}
+                onChange={(e) => setDetailedInfo({ additionalPassportNumber: e.target.value })}
               />
             </div>
           )}
@@ -286,23 +300,29 @@ export const Step2PersonalInfo = () => {
             </div>
           </div>
 
-          {/* Spouse Additional ID */}
+          {/* Spouse Additional ID - multi-select */}
           <div className="space-y-3">
             <Label>אמצעי זיהוי נוסף</Label>
-            <RadioGroup
-              value={spouseInfo.additionalIdType}
-              onValueChange={(v: any) => setSpouseInfo({ additionalIdType: v })}
-              className="flex flex-wrap flex-row-reverse gap-3 justify-end"
-            >
+            <div className="flex flex-wrap flex-row-reverse gap-3 justify-end">
               {additionalIdOptions.map((opt) => (
                 <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value={opt.value} id={`spouseAddId_${opt.value}`} />
+                  <Checkbox
+                    id={`spouseAddId_${opt.value}`}
+                    checked={spouseInfo.additionalIdTypes.includes(opt.value as any)}
+                    onCheckedChange={(checked) => {
+                      const current = spouseInfo.additionalIdTypes || [];
+                      const updated = checked
+                        ? [...current, opt.value]
+                        : current.filter((v) => v !== opt.value);
+                      setSpouseInfo({ additionalIdTypes: updated as any });
+                    }}
+                  />
                   <Label htmlFor={`spouseAddId_${opt.value}`}>{opt.label}</Label>
                 </div>
               ))}
-            </RadioGroup>
+            </div>
 
-            {spouseInfo.additionalIdType === "parentId" && (
+            {spouseInfo.additionalIdTypes.includes("parentId") && (
               <div className="space-y-2 mr-6">
                 <Label htmlFor="spouseParentIdNum">מספר ת.ז. של ההורה</Label>
                 <Input
@@ -312,15 +332,23 @@ export const Step2PersonalInfo = () => {
                 />
               </div>
             )}
-            {(spouseInfo.additionalIdType === "license" || spouseInfo.additionalIdType === "passport") && (
+            {spouseInfo.additionalIdTypes.includes("license") && (
               <div className="space-y-2 mr-6">
-                <Label htmlFor="spouseAddIdNum">
-                  {spouseInfo.additionalIdType === "license" ? "מספר רישיון" : "מספר דרכון"}
-                </Label>
+                <Label htmlFor="spouseLicenseNum">מספר רישיון</Label>
                 <Input
-                  id="spouseAddIdNum"
-                  value={spouseInfo.additionalIdNumber}
-                  onChange={(e) => setSpouseInfo({ additionalIdNumber: e.target.value })}
+                  id="spouseLicenseNum"
+                  value={spouseInfo.additionalLicenseNumber}
+                  onChange={(e) => setSpouseInfo({ additionalLicenseNumber: e.target.value })}
+                />
+              </div>
+            )}
+            {spouseInfo.additionalIdTypes.includes("passport") && (
+              <div className="space-y-2 mr-6">
+                <Label htmlFor="spousePassportNum">מספר דרכון</Label>
+                <Input
+                  id="spousePassportNum"
+                  value={spouseInfo.additionalPassportNumber}
+                  onChange={(e) => setSpouseInfo({ additionalPassportNumber: e.target.value })}
                 />
               </div>
             )}
