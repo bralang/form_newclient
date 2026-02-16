@@ -8,6 +8,7 @@ import { Step2BusinessInfo } from "./Step2BusinessInfo";
 import { useState, useEffect } from "react";
 import { g } from "@/lib/gender-utils";
 import { Mail, Phone } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const Step2PersonalInfo = () => {
   const {
@@ -154,13 +155,21 @@ export const Step2PersonalInfo = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="availability">הזמינות שלי</Label>
-          <Input
-            id="availability"
-            value={detailedInfo.availability}
-            onChange={(e) => setDetailedInfo({ availability: e.target.value })}
-            placeholder="לדוגמה: ימים א-ה 9:00-17:00"
-          />
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="availability"
+              checked={detailedInfo.availability === "low_email"}
+              onCheckedChange={(checked) =>
+                setDetailedInfo({ availability: checked ? "low_email" : "" })
+              }
+            />
+            <div>
+              <Label htmlFor="availability" className="cursor-pointer">
+                הזמינות שלי למייל נמוכה, {g(gender, "מעדיף", "מעדיפה")} לקבל הודעות ממערכת טלפונית במקום במייל
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1">שים לב! כרגע בפיתוח עדיין לא בשימוש מידי.</p>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -215,7 +224,6 @@ export const Step2PersonalInfo = () => {
                 value={detailedInfo.additionalIdNumber}
                 onChange={(e) => setDetailedInfo({ additionalIdNumber: e.target.value })}
               />
-              <p className="text-xs text-muted-foreground">העלאת הטפסים תתבצע בשלב 3</p>
             </div>
           )}
         </div>
@@ -260,9 +268,7 @@ export const Step2PersonalInfo = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label>
-                מגדר <span className="text-xs text-muted-foreground">(אוטומטי – ניתן לשנות)</span>
-              </Label>
+              <Label>מגדר</Label>
               <RadioGroup
                 value={spouseInfo.gender}
                 onValueChange={(v: any) => setSpouseInfo({ gender: v })}
@@ -316,19 +322,26 @@ export const Step2PersonalInfo = () => {
                   value={spouseInfo.additionalIdNumber}
                   onChange={(e) => setSpouseInfo({ additionalIdNumber: e.target.value })}
                 />
-                <p className="text-xs text-muted-foreground">העלאת הטפסים תתבצע בשלב 3</p>
               </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="spouseAvailability">הזמינות שלי</Label>
-            <Input
-              id="spouseAvailability"
-              value={spouseInfo.availability}
-              onChange={(e) => setSpouseInfo({ availability: e.target.value })}
-              placeholder="לדוגמה: ימים א-ה 9:00-17:00"
-            />
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="spouseAvailability"
+                checked={spouseInfo.availability === "low_email"}
+                onCheckedChange={(checked) =>
+                  setSpouseInfo({ availability: checked ? "low_email" : "" })
+                }
+              />
+              <div>
+                <Label htmlFor="spouseAvailability" className="cursor-pointer">
+                  הזמינות שלי למייל נמוכה, {g(spouseInfo.gender, "מעדיף", "מעדיפה")} לקבל הודעות ממערכת טלפונית במקום במייל
+                </Label>
+                <p className="text-xs text-muted-foreground mt-1">שים לב! כרגע בפיתוח עדיין לא בשימוש מידי.</p>
+              </div>
+            </div>
           </div>
         </div>
       )}
