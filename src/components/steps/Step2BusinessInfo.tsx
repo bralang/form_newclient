@@ -1,7 +1,7 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { g } from "@/lib/gender-utils";
 
 export const Step2BusinessInfo = () => {
@@ -33,32 +33,26 @@ export const Step2BusinessInfo = () => {
   const userName = personalInfo.firstName || "המשתמש";
   const spouseName = personalInfo.spouseName || "בן/בת הזוג";
 
-  // ─── Yes/No Radio helper ───
-  const YesNo = ({
+  // ─── Yes/No Select helper ───
+  const YesNoSelect = ({
     value,
     onChange,
-    prefix,
-    name,
   }: {
     value: boolean | undefined;
     onChange: (v: boolean) => void;
-    prefix: string;
-    name: string;
   }) => (
-    <RadioGroup
+    <Select
       value={value === true ? "yes" : value === false ? "no" : ""}
       onValueChange={(v) => onChange(v === "yes")}
-      className="flex flex-row-reverse gap-4 justify-end"
     >
-      <div className="flex items-center space-x-2 space-x-reverse">
-        <RadioGroupItem value="yes" id={`${prefix}${name}Yes`} />
-        <Label htmlFor={`${prefix}${name}Yes`}>כן</Label>
-      </div>
-      <div className="flex items-center space-x-2 space-x-reverse">
-        <RadioGroupItem value="no" id={`${prefix}${name}No`} />
-        <Label htmlFor={`${prefix}${name}No`}>לא</Label>
-      </div>
-    </RadioGroup>
+      <SelectTrigger>
+        <SelectValue placeholder="בחר" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="yes">כן</SelectItem>
+        <SelectItem value="no">לא</SelectItem>
+      </SelectContent>
+    </Select>
   );
 
   // ─── New Business ───
@@ -86,13 +80,11 @@ export const Step2BusinessInfo = () => {
         <p className="text-xs text-muted-foreground">לא חייבים לבחור שם עסק, ברירת המחדל היא שמך</p>
       </div>
 
-      {/* Business number = ID number, sent silently in webhook, not shown */}
-
       <div className="space-y-2">
         <Label>
           {g(gender, "האם אתה עכשיו באבטלה או בחופשת לידה?", "האם את עכשיו באבטלה או בחופשת לידה?")}
         </Label>
-        <YesNo value={info.isUnemployedOrMaternity} onChange={(v) => setInfo({ isUnemployedOrMaternity: v })} prefix={prefix} name="unemployed" />
+        <YesNoSelect value={info.isUnemployedOrMaternity} onChange={(v) => setInfo({ isUnemployedOrMaternity: v })} />
       </div>
 
       <div className="space-y-2">
@@ -102,16 +94,15 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>סוג העסק</Label>
-        <RadioGroup value={info.businessType || ""} onValueChange={(v: any) => setInfo({ businessType: v })} className="flex flex-row-reverse gap-4 justify-end">
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="exempt" id={`${prefix}exempt`} />
-            <Label htmlFor={`${prefix}exempt`}>פטור</Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="authorized" id={`${prefix}authorized`} />
-            <Label htmlFor={`${prefix}authorized`}>מורשה</Label>
-          </div>
-        </RadioGroup>
+        <Select value={info.businessType || ""} onValueChange={(v: any) => setInfo({ businessType: v })}>
+          <SelectTrigger>
+            <SelectValue placeholder="בחר סוג עסק" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="exempt">פטור</SelectItem>
+            <SelectItem value="authorized">מורשה</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Bank details - immediately after selecting authorized */}
@@ -129,21 +120,20 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה רוצה להיות עוסק זעיר?", "האם את רוצה להיות עוסקת זעירה?")}</Label>
-        <YesNo value={info.wantSmallBusiness} onChange={(v) => setInfo({ wantSmallBusiness: v })} prefix={prefix} name="small" />
+        <YesNoSelect value={info.wantSmallBusiness} onChange={(v) => setInfo({ wantSmallBusiness: v })} />
       </div>
 
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")}</Label>
-        <RadioGroup value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })} className="flex flex-row-reverse gap-4 justify-end">
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="sole" id={`${prefix}sole`} />
-            <Label htmlFor={`${prefix}sole`}>{g(gender, "יחיד", "יחידה")}</Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="partnership" id={`${prefix}partnership`} />
-            <Label htmlFor={`${prefix}partnership`}>שותפות</Label>
-          </div>
-        </RadioGroup>
+        <Select value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })}>
+          <SelectTrigger>
+            <SelectValue placeholder="בחר" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sole">{g(gender, "יחיד", "יחידה")}</SelectItem>
+            <SelectItem value="partnership">שותפות</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {info.ownershipType === "partnership" && (
@@ -155,7 +145,7 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>האם העסק מתנהל מהבית?</Label>
-        <YesNo value={info.isHomeOffice} onChange={(v) => setInfo({ isHomeOffice: v })} prefix={prefix} name="home" />
+        <YesNoSelect value={info.isHomeOffice} onChange={(v) => setInfo({ isHomeOffice: v })} />
       </div>
 
       {info.isHomeOffice === false && (
@@ -178,10 +168,9 @@ export const Step2BusinessInfo = () => {
         </div>
       )}
 
-
       <div className="space-y-2">
         <Label>האם העסק צפוי להעסיק עובדים?</Label>
-        <YesNo value={info.planningEmployees} onChange={(v) => setInfo({ planningEmployees: v })} prefix={prefix} name="emp" />
+        <YesNoSelect value={info.planningEmployees} onChange={(v) => setInfo({ planningEmployees: v })} />
       </div>
 
       <div className="space-y-2">
@@ -212,16 +201,15 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")}</Label>
-        <RadioGroup value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })} className="flex flex-row-reverse gap-4 justify-end">
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="sole" id={`${prefix}exSole`} />
-            <Label htmlFor={`${prefix}exSole`}>{g(gender, "יחיד", "יחידה")}</Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="partnership" id={`${prefix}exPartnership`} />
-            <Label htmlFor={`${prefix}exPartnership`}>שותפות</Label>
-          </div>
-        </RadioGroup>
+        <Select value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })}>
+          <SelectTrigger>
+            <SelectValue placeholder="בחר" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="sole">{g(gender, "יחיד", "יחידה")}</SelectItem>
+            <SelectItem value="partnership">שותפות</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {info.ownershipType === "partnership" && (
@@ -234,11 +222,10 @@ export const Step2BusinessInfo = () => {
           />
         </div>
       )}
-      {/* If sole ownership, business number = ID, sent silently in webhook */}
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים?</Label>
-        <YesNo value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} prefix={prefix} name="exEmp" />
+        <YesNoSelect value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} />
       </div>
     </div>
   );
@@ -331,15 +318,13 @@ export const Step2BusinessInfo = () => {
 
             <div className="space-y-2">
               <Label>האם החברה קיימת ברשם החברות?</Label>
-              <YesNo
+              <YesNoSelect
                 value={company.existsInRegistrar}
                 onChange={(v) => {
                   const updated = [...(info.newCompanies || [])];
                   updated[idx] = { ...updated[idx], existsInRegistrar: v };
                   setInfo({ newCompanies: updated });
                 }}
-                prefix={`${prefix}reg${idx}`}
-                name="reg"
               />
             </div>
 
@@ -363,24 +348,22 @@ export const Step2BusinessInfo = () => {
 
             <div className="space-y-2">
               <Label>מי יהיו בעלי המניות בחברה?</Label>
-              <RadioGroup
+              <Select
                 value={company.shareholderType || ""}
                 onValueChange={(v) => {
                   const updated = [...(info.newCompanies || [])];
                   updated[idx] = { ...updated[idx], shareholderType: v };
                   setInfo({ newCompanies: updated });
                 }}
-                className="flex flex-row-reverse gap-4 justify-end"
               >
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="alone" id={`${prefix}sh${idx}Alone`} />
-                  <Label htmlFor={`${prefix}sh${idx}Alone`}>אני לבד</Label>
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="other" id={`${prefix}sh${idx}Other`} />
-                  <Label htmlFor={`${prefix}sh${idx}Other`}>אחר</Label>
-                </div>
-              </RadioGroup>
+                <SelectTrigger>
+                  <SelectValue placeholder="בחר" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="alone">אני לבד</SelectItem>
+                  <SelectItem value="other">אחר</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {company.shareholderType === "other" && (
@@ -399,15 +382,13 @@ export const Step2BusinessInfo = () => {
 
             <div className="space-y-2">
               <Label>האם החברה צפויה להעסיק עובדים?</Label>
-              <YesNo
+              <YesNoSelect
                 value={company.planningEmployees}
                 onChange={(v) => {
                   const updated = [...(info.newCompanies || [])];
                   updated[idx] = { ...updated[idx], planningEmployees: v };
                   setInfo({ newCompanies: updated });
                 }}
-                prefix={`${prefix}emp${idx}`}
-                name="emp"
               />
             </div>
           </div>

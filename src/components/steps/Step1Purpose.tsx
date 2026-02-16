@@ -1,8 +1,8 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormNavigation } from "@/components/FormNavigation";
 import { useState } from "react";
 
@@ -114,20 +114,18 @@ export const Step1Purpose = () => {
         {/* Marital Status */}
         <div className="space-y-2">
           <Label>מצב משפחתי *</Label>
-          <RadioGroup
+          <Select
             value={personalInfo.maritalStatus}
             onValueChange={(v: any) => setPersonalInfo({ maritalStatus: v })}
-            className="flex flex-row-reverse gap-4 justify-end"
           >
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="single" id="single" />
-              <Label htmlFor="single">יחיד/ה</Label>
-            </div>
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="married" id="married" />
-              <Label htmlFor="married">בן/בת זוג</Label>
-            </div>
-          </RadioGroup>
+            <SelectTrigger>
+              <SelectValue placeholder="בחר מצב משפחתי" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="single">יחיד/ה</SelectItem>
+              <SelectItem value="married">בן/בת זוג</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {isMarried && (
