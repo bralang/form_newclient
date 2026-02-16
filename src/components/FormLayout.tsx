@@ -137,13 +137,13 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
           </div>
 
           {/* Form Content */}
-          <div className="p-4 md:p-8 lg:p-10 max-w-3xl mx-auto">
-            <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
-              {children}
-            </div>
-            {/* Logo below the form card */}
-            <div className="hidden lg:flex justify-center mt-6 mb-4">
+          <div className="p-4 md:p-8 lg:p-10 max-w-3xl mx-auto flex items-start gap-6">
+            {/* Logo to the left of the form */}
+            <div className="hidden lg:flex flex-col items-center pt-4 shrink-0">
               <img src={logo} alt="חסידה - ייעוץ מס אכפתי לעסקים" className="h-20 w-auto opacity-80" />
+            </div>
+            <div className="flex-1 bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
+              {children}
             </div>
           </div>
         </main>
