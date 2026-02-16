@@ -92,16 +92,18 @@ export const Step3Documents = () => {
             onChange={(files) => setDocumentsInfo({ idCardFiles: files ? Array.from(files) : undefined })}
           />
 
-          {(detailedInfo.additionalIdType === "license" || detailedInfo.additionalIdType === "passport") && (
+          {detailedInfo.additionalIdTypes.includes("license") && (
             <FileUpload
-              id="addIdFile"
-              label={detailedInfo.additionalIdType === "license" ? "העלאת רישיון נהיגה" : "העלאת דרכון"}
-              onChange={(files) =>
-                setDocumentsInfo({
-                  licenseFile: detailedInfo.additionalIdType === "license" ? files?.[0] : undefined,
-                  passportFile: detailedInfo.additionalIdType === "passport" ? files?.[0] : undefined,
-                })
-              }
+              id="licenseFile"
+              label="העלאת רישיון נהיגה"
+              onChange={(files) => setDocumentsInfo({ licenseFile: files?.[0] })}
+            />
+          )}
+          {detailedInfo.additionalIdTypes.includes("passport") && (
+            <FileUpload
+              id="passportFile"
+              label="העלאת דרכון"
+              onChange={(files) => setDocumentsInfo({ passportFile: files?.[0] })}
             />
           )}
         </div>
@@ -120,16 +122,18 @@ export const Step3Documents = () => {
               onChange={(files) => setDocumentsInfo({ spouseIdCardFiles: files ? Array.from(files) : undefined })}
             />
 
-            {(spouseInfo.additionalIdType === "license" || spouseInfo.additionalIdType === "passport") && (
+            {spouseInfo.additionalIdTypes.includes("license") && (
               <FileUpload
-                id="spouseAddIdFile"
-                label={spouseInfo.additionalIdType === "license" ? "העלאת רישיון נהיגה" : "העלאת דרכון"}
-                onChange={(files) =>
-                  setDocumentsInfo({
-                    spouseLicenseFile: spouseInfo.additionalIdType === "license" ? files?.[0] : undefined,
-                    spousePassportFile: spouseInfo.additionalIdType === "passport" ? files?.[0] : undefined,
-                  })
-                }
+                id="spouseLicenseFile"
+                label="העלאת רישיון נהיגה"
+                onChange={(files) => setDocumentsInfo({ spouseLicenseFile: files?.[0] })}
+              />
+            )}
+            {spouseInfo.additionalIdTypes.includes("passport") && (
+              <FileUpload
+                id="spousePassportFile"
+                label="העלאת דרכון"
+                onChange={(files) => setDocumentsInfo({ spousePassportFile: files?.[0] })}
               />
             )}
           </div>

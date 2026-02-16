@@ -29,8 +29,10 @@ export interface DetailedPersonalInfo {
   birthDate: string;
   availability: string;
   detailedMaritalStatus: string;
-  additionalIdType: "parentId" | "license" | "passport" | "";
+  additionalIdTypes: ("parentId" | "license" | "passport")[];
   additionalIdNumber: string;
+  additionalLicenseNumber: string;
+  additionalPassportNumber: string;
 }
 
 export interface SpouseDetailedInfo {
@@ -38,8 +40,10 @@ export interface SpouseDetailedInfo {
   email: string;
   phone: string;
   gender: "male" | "female" | "";
-  additionalIdType: "parentId" | "license" | "passport" | "";
+  additionalIdTypes: ("parentId" | "license" | "passport")[];
   additionalIdNumber: string;
+  additionalLicenseNumber: string;
+  additionalPassportNumber: string;
   availability: string;
 }
 
@@ -197,16 +201,20 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     birthDate: "",
     availability: "",
     detailedMaritalStatus: "",
-    additionalIdType: "",
+    additionalIdTypes: [],
     additionalIdNumber: "",
+    additionalLicenseNumber: "",
+    additionalPassportNumber: "",
   });
   const [spouseInfo, setSI] = useState<SpouseDetailedInfo>({
     idNumber: "",
     email: "",
     phone: "",
     gender: "",
-    additionalIdType: "",
+    additionalIdTypes: [],
     additionalIdNumber: "",
+    additionalLicenseNumber: "",
+    additionalPassportNumber: "",
     availability: "",
   });
   const [businessInfo, setBI] = useState<BusinessInfo>({});
