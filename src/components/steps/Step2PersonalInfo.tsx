@@ -1,7 +1,7 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FormNavigation } from "@/components/FormNavigation";
 import { Step2BusinessInfo } from "./Step2BusinessInfo";
@@ -128,20 +128,18 @@ export const Step2PersonalInfo = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
             <Label>מגדר *</Label>
-            <RadioGroup
+            <Select
               value={detailedInfo.gender}
               onValueChange={(v: any) => setDetailedInfo({ gender: v })}
-              className="flex flex-row-reverse gap-4 justify-end"
             >
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <RadioGroupItem value="male" id="genderMale" />
-                <Label htmlFor="genderMale">זכר</Label>
-              </div>
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <RadioGroupItem value="female" id="genderFemale" />
-                <Label htmlFor="genderFemale">נקבה</Label>
-              </div>
-            </RadioGroup>
+              <SelectTrigger>
+                <SelectValue placeholder="בחר מגדר" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">זכר</SelectItem>
+                <SelectItem value="female">נקבה</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="birthDate">תאריך לידה *</Label>
@@ -174,18 +172,19 @@ export const Step2PersonalInfo = () => {
 
         <div className="space-y-2">
           <Label>מצב משפחתי מפורט</Label>
-          <RadioGroup
+          <Select
             value={detailedInfo.detailedMaritalStatus}
             onValueChange={(v: any) => setDetailedInfo({ detailedMaritalStatus: v })}
-            className="flex flex-wrap flex-row-reverse gap-3 justify-end"
           >
-            {maritalOptions.map((opt) => (
-              <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
-                <RadioGroupItem value={opt.value} id={`marital_${opt.value}`} />
-                <Label htmlFor={`marital_${opt.value}`}>{opt.label}</Label>
-              </div>
-            ))}
-          </RadioGroup>
+            <SelectTrigger>
+              <SelectValue placeholder="בחר מצב משפחתי" />
+            </SelectTrigger>
+            <SelectContent>
+              {maritalOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Additional ID - multi-select */}
@@ -283,20 +282,18 @@ export const Step2PersonalInfo = () => {
             </div>
             <div className="space-y-2">
               <Label>מגדר</Label>
-              <RadioGroup
+              <Select
                 value={spouseInfo.gender}
                 onValueChange={(v: any) => setSpouseInfo({ gender: v })}
-                className="flex flex-row-reverse gap-4 justify-end"
               >
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="male" id="spouseGenderMale" />
-                  <Label htmlFor="spouseGenderMale">זכר</Label>
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="female" id="spouseGenderFemale" />
-                  <Label htmlFor="spouseGenderFemale">נקבה</Label>
-                </div>
-              </RadioGroup>
+                <SelectTrigger>
+                  <SelectValue placeholder="בחר מגדר" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">זכר</SelectItem>
+                  <SelectItem value="female">נקבה</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

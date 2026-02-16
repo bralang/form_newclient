@@ -22,12 +22,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* ─── Sidebar (Desktop) ─── */}
         <aside className="hidden lg:flex lg:flex-col lg:w-72 xl:w-80 bg-gradient-to-b from-primary to-primary/80 text-primary-foreground sticky top-0 h-screen p-6 justify-between shrink-0">
-          {/* Logo */}
           <div>
-            <div className="flex justify-center mb-8">
-              <img src={logo} alt="חסידה - ייעוץ מס אכפתי לעסקים" className="h-16 w-auto" />
-            </div>
-
             <h2 className="text-xl font-bold text-center mb-8 opacity-90">שאלון קבלת לקוח</h2>
 
             {/* Progress Steps */}
@@ -143,6 +138,10 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
 
           {/* Form Content */}
           <div className="p-4 md:p-8 lg:p-10 max-w-3xl mx-auto">
+            {/* Logo above the form on white background */}
+            <div className="hidden lg:flex justify-center mb-6">
+              <img src={logo} alt="חסידה - ייעוץ מס אכפתי לעסקים" className="h-16 w-auto" />
+            </div>
             <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
               {children}
             </div>
