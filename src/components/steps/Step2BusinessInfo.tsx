@@ -2,7 +2,6 @@ import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { g } from "@/lib/gender-utils";
 
 export const Step2BusinessInfo = () => {
@@ -34,13 +33,46 @@ export const Step2BusinessInfo = () => {
   const userName = personalInfo.firstName || "המשתמש";
   const spouseName = personalInfo.spouseName || "בן/בת הזוג";
 
-  // ─── New Business Fields ───
+  // ─── Yes/No Radio helper ───
+  const YesNo = ({
+    value,
+    onChange,
+    prefix,
+    name,
+  }: {
+    value: boolean | undefined;
+    onChange: (v: boolean) => void;
+    prefix: string;
+    name: string;
+  }) => (
+    <RadioGroup
+      value={value === true ? "yes" : value === false ? "no" : ""}
+      onValueChange={(v) => onChange(v === "yes")}
+      className="flex flex-row-reverse gap-4 justify-end"
+    >
+      <div className="flex items-center space-x-2 space-x-reverse">
+        <RadioGroupItem value="yes" id={`${prefix}${name}Yes`} />
+        <Label htmlFor={`${prefix}${name}Yes`}>כן</Label>
+      </div>
+      <div className="flex items-center space-x-2 space-x-reverse">
+        <RadioGroupItem value="no" id={`${prefix}${name}No`} />
+        <Label htmlFor={`${prefix}${name}No`}>לא</Label>
+      </div>
+    </RadioGroup>
+  );
+
+  // ─── New Business ───
   const renderNewBusiness = (
-    info: any, setInfo: any, name: string, gender: "male" | "female" | "", prefix = ""
+    info: any,
+    setInfo: any,
+    name: string,
+    gender: "male" | "female" | "",
+    idNumber: string,
+    prefix = ""
   ) => (
-    <div className="space-y-6 p-4 bg-muted/30 rounded-lg">
+    <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
       <h3 className="text-xl font-bold text-primary">
-        העסק החדש של <span className="underline">{name}</span>
+        העסק החדש של <span className="underline decoration-primary/50">{name}</span>
       </h3>
 
       <div className="space-y-2">
@@ -56,44 +88,25 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>מספר עסק</Label>
-        <Input value={detailedInfo.idNumber || ""} disabled className="bg-muted" />
+        <Input value={idNumber || ""} disabled className="bg-muted" />
         <p className="text-xs text-muted-foreground">מספר העסק הוא מספר ת.ז. שלך</p>
       </div>
 
       <div className="space-y-2">
-        <Label>{g(gender, "האם אתה עכשיו באבטלה או בחופשת לידה?", "האם את עכשיו באבטלה או בחופשת לידה?")}</Label>
-        <RadioGroup
-          value={info.isUnemployedOrMaternity === true ? "yes" : info.isUnemployedOrMaternity === false ? "no" : ""}
-          onValueChange={(v) => setInfo({ isUnemployedOrMaternity: v === "yes" })}
-          className="flex flex-row-reverse gap-4 justify-end"
-        >
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="yes" id={`${prefix}unemployedYes`} />
-            <Label htmlFor={`${prefix}unemployedYes`}>כן</Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="no" id={`${prefix}unemployedNo`} />
-            <Label htmlFor={`${prefix}unemployedNo`}>לא</Label>
-          </div>
-        </RadioGroup>
+        <Label>
+          {g(gender, "האם אתה עכשיו באבטלה או בחופשת לידה?", "האם את עכשיו באבטלה או בחופשת לידה?")}
+        </Label>
+        <YesNo value={info.isUnemployedOrMaternity} onChange={(v) => setInfo({ isUnemployedOrMaternity: v })} prefix={prefix} name="unemployed" />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor={`${prefix}businessField`}>תחום העיסוק</Label>
-        <Input
-          id={`${prefix}businessField`}
-          value={info.businessField || ""}
-          onChange={(e) => setInfo({ businessField: e.target.value })}
-        />
+        <Input id={`${prefix}businessField`} value={info.businessField || ""} onChange={(e) => setInfo({ businessField: e.target.value })} />
       </div>
 
       <div className="space-y-2">
         <Label>סוג העסק</Label>
-        <RadioGroup
-          value={info.businessType || ""}
-          onValueChange={(v: any) => setInfo({ businessType: v })}
-          className="flex flex-row-reverse gap-4 justify-end"
-        >
+        <RadioGroup value={info.businessType || ""} onValueChange={(v: any) => setInfo({ businessType: v })} className="flex flex-row-reverse gap-4 justify-end">
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="exempt" id={`${prefix}exempt`} />
             <Label htmlFor={`${prefix}exempt`}>פטור</Label>
@@ -107,30 +120,12 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה רוצה להיות עוסק זעיר?", "האם את רוצה להיות עוסקת זעירה?")}</Label>
-        <RadioGroup
-          value={info.wantSmallBusiness === true ? "yes" : info.wantSmallBusiness === false ? "no" : ""}
-          onValueChange={(v) => setInfo({ wantSmallBusiness: v === "yes" })}
-          className="flex flex-row-reverse gap-4 justify-end"
-        >
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="yes" id={`${prefix}smallYes`} />
-            <Label htmlFor={`${prefix}smallYes`}>כן</Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="no" id={`${prefix}smallNo`} />
-            <Label htmlFor={`${prefix}smallNo`}>לא</Label>
-          </div>
-        </RadioGroup>
+        <YesNo value={info.wantSmallBusiness} onChange={(v) => setInfo({ wantSmallBusiness: v })} prefix={prefix} name="small" />
       </div>
 
-      {/* Ownership */}
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")}</Label>
-        <RadioGroup
-          value={info.ownershipType || ""}
-          onValueChange={(v: any) => setInfo({ ownershipType: v })}
-          className="flex flex-row-reverse gap-4 justify-end"
-        >
+        <RadioGroup value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })} className="flex flex-row-reverse gap-4 justify-end">
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="sole" id={`${prefix}sole`} />
             <Label htmlFor={`${prefix}sole`}>{g(gender, "יחיד", "יחידה")}</Label>
@@ -145,60 +140,30 @@ export const Step2BusinessInfo = () => {
       {info.ownershipType === "partnership" && (
         <div className="space-y-2">
           <Label htmlFor={`${prefix}businessNumber`}>מספר העוסק (שותפות)</Label>
-          <Input
-            id={`${prefix}businessNumber`}
-            value={info.businessNumber || ""}
-            onChange={(e) => setInfo({ businessNumber: e.target.value })}
-          />
+          <Input id={`${prefix}businessNumber`} value={info.businessNumber || ""} onChange={(e) => setInfo({ businessNumber: e.target.value })} />
         </div>
       )}
 
-      {/* Home office */}
       <div className="space-y-2">
         <Label>האם העסק מתנהל מהבית?</Label>
-        <RadioGroup
-          value={info.isHomeOffice === true ? "yes" : info.isHomeOffice === false ? "no" : ""}
-          onValueChange={(v) => setInfo({ isHomeOffice: v === "yes" })}
-          className="flex flex-row-reverse gap-4 justify-end"
-        >
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="yes" id={`${prefix}homeYes`} />
-            <Label htmlFor={`${prefix}homeYes`}>כן</Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="no" id={`${prefix}homeNo`} />
-            <Label htmlFor={`${prefix}homeNo`}>לא</Label>
-          </div>
-        </RadioGroup>
+        <YesNo value={info.isHomeOffice} onChange={(v) => setInfo({ isHomeOffice: v })} prefix={prefix} name="home" />
       </div>
 
       {info.isHomeOffice === false && (
-        <div className="space-y-4 mr-6">
-          <Label className="text-lg font-semibold">כתובת העסק</Label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
+        <div className="space-y-3 mr-4">
+          <Label className="text-base font-semibold">כתובת העסק</Label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="space-y-1">
               <Label htmlFor={`${prefix}street`}>רחוב</Label>
-              <Input
-                id={`${prefix}street`}
-                value={info.businessAddress?.street || ""}
-                onChange={(e) => setInfo({ businessAddress: { ...info.businessAddress, street: e.target.value } })}
-              />
+              <Input id={`${prefix}street`} value={info.businessAddress?.street || ""} onChange={(e) => setInfo({ businessAddress: { ...info.businessAddress, street: e.target.value } })} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor={`${prefix}number`}>מספר</Label>
-              <Input
-                id={`${prefix}number`}
-                value={info.businessAddress?.number || ""}
-                onChange={(e) => setInfo({ businessAddress: { ...info.businessAddress, number: e.target.value } })}
-              />
+              <Input id={`${prefix}number`} value={info.businessAddress?.number || ""} onChange={(e) => setInfo({ businessAddress: { ...info.businessAddress, number: e.target.value } })} />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor={`${prefix}city`}>עיר</Label>
-              <Input
-                id={`${prefix}city`}
-                value={info.businessAddress?.city || ""}
-                onChange={(e) => setInfo({ businessAddress: { ...info.businessAddress, city: e.target.value } })}
-              />
+              <Input id={`${prefix}city`} value={info.businessAddress?.city || ""} onChange={(e) => setInfo({ businessAddress: { ...info.businessAddress, city: e.target.value } })} />
             </div>
           </div>
         </div>
@@ -206,86 +171,63 @@ export const Step2BusinessInfo = () => {
 
       {/* Bank details - only for authorized */}
       {info.businessType === "authorized" && (
-        <div className="space-y-4 p-4 bg-background rounded-lg border">
-          <Label className="text-lg font-semibold">פרטי חשבון בנק</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor={`${prefix}bank`}>בנק</Label>
-              <Input id={`${prefix}bank`} value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} />
+        <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
+          <Label className="text-base font-semibold">פרטי חשבון</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>בנק</Label>
+              <Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor={`${prefix}branch`}>סניף</Label>
-              <Input id={`${prefix}branch`} value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} />
+            <div className="space-y-1">
+              <Label>סניף</Label>
+              <Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor={`${prefix}accountNumber`}>מספר חשבון</Label>
-              <Input id={`${prefix}accountNumber`} value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} />
+            <div className="space-y-1">
+              <Label>מספר חשבון</Label>
+              <Input value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor={`${prefix}accountHolder`}>שם בעל החשבון</Label>
-              <Input id={`${prefix}accountHolder`} value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} />
+            <div className="space-y-1">
+              <Label>שם בעל החשבון</Label>
+              <Input value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} />
             </div>
           </div>
         </div>
       )}
 
-      {/* Employees */}
       <div className="space-y-2">
         <Label>האם העסק צפוי להעסיק עובדים?</Label>
-        <RadioGroup
-          value={info.hasEmployees === true ? "yes" : info.hasEmployees === false ? "no" : ""}
-          onValueChange={(v) => setInfo({ hasEmployees: v === "yes" })}
-          className="flex flex-row-reverse gap-4 justify-end"
-        >
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="yes" id={`${prefix}empYes`} />
-            <Label htmlFor={`${prefix}empYes`}>כן</Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="no" id={`${prefix}empNo`} />
-            <Label htmlFor={`${prefix}empNo`}>לא</Label>
-          </div>
-        </RadioGroup>
+        <YesNo value={info.planningEmployees} onChange={(v) => setInfo({ planningEmployees: v })} prefix={prefix} name="emp" />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor={`${prefix}activityStartDate`}>מתי התחילה הפעילות העסקית?</Label>
-        <Input
-          id={`${prefix}activityStartDate`}
-          type="date"
-          value={info.activityStartDate || ""}
-          onChange={(e) => setInfo({ activityStartDate: e.target.value })}
-        />
+        <Input id={`${prefix}activityStartDate`} type="date" value={info.activityStartDate || ""} onChange={(e) => setInfo({ activityStartDate: e.target.value })} />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor={`${prefix}expectedRevenue`}>מה המחזור הצפוי בעסק השנה?</Label>
-        <Input
-          id={`${prefix}expectedRevenue`}
-          value={info.expectedRevenue || ""}
-          onChange={(e) => setInfo({ expectedRevenue: e.target.value })}
-          placeholder="לדוגמה: 100,000 ₪"
-        />
+        <Input id={`${prefix}expectedRevenue`} value={info.expectedRevenue || ""} onChange={(e) => setInfo({ expectedRevenue: e.target.value })} placeholder="לדוגמה: 100,000 ₪" />
       </div>
     </div>
   );
 
-  // ─── Existing Business Fields ───
+  // ─── Existing Business ───
   const renderExistingBusiness = (
-    info: any, setInfo: any, name: string, gender: "male" | "female" | "", prefix = ""
+    info: any,
+    setInfo: any,
+    name: string,
+    gender: "male" | "female" | "",
+    idNumber: string,
+    prefix = ""
   ) => (
-    <div className="space-y-6 p-4 bg-muted/30 rounded-lg">
+    <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
       <h3 className="text-xl font-bold text-primary">
-        העסק הקיים של <span className="underline">{name}</span>
+        העסק הקיים של <span className="underline decoration-primary/50">{name}</span>
       </h3>
 
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")}</Label>
-        <RadioGroup
-          value={info.ownershipType || ""}
-          onValueChange={(v: any) => setInfo({ ownershipType: v })}
-          className="flex flex-row-reverse gap-4 justify-end"
-        >
+        <RadioGroup value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })} className="flex flex-row-reverse gap-4 justify-end">
           <div className="flex items-center space-x-2 space-x-reverse">
             <RadioGroupItem value="sole" id={`${prefix}exSole`} />
             <Label htmlFor={`${prefix}exSole`}>{g(gender, "יחיד", "יחידה")}</Label>
@@ -298,10 +240,10 @@ export const Step2BusinessInfo = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor={`${prefix}businessNumber`}>מספר העוסק</Label>
+        <Label htmlFor={`${prefix}exBusinessNumber`}>מספר העוסק</Label>
         <Input
-          id={`${prefix}businessNumber`}
-          value={info.businessNumber || (info.ownershipType !== "partnership" ? detailedInfo.idNumber : "")}
+          id={`${prefix}exBusinessNumber`}
+          value={info.businessNumber || (info.ownershipType !== "partnership" ? idNumber : "")}
           onChange={(e) => setInfo({ businessNumber: e.target.value })}
           disabled={info.ownershipType !== "partnership"}
         />
@@ -312,42 +254,33 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים?</Label>
-        <RadioGroup
-          value={info.hasEmployees === true ? "yes" : info.hasEmployees === false ? "no" : ""}
-          onValueChange={(v) => setInfo({ hasEmployees: v === "yes" })}
-          className="flex flex-row-reverse gap-4 justify-end"
-        >
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="yes" id={`${prefix}exEmpYes`} />
-            <Label htmlFor={`${prefix}exEmpYes`}>כן</Label>
-          </div>
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <RadioGroupItem value="no" id={`${prefix}exEmpNo`} />
-            <Label htmlFor={`${prefix}exEmpNo`}>לא</Label>
-          </div>
-        </RadioGroup>
+        <YesNo value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} prefix={prefix} name="exEmp" />
       </div>
     </div>
   );
 
-  // ─── Company Fields (Purpose 4) ───
+  // ─── Company (Purpose 4) ───
   const renderCompany = (
-    info: any, setInfo: any, name: string, _gender: "male" | "female" | "", prefix = ""
+    info: any,
+    setInfo: any,
+    name: string,
+    _gender: "male" | "female" | "",
+    prefix = ""
   ) => {
     const existingCount = info.existingCompanyCount || 0;
     const newCount = info.newCompanyCount || 0;
 
     return (
-      <div className="space-y-6 p-4 bg-muted/30 rounded-lg">
+      <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
         <h3 className="text-xl font-bold text-primary">
-          חברות של <span className="underline">{name}</span>
+          חברות של <span className="underline decoration-primary/50">{name}</span>
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor={`${prefix}existingCompanyCount`}>לכמה חברות קיימות (עם תיק פתוח ברשות המיסים) מעוניין לקבל שירות?</Label>
+            <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות (עם תיק פתוח ברשות המיסים) מעוניין לקבל שירות?</Label>
             <Input
-              id={`${prefix}existingCompanyCount`}
+              id={`${prefix}existingCount`}
               type="number"
               min="0"
               value={existingCount}
@@ -360,9 +293,9 @@ export const Step2BusinessInfo = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`${prefix}newCompanyCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
+            <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
             <Input
-              id={`${prefix}newCompanyCount`}
+              id={`${prefix}newCount`}
               type="number"
               min="0"
               value={newCount}
@@ -378,10 +311,10 @@ export const Step2BusinessInfo = () => {
 
         {/* Existing companies */}
         {(info.existingCompanies || []).map((company: any, idx: number) => (
-          <div key={`existing-${idx}`} className="space-y-4 p-3 border rounded-lg">
-            <h4 className="font-semibold">חברה קיימת #{idx + 1}</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+          <div key={`existing-${idx}`} className="space-y-3 p-4 border border-border rounded-xl bg-card">
+            <h4 className="font-bold text-primary">חברה קיימת #{idx + 1}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
                 <Label>שם חברה</Label>
                 <Input
                   value={company.name || ""}
@@ -392,7 +325,7 @@ export const Step2BusinessInfo = () => {
                   }}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label>ח.פ.</Label>
                 <Input
                   value={company.companyNumber || ""}
@@ -409,33 +342,25 @@ export const Step2BusinessInfo = () => {
 
         {/* New companies */}
         {(info.newCompanies || []).map((company: any, idx: number) => (
-          <div key={`new-${idx}`} className="space-y-4 p-3 border rounded-lg">
-            <h4 className="font-semibold">חברה חדשה #{idx + 1}</h4>
+          <div key={`new-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
+            <h4 className="font-bold text-primary">חברה חדשה #{idx + 1}</h4>
 
             <div className="space-y-2">
               <Label>האם החברה קיימת ברשם החברות?</Label>
-              <RadioGroup
-                value={company.existsInRegistrar === true ? "yes" : company.existsInRegistrar === false ? "no" : ""}
-                onValueChange={(v) => {
+              <YesNo
+                value={company.existsInRegistrar}
+                onChange={(v) => {
                   const updated = [...(info.newCompanies || [])];
-                  updated[idx] = { ...updated[idx], existsInRegistrar: v === "yes" };
+                  updated[idx] = { ...updated[idx], existsInRegistrar: v };
                   setInfo({ newCompanies: updated });
                 }}
-                className="flex flex-row-reverse gap-4 justify-end"
-              >
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="yes" id={`${prefix}reg${idx}Yes`} />
-                  <Label htmlFor={`${prefix}reg${idx}Yes`}>כן</Label>
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="no" id={`${prefix}reg${idx}No`} />
-                  <Label htmlFor={`${prefix}reg${idx}No`}>לא</Label>
-                </div>
-              </RadioGroup>
+                prefix={`${prefix}reg${idx}`}
+                name="reg"
+              />
             </div>
 
             {company.existsInRegistrar === false && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <Label className="font-semibold">3 שמות מבוקשים</Label>
                 {[1, 2, 3].map((n) => (
                   <Input
@@ -490,24 +415,16 @@ export const Step2BusinessInfo = () => {
 
             <div className="space-y-2">
               <Label>האם החברה צפויה להעסיק עובדים?</Label>
-              <RadioGroup
-                value={company.planningEmployees === true ? "yes" : company.planningEmployees === false ? "no" : ""}
-                onValueChange={(v) => {
+              <YesNo
+                value={company.planningEmployees}
+                onChange={(v) => {
                   const updated = [...(info.newCompanies || [])];
-                  updated[idx] = { ...updated[idx], planningEmployees: v === "yes" };
+                  updated[idx] = { ...updated[idx], planningEmployees: v };
                   setInfo({ newCompanies: updated });
                 }}
-                className="flex flex-row-reverse gap-4 justify-end"
-              >
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="yes" id={`${prefix}emp${idx}Yes`} />
-                  <Label htmlFor={`${prefix}emp${idx}Yes`}>כן</Label>
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="no" id={`${prefix}emp${idx}No`} />
-                  <Label htmlFor={`${prefix}emp${idx}No`}>לא</Label>
-                </div>
-              </RadioGroup>
+                prefix={`${prefix}emp${idx}`}
+                name="emp"
+              />
             </div>
           </div>
         ))}
@@ -515,29 +432,29 @@ export const Step2BusinessInfo = () => {
     );
   };
 
-  // ─── Nonprofit message ───
+  // ─── Nonprofit ───
   const renderNonprofitMessage = (name: string) => (
-    <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-      <h3 className="text-xl font-bold text-primary mb-2">עמותה - {name}</h3>
+    <div className="p-5 bg-primary/5 rounded-xl border border-primary/15">
+      <h3 className="text-xl font-bold text-primary mb-2">עמותה – {name}</h3>
       <p className="text-muted-foreground">ניצור איתך קשר למטרת קידום העסק</p>
     </div>
   );
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-2xl font-bold text-foreground">
-        חלק ב׳ – מידע נחוץ כדי להרוויח את השירות שלנו – פרטי העסק
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold text-foreground">
+        חלק ב׳ –מידע נחוץ כדי להרוויח את השירות שלנו – פרטי העסק
       </h2>
 
       {/* User sections */}
-      {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userGender)}
-      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender)}
+      {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
+      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
       {userHasNonprofit && renderNonprofitMessage(userName)}
       {userHasCompany && renderCompany(businessInfo, setBusinessInfo, userName, userGender)}
 
       {/* Spouse sections */}
-      {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, "sp_")}
-      {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, "sp_")}
+      {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_")}
+      {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasNonprofit && renderNonprofitMessage(spouseName)}
       {isMarried && spouseHasCompany && renderCompany(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, "sp_")}
     </div>
