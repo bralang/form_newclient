@@ -92,14 +92,14 @@ export const Step3Documents = () => {
             onChange={(files) => setDocumentsInfo({ idCardFiles: files ? Array.from(files) : undefined })}
           />
 
-          {detailedInfo.additionalIdTypes.includes("license") && (
+          {detailedInfo.additionalIdTypes?.includes("license") && (
             <FileUpload
               id="licenseFile"
               label="העלאת רישיון נהיגה"
               onChange={(files) => setDocumentsInfo({ licenseFile: files?.[0] })}
             />
           )}
-          {detailedInfo.additionalIdTypes.includes("passport") && (
+          {detailedInfo.additionalIdTypes?.includes("passport") && (
             <FileUpload
               id="passportFile"
               label="העלאת דרכון"
@@ -122,14 +122,14 @@ export const Step3Documents = () => {
               onChange={(files) => setDocumentsInfo({ spouseIdCardFiles: files ? Array.from(files) : undefined })}
             />
 
-            {spouseInfo.additionalIdTypes.includes("license") && (
+            {spouseInfo.additionalIdTypes?.includes("license") && (
               <FileUpload
                 id="spouseLicenseFile"
                 label="העלאת רישיון נהיגה"
                 onChange={(files) => setDocumentsInfo({ spouseLicenseFile: files?.[0] })}
               />
             )}
-            {spouseInfo.additionalIdTypes.includes("passport") && (
+            {spouseInfo.additionalIdTypes?.includes("passport") && (
               <FileUpload
                 id="spousePassportFile"
                 label="העלאת דרכון"
