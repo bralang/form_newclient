@@ -2,97 +2,62 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
+// ─── Step 1 Interfaces ─────────────────────────────
+
 export interface PersonalInfo {
   firstName: string;
   lastName: string;
-  gender: "male" | "female" | "";
-  idNumber: string;
-  birthDate: string;
+  phone: string;
+  email: string;
   maritalStatus: "single" | "married" | "";
-  hasChildren: boolean;
-  numberOfChildren?: number;
-  spouseName?: string;
-  spouseIdNumber?: string;
-  spouseBirthDate?: string;
+  spouseName: string;
+  step1CompletedAt?: string;
   ref?: string;
 }
 
-export interface ContactInfo {
-  phone: string;
-  email: string;
-  preferPhoneOverEmail: boolean;
-  spousePhone?: string;
-  spouseEmail?: string;
-  homePhone?: string;
-  address?: {
-    street: string;
-    number: string;
-    city: string;
-  };
-}
-
-export interface IdentificationInfo {
-  idCardFiles?: File[];
-  additionalIdTypes?: ("parentId" | "license" | "passport")[];
-  additionalIdNumber?: string;
-  additionalIdFile?: File;
-  licenseNumber?: string;
-  licenseFile?: File;
-  passportNumber?: string;
-  passportFile?: File;
-  spouseIdCardFiles?: File[];
-  spouseAdditionalIdTypes?: ("parentId" | "license" | "passport")[];
-  spouseAdditionalIdNumber?: string;
-  spouseAdditionalIdFile?: File;
-  spouseLicenseNumber?: string;
-  spouseLicenseFile?: File;
-  spousePassportNumber?: string;
-  spousePassportFile?: File;
-}
-
 export interface ServiceType {
-  purposes: string[];
-  spouseEmploymentStatus?: "unemployed" | "employee" | "business_owner" | "wants_business" | "shareholder" | "";
+  userPurposes: string[];
+  spousePurposes: string[];
+}
+
+// ─── Step 2 Interfaces ─────────────────────────────
+
+export interface DetailedPersonalInfo {
+  idNumber: string;
+  homePhone: string;
+  gender: "male" | "female" | "";
+  birthDate: string;
+  availability: string;
+  detailedMaritalStatus: string;
+  additionalIdType: "parentId" | "license" | "passport" | "";
+  additionalIdNumber: string;
+}
+
+export interface SpouseDetailedInfo {
+  idNumber: string;
+  email: string;
+  phone: string;
+  gender: "male" | "female" | "";
+  additionalIdType: "parentId" | "license" | "passport" | "";
+  additionalIdNumber: string;
+  availability: string;
 }
 
 export interface BusinessInfo {
-  businessName?: string;
-  businessField?: string;
-  businessType?: "exempt" | "authorized" | "licensed" | "company" | "nonprofit" | "";
-  startDate?: string;
-  businessAddress?: {
-    street: string;
-    number: string;
-    city: string;
-  };
-  isHomeOffice?: boolean;
-  isSmallBusiness?: boolean;
+  // Common
   ownershipType?: "sole" | "partnership" | "";
-  businessOffering?: "products" | "services" | "both" | "";
+  businessNumber?: string;
   hasEmployees?: boolean;
-  companyRegistrationFile?: File;
-  leaseAgreementFile?: File;
-  documentMethod?: "summit" | "manual" | "software" | "";
-  otherSoftwareName?: string;
-  softwareUsername?: string;
-  softwarePassword?: string;
-  planningEmployees?: boolean;
-  expectedRevenue?: string;
-  chosenBusinessName?: string;
-  // Business bank account fields
-  hasSeparateBankAccount?: boolean;
-  businessBankDetails?: {
-    bank: string;
-    branch: string;
-    accountNumber: string;
-    accountHolder: string;
-  };
-  businessBankConfirmationFile?: File;
-}
 
-export interface FinancialInfo {
-  hasWealthDeclaration: boolean;
-  wealthDeclarationFile?: File;
+  // New business
+  businessName?: string;
+  isUnemployedOrMaternity?: boolean;
+  businessField?: string;
+  businessType?: "exempt" | "authorized" | "";
+  wantSmallBusiness?: boolean;
+  isHomeOffice?: boolean;
+  businessAddress?: { street: string; number: string; city: string };
+  hasSeparateBankAccount?: boolean;
   bankDetails?: {
     bank: string;
     branch: string;
@@ -100,95 +65,256 @@ export interface FinancialInfo {
     accountHolder: string;
   };
   bankConfirmationFile?: File;
+  leaseAgreementFile?: File;
+  planningEmployees?: boolean;
+  activityStartDate?: string;
+  expectedRevenue?: string;
+
+  // Company (purpose 4)
+  existingCompanyCount?: number;
+  newCompanyCount?: number;
+  existingCompanies?: Array<{ name: string; companyNumber: string }>;
+  newCompanies?: Array<{
+    existsInRegistrar?: boolean;
+    requestedName1?: string;
+    requestedName2?: string;
+    requestedName3?: string;
+    shareholderType?: "alone" | "other" | "";
+    shareholderDetails?: string;
+    planningEmployees?: boolean;
+  }>;
 }
+
+// ─── Step 3 Interfaces ─────────────────────────────
+
+export interface DocumentsInfo {
+  idCardFiles?: File[];
+  parentIdNumber?: string;
+  licenseNumber?: string;
+  passportNumber?: string;
+  licenseFile?: File;
+  passportFile?: File;
+
+  spouseIdCardFiles?: File[];
+  spouseParentIdNumber?: string;
+  spouseLicenseNumber?: string;
+  spousePassportNumber?: string;
+  spouseLicenseFile?: File;
+  spousePassportFile?: File;
+
+  bankConfirmationFile?: File;
+  leaseAgreementFile?: File;
+  spouseBankConfirmationFile?: File;
+  spouseLeaseAgreementFile?: File;
+
+  incorporationFiles?: File[];
+  registrarExtractFile?: File;
+  companyBankConfirmationFile?: File;
+}
+
+// ─── Step 4 Interfaces ─────────────────────────────
 
 export interface FeedbackInfo {
   agreeToNotifications: boolean;
-  feedback?: string;
-  openQuestion?: string;
-  hasScheduledMeeting?: boolean;
-  preferredMeetingDate?: string;
-  personalQuestion?: string;
+  hasScheduledMeeting: boolean;
+  preferredMeetingDate: string;
+  finalQuestion: string;
 }
+
+// ─── Context Type ───────────────────────────────────
 
 interface FormContextType {
   currentStep: number;
   setCurrentStep: (step: number) => void;
+
   personalInfo: PersonalInfo;
   setPersonalInfo: (data: Partial<PersonalInfo>) => void;
-  contactInfo: ContactInfo;
-  setContactInfo: (data: Partial<ContactInfo>) => void;
-  identificationInfo: IdentificationInfo;
-  setIdentificationInfo: (data: Partial<IdentificationInfo>) => void;
+
   serviceType: ServiceType;
   setServiceType: (data: Partial<ServiceType>) => void;
+
+  detailedInfo: DetailedPersonalInfo;
+  setDetailedInfo: (data: Partial<DetailedPersonalInfo>) => void;
+
+  spouseInfo: SpouseDetailedInfo;
+  setSpouseInfo: (data: Partial<SpouseDetailedInfo>) => void;
+
   businessInfo: BusinessInfo;
   setBusinessInfo: (data: Partial<BusinessInfo>) => void;
+
   spouseBusinessInfo: BusinessInfo;
   setSpouseBusinessInfo: (data: Partial<BusinessInfo>) => void;
-  financialInfo: FinancialInfo;
-  setFinancialInfo: (data: Partial<FinancialInfo>) => void;
+
+  documentsInfo: DocumentsInfo;
+  setDocumentsInfo: (data: Partial<DocumentsInfo>) => void;
+
   feedbackInfo: FeedbackInfo;
   setFeedbackInfo: (data: Partial<FeedbackInfo>) => void;
+
   sendToWebhook: (
     url: string,
     data: any,
-    options?: {
-      silent?: boolean;
-    }
+    options?: { silent?: boolean }
   ) => Promise<boolean>;
 }
+
+// ─── Context ────────────────────────────────────────
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
 
 export const useFormContext = () => {
   const context = useContext(FormContext);
-  if (!context) {
-    throw new Error("useFormContext must be used within FormProvider");
-  }
+  if (!context) throw new Error("useFormContext must be used within FormProvider");
   return context;
 };
 
-export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// ─── Provider ───────────────────────────────────────
+
+export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [personalInfo, setPersonalInfoState] = useState<PersonalInfo>({
+
+  // Step 1
+  const [personalInfo, setPI] = useState<PersonalInfo>({
     firstName: "",
     lastName: "",
-    gender: "",
-    idNumber: "",
-    birthDate: "",
-    maritalStatus: "",
-    hasChildren: false,
-  });
-  const [contactInfo, setContactInfoState] = useState<ContactInfo>({
     phone: "",
     email: "",
-    preferPhoneOverEmail: false,
+    maritalStatus: "",
+    spouseName: "",
   });
-  const [identificationInfo, setIdentificationInfoState] = useState<IdentificationInfo>({});
-  const [serviceType, setServiceTypeState] = useState<ServiceType>({
-    purposes: [],
-  });
-  const [businessInfo, setBusinessInfoState] = useState<BusinessInfo>({
-    isHomeOffice: false,
-    hasEmployees: false,
-    planningEmployees: false,
-  });
-  const [spouseBusinessInfo, setSpouseBusinessInfoState] = useState<BusinessInfo>({
-    isHomeOffice: false,
-    hasEmployees: false,
-    planningEmployees: false,
-  });
-  const [financialInfo, setFinancialInfoState] = useState<FinancialInfo>({
-    hasWealthDeclaration: false,
-  });
-  const [feedbackInfo, setFeedbackInfoState] = useState<FeedbackInfo>({
-    agreeToNotifications: false,
+  const [serviceType, setST] = useState<ServiceType>({
+    userPurposes: [],
+    spousePurposes: [],
   });
 
-  // Load from sessionStorage on mount
+  // Step 2
+  const [detailedInfo, setDI] = useState<DetailedPersonalInfo>({
+    idNumber: "",
+    homePhone: "",
+    gender: "",
+    birthDate: "",
+    availability: "",
+    detailedMaritalStatus: "",
+    additionalIdType: "",
+    additionalIdNumber: "",
+  });
+  const [spouseInfo, setSI] = useState<SpouseDetailedInfo>({
+    idNumber: "",
+    email: "",
+    phone: "",
+    gender: "",
+    additionalIdType: "",
+    additionalIdNumber: "",
+    availability: "",
+  });
+  const [businessInfo, setBI] = useState<BusinessInfo>({});
+  const [spouseBusinessInfo, setSBI] = useState<BusinessInfo>({});
+
+  // Step 3
+  const [documentsInfo, setDocsI] = useState<DocumentsInfo>({});
+
+  // Step 4
+  const [feedbackInfo, setFI] = useState<FeedbackInfo>({
+    agreeToNotifications: false,
+    hasScheduledMeeting: false,
+    preferredMeetingDate: "",
+    finalQuestion: "",
+  });
+
+  // ─── Setters ──────────────────────────
+  const setPersonalInfo = (d: Partial<PersonalInfo>) =>
+    setPI((p) => ({ ...p, ...d }));
+  const setServiceType = (d: Partial<ServiceType>) =>
+    setST((p) => ({ ...p, ...d }));
+  const setDetailedInfo = (d: Partial<DetailedPersonalInfo>) =>
+    setDI((p) => ({ ...p, ...d }));
+  const setSpouseInfo = (d: Partial<SpouseDetailedInfo>) =>
+    setSI((p) => ({ ...p, ...d }));
+  const setBusinessInfo = (d: Partial<BusinessInfo>) =>
+    setBI((p) => ({ ...p, ...d }));
+  const setSpouseBusinessInfo = (d: Partial<BusinessInfo>) =>
+    setSBI((p) => ({ ...p, ...d }));
+  const setDocumentsInfo = (d: Partial<DocumentsInfo>) =>
+    setDocsI((p) => ({ ...p, ...d }));
+  const setFeedbackInfo = (d: Partial<FeedbackInfo>) =>
+    setFI((p) => ({ ...p, ...d }));
+
+  // ─── Session Storage: Save ────────────
   useEffect(() => {
-    const safeParse = <T,>(raw: string | null): T | null => {
+    sessionStorage.setItem("formStep", String(currentStep));
+  }, [currentStep]);
+
+  useEffect(() => {
+    sessionStorage.setItem("personalInfo", JSON.stringify(personalInfo));
+  }, [personalInfo]);
+
+  useEffect(() => {
+    sessionStorage.setItem("serviceType", JSON.stringify(serviceType));
+  }, [serviceType]);
+
+  useEffect(() => {
+    sessionStorage.setItem("detailedInfo", JSON.stringify(detailedInfo));
+  }, [detailedInfo]);
+
+  useEffect(() => {
+    sessionStorage.setItem("spouseInfo", JSON.stringify(spouseInfo));
+  }, [spouseInfo]);
+
+  useEffect(() => {
+    const stripFiles = (obj: any) => {
+      const clean: Record<string, any> = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (v instanceof File || (Array.isArray(v) && v[0] instanceof File))
+          continue;
+        clean[k] = v;
+      }
+      return clean;
+    };
+    sessionStorage.setItem("businessInfo", JSON.stringify(stripFiles(businessInfo)));
+  }, [businessInfo]);
+
+  useEffect(() => {
+    const stripFiles = (obj: any) => {
+      const clean: Record<string, any> = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (v instanceof File || (Array.isArray(v) && v[0] instanceof File))
+          continue;
+        clean[k] = v;
+      }
+      return clean;
+    };
+    sessionStorage.setItem(
+      "spouseBusinessInfo",
+      JSON.stringify(stripFiles(spouseBusinessInfo))
+    );
+  }, [spouseBusinessInfo]);
+
+  useEffect(() => {
+    const stripFiles = (obj: any) => {
+      const clean: Record<string, any> = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (v instanceof File || (Array.isArray(v) && v[0] instanceof File))
+          continue;
+        clean[k] = v;
+      }
+      return clean;
+    };
+    sessionStorage.setItem(
+      "documentsInfo",
+      JSON.stringify(stripFiles(documentsInfo))
+    );
+  }, [documentsInfo]);
+
+  useEffect(() => {
+    sessionStorage.setItem("feedbackInfo", JSON.stringify(feedbackInfo));
+  }, [feedbackInfo]);
+
+  // ─── Session Storage: Load ────────────
+  useEffect(() => {
+    const parse = <T,>(key: string): T | null => {
+      const raw = sessionStorage.getItem(key);
       if (!raw) return null;
       try {
         return JSON.parse(raw) as T;
@@ -197,207 +323,51 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    const asBool = (v: unknown) => v === true || v === "true";
-
     try {
-      const savedStep = sessionStorage.getItem("formStep");
+      const step = Number(sessionStorage.getItem("formStep"));
+      if (step >= 1 && step <= 4) setCurrentStep(step);
 
-      const savedPersonalInfo = safeParse<PersonalInfo>(sessionStorage.getItem("personalInfo"));
-      const savedContactInfo = safeParse<ContactInfo>(sessionStorage.getItem("contactInfo"));
-      const savedIdentificationInfo = safeParse<IdentificationInfo>(
-        sessionStorage.getItem("identificationInfo")
-      );
-      const savedServiceType = safeParse<ServiceType>(sessionStorage.getItem("serviceType"));
-      const savedBusinessInfo = safeParse<BusinessInfo>(sessionStorage.getItem("businessInfo"));
-      const savedSpouseBusinessInfo = safeParse<BusinessInfo>(sessionStorage.getItem("spouseBusinessInfo"));
-      const savedFinancialInfo = safeParse<FinancialInfo>(sessionStorage.getItem("financialInfo"));
-      const savedFeedbackInfo = safeParse<FeedbackInfo>(sessionStorage.getItem("feedbackInfo"));
+      const pi = parse<PersonalInfo>("personalInfo");
+      if (pi) setPI((prev) => ({ ...prev, ...pi }));
 
-      if (savedStep) {
-        const step = Number(savedStep);
-        setCurrentStep(Number.isFinite(step) && step >= 1 && step <= 4 ? step : 1);
-      }
-
-      if (savedPersonalInfo) {
-        setPersonalInfoState((prev) => {
-          // If the user already typed something before hydration finished, keep their current values.
-          const merged = { ...savedPersonalInfo, ...prev } as PersonalInfo;
-
-          return {
-            ...merged,
-            gender: merged.gender === "male" || merged.gender === "female" ? merged.gender : "",
-            maritalStatus:
-              merged.maritalStatus === "single" || merged.maritalStatus === "married"
-                ? merged.maritalStatus
-                : "",
-            hasChildren: asBool((merged as any).hasChildren),
-          };
+      const st = parse<ServiceType>("serviceType");
+      if (st)
+        setST({
+          userPurposes: Array.isArray(st.userPurposes) ? st.userPurposes : [],
+          spousePurposes: Array.isArray(st.spousePurposes)
+            ? st.spousePurposes
+            : [],
         });
-      }
 
-      if (savedContactInfo) {
-        setContactInfoState((prev) => ({
-          ...prev,
-          ...savedContactInfo,
-          preferPhoneOverEmail: asBool((savedContactInfo as any).preferPhoneOverEmail),
-        }));
-      }
+      const di = parse<DetailedPersonalInfo>("detailedInfo");
+      if (di) setDI((prev) => ({ ...prev, ...di }));
 
-      if (savedIdentificationInfo) {
-        const normalizeIdTypes = (v: unknown): ("parentId" | "license" | "passport")[] => {
-          if (!Array.isArray(v)) return [];
-          return v.filter((x) => x === "parentId" || x === "license" || x === "passport");
-        };
+      const si = parse<SpouseDetailedInfo>("spouseInfo");
+      if (si) setSI((prev) => ({ ...prev, ...si }));
 
-        // Prevent rare race: user selects an option before sessionStorage hydration finishes.
-        // Keep user's current selection (prev) and only fill missing values from storage.
-        setIdentificationInfoState((prev) => {
-          const merged = { ...savedIdentificationInfo, ...prev } as IdentificationInfo;
-          return {
-            ...merged,
-            additionalIdTypes: normalizeIdTypes((merged as any).additionalIdTypes),
-            spouseAdditionalIdTypes: normalizeIdTypes((merged as any).spouseAdditionalIdTypes),
-          };
-        });
-      }
+      const bi = parse<BusinessInfo>("businessInfo");
+      if (bi) setBI((prev) => ({ ...prev, ...bi }));
 
-      if (savedServiceType) {
-        setServiceTypeState({
-          ...savedServiceType,
-          purposes: Array.isArray(savedServiceType.purposes) ? savedServiceType.purposes : [],
-        });
-      }
+      const sbi = parse<BusinessInfo>("spouseBusinessInfo");
+      if (sbi) setSBI((prev) => ({ ...prev, ...sbi }));
 
-      if (savedBusinessInfo) {
-        setBusinessInfoState((prev) => {
-          const merged = { ...savedBusinessInfo, ...prev } as BusinessInfo;
-          return {
-            ...merged,
-            isHomeOffice: asBool((merged as any).isHomeOffice),
-            hasEmployees: asBool((merged as any).hasEmployees),
-            planningEmployees: asBool((merged as any).planningEmployees),
-          };
-        });
-      }
+      const docs = parse<DocumentsInfo>("documentsInfo");
+      if (docs) setDocsI((prev) => ({ ...prev, ...docs }));
 
-      if (savedSpouseBusinessInfo) {
-        setSpouseBusinessInfoState((prev) => ({
-          ...prev,
-          ...savedSpouseBusinessInfo,
-          isHomeOffice: asBool((savedSpouseBusinessInfo as any).isHomeOffice),
-          hasEmployees: asBool((savedSpouseBusinessInfo as any).hasEmployees),
-          planningEmployees: asBool((savedSpouseBusinessInfo as any).planningEmployees),
-        }));
-      }
-
-      if (savedFinancialInfo) {
-        setFinancialInfoState((prev) => ({
-          ...prev,
-          ...savedFinancialInfo,
-          hasWealthDeclaration: asBool((savedFinancialInfo as any).hasWealthDeclaration),
-        }));
-      }
-
-      if (savedFeedbackInfo) {
-        setFeedbackInfoState((prev) => ({
-          ...prev,
-          ...savedFeedbackInfo,
-          agreeToNotifications: asBool((savedFeedbackInfo as any).agreeToNotifications),
-        }));
-      }
+      const fi = parse<FeedbackInfo>("feedbackInfo");
+      if (fi) setFI((prev) => ({ ...prev, ...fi }));
     } catch (e) {
-      console.error("Failed loading form from sessionStorage:", e);
+      console.error("Failed loading form state:", e);
       sessionStorage.clear();
       setCurrentStep(1);
     }
   }, []);
 
-  // Save to sessionStorage on change
-  useEffect(() => {
-    sessionStorage.setItem("formStep", currentStep.toString());
-  }, [currentStep]);
-
-  useEffect(() => {
-    sessionStorage.setItem("personalInfo", JSON.stringify(personalInfo));
-  }, [personalInfo]);
-
-  useEffect(() => {
-    sessionStorage.setItem("contactInfo", JSON.stringify(contactInfo));
-  }, [contactInfo]);
-
-  useEffect(() => {
-    // Files can't be reliably persisted in sessionStorage. We only persist the serializable fields.
-    const {
-      idCardFile,
-      additionalIdFile,
-      spouseIdCardFile,
-      spouseAdditionalIdFile,
-      ...serializable
-    } = identificationInfo as any;
-
-    sessionStorage.setItem("identificationInfo", JSON.stringify(serializable));
-  }, [identificationInfo]);
-
-  useEffect(() => {
-    sessionStorage.setItem("serviceType", JSON.stringify(serviceType));
-  }, [serviceType]);
-
-  useEffect(() => {
-    sessionStorage.setItem("businessInfo", JSON.stringify(businessInfo));
-  }, [businessInfo]);
-
-  useEffect(() => {
-    sessionStorage.setItem("spouseBusinessInfo", JSON.stringify(spouseBusinessInfo));
-  }, [spouseBusinessInfo]);
-
-  useEffect(() => {
-    // Files can't be reliably persisted in sessionStorage. Persist serializable fields only.
-    const { wealthDeclarationFile, bankConfirmationFile, ...serializable } = financialInfo as any;
-    sessionStorage.setItem("financialInfo", JSON.stringify(serializable));
-  }, [financialInfo]);
-
-  useEffect(() => {
-    sessionStorage.setItem("feedbackInfo", JSON.stringify(feedbackInfo));
-  }, [feedbackInfo]);
-
-  const setPersonalInfo = (data: Partial<PersonalInfo>) => {
-    setPersonalInfoState((prev) => ({ ...prev, ...data }));
-  };
-
-  const setContactInfo = (data: Partial<ContactInfo>) => {
-    setContactInfoState((prev) => ({ ...prev, ...data }));
-  };
-
-  const setIdentificationInfo = (data: Partial<IdentificationInfo>) => {
-    setIdentificationInfoState((prev) => ({ ...prev, ...data }));
-  };
-
-  const setServiceType = (data: Partial<ServiceType>) => {
-    setServiceTypeState((prev) => ({ ...prev, ...data }));
-  };
-
-  const setBusinessInfo = (data: Partial<BusinessInfo>) => {
-    setBusinessInfoState((prev) => ({ ...prev, ...data }));
-  };
-
-  const setSpouseBusinessInfo = (data: Partial<BusinessInfo>) => {
-    setSpouseBusinessInfoState((prev) => ({ ...prev, ...data }));
-  };
-
-  const setFinancialInfo = (data: Partial<FinancialInfo>) => {
-    setFinancialInfoState((prev) => ({ ...prev, ...data }));
-  };
-
-  const setFeedbackInfo = (data: Partial<FeedbackInfo>) => {
-    setFeedbackInfoState((prev) => ({ ...prev, ...data }));
-  };
-
+  // ─── Webhook ──────────────────────────
   const sendToWebhook = async (
     url: string,
     data: any,
-    options?: {
-      silent?: boolean;
-    }
+    options?: { silent?: boolean }
   ): Promise<boolean> => {
     const N8N_ROUTES = [
       {
@@ -406,47 +376,29 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
       {
         prefix: "https://n8n.chasida.biz/webhook/",
-        // We keep the allowlist key format used by the backend proxy.
-        // Example: client-intake-step1 -> chasida-client-intake-step1
         toName: (path: string) => `chasida-${path}`,
       },
     ] as const;
 
     const notify = !options?.silent;
-
     const route = N8N_ROUTES.find((r) => url.startsWith(r.prefix));
 
-    console.log("sendToWebhook called", {
-      url,
-      via: route ? "n8n-proxy" : "direct",
-    });
-
     try {
-      // Prefer backend proxy for n8n to avoid CORS/network flakiness from the browser
       if (route) {
         const path = url.slice(route.prefix.length);
         const name = route.toName(path);
 
-        const { data: res, error } = await supabase.functions.invoke("n8n-proxy", {
-          body: { name, payload: data },
-        });
-
-        console.log("n8n-proxy result", {
-          name,
-          ok: Boolean(res?.ok),
-          upstream_status: res?.upstream_status,
-        });
+        const { data: res, error } = await supabase.functions.invoke(
+          "n8n-proxy",
+          { body: { name, payload: data } }
+        );
 
         if (error) throw new Error(error.message);
         if (!res?.ok) {
-          console.error("Webhook non-OK response (proxy):", {
-            url,
-            status: res?.upstream_status,
-            body: res?.upstream_body,
-          });
-          if (notify) {
-            toast.error(`שגיאה בשליחת הנתונים (סטטוס ${res?.upstream_status ?? "?"})`);
-          }
+          if (notify)
+            toast.error(
+              `שגיאה בשליחת הנתונים (סטטוס ${res?.upstream_status ?? "?"})`
+            );
           return false;
         }
 
@@ -461,42 +413,35 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const response = await fetch(url, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json; charset=utf-8",
-          },
+          headers: { "Content-Type": "application/json; charset=utf-8" },
           body: JSON.stringify(data),
           signal: controller.signal,
         });
-
-        const responseText = await response.text().catch(() => "");
 
         if (response.ok) {
           if (notify) toast.success("הנתונים נשלחו בהצלחה");
           return true;
         }
 
-        console.error("Webhook non-OK response:", {
-          url,
-          status: response.status,
-          body: responseText,
-        });
-        if (notify) toast.error(`שגיאה בשליחת הנתונים (סטטוס ${response.status})`);
+        if (notify)
+          toast.error(`שגיאה בשליחת הנתונים (סטטוס ${response.status})`);
         return false;
       } catch (error: any) {
         const isAbort = error?.name === "AbortError";
-        console.error("Webhook error:", error);
-        if (notify) toast.error(isAbort ? "פג זמן החיבור לשרת" : "שגיאה בחיבור לשרת");
+        if (notify)
+          toast.error(isAbort ? "פג זמן החיבור לשרת" : "שגיאה בחיבור לשרת");
         return false;
       } finally {
         clearTimeout(timeout);
       }
     } catch (error: any) {
-      console.error("Webhook proxy error:", error);
+      console.error("Webhook error:", error);
       if (notify) toast.error("שגיאה בחיבור לשרת");
       return false;
     }
   };
 
+  // ─── Render ───────────────────────────
   return (
     <FormContext.Provider
       value={{
@@ -504,18 +449,18 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentStep,
         personalInfo,
         setPersonalInfo,
-        contactInfo,
-        setContactInfo,
-        identificationInfo,
-        setIdentificationInfo,
         serviceType,
         setServiceType,
+        detailedInfo,
+        setDetailedInfo,
+        spouseInfo,
+        setSpouseInfo,
         businessInfo,
         setBusinessInfo,
         spouseBusinessInfo,
         setSpouseBusinessInfo,
-        financialInfo,
-        setFinancialInfo,
+        documentsInfo,
+        setDocumentsInfo,
         feedbackInfo,
         setFeedbackInfo,
         sendToWebhook,

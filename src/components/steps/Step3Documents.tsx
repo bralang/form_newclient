@@ -1,46 +1,63 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { FormNavigation } from "@/components/FormNavigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 export const Step3Documents = () => {
   const {
     personalInfo,
-    identificationInfo,
-    setIdentificationInfo,
+    detailedInfo,
+    spouseInfo,
+    serviceType,
+    businessInfo,
+    spouseBusinessInfo,
+    documentsInfo,
+    setDocumentsInfo,
     setCurrentStep,
     sendToWebhook,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
-  const additionalIdFieldsRef = useRef<HTMLDivElement | null>(null);
-  const spouseAdditionalIdFieldsRef = useRef<HTMLDivElement | null>(null);
+
+  const isMarried = personalInfo.maritalStatus === "married";
+  const userPurposes = serviceType.userPurposes;
+  const spousePurposes = serviceType.spousePurposes;
+
+  // Determine what documents are needed
+  const userHasAuthorized =
+    userPurposes.includes("new_business") &&
+    businessInfo.businessType === "authorized";
+  const spouseHasAuthorized =
+    spousePurposes.includes("new_business") &&
+    spouseBusinessInfo.businessType === "authorized";
+
+  const userNeedsLease =
+    userPurposes.includes("new_business") && businessInfo.isHomeOffice === false;
+  const spouseNeedsLease =
+    spousePurposes.includes("new_business") &&
+    spouseBusinessInfo.isHomeOffice === false;
+
+  const userHasCompany = userPurposes.includes("company");
+  const spouseHasCompany = spousePurposes.includes("company");
+
+  // Check if any existing companies (purpose 4)
+  const hasExistingCompanies =
+    (businessInfo.existingCompanyCount || 0) > 0 ||
+    (spouseBusinessInfo.existingCompanyCount || 0) > 0;
+  const hasNewCompaniesInRegistrar =
+    businessInfo.newCompanies?.some((c) => c.existsInRegistrar) ||
+    spouseBusinessInfo.newCompanies?.some((c) => c.existsInRegistrar);
 
   const handleNext = async () => {
-    console.log("Step3Documents: Next clicked");
     setLoading(true);
-    const success = await sendToWebhook(
-      "https://n8n.link-up.co.il/webhook/client-intake-step3-documents",
-      { identificationInfo }
+    sendToWebhook(
+      "https://n8n.chasida.biz/webhook/client-intake-step3",
+      { documentsInfo, personalInfo },
+      { silent: true }
     );
     setLoading(false);
-    if (success) {
-      setCurrentStep(4);
-    }
+    setCurrentStep(4);
   };
-
-  useEffect(() => {
-    if (identificationInfo.additionalIdTypes?.length) {
-      additionalIdFieldsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [identificationInfo.additionalIdTypes]);
-
-  useEffect(() => {
-    if (identificationInfo.spouseAdditionalIdTypes?.length) {
-      spouseAdditionalIdFieldsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [identificationInfo.spouseAdditionalIdTypes]);
 
   return (
     <div className="space-y-8">
@@ -49,279 +66,276 @@ export const Step3Documents = () => {
         <h2 className="text-xl font-bold text-foreground">עדכון מסמכים נגיש</h2>
       </div>
 
-      {/* Marketing Text Before Documents */}
+      {/* Marketing Text */}
       <div className="p-6 bg-gradient-to-r from-primary/10 to-secondary/30 rounded-lg space-y-4">
-        <h3 className="text-xl font-bold text-foreground">מסכימים להרוויח יותר מהעסק שלכם?</h3>
+        <h3 className="text-xl font-bold text-foreground">
+          מסכימים להרוויח יותר מהעסק שלכם?
+        </h3>
         <p className="text-muted-foreground">
           מסמיכים אותנו להיות המייצגים מול הרשויות?
         </p>
         <p className="text-sm text-muted-foreground">
           המסמכים שתעלו בשלב זה יתנו לנו את הרשות להוציא טופסי ייצוג לחתימה.
         </p>
-        <p className="text-lg font-semibold text-primary">מתקדמים...</p>
+        <p className="text-lg font-semibold text-primary">מתקדמים…</p>
       </div>
 
-      {/* Document Upload Section */}
+      {/* Document Uploads */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">העלאת מסמכים נחוצים</h2>
+        <h2 className="text-2xl font-bold text-foreground">
+          העלאת מסמכים נחוצים
+        </h2>
 
+        {/* User ID */}
         <div className="space-y-4 p-4 bg-muted rounded-lg">
-          <h3 className="font-semibold text-lg">מסמכי זיהוי עיקריים</h3>
+          <h3 className="font-semibold text-lg">
+            מסמכי זיהוי - {personalInfo.firstName || "שלי"}
+          </h3>
 
           <div className="space-y-2">
-            <Label htmlFor="idCardFiles">צילום תעודת זהות + ספח * (ניתן להעלות מספר קבצים)</Label>
+            <Label htmlFor="idCardFiles">
+              צילום ת.ז. + ספח * (ניתן להעלות מספר קבצים)
+            </Label>
             <Input
               id="idCardFiles"
               type="file"
               accept="image/*,.pdf"
               multiple
-              onChange={(e) => setIdentificationInfo({ idCardFiles: e.target.files ? Array.from(e.target.files) : undefined })}
+              onChange={(e) =>
+                setDocumentsInfo({
+                  idCardFiles: e.target.files
+                    ? Array.from(e.target.files)
+                    : undefined,
+                })
+              }
             />
           </div>
 
-          <div className="space-y-4">
-            <Label>אמצעי זיהוי נוסף (ניתן לבחור יותר מאחד)</Label>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <Checkbox
-                  id="parentId"
-                  checked={identificationInfo.additionalIdTypes?.includes("parentId") || false}
-                  onCheckedChange={(checked) => {
-                    const current = identificationInfo.additionalIdTypes || [];
-                    if (checked) {
-                      setIdentificationInfo({ additionalIdTypes: [...current, "parentId"] });
-                    } else {
-                      setIdentificationInfo({ additionalIdTypes: current.filter(t => t !== "parentId") });
-                    }
-                  }}
-                />
-                <Label htmlFor="parentId" className="cursor-pointer">
-                  מספר זהות של אחד ההורים
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <Checkbox
-                  id="license"
-                  checked={identificationInfo.additionalIdTypes?.includes("license") || false}
-                  onCheckedChange={(checked) => {
-                    const current = identificationInfo.additionalIdTypes || [];
-                    if (checked) {
-                      setIdentificationInfo({ additionalIdTypes: [...current, "license"] });
-                    } else {
-                      setIdentificationInfo({ additionalIdTypes: current.filter(t => t !== "license") });
-                    }
-                  }}
-                />
-                <Label htmlFor="license" className="cursor-pointer">
-                  רישיון נהיגה
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <Checkbox
-                  id="passport"
-                  checked={identificationInfo.additionalIdTypes?.includes("passport") || false}
-                  onCheckedChange={(checked) => {
-                    const current = identificationInfo.additionalIdTypes || [];
-                    if (checked) {
-                      setIdentificationInfo({ additionalIdTypes: [...current, "passport"] });
-                    } else {
-                      setIdentificationInfo({ additionalIdTypes: current.filter(t => t !== "passport") });
-                    }
-                  }}
-                />
-                <Label htmlFor="passport" className="cursor-pointer">
-                  דרכון ישראלי
-                </Label>
-              </div>
+          {/* Additional ID files based on step 2 selection */}
+          {(detailedInfo.additionalIdType === "license" ||
+            detailedInfo.additionalIdType === "passport") && (
+            <div className="space-y-2">
+              <Label htmlFor="addIdFile">
+                {detailedInfo.additionalIdType === "license"
+                  ? "העלאת רישיון נהיגה"
+                  : "העלאת דרכון"}
+              </Label>
+              <Input
+                id="addIdFile"
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) =>
+                  setDocumentsInfo({
+                    licenseFile:
+                      detailedInfo.additionalIdType === "license"
+                        ? e.target.files?.[0]
+                        : undefined,
+                    passportFile:
+                      detailedInfo.additionalIdType === "passport"
+                        ? e.target.files?.[0]
+                        : undefined,
+                  })
+                }
+              />
             </div>
-
-            {identificationInfo.additionalIdTypes?.includes("parentId") && (
-              <div ref={additionalIdFieldsRef} className="space-y-4 mr-6 p-3 border-r-2 border-primary/30">
-                <h4 className="font-medium">פרטי זהות הורה</h4>
-                <div className="space-y-2">
-                  <Label htmlFor="additionalIdNumber">מספר זהות של ההורה</Label>
-                  <Input
-                    id="additionalIdNumber"
-                    value={identificationInfo.additionalIdNumber || ""}
-                    onChange={(e) => setIdentificationInfo({ additionalIdNumber: e.target.value })}
-                  />
-                </div>
-              </div>
-            )}
-
-            {identificationInfo.additionalIdTypes?.includes("license") && (
-              <div className="space-y-4 mr-6 p-3 border-r-2 border-primary/30">
-                <h4 className="font-medium">פרטי רישיון נהיגה</h4>
-                <div className="space-y-2">
-                  <Label htmlFor="licenseNumber">מספר רישיון</Label>
-                  <Input
-                    id="licenseNumber"
-                    value={identificationInfo.licenseNumber || ""}
-                    onChange={(e) => setIdentificationInfo({ licenseNumber: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="licenseFile">העלאת קובץ רישיון</Label>
-                  <Input
-                    id="licenseFile"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) => setIdentificationInfo({ licenseFile: e.target.files?.[0] || undefined })}
-                  />
-                </div>
-              </div>
-            )}
-
-            {identificationInfo.additionalIdTypes?.includes("passport") && (
-              <div className="space-y-4 mr-6 p-3 border-r-2 border-primary/30">
-                <h4 className="font-medium">פרטי דרכון</h4>
-                <div className="space-y-2">
-                  <Label htmlFor="passportNumber">מספר דרכון</Label>
-                  <Input
-                    id="passportNumber"
-                    value={identificationInfo.passportNumber || ""}
-                    onChange={(e) => setIdentificationInfo({ passportNumber: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="passportFile">העלאת קובץ דרכון</Label>
-                  <Input
-                    id="passportFile"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) => setIdentificationInfo({ passportFile: e.target.files?.[0] || undefined })}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
-        {personalInfo.maritalStatus === "married" && (
+        {/* Spouse ID */}
+        {isMarried && (
           <div className="space-y-4 p-4 bg-muted rounded-lg">
-            <h3 className="font-semibold text-lg">מסמכי זיהוי של בן/בת הזוג</h3>
+            <h3 className="font-semibold text-lg">
+              מסמכי זיהוי - {personalInfo.spouseName || "בן/בת הזוג"}
+            </h3>
 
             <div className="space-y-2">
-              <Label htmlFor="spouseIdCardFiles">צילום תעודת זהות + ספח (ניתן להעלות מספר קבצים)</Label>
+              <Label htmlFor="spouseIdCardFiles">
+                צילום ת.ז. + ספח (ניתן להעלות מספר קבצים)
+              </Label>
               <Input
                 id="spouseIdCardFiles"
                 type="file"
                 accept="image/*,.pdf"
                 multiple
-                onChange={(e) => setIdentificationInfo({ spouseIdCardFiles: e.target.files ? Array.from(e.target.files) : undefined })}
+                onChange={(e) =>
+                  setDocumentsInfo({
+                    spouseIdCardFiles: e.target.files
+                      ? Array.from(e.target.files)
+                      : undefined,
+                  })
+                }
               />
             </div>
 
-            <div className="space-y-4">
-              <Label>אמצעי זיהוי נוסף (ניתן לבחור יותר מאחד)</Label>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Checkbox
-                    id="spouseParentId"
-                    checked={identificationInfo.spouseAdditionalIdTypes?.includes("parentId") || false}
-                    onCheckedChange={(checked) => {
-                      const current = identificationInfo.spouseAdditionalIdTypes || [];
-                      if (checked) {
-                        setIdentificationInfo({ spouseAdditionalIdTypes: [...current, "parentId"] });
-                      } else {
-                        setIdentificationInfo({ spouseAdditionalIdTypes: current.filter(t => t !== "parentId") });
-                      }
-                    }}
-                  />
-                  <Label htmlFor="spouseParentId" className="cursor-pointer">מספר זהות של אחד ההורים</Label>
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Checkbox
-                    id="spouseLicense"
-                    checked={identificationInfo.spouseAdditionalIdTypes?.includes("license") || false}
-                    onCheckedChange={(checked) => {
-                      const current = identificationInfo.spouseAdditionalIdTypes || [];
-                      if (checked) {
-                        setIdentificationInfo({ spouseAdditionalIdTypes: [...current, "license"] });
-                      } else {
-                        setIdentificationInfo({ spouseAdditionalIdTypes: current.filter(t => t !== "license") });
-                      }
-                    }}
-                  />
-                  <Label htmlFor="spouseLicense" className="cursor-pointer">רישיון נהיגה</Label>
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Checkbox
-                    id="spousePassport"
-                    checked={identificationInfo.spouseAdditionalIdTypes?.includes("passport") || false}
-                    onCheckedChange={(checked) => {
-                      const current = identificationInfo.spouseAdditionalIdTypes || [];
-                      if (checked) {
-                        setIdentificationInfo({ spouseAdditionalIdTypes: [...current, "passport"] });
-                      } else {
-                        setIdentificationInfo({ spouseAdditionalIdTypes: current.filter(t => t !== "passport") });
-                      }
-                    }}
-                  />
-                  <Label htmlFor="spousePassport" className="cursor-pointer">דרכון ישראלי</Label>
-                </div>
+            {(spouseInfo.additionalIdType === "license" ||
+              spouseInfo.additionalIdType === "passport") && (
+              <div className="space-y-2">
+                <Label htmlFor="spouseAddIdFile">
+                  {spouseInfo.additionalIdType === "license"
+                    ? "העלאת רישיון נהיגה"
+                    : "העלאת דרכון"}
+                </Label>
+                <Input
+                  id="spouseAddIdFile"
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) =>
+                    setDocumentsInfo({
+                      spouseLicenseFile:
+                        spouseInfo.additionalIdType === "license"
+                          ? e.target.files?.[0]
+                          : undefined,
+                      spousePassportFile:
+                        spouseInfo.additionalIdType === "passport"
+                          ? e.target.files?.[0]
+                          : undefined,
+                    })
+                  }
+                />
               </div>
+            )}
+          </div>
+        )}
 
-              {identificationInfo.spouseAdditionalIdTypes?.includes("parentId") && (
-                <div ref={spouseAdditionalIdFieldsRef} className="space-y-4 mr-6 p-3 border-r-2 border-primary/30">
-                  <h4 className="font-medium">פרטי זהות הורה</h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="spouseAdditionalIdNumber">מספר זהות של ההורה</Label>
-                    <Input
-                      id="spouseAdditionalIdNumber"
-                      value={identificationInfo.spouseAdditionalIdNumber || ""}
-                      onChange={(e) => setIdentificationInfo({ spouseAdditionalIdNumber: e.target.value })}
-                    />
-                  </div>
-                </div>
-              )}
+        {/* Bank confirmation for authorized business */}
+        {userHasAuthorized && (
+          <div className="space-y-2 p-4 bg-muted rounded-lg">
+            <h3 className="font-semibold text-lg">
+              אישור ניהול חשבון - {personalInfo.firstName}
+            </h3>
+            <Label htmlFor="bankConfFile">
+              אישור ניהול חשבון בנק / צילום שיק
+            </Label>
+            <Input
+              id="bankConfFile"
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e) =>
+                setDocumentsInfo({
+                  bankConfirmationFile: e.target.files?.[0] || undefined,
+                })
+              }
+            />
+          </div>
+        )}
 
-              {identificationInfo.spouseAdditionalIdTypes?.includes("license") && (
-                <div className="space-y-4 mr-6 p-3 border-r-2 border-primary/30">
-                  <h4 className="font-medium">פרטי רישיון נהיגה</h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="spouseLicenseNumber">מספר רישיון</Label>
-                    <Input
-                      id="spouseLicenseNumber"
-                      value={identificationInfo.spouseLicenseNumber || ""}
-                      onChange={(e) => setIdentificationInfo({ spouseLicenseNumber: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="spouseLicenseFile">העלאת קובץ רישיון</Label>
-                    <Input
-                      id="spouseLicenseFile"
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => setIdentificationInfo({ spouseLicenseFile: e.target.files?.[0] || undefined })}
-                    />
-                  </div>
-                </div>
-              )}
+        {spouseHasAuthorized && (
+          <div className="space-y-2 p-4 bg-muted rounded-lg">
+            <h3 className="font-semibold text-lg">
+              אישור ניהול חשבון - {personalInfo.spouseName}
+            </h3>
+            <Label htmlFor="spouseBankConfFile">
+              אישור ניהול חשבון בנק / צילום שיק
+            </Label>
+            <Input
+              id="spouseBankConfFile"
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e) =>
+                setDocumentsInfo({
+                  spouseBankConfirmationFile: e.target.files?.[0] || undefined,
+                })
+              }
+            />
+          </div>
+        )}
 
-              {identificationInfo.spouseAdditionalIdTypes?.includes("passport") && (
-                <div className="space-y-4 mr-6 p-3 border-r-2 border-primary/30">
-                  <h4 className="font-medium">פרטי דרכון</h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="spousePassportNumber">מספר דרכון</Label>
-                    <Input
-                      id="spousePassportNumber"
-                      value={identificationInfo.spousePassportNumber || ""}
-                      onChange={(e) => setIdentificationInfo({ spousePassportNumber: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="spousePassportFile">העלאת קובץ דרכון</Label>
-                    <Input
-                      id="spousePassportFile"
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => setIdentificationInfo({ spousePassportFile: e.target.files?.[0] || undefined })}
-                    />
-                  </div>
+        {/* Lease agreement if not home office */}
+        {userNeedsLease && (
+          <div className="space-y-2 p-4 bg-muted rounded-lg">
+            <h3 className="font-semibold text-lg">
+              הסכם שכירות לעסק - {personalInfo.firstName}
+            </h3>
+            <Input
+              type="file"
+              accept=".pdf,.doc,.docx,image/*"
+              onChange={(e) =>
+                setDocumentsInfo({
+                  leaseAgreementFile: e.target.files?.[0] || undefined,
+                })
+              }
+            />
+          </div>
+        )}
+
+        {spouseNeedsLease && (
+          <div className="space-y-2 p-4 bg-muted rounded-lg">
+            <h3 className="font-semibold text-lg">
+              הסכם שכירות לעסק - {personalInfo.spouseName}
+            </h3>
+            <Input
+              type="file"
+              accept=".pdf,.doc,.docx,image/*"
+              onChange={(e) =>
+                setDocumentsInfo({
+                  spouseLeaseAgreementFile: e.target.files?.[0] || undefined,
+                })
+              }
+            />
+          </div>
+        )}
+
+        {/* Company documents */}
+        {(userHasCompany || spouseHasCompany) && (
+          <div className="space-y-4 p-4 bg-muted rounded-lg">
+            <h3 className="font-semibold text-lg">מסמכי חברה</h3>
+
+            {hasExistingCompanies && (
+              <div className="space-y-2">
+                <Label htmlFor="incorporationFiles">
+                  תעודת התאגדות ו/או נסח רשם החברות
+                </Label>
+                <Input
+                  id="incorporationFiles"
+                  type="file"
+                  accept=".pdf,.doc,.docx,image/*"
+                  multiple
+                  onChange={(e) =>
+                    setDocumentsInfo({
+                      incorporationFiles: e.target.files
+                        ? Array.from(e.target.files)
+                        : undefined,
+                    })
+                  }
+                />
+              </div>
+            )}
+
+            {hasNewCompaniesInRegistrar && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="registrarFile">
+                    תעודת התאגדות ו/או נסח רשם החברות (חברה חדשה קיימת ברשם)
+                  </Label>
+                  <Input
+                    id="registrarFile"
+                    type="file"
+                    accept=".pdf,.doc,.docx,image/*"
+                    onChange={(e) =>
+                      setDocumentsInfo({
+                        registrarExtractFile: e.target.files?.[0] || undefined,
+                      })
+                    }
+                  />
                 </div>
-              )}
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="companyBankFile">
+                    אישור ניהול חשבון של החברה
+                  </Label>
+                  <Input
+                    id="companyBankFile"
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) =>
+                      setDocumentsInfo({
+                        companyBankConfirmationFile:
+                          e.target.files?.[0] || undefined,
+                      })
+                    }
+                  />
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

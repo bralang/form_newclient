@@ -2,117 +2,136 @@ import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { FormNavigation } from "@/components/FormNavigation";
-import { useEffect, useRef, useState, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { toast } from "sonner";
+import { Step2BusinessInfo } from "./Step2BusinessInfo";
+import { useState, useEffect } from "react";
+import { g } from "@/lib/gender-utils";
+import { Mail, Phone } from "lucide-react";
 
 export const Step2PersonalInfo = () => {
   const {
     personalInfo,
-    setPersonalInfo,
-    contactInfo,
-    setContactInfo,
+    detailedInfo,
+    setDetailedInfo,
+    spouseInfo,
+    setSpouseInfo,
     serviceType,
-    businessInfo,
-    setBusinessInfo,
-    spouseBusinessInfo,
-    setSpouseBusinessInfo,
     setCurrentStep,
     sendToWebhook,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
-  const [searchParams] = useSearchParams();
-  
-  // קריאת ref מה-URL (לדוגמה: ?ref=עיתון)
-  const refFromUrl = useMemo(() => searchParams.get("ref") || "", [searchParams]);
+  const [reminderDate, setReminderDate] = useState("");
 
-  const hasBusiness = serviceType.purposes?.some((p) =>
-    ["new_business", "existing_business", "shareholder"].includes(p)
-  );
-  const spouseHasBusiness = serviceType.spouseEmploymentStatus === "business_owner";
+  const isMarried = personalInfo.maritalStatus === "married";
+  const gender = detailedInfo.gender;
+  const hasAnyPurpose =
+    serviceType.userPurposes.length > 0 ||
+    serviceType.spousePurposes.length > 0;
+
+  // Auto-set spouse gender to opposite when user sets gender
+  useEffect(() => {
+    if (detailedInfo.gender && !spouseInfo.gender) {
+      setSpouseInfo({
+        gender: detailedInfo.gender === "male" ? "female" : "male",
+      });
+    }
+  }, [detailedInfo.gender]);
+
+  // Auto-fill business number from ID
+  useEffect(() => {
+    if (detailedInfo.idNumber) {
+      // This will be used by the business section
+    }
+  }, [detailedInfo.idNumber]);
+
+  const maritalOptions = isMarried
+    ? [
+        { value: "single", label: "רווק/ה" },
+        { value: "divorced", label: g(gender, "גרוש", "גרושה") },
+        { value: "widowed", label: g(gender, "אלמן", "אלמנה") },
+        { value: "separated", label: g(gender, "פרוד", "פרודה") },
+        { value: "married", label: g(gender, "נשוי", "נשואה") },
+      ]
+    : [
+        { value: "single", label: "רווק/ה" },
+        { value: "divorced", label: g(gender, "גרוש", "גרושה") },
+        { value: "widowed", label: g(gender, "אלמן", "אלמנה") },
+        { value: "separated", label: g(gender, "פרוד", "פרודה") },
+      ];
+
+  const additionalIdOptions = [
+    { value: "parentId", label: "ת.ז. הורים" },
+    { value: "license", label: "רישיון נהיגה" },
+    { value: "passport", label: "דרכון" },
+  ];
 
   const handleNext = async () => {
-    console.log("Step2PersonalInfo: Next clicked");
     setLoading(true);
-
-    const payload = {
-      ref: refFromUrl,
-      personalInfo: {
-        firstName: personalInfo.firstName,
-        lastName: personalInfo.lastName,
-        gender: personalInfo.gender,
-        idNumber: personalInfo.idNumber,
-        birthDate: personalInfo.birthDate,
-        maritalStatus: personalInfo.maritalStatus,
-        hasChildren: personalInfo.hasChildren,
-        numberOfChildren: personalInfo.numberOfChildren ?? null,
-        spouseName: personalInfo.spouseName ?? null,
-        spouseIdNumber: personalInfo.spouseIdNumber ?? null,
-        spouseBirthDate: personalInfo.spouseBirthDate ?? null,
-        ref: refFromUrl,
-      },
-      contactInfo,
-      businessBankInfo: {
-        hasSeparateBankAccount: businessInfo.hasSeparateBankAccount,
-        bankDetails: businessInfo.businessBankDetails,
-      },
-      spouseBusinessBankInfo: {
-        hasSeparateBankAccount: spouseBusinessInfo.hasSeparateBankAccount,
-        bankDetails: spouseBusinessInfo.businessBankDetails,
-      },
-    };
-
-    console.log("Step2PersonalInfo payload to webhook:", JSON.stringify(payload, null, 2));
-
-    const mainOk = await sendToWebhook("https://n8n.link-up.co.il/webhook/client-intake-step2-personal", payload);
-
-    const extraOk = await sendToWebhook("https://n8n.chasida.biz/webhook/client-intake-step2-personal", payload, {
-      silent: true,
-    });
-
+    sendToWebhook(
+      "https://n8n.chasida.biz/webhook/client-intake-step2",
+      { personalInfo, detailedInfo, spouseInfo, serviceType },
+      { silent: true }
+    );
     setLoading(false);
+    setCurrentStep(3);
+  };
 
-    if (!extraOk) {
-      toast.error("שגיאה בשליחה ל-webhook הנוסף");
-    }
+  const handleSendEmailList = async () => {
+    sendToWebhook(
+      "https://n8n.chasida.biz/webhook/send-document-list",
+      { email: personalInfo.email, personalInfo, serviceType },
+      { silent: false }
+    );
+  };
 
-    if (mainOk) {
-      setCurrentStep(3);
-    }
+  const handleSendReminder = async () => {
+    if (!reminderDate) return;
+    sendToWebhook(
+      "https://n8n.chasida.biz/webhook/send-reminder",
+      {
+        phone: personalInfo.phone,
+        reminderDate,
+        personalInfo,
+        serviceType,
+      },
+      { silent: false }
+    );
   };
 
   return (
     <div className="space-y-8">
       {/* Section Header */}
       <div className="text-center p-4 bg-muted/50 rounded-lg">
-        <h2 className="text-xl font-bold text-foreground">מידע נחוץ כדי להרוויח את השירות שלנו</h2>
-        <p className="text-sm text-muted-foreground mt-2">אנא מלא את כל הפרטים בקפידה</p>
+        <h2 className="text-xl font-bold text-foreground">
+          מידע נחוץ כדי להרוויח את השירות שלנו
+        </h2>
+        <p className="text-sm text-muted-foreground mt-2">פרטים שלכם</p>
       </div>
 
-      {/* Personal Info Section */}
+      {/* ─── User Personal Details ─── */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">פרטים אישיים</h2>
+        <h2 className="text-2xl font-bold text-foreground">
+          פרטים אישיים - {personalInfo.firstName || "שלי"}
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="firstName">שם פרטי *</Label>
+            <Label htmlFor="idNumber">ת.ז. *</Label>
             <Input
-              id="firstName"
-              value={personalInfo.firstName}
-              onChange={(e) => setPersonalInfo({ firstName: e.target.value })}
-              required
+              id="idNumber"
+              value={detailedInfo.idNumber}
+              onChange={(e) => setDetailedInfo({ idNumber: e.target.value })}
+              maxLength={9}
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="lastName">שם משפחה *</Label>
+            <Label htmlFor="homePhone">טלפון בבית</Label>
             <Input
-              id="lastName"
-              value={personalInfo.lastName}
-              onChange={(e) => setPersonalInfo({ lastName: e.target.value })}
-              required
+              id="homePhone"
+              type="tel"
+              value={detailedInfo.homePhone}
+              onChange={(e) => setDetailedInfo({ homePhone: e.target.value })}
             />
           </div>
         </div>
@@ -120,469 +139,304 @@ export const Step2PersonalInfo = () => {
         <div className="space-y-2">
           <Label>מגדר *</Label>
           <RadioGroup
-            value={personalInfo.gender}
-            onValueChange={(value: "male" | "female") => setPersonalInfo({ gender: value })}
+            value={detailedInfo.gender}
+            onValueChange={(v: any) => setDetailedInfo({ gender: v })}
             className="flex flex-row-reverse gap-4 justify-end"
           >
             <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="male" id="male" />
-              <Label htmlFor="male">זכר</Label>
+              <RadioGroupItem value="male" id="genderMale" />
+              <Label htmlFor="genderMale">זכר</Label>
             </div>
             <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="female" id="female" />
-              <Label htmlFor="female">נקבה</Label>
+              <RadioGroupItem value="female" id="genderFemale" />
+              <Label htmlFor="genderFemale">נקבה</Label>
             </div>
           </RadioGroup>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="idNumber">מספר זהות *</Label>
-            <Input
-              id="idNumber"
-              value={personalInfo.idNumber}
-              onChange={(e) => setPersonalInfo({ idNumber: e.target.value })}
-              maxLength={9}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="birthDate">תאריך לידה *</Label>
-            <Input
-              id="birthDate"
-              type="date"
-              value={personalInfo.birthDate}
-              onChange={(e) => setPersonalInfo({ birthDate: e.target.value })}
-              required
-            />
-          </div>
         </div>
 
         <div className="space-y-2">
-          <Label>מצב אישי *</Label>
+          <Label htmlFor="birthDate">תאריך לידה *</Label>
+          <Input
+            id="birthDate"
+            type="date"
+            value={detailedInfo.birthDate}
+            onChange={(e) => setDetailedInfo({ birthDate: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="availability">הזמינות שלי</Label>
+          <Input
+            id="availability"
+            value={detailedInfo.availability}
+            onChange={(e) => setDetailedInfo({ availability: e.target.value })}
+            placeholder="לדוגמה: ימים א-ה 9:00-17:00"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>מצב משפחתי מפורט</Label>
           <RadioGroup
-            value={personalInfo.maritalStatus}
-            onValueChange={(value: "single" | "married") => setPersonalInfo({ maritalStatus: value })}
-            className="flex flex-row-reverse gap-4 justify-end"
+            value={detailedInfo.detailedMaritalStatus}
+            onValueChange={(v: any) =>
+              setDetailedInfo({ detailedMaritalStatus: v })
+            }
+            className="flex flex-wrap flex-row-reverse gap-4 justify-end"
           >
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="single" id="single" />
-              <Label htmlFor="single">יחיד</Label>
-            </div>
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <RadioGroupItem value="married" id="married" />
-              <Label htmlFor="married">בן זוג</Label>
-            </div>
+            {maritalOptions.map((opt) => (
+              <div
+                key={opt.value}
+                className="flex items-center space-x-2 space-x-reverse"
+              >
+                <RadioGroupItem
+                  value={opt.value}
+                  id={`marital_${opt.value}`}
+                />
+                <Label htmlFor={`marital_${opt.value}`}>{opt.label}</Label>
+              </div>
+            ))}
           </RadioGroup>
         </div>
 
+        {/* Additional ID */}
         <div className="space-y-4">
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <Checkbox
-              id="hasChildren"
-              checked={personalInfo.hasChildren}
-              onCheckedChange={(checked) => setPersonalInfo({ hasChildren: checked === true })}
-            />
-            <Label htmlFor="hasChildren">יש לי ילדים</Label>
-          </div>
+          <Label>אמצעי זיהוי נוסף</Label>
+          <RadioGroup
+            value={detailedInfo.additionalIdType}
+            onValueChange={(v: any) =>
+              setDetailedInfo({ additionalIdType: v })
+            }
+            className="flex flex-wrap flex-row-reverse gap-4 justify-end"
+          >
+            {additionalIdOptions.map((opt) => (
+              <div
+                key={opt.value}
+                className="flex items-center space-x-2 space-x-reverse"
+              >
+                <RadioGroupItem
+                  value={opt.value}
+                  id={`addId_${opt.value}`}
+                />
+                <Label htmlFor={`addId_${opt.value}`}>{opt.label}</Label>
+              </div>
+            ))}
+          </RadioGroup>
 
-          {personalInfo.hasChildren && (
+          {detailedInfo.additionalIdType === "parentId" && (
             <div className="space-y-2 mr-6">
-              <Label htmlFor="numberOfChildren">מספר ילדים</Label>
+              <Label htmlFor="parentIdNum">מספר ת.ז. של ההורה</Label>
               <Input
-                id="numberOfChildren"
-                type="number"
-                min="0"
-                value={personalInfo.numberOfChildren || ""}
-                onChange={(e) => setPersonalInfo({ numberOfChildren: parseInt(e.target.value) || undefined })}
+                id="parentIdNum"
+                value={detailedInfo.additionalIdNumber}
+                onChange={(e) =>
+                  setDetailedInfo({ additionalIdNumber: e.target.value })
+                }
               />
             </div>
           )}
-        </div>
-
-        {personalInfo.maritalStatus === "married" && (
-          <div className="space-y-4 p-4 bg-muted rounded-lg">
-            <h3 className="font-semibold text-lg">פרטי בן/בת הזוג</h3>
-
-            <div className="space-y-2">
-              <Label htmlFor="spouseName">שם בן/בת הזוג</Label>
+          {(detailedInfo.additionalIdType === "license" ||
+            detailedInfo.additionalIdType === "passport") && (
+            <div className="space-y-2 mr-6">
+              <Label htmlFor="addIdNum">
+                {detailedInfo.additionalIdType === "license"
+                  ? "מספר רישיון"
+                  : "מספר דרכון"}
+              </Label>
               <Input
-                id="spouseName"
-                value={personalInfo.spouseName || ""}
-                onChange={(e) => setPersonalInfo({ spouseName: e.target.value })}
+                id="addIdNum"
+                value={detailedInfo.additionalIdNumber}
+                onChange={(e) =>
+                  setDetailedInfo({ additionalIdNumber: e.target.value })
+                }
               />
+              <p className="text-xs text-muted-foreground">
+                העלאת הטפסים תתבצע בשלב 3
+              </p>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="spouseIdNumber">מספר זהות</Label>
-                <Input
-                  id="spouseIdNumber"
-                  value={personalInfo.spouseIdNumber || ""}
-                  onChange={(e) => setPersonalInfo({ spouseIdNumber: e.target.value })}
-                  maxLength={9}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="spouseBirthDate">תאריך לידה</Label>
-                <Input
-                  id="spouseBirthDate"
-                  type="date"
-                  value={personalInfo.spouseBirthDate || ""}
-                  onChange={(e) => setPersonalInfo({ spouseBirthDate: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Contact Info Section */}
+      {/* ─── Spouse Personal Details ─── */}
+      {isMarried && (
+        <div className="space-y-6 pt-6 border-t border-border">
+          <h2 className="text-2xl font-bold text-foreground">
+            פרטים אישיים - {personalInfo.spouseName || "בן/בת הזוג"}
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="spouseId">ת.ז. *</Label>
+              <Input
+                id="spouseId"
+                value={spouseInfo.idNumber}
+                onChange={(e) => setSpouseInfo({ idNumber: e.target.value })}
+                maxLength={9}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="spouseEmail">מייל</Label>
+              <Input
+                id="spouseEmail"
+                type="email"
+                value={spouseInfo.email}
+                onChange={(e) => setSpouseInfo({ email: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="spousePhone">טלפון</Label>
+              <Input
+                id="spousePhone"
+                type="tel"
+                value={spouseInfo.phone}
+                onChange={(e) => setSpouseInfo({ phone: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>
+                מגדר{" "}
+                <span className="text-xs text-muted-foreground">
+                  (אוטומטי - ניתן לשנות)
+                </span>
+              </Label>
+              <RadioGroup
+                value={spouseInfo.gender}
+                onValueChange={(v: any) => setSpouseInfo({ gender: v })}
+                className="flex flex-row-reverse gap-4 justify-end"
+              >
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value="male" id="spouseGenderMale" />
+                  <Label htmlFor="spouseGenderMale">זכר</Label>
+                </div>
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <RadioGroupItem value="female" id="spouseGenderFemale" />
+                  <Label htmlFor="spouseGenderFemale">נקבה</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+
+          {/* Spouse Additional ID */}
+          <div className="space-y-4">
+            <Label>אמצעי זיהוי נוסף</Label>
+            <RadioGroup
+              value={spouseInfo.additionalIdType}
+              onValueChange={(v: any) =>
+                setSpouseInfo({ additionalIdType: v })
+              }
+              className="flex flex-wrap flex-row-reverse gap-4 justify-end"
+            >
+              {additionalIdOptions.map((opt) => (
+                <div
+                  key={opt.value}
+                  className="flex items-center space-x-2 space-x-reverse"
+                >
+                  <RadioGroupItem
+                    value={opt.value}
+                    id={`spouseAddId_${opt.value}`}
+                  />
+                  <Label htmlFor={`spouseAddId_${opt.value}`}>
+                    {opt.label}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+
+            {spouseInfo.additionalIdType === "parentId" && (
+              <div className="space-y-2 mr-6">
+                <Label htmlFor="spouseParentIdNum">מספר ת.ז. של ההורה</Label>
+                <Input
+                  id="spouseParentIdNum"
+                  value={spouseInfo.additionalIdNumber}
+                  onChange={(e) =>
+                    setSpouseInfo({ additionalIdNumber: e.target.value })
+                  }
+                />
+              </div>
+            )}
+            {(spouseInfo.additionalIdType === "license" ||
+              spouseInfo.additionalIdType === "passport") && (
+              <div className="space-y-2 mr-6">
+                <Label htmlFor="spouseAddIdNum">
+                  {spouseInfo.additionalIdType === "license"
+                    ? "מספר רישיון"
+                    : "מספר דרכון"}
+                </Label>
+                <Input
+                  id="spouseAddIdNum"
+                  value={spouseInfo.additionalIdNumber}
+                  onChange={(e) =>
+                    setSpouseInfo({ additionalIdNumber: e.target.value })
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  העלאת הטפסים תתבצע בשלב 3
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="spouseAvailability">הזמינות שלי</Label>
+            <Input
+              id="spouseAvailability"
+              value={spouseInfo.availability}
+              onChange={(e) => setSpouseInfo({ availability: e.target.value })}
+              placeholder="לדוגמה: ימים א-ה 9:00-17:00"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ─── Business Details Section ─── */}
+      {hasAnyPurpose && (
+        <div className="pt-8">
+          <div className="h-2 bg-gradient-to-l from-primary/30 to-secondary/50 rounded-full mb-8" />
+          <Step2BusinessInfo />
+        </div>
+      )}
+
+      {/* ─── Ending Text for Step 2 ─── */}
       <div className="space-y-6 pt-6 border-t border-border">
-        <h2 className="text-2xl font-bold text-foreground">פרטי התקשרות</h2>
+        <div className="p-6 bg-primary/10 rounded-lg border border-primary/20">
+          <h3 className="font-semibold text-lg text-foreground mb-3">
+            📋 כדי להתקדם עליך להכין את עצמך לשלב 3
+          </h3>
+          <p className="text-muted-foreground text-sm mb-4">
+            ניתן להעלות כאן בשאלון טפסים במיידי, או להשאיר כך את השאלון ולהכין
+            את המסמכים הנדרשים.
+          </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="phone">טלפון נייד *</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={contactInfo.phone}
-              onChange={(e) => setContactInfo({ phone: e.target.value })}
-              required
-            />
-          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" size="sm" onClick={handleSendEmailList}>
+              <Mail className="ml-2 h-4 w-4" />
+              קבלת רשימה למייל
+            </Button>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">דואר אלקטרוני *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={contactInfo.email}
-              onChange={(e) => setContactInfo({ email: e.target.value })}
-              required
-            />
-          </div>
-        </div>
-
-
-        <div className="flex items-center space-x-2 space-x-reverse">
-          <Checkbox
-            id="preferPhoneOverEmail"
-            checked={contactInfo.preferPhoneOverEmail}
-            onCheckedChange={(checked) => setContactInfo({ preferPhoneOverEmail: checked === true })}
-          />
-          <Label htmlFor="preferPhoneOverEmail">הזמינות שלי למייל נמוכה, מעדיף לקבל הודעות טלפוניות במקום במייל</Label>
-        </div>
-
-        {personalInfo.maritalStatus === "married" && (
-          <div className="space-y-4 p-4 bg-muted rounded-lg">
-            <h3 className="font-semibold text-lg">פרטי התקשרות של בן/בת הזוג</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="spousePhone">טלפון</Label>
-                <Input
-                  id="spousePhone"
-                  type="tel"
-                  value={contactInfo.spousePhone || ""}
-                  onChange={(e) => setContactInfo({ spousePhone: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="spouseEmail">דואר אלקטרוני</Label>
-                <Input
-                  id="spouseEmail"
-                  type="email"
-                  value={contactInfo.spouseEmail || ""}
-                  onChange={(e) => setContactInfo({ spouseEmail: e.target.value })}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="homePhone">טלפון בבית</Label>
-          <Input
-            id="homePhone"
-            type="tel"
-            value={contactInfo.homePhone || ""}
-            onChange={(e) => setContactInfo({ homePhone: e.target.value })}
-          />
-        </div>
-
-        <div className="space-y-4">
-          <Label className="text-lg font-semibold">כתובת מגורים *</Label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="street">רחוב *</Label>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleSendReminder}>
+                <Phone className="ml-2 h-4 w-4" />
+                תזכורת לטלפון
+              </Button>
               <Input
-                id="street"
-                value={contactInfo.address?.street || ""}
-                onChange={(e) =>
-                  setContactInfo({
-                    address: { ...contactInfo.address, street: e.target.value } as any,
-                  })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="number">מספר *</Label>
-              <Input
-                id="number"
-                value={contactInfo.address?.number || ""}
-                onChange={(e) =>
-                  setContactInfo({
-                    address: { ...contactInfo.address, number: e.target.value } as any,
-                  })
-                }
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">עיר *</Label>
-              <Input
-                id="city"
-                value={contactInfo.address?.city || ""}
-                onChange={(e) =>
-                  setContactInfo({
-                    address: { ...contactInfo.address, city: e.target.value } as any,
-                  })
-                }
-                required
+                type="date"
+                value={reminderDate}
+                onChange={(e) => setReminderDate(e.target.value)}
+                className="w-40 h-9"
               />
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Business Bank Account Section - for main user */}
-      {hasBusiness && (
-        <div className="space-y-6 pt-6 border-t border-border">
-          <h2 className="text-2xl font-bold text-foreground">חשבון בנק לעסק</h2>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Checkbox
-                id="hasSeparateBankAccount"
-                checked={Boolean(businessInfo.hasSeparateBankAccount)}
-                onCheckedChange={(checked) => setBusinessInfo({ hasSeparateBankAccount: checked === true })}
-              />
-              <Label htmlFor="hasSeparateBankAccount">האם יש חשבון בנק נפרד לעסק?</Label>
-            </div>
-
-            {businessInfo.hasSeparateBankAccount && (
-              <div className="space-y-4 p-4 bg-muted rounded-lg">
-                <h3 className="font-semibold text-lg">פרטי חשבון בנק העסק</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="businessBank">בנק</Label>
-                    <Input
-                      id="businessBank"
-                      value={businessInfo.businessBankDetails?.bank || ""}
-                      onChange={(e) =>
-                        setBusinessInfo({
-                          businessBankDetails: { ...businessInfo.businessBankDetails, bank: e.target.value } as any,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="businessBranch">סניף</Label>
-                    <Input
-                      id="businessBranch"
-                      value={businessInfo.businessBankDetails?.branch || ""}
-                      onChange={(e) =>
-                        setBusinessInfo({
-                          businessBankDetails: { ...businessInfo.businessBankDetails, branch: e.target.value } as any,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="businessAccountNumber">מספר חשבון</Label>
-                    <Input
-                      id="businessAccountNumber"
-                      value={businessInfo.businessBankDetails?.accountNumber || ""}
-                      onChange={(e) =>
-                        setBusinessInfo({
-                          businessBankDetails: {
-                            ...businessInfo.businessBankDetails,
-                            accountNumber: e.target.value,
-                          } as any,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="businessAccountHolder">שם בעל החשבון</Label>
-                    <Input
-                      id="businessAccountHolder"
-                      value={businessInfo.businessBankDetails?.accountHolder || ""}
-                      onChange={(e) =>
-                        setBusinessInfo({
-                          businessBankDetails: {
-                            ...businessInfo.businessBankDetails,
-                            accountHolder: e.target.value,
-                          } as any,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="businessBankConfirmationFile">אישור ניהול חשבון / צילום שיק</Label>
-                  <Input
-                    id="businessBankConfirmationFile"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) =>
-                      setBusinessInfo({ businessBankConfirmationFile: e.target.files?.[0] || undefined })
-                    }
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Business Bank Account Section - for spouse */}
-      {spouseHasBusiness && (
-        <div className="space-y-6 pt-6 border-t border-border">
-          <h2 className="text-2xl font-bold text-foreground">חשבון בנק לעסק של בן/בת הזוג</h2>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Checkbox
-                id="spouseHasSeparateBankAccount"
-                checked={Boolean(spouseBusinessInfo.hasSeparateBankAccount)}
-                onCheckedChange={(checked) => setSpouseBusinessInfo({ hasSeparateBankAccount: checked === true })}
-              />
-              <Label htmlFor="spouseHasSeparateBankAccount">האם יש חשבון בנק נפרד לעסק?</Label>
-            </div>
-
-            {spouseBusinessInfo.hasSeparateBankAccount && (
-              <div className="space-y-4 p-4 bg-muted rounded-lg">
-                <h3 className="font-semibold text-lg">פרטי חשבון בנק העסק של בן/בת הזוג</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="spouseBusinessBank">בנק</Label>
-                    <Input
-                      id="spouseBusinessBank"
-                      value={spouseBusinessInfo.businessBankDetails?.bank || ""}
-                      onChange={(e) =>
-                        setSpouseBusinessInfo({
-                          businessBankDetails: { ...spouseBusinessInfo.businessBankDetails, bank: e.target.value } as any,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="spouseBusinessBranch">סניף</Label>
-                    <Input
-                      id="spouseBusinessBranch"
-                      value={spouseBusinessInfo.businessBankDetails?.branch || ""}
-                      onChange={(e) =>
-                        setSpouseBusinessInfo({
-                          businessBankDetails: { ...spouseBusinessInfo.businessBankDetails, branch: e.target.value } as any,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="spouseBusinessAccountNumber">מספר חשבון</Label>
-                    <Input
-                      id="spouseBusinessAccountNumber"
-                      value={spouseBusinessInfo.businessBankDetails?.accountNumber || ""}
-                      onChange={(e) =>
-                        setSpouseBusinessInfo({
-                          businessBankDetails: {
-                            ...spouseBusinessInfo.businessBankDetails,
-                            accountNumber: e.target.value,
-                          } as any,
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="spouseBusinessAccountHolder">שם בעל החשבון</Label>
-                    <Input
-                      id="spouseBusinessAccountHolder"
-                      value={spouseBusinessInfo.businessBankDetails?.accountHolder || ""}
-                      onChange={(e) =>
-                        setSpouseBusinessInfo({
-                          businessBankDetails: {
-                            ...spouseBusinessInfo.businessBankDetails,
-                            accountHolder: e.target.value,
-                          } as any,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="spouseBusinessBankConfirmationFile">אישור ניהול חשבון / צילום שיק</Label>
-                  <Input
-                    id="spouseBusinessBankConfirmationFile"
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={(e) =>
-                      setSpouseBusinessInfo({ businessBankConfirmationFile: e.target.files?.[0] || undefined })
-                    }
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Preparation Note */}
-      <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-        <h3 className="font-semibold text-lg text-foreground mb-2">📋 הכנה לשלב הבא</h3>
-        <p className="text-muted-foreground mb-2">
-          כדי להתקדם עליך להכין את עצמך לשלב 3 - יש להכין מספר מסמכים בסיסיים אותם יש להעלות לשאלון.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          תוכל לקבל רשימה למייל לפי התשובות שענית איזה מסמכים אתה צריך, וגם תזכורת לטלפון / סיוע מהמזכירה.
-        </p>
       </div>
 
       <FormNavigation
         onNext={handleNext}
         onPrev={() => setCurrentStep(1)}
+        nextLabel="למעבר להעלאת המסמכים"
         loading={loading}
-        disabled={
-          !personalInfo.firstName ||
-          !personalInfo.lastName ||
-          !personalInfo.gender ||
-          !personalInfo.idNumber ||
-          !personalInfo.birthDate ||
-          !personalInfo.maritalStatus ||
-          !contactInfo.phone ||
-          !contactInfo.email ||
-          !contactInfo.address?.street ||
-          !contactInfo.address?.number ||
-          !contactInfo.address?.city
-        }
       />
     </div>
   );
