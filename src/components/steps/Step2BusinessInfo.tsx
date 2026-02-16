@@ -86,11 +86,7 @@ export const Step2BusinessInfo = () => {
         <p className="text-xs text-muted-foreground">לא חייבים לבחור שם עסק, ברירת המחדל היא שמך</p>
       </div>
 
-      <div className="space-y-2">
-        <Label>מספר עסק</Label>
-        <Input value={idNumber || ""} disabled className="bg-muted" />
-        <p className="text-xs text-muted-foreground">מספר העסק הוא מספר ת.ז. שלך</p>
-      </div>
+      {/* Business number = ID number, sent silently in webhook, not shown */}
 
       <div className="space-y-2">
         <Label>
@@ -117,6 +113,19 @@ export const Step2BusinessInfo = () => {
           </div>
         </RadioGroup>
       </div>
+
+      {/* Bank details - immediately after selecting authorized */}
+      {info.businessType === "authorized" && (
+        <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
+          <Label className="text-base font-semibold">פרטי חשבון</Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1"><Label>בנק</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} /></div>
+            <div className="space-y-1"><Label>סניף</Label><Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} /></div>
+            <div className="space-y-1"><Label>מספר חשבון</Label><Input value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} /></div>
+            <div className="space-y-1"><Label>שם בעל החשבון</Label><Input value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} /></div>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה רוצה להיות עוסק זעיר?", "האם את רוצה להיות עוסקת זעירה?")}</Label>
@@ -169,30 +178,6 @@ export const Step2BusinessInfo = () => {
         </div>
       )}
 
-      {/* Bank details - only for authorized */}
-      {info.businessType === "authorized" && (
-        <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
-          <Label className="text-base font-semibold">פרטי חשבון</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label>בנק</Label>
-              <Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} />
-            </div>
-            <div className="space-y-1">
-              <Label>סניף</Label>
-              <Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} />
-            </div>
-            <div className="space-y-1">
-              <Label>מספר חשבון</Label>
-              <Input value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} />
-            </div>
-            <div className="space-y-1">
-              <Label>שם בעל החשבון</Label>
-              <Input value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} />
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="space-y-2">
         <Label>האם העסק צפוי להעסיק עובדים?</Label>
@@ -239,18 +224,17 @@ export const Step2BusinessInfo = () => {
         </RadioGroup>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor={`${prefix}exBusinessNumber`}>מספר העוסק</Label>
-        <Input
-          id={`${prefix}exBusinessNumber`}
-          value={info.businessNumber || (info.ownershipType !== "partnership" ? idNumber : "")}
-          onChange={(e) => setInfo({ businessNumber: e.target.value })}
-          disabled={info.ownershipType !== "partnership"}
-        />
-        {info.ownershipType !== "partnership" && (
-          <p className="text-xs text-muted-foreground">מספר העוסק הוא מספר ת.ז. שלך</p>
-        )}
-      </div>
+      {info.ownershipType === "partnership" && (
+        <div className="space-y-2">
+          <Label htmlFor={`${prefix}exBusinessNumber`}>מספר העוסק</Label>
+          <Input
+            id={`${prefix}exBusinessNumber`}
+            value={info.businessNumber || ""}
+            onChange={(e) => setInfo({ businessNumber: e.target.value })}
+          />
+        </div>
+      )}
+      {/* If sole ownership, business number = ID, sent silently in webhook */}
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים?</Label>
