@@ -141,7 +141,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
               {/* Logo inside the form card */}
               <div className="hidden lg:flex justify-center mb-6">
-                <img src={logo} alt="חסידה - ייעוץ מס אכפתי לעסקים" className="h-14 w-auto" />
+                <img src={logo} alt="חסידה - ייעוץ מס אכפתי לעסקים" className="h-24 w-auto" />
               </div>
               {children}
             </div>
