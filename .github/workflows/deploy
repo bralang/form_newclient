@@ -1,0 +1,48 @@
+name: Deploy form_newclient
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # קביעת תיקיית יעד לפי branch
+      - name: Set deploy path
+        run: |
+          echo "DEPLOY_PATH=/www/wwwroot/forms.chasida.biz/newclient/form_newclient" >> $GITHUB_ENV
+
+      - name: Upload build to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "dist/*"
+          target: ${{ env.DEPLOY_PATH }}
+
+      - name: Post deploy command
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo "Deployed form_newclient (${GITHUB_REF_NAME}) to $DEPLOY_PATH"
