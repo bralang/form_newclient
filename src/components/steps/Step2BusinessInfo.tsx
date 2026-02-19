@@ -88,6 +88,13 @@ export const Step2BusinessInfo = () => {
       </div>
 
       <div className="space-y-2">
+        <Label>
+          {g(gender, "האם היה לך עסק עצמאי בעבר?", "האם היה לך עסק עצמאי בעבר?")}
+        </Label>
+        <YesNoSelect value={info.hadPreviousBusiness} onChange={(v) => setInfo({ hadPreviousBusiness: v })} />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor={`${prefix}businessField`}>תחום העיסוק</Label>
         <Input id={`${prefix}businessField`} value={info.businessField || ""} onChange={(e) => setInfo({ businessField: e.target.value })} />
       </div>
