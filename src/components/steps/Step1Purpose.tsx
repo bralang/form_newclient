@@ -20,6 +20,10 @@ export const Step1Purpose = () => {
     setPersonalInfo,
     serviceType,
     setServiceType,
+    businessInfo,
+    setBusinessInfo,
+    spouseBusinessInfo,
+    setSpouseBusinessInfo,
     setCurrentStep,
     sendToWebhook,
   } = useFormContext();
@@ -208,6 +212,68 @@ export const Step1Purpose = () => {
           </div>
         )}
       </div>
+
+      {/* Had Previous Business - shown when new_business is selected */}
+      {serviceType.userPurposes.includes("new_business") && (
+        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <h3 className="text-lg font-bold text-foreground">
+            {personalInfo.firstName || "את/ה"}, האם היה לך עסק עצמאי בעבר?
+          </h3>
+          <div className="flex gap-3">
+            <label className="flex items-center gap-2 p-3 rounded-xl border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors flex-1">
+              <input
+                type="radio"
+                name="hadPreviousBusiness"
+                checked={businessInfo.hadPreviousBusiness === true}
+                onChange={() => setBusinessInfo({ hadPreviousBusiness: true })}
+                className="accent-primary"
+              />
+              <span className="text-sm font-medium">כן</span>
+            </label>
+            <label className="flex items-center gap-2 p-3 rounded-xl border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors flex-1">
+              <input
+                type="radio"
+                name="hadPreviousBusiness"
+                checked={businessInfo.hadPreviousBusiness === false}
+                onChange={() => setBusinessInfo({ hadPreviousBusiness: false })}
+                className="accent-primary"
+              />
+              <span className="text-sm font-medium">לא</span>
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Same for spouse */}
+      {isMarried && serviceType.spousePurposes.includes("new_business") && (
+        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <h3 className="text-lg font-bold text-foreground">
+            {personalInfo.spouseName || "בן/בת הזוג"}, האם היה לך עסק עצמאי בעבר?
+          </h3>
+          <div className="flex gap-3">
+            <label className="flex items-center gap-2 p-3 rounded-xl border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors flex-1">
+              <input
+                type="radio"
+                name="spouseHadPreviousBusiness"
+                checked={spouseBusinessInfo.hadPreviousBusiness === true}
+                onChange={() => setSpouseBusinessInfo({ hadPreviousBusiness: true })}
+                className="accent-primary"
+              />
+              <span className="text-sm font-medium">כן</span>
+            </label>
+            <label className="flex items-center gap-2 p-3 rounded-xl border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors flex-1">
+              <input
+                type="radio"
+                name="spouseHadPreviousBusiness"
+                checked={spouseBusinessInfo.hadPreviousBusiness === false}
+                onChange={() => setSpouseBusinessInfo({ hadPreviousBusiness: false })}
+                className="accent-primary"
+              />
+              <span className="text-sm font-medium">לא</span>
+            </label>
+          </div>
+        </div>
+      )}
 
       <FormNavigation
         onNext={handleNext}

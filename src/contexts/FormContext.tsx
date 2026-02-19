@@ -52,6 +52,7 @@ export interface BusinessInfo {
   ownershipType?: "sole" | "partnership" | "";
   businessNumber?: string;
   hasEmployees?: boolean;
+  hadPreviousBusiness?: boolean;
 
   // New business
   businessName?: string;
