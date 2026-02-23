@@ -2,16 +2,16 @@ import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormNavigation } from "@/components/FormNavigation";
 import { useState } from "react";
 
 const PURPOSES = [
-  { id: "new_business", label: "עבור עסק חדש" },
-  { id: "existing_business", label: "עבור עסק קיים" },
-  { id: "nonprofit", label: "אני מנהל עמותה או רוצה לפתוח עמותה חדשה" },
-  { id: "company", label: "אני בעל מניות בחברה או רוצה לפתוח חברה" },
-  { id: "tax_refund", label: "להחזר מס" },
+  { id: "business", label: "עבור עסק עצמאי", hasSubStatus: true },
+  { id: "company", label: "עבור חברה", hasSubStatus: true },
+  { id: "nonprofit", label: "עבור עמותה", hasSubStatus: true },
+  { id: "tax_refund", label: "להחזר מס", hasSubStatus: false },
 ];
 
 export const Step1Purpose = () => {
@@ -20,28 +20,47 @@ export const Step1Purpose = () => {
     setPersonalInfo,
     serviceType,
     setServiceType,
-    businessInfo,
-    setBusinessInfo,
-    spouseBusinessInfo,
-    setSpouseBusinessInfo,
     setCurrentStep,
     sendToWebhook,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const isMarried = personalInfo.maritalStatus === "married";
 
+  const togglePurpose = (
+    id: string,
+    purposes: string[],
+    purposeStatus: Record<string, "new" | "existing">,
+    setPurposes: (purposes: string[]) => void,
+    setStatus: (status: Record<string, "new" | "existing">) => void
+  ) => {
+    if (purposes.includes(id)) {
+      setPurposes(purposes.filter((p) => p !== id));
+      const newStatus = { ...purposeStatus };
+      delete newStatus[id];
+      setStatus(newStatus);
+    } else {
+      setPurposes([...purposes, id]);
+    }
+  };
+
   const toggleUserPurpose = (id: string) => {
-    const cur = serviceType.userPurposes;
-    setServiceType({
-      userPurposes: cur.includes(id) ? cur.filter((p) => p !== id) : [...cur, id],
-    });
+    togglePurpose(
+      id,
+      serviceType.userPurposes,
+      serviceType.userPurposeStatus,
+      (p) => setServiceType({ userPurposes: p }),
+      (s) => setServiceType({ userPurposeStatus: s })
+    );
   };
 
   const toggleSpousePurpose = (id: string) => {
-    const cur = serviceType.spousePurposes;
-    setServiceType({
-      spousePurposes: cur.includes(id) ? cur.filter((p) => p !== id) : [...cur, id],
-    });
+    togglePurpose(
+      id,
+      serviceType.spousePurposes,
+      serviceType.spousePurposeStatus,
+      (p) => setServiceType({ spousePurposes: p }),
+      (s) => setServiceType({ spousePurposeStatus: s })
+    );
   };
 
   const handleNext = async () => {
@@ -55,6 +74,50 @@ export const Step1Purpose = () => {
     setLoading(false);
     setCurrentStep(2);
   };
+
+  const renderPurposeList = (
+    purposes: string[],
+    purposeStatus: Record<string, "new" | "existing">,
+    toggleFn: (id: string) => void,
+    setStatusFn: (status: Record<string, "new" | "existing">) => void
+  ) => (
+    <div className="space-y-2">
+      {PURPOSES.map((purpose) => (
+        <div key={purpose.id}>
+          <label className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors">
+            <Checkbox
+              id={purpose.id}
+              checked={purposes.includes(purpose.id)}
+              onCheckedChange={() => toggleFn(purpose.id)}
+            />
+            <span className="text-sm font-medium">{purpose.label}</span>
+          </label>
+
+          {/* Sub-status: new / existing */}
+          {purpose.hasSubStatus && purposes.includes(purpose.id) && (
+            <div className="mr-10 mt-2 mb-1 animate-in fade-in slide-in-from-top-2 duration-300">
+              <RadioGroup
+                value={purposeStatus[purpose.id] || ""}
+                onValueChange={(v: "new" | "existing") =>
+                  setStatusFn({ ...purposeStatus, [purpose.id]: v })
+                }
+                className="flex gap-6"
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="new" id={`${purpose.id}-new`} />
+                  <Label htmlFor={`${purpose.id}-new`} className="cursor-pointer text-sm">חדש</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="existing" id={`${purpose.id}-existing`} />
+                  <Label htmlFor={`${purpose.id}-existing`} className="cursor-pointer text-sm">קיים</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="space-y-8">
@@ -149,70 +212,42 @@ export const Step1Purpose = () => {
         <h3 className="text-xl font-bold text-foreground">למה באת?</h3>
 
         {isMarried ? (
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-primary/10">
-                  <th className="p-3 text-right text-muted-foreground font-medium text-sm">
-                    מטרה
-                  </th>
-                  <th className="p-3 text-center font-bold text-primary text-sm">
-                    {personalInfo.firstName || "אני"}
-                  </th>
-                  <th className="p-3 text-center font-bold text-primary text-sm">
-                    {personalInfo.spouseName || "בן/בת זוג"}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {PURPOSES.map((purpose, idx) => (
-                  <tr
-                    key={purpose.id}
-                    className={`border-b border-border/50 transition-colors hover:bg-muted/30 ${
-                      idx % 2 === 0 ? "bg-muted/10" : ""
-                    }`}
-                  >
-                    <td className="p-3 text-sm font-medium">{purpose.label}</td>
-                    <td className="p-3 text-center">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={serviceType.userPurposes.includes(purpose.id)}
-                          onCheckedChange={() => toggleUserPurpose(purpose.id)}
-                        />
-                      </div>
-                    </td>
-                    <td className="p-3 text-center">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={serviceType.spousePurposes.includes(purpose.id)}
-                          onCheckedChange={() => toggleSpousePurpose(purpose.id)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-6">
+            {/* User purposes */}
+            <div className="space-y-3">
+              <h4 className="font-bold text-primary">
+                {personalInfo.firstName || "אני"}
+              </h4>
+              {renderPurposeList(
+                serviceType.userPurposes,
+                serviceType.userPurposeStatus,
+                toggleUserPurpose,
+                (s) => setServiceType({ userPurposeStatus: s })
+              )}
+            </div>
+
+            {/* Spouse purposes */}
+            <div className="space-y-3">
+              <h4 className="font-bold text-primary">
+                {personalInfo.spouseName || "בן/בת זוג"}
+              </h4>
+              {renderPurposeList(
+                serviceType.spousePurposes,
+                serviceType.spousePurposeStatus,
+                toggleSpousePurpose,
+                (s) => setServiceType({ spousePurposeStatus: s })
+              )}
+            </div>
           </div>
         ) : (
-          <div className="space-y-2">
-            {PURPOSES.map((purpose) => (
-              <label
-                key={purpose.id}
-                className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors"
-              >
-                <Checkbox
-                  id={purpose.id}
-                  checked={serviceType.userPurposes.includes(purpose.id)}
-                  onCheckedChange={() => toggleUserPurpose(purpose.id)}
-                />
-                <span className="text-sm font-medium">{purpose.label}</span>
-              </label>
-            ))}
-          </div>
+          renderPurposeList(
+            serviceType.userPurposes,
+            serviceType.userPurposeStatus,
+            toggleUserPurpose,
+            (s) => setServiceType({ userPurposeStatus: s })
+          )
         )}
       </div>
-
 
       <FormNavigation
         onNext={handleNext}

@@ -18,6 +18,8 @@ export interface PersonalInfo {
 export interface ServiceType {
   userPurposes: string[];
   spousePurposes: string[];
+  userPurposeStatus: Record<string, "new" | "existing">;
+  spousePurposeStatus: Record<string, "new" | "existing">;
 }
 
 // ─── Step 2 Interfaces ─────────────────────────────
@@ -192,6 +194,8 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
   const [serviceType, setST] = useState<ServiceType>({
     userPurposes: [],
     spousePurposes: [],
+    userPurposeStatus: {},
+    spousePurposeStatus: {},
   });
 
   // Step 2
@@ -346,6 +350,8 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
           spousePurposes: Array.isArray(st.spousePurposes)
             ? st.spousePurposes
             : [],
+          userPurposeStatus: st.userPurposeStatus || {},
+          spousePurposeStatus: st.spousePurposeStatus || {},
         });
 
       const di = parse<DetailedPersonalInfo>("detailedInfo");
