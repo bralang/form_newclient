@@ -20,13 +20,13 @@ export const Step2BusinessInfo = () => {
   const userGender = detailedInfo.gender;
   const spouseGender = spouseInfo.gender;
 
-  const userHasNewBusiness = serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business === "new";
-  const userHasExistingBusiness = serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business === "existing";
+  const userHasNewBusiness = serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("new");
+  const userHasExistingBusiness = serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing");
   const userHasCompany = serviceType.userPurposes.includes("company");
   const userHasNonprofit = serviceType.userPurposes.includes("nonprofit");
 
-  const spouseHasNewBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business === "new";
-  const spouseHasExistingBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business === "existing";
+  const spouseHasNewBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("new");
+  const spouseHasExistingBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing");
   const spouseHasCompany = serviceType.spousePurposes.includes("company");
   const spouseHasNonprofit = serviceType.spousePurposes.includes("nonprofit");
 

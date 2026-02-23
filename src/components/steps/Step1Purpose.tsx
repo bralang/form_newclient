@@ -2,7 +2,6 @@ import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormNavigation } from "@/components/FormNavigation";
 import { useState } from "react";
@@ -29,9 +28,9 @@ export const Step1Purpose = () => {
   const togglePurpose = (
     id: string,
     purposes: string[],
-    purposeStatus: Record<string, "new" | "existing">,
+    purposeStatus: Record<string, ("new" | "existing")[]>,
     setPurposes: (purposes: string[]) => void,
-    setStatus: (status: Record<string, "new" | "existing">) => void
+    setStatus: (status: Record<string, ("new" | "existing")[]>) => void
   ) => {
     if (purposes.includes(id)) {
       setPurposes(purposes.filter((p) => p !== id));
@@ -41,6 +40,19 @@ export const Step1Purpose = () => {
     } else {
       setPurposes([...purposes, id]);
     }
+  };
+
+  const toggleSubStatus = (
+    purposeId: string,
+    value: "new" | "existing",
+    purposeStatus: Record<string, ("new" | "existing")[]>,
+    setStatusFn: (status: Record<string, ("new" | "existing")[]>) => void
+  ) => {
+    const current = purposeStatus[purposeId] || [];
+    const updated = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    setStatusFn({ ...purposeStatus, [purposeId]: updated });
   };
 
   const toggleUserPurpose = (id: string) => {
@@ -77,24 +89,31 @@ export const Step1Purpose = () => {
 
   const renderSubStatus = (
     purposeId: string,
-    purposeStatus: Record<string, "new" | "existing">,
-    setStatusFn: (status: Record<string, "new" | "existing">) => void
-  ) => (
-    <Select
-      value={purposeStatus[purposeId] || ""}
-      onValueChange={(v: string) =>
-        setStatusFn({ ...purposeStatus, [purposeId]: v as "new" | "existing" })
-      }
-    >
-      <SelectTrigger className="h-8 w-24 text-xs">
-        <SelectValue placeholder="בחר" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="new">חדש</SelectItem>
-        <SelectItem value="existing">קיים</SelectItem>
-      </SelectContent>
-    </Select>
-  );
+    purposeStatus: Record<string, ("new" | "existing")[]>,
+    setStatusFn: (status: Record<string, ("new" | "existing")[]>) => void
+  ) => {
+    const current = purposeStatus[purposeId] || [];
+    return (
+      <div className="flex items-center gap-3">
+        <label className="flex items-center gap-1.5 cursor-pointer">
+          <Checkbox
+            checked={current.includes("new")}
+            onCheckedChange={() => toggleSubStatus(purposeId, "new", purposeStatus, setStatusFn)}
+            className="h-3.5 w-3.5"
+          />
+          <span className="text-xs text-muted-foreground">חדש</span>
+        </label>
+        <label className="flex items-center gap-1.5 cursor-pointer">
+          <Checkbox
+            checked={current.includes("existing")}
+            onCheckedChange={() => toggleSubStatus(purposeId, "existing", purposeStatus, setStatusFn)}
+            className="h-3.5 w-3.5"
+          />
+          <span className="text-xs text-muted-foreground">קיים</span>
+        </label>
+      </div>
+    );
+  };
 
   const renderSinglePurposeList = () => (
     <div className="space-y-2">

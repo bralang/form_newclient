@@ -23,8 +23,8 @@ export const Step3Documents = () => {
   const userPurposes = serviceType.userPurposes;
   const spousePurposes = serviceType.spousePurposes;
 
-  const userHasNewBusiness = userPurposes.includes("business") && serviceType.userPurposeStatus?.business === "new";
-  const spouseHasNewBusiness = spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business === "new";
+  const userHasNewBusiness = userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("new");
+  const spouseHasNewBusiness = spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("new");
 
   const userHasAuthorized = userHasNewBusiness && businessInfo.businessType === "authorized";
   const spouseHasAuthorized = spouseHasNewBusiness && spouseBusinessInfo.businessType === "authorized";
