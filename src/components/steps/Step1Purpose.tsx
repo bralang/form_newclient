@@ -117,81 +117,103 @@ export const Step1Purpose = () => {
 
   const renderSinglePurposeList = () => (
     <div className="space-y-2">
-      {PURPOSES.map((purpose) => (
-        <div key={purpose.id} className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
-          <label className="flex items-center gap-3 cursor-pointer flex-1">
-            <Checkbox
-              checked={serviceType.userPurposes.includes(purpose.id)}
-              onCheckedChange={() => toggleUserPurpose(purpose.id)}
-            />
-            <span className="text-sm font-medium">{purpose.label}</span>
-          </label>
-          {purpose.hasSubStatus && serviceType.userPurposes.includes(purpose.id) && (
-            <div className="animate-in fade-in duration-200">
-              {renderSubStatus(
-                purpose.id,
-                serviceType.userPurposeStatus,
-                (s) => setServiceType({ userPurposeStatus: s })
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+      {PURPOSES.map((purpose) => {
+        const isChecked = serviceType.userPurposes.includes(purpose.id);
+        return (
+          <div
+            key={purpose.id}
+            className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
+              isChecked
+                ? "border-primary/40 bg-primary/5 shadow-sm"
+                : "border-border/50 hover:bg-muted/30"
+            }`}
+          >
+            <label className="flex items-center gap-3 cursor-pointer">
+              <Checkbox
+                checked={isChecked}
+                onCheckedChange={() => toggleUserPurpose(purpose.id)}
+              />
+              <span className={`text-sm font-medium ${isChecked ? "text-primary" : ""}`}>
+                {purpose.label}
+              </span>
+            </label>
+            {purpose.hasSubStatus && isChecked && (
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200">
+                {renderSubStatus(
+                  purpose.id,
+                  serviceType.userPurposeStatus,
+                  (s) => setServiceType({ userPurposeStatus: s })
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 
   const renderTablePurposes = () => (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
+    <div className="rounded-xl border border-border/50 overflow-hidden">
+      <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border">
-            <th className="text-right p-3 font-bold text-foreground">נושא</th>
-            <th className="text-center p-3 font-bold text-primary">{personalInfo.firstName || "אני"}</th>
-            <th className="text-center p-3 font-bold text-primary">{personalInfo.spouseName || "בן/בת זוג"}</th>
+          <tr className="bg-muted/40">
+            <th className="text-right py-3 px-4 font-bold text-foreground text-sm">נושא</th>
+            <th className="text-center py-3 px-4 font-bold text-primary text-sm">{personalInfo.firstName || "אני"}</th>
+            <th className="text-center py-3 px-4 font-bold text-primary text-sm">{personalInfo.spouseName || "בן/בת זוג"}</th>
           </tr>
         </thead>
         <tbody>
-          {PURPOSES.map((purpose) => (
-            <tr key={purpose.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
-              <td className="p-3 font-medium text-right">{purpose.label}</td>
-              {/* User column */}
-              <td className="p-3">
-                <div className="flex flex-col items-center gap-2">
-                  <Checkbox
-                    checked={serviceType.userPurposes.includes(purpose.id)}
-                    onCheckedChange={() => toggleUserPurpose(purpose.id)}
-                  />
-                  {purpose.hasSubStatus && serviceType.userPurposes.includes(purpose.id) && (
-                    <div className="animate-in fade-in duration-200">
-                      {renderSubStatus(
-                        purpose.id,
-                        serviceType.userPurposeStatus,
-                        (s) => setServiceType({ userPurposeStatus: s })
-                      )}
-                    </div>
-                  )}
-                </div>
-              </td>
-              {/* Spouse column */}
-              <td className="p-3">
-                <div className="flex flex-col items-center gap-2">
-                  <Checkbox
-                    checked={serviceType.spousePurposes.includes(purpose.id)}
-                    onCheckedChange={() => toggleSpousePurpose(purpose.id)}
-                  />
-                  {purpose.hasSubStatus && serviceType.spousePurposes.includes(purpose.id) && (
-                    <div className="animate-in fade-in duration-200">
-                      {renderSubStatus(
-                        purpose.id,
-                        serviceType.spousePurposeStatus,
-                        (s) => setServiceType({ spousePurposeStatus: s })
-                      )}
-                    </div>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
+          {PURPOSES.map((purpose, index) => {
+            const userChecked = serviceType.userPurposes.includes(purpose.id);
+            const spouseChecked = serviceType.spousePurposes.includes(purpose.id);
+            const isHighlighted = userChecked || spouseChecked;
+            return (
+              <tr
+                key={purpose.id}
+                className={`transition-colors ${
+                  isHighlighted ? "bg-primary/5" : "hover:bg-muted/20"
+                } ${index < PURPOSES.length - 1 ? "border-b border-border/20" : ""}`}
+              >
+                <td className="py-3 px-4 font-medium text-right">{purpose.label}</td>
+                {/* User column */}
+                <td className="py-3 px-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <Checkbox
+                      checked={userChecked}
+                      onCheckedChange={() => toggleUserPurpose(purpose.id)}
+                    />
+                    {purpose.hasSubStatus && userChecked && (
+                      <div className="animate-in fade-in duration-200">
+                        {renderSubStatus(
+                          purpose.id,
+                          serviceType.userPurposeStatus,
+                          (s) => setServiceType({ userPurposeStatus: s })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </td>
+                {/* Spouse column */}
+                <td className="py-3 px-4">
+                  <div className="flex flex-col items-center gap-2">
+                    <Checkbox
+                      checked={spouseChecked}
+                      onCheckedChange={() => toggleSpousePurpose(purpose.id)}
+                    />
+                    {purpose.hasSubStatus && spouseChecked && (
+                      <div className="animate-in fade-in duration-200">
+                        {renderSubStatus(
+                          purpose.id,
+                          serviceType.spousePurposeStatus,
+                          (s) => setServiceType({ spousePurposeStatus: s })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
