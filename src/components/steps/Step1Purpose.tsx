@@ -94,23 +94,29 @@ export const Step1Purpose = () => {
   ) => {
     const current = purposeStatus[purposeId] || [];
     return (
-      <div className="flex items-center gap-3">
-        <label className="flex items-center gap-1.5 cursor-pointer">
-          <Checkbox
-            checked={current.includes("new")}
-            onCheckedChange={() => toggleSubStatus(purposeId, "new", purposeStatus, setStatusFn)}
-            className="h-3.5 w-3.5"
-          />
-          <span className="text-xs text-muted-foreground">חדש</span>
-        </label>
-        <label className="flex items-center gap-1.5 cursor-pointer">
-          <Checkbox
-            checked={current.includes("existing")}
-            onCheckedChange={() => toggleSubStatus(purposeId, "existing", purposeStatus, setStatusFn)}
-            className="h-3.5 w-3.5"
-          />
-          <span className="text-xs text-muted-foreground">קיים</span>
-        </label>
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => toggleSubStatus(purposeId, "new", purposeStatus, setStatusFn)}
+          className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-all duration-150 border ${
+            current.includes("new")
+              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+              : "bg-transparent text-muted-foreground border-border/60 hover:border-primary/40 hover:text-foreground"
+          }`}
+        >
+          חדש
+        </button>
+        <button
+          type="button"
+          onClick={() => toggleSubStatus(purposeId, "existing", purposeStatus, setStatusFn)}
+          className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-all duration-150 border ${
+            current.includes("existing")
+              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+              : "bg-transparent text-muted-foreground border-border/60 hover:border-primary/40 hover:text-foreground"
+          }`}
+        >
+          קיים
+        </button>
       </div>
     );
   };
@@ -178,10 +184,17 @@ export const Step1Purpose = () => {
                 {/* User column */}
                 <td className="py-3 px-4">
                   <div className="flex flex-col items-center gap-2">
-                    <Checkbox
-                      checked={userChecked}
-                      onCheckedChange={() => toggleUserPurpose(purpose.id)}
-                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleUserPurpose(purpose.id)}
+                      className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-150 ${
+                        userChecked
+                          ? "bg-primary border-primary text-primary-foreground"
+                          : "border-border/60 hover:border-primary/40"
+                      }`}
+                    >
+                      {userChecked && <span className="text-xs">✓</span>}
+                    </button>
                     {purpose.hasSubStatus && userChecked && (
                       <div className="animate-in fade-in duration-200">
                         {renderSubStatus(
@@ -196,10 +209,17 @@ export const Step1Purpose = () => {
                 {/* Spouse column */}
                 <td className="py-3 px-4">
                   <div className="flex flex-col items-center gap-2">
-                    <Checkbox
-                      checked={spouseChecked}
-                      onCheckedChange={() => toggleSpousePurpose(purpose.id)}
-                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleSpousePurpose(purpose.id)}
+                      className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-150 ${
+                        spouseChecked
+                          ? "bg-primary border-primary text-primary-foreground"
+                          : "border-border/60 hover:border-primary/40"
+                      }`}
+                    >
+                      {spouseChecked && <span className="text-xs">✓</span>}
+                    </button>
                     {purpose.hasSubStatus && spouseChecked && (
                       <div className="animate-in fade-in duration-200">
                         {renderSubStatus(
