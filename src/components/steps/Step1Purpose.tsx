@@ -75,47 +75,106 @@ export const Step1Purpose = () => {
     setCurrentStep(2);
   };
 
-  const renderPurposeList = (
-    purposes: string[],
+  const renderSubStatus = (
+    purposeId: string,
     purposeStatus: Record<string, "new" | "existing">,
-    toggleFn: (id: string) => void,
     setStatusFn: (status: Record<string, "new" | "existing">) => void
   ) => (
+    <Select
+      value={purposeStatus[purposeId] || ""}
+      onValueChange={(v: string) =>
+        setStatusFn({ ...purposeStatus, [purposeId]: v as "new" | "existing" })
+      }
+    >
+      <SelectTrigger className="h-8 w-24 text-xs">
+        <SelectValue placeholder="בחר" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="new">חדש</SelectItem>
+        <SelectItem value="existing">קיים</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+
+  const renderSinglePurposeList = () => (
     <div className="space-y-2">
       {PURPOSES.map((purpose) => (
-        <div key={purpose.id}>
-          <label className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/30 cursor-pointer transition-colors">
+        <div key={purpose.id} className="flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
+          <label className="flex items-center gap-3 cursor-pointer flex-1">
             <Checkbox
-              id={purpose.id}
-              checked={purposes.includes(purpose.id)}
-              onCheckedChange={() => toggleFn(purpose.id)}
+              checked={serviceType.userPurposes.includes(purpose.id)}
+              onCheckedChange={() => toggleUserPurpose(purpose.id)}
             />
             <span className="text-sm font-medium">{purpose.label}</span>
           </label>
-
-          {/* Sub-status: new / existing */}
-          {purpose.hasSubStatus && purposes.includes(purpose.id) && (
-            <div className="mr-10 mt-2 mb-1 animate-in fade-in slide-in-from-top-2 duration-300">
-              <RadioGroup
-                value={purposeStatus[purpose.id] || ""}
-                onValueChange={(v: "new" | "existing") =>
-                  setStatusFn({ ...purposeStatus, [purpose.id]: v })
-                }
-                className="flex gap-6"
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="new" id={`${purpose.id}-new`} />
-                  <Label htmlFor={`${purpose.id}-new`} className="cursor-pointer text-sm">חדש</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="existing" id={`${purpose.id}-existing`} />
-                  <Label htmlFor={`${purpose.id}-existing`} className="cursor-pointer text-sm">קיים</Label>
-                </div>
-              </RadioGroup>
+          {purpose.hasSubStatus && serviceType.userPurposes.includes(purpose.id) && (
+            <div className="animate-in fade-in duration-200">
+              {renderSubStatus(
+                purpose.id,
+                serviceType.userPurposeStatus,
+                (s) => setServiceType({ userPurposeStatus: s })
+              )}
             </div>
           )}
         </div>
       ))}
+    </div>
+  );
+
+  const renderTablePurposes = () => (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className="border-b border-border">
+            <th className="text-right p-3 font-bold text-foreground">נושא</th>
+            <th className="text-center p-3 font-bold text-primary">{personalInfo.firstName || "אני"}</th>
+            <th className="text-center p-3 font-bold text-primary">{personalInfo.spouseName || "בן/בת זוג"}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {PURPOSES.map((purpose) => (
+            <tr key={purpose.id} className="border-b border-border/30 hover:bg-muted/20 transition-colors">
+              <td className="p-3 font-medium text-right">{purpose.label}</td>
+              {/* User column */}
+              <td className="p-3">
+                <div className="flex flex-col items-center gap-2">
+                  <Checkbox
+                    checked={serviceType.userPurposes.includes(purpose.id)}
+                    onCheckedChange={() => toggleUserPurpose(purpose.id)}
+                  />
+                  {purpose.hasSubStatus && serviceType.userPurposes.includes(purpose.id) && (
+                    <div className="animate-in fade-in duration-200">
+                      {renderSubStatus(
+                        purpose.id,
+                        serviceType.userPurposeStatus,
+                        (s) => setServiceType({ userPurposeStatus: s })
+                      )}
+                    </div>
+                  )}
+                </div>
+              </td>
+              {/* Spouse column */}
+              <td className="p-3">
+                <div className="flex flex-col items-center gap-2">
+                  <Checkbox
+                    checked={serviceType.spousePurposes.includes(purpose.id)}
+                    onCheckedChange={() => toggleSpousePurpose(purpose.id)}
+                  />
+                  {purpose.hasSubStatus && serviceType.spousePurposes.includes(purpose.id) && (
+                    <div className="animate-in fade-in duration-200">
+                      {renderSubStatus(
+                        purpose.id,
+                        serviceType.spousePurposeStatus,
+                        (s) => setServiceType({ spousePurposeStatus: s })
+                      )}
+                    </div>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 
@@ -210,43 +269,7 @@ export const Step1Purpose = () => {
       {/* Purpose Selection */}
       <div className="space-y-5">
         <h3 className="text-xl font-bold text-foreground">למה באת?</h3>
-
-        {isMarried ? (
-          <div className="space-y-6">
-            {/* User purposes */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-primary">
-                {personalInfo.firstName || "אני"}
-              </h4>
-              {renderPurposeList(
-                serviceType.userPurposes,
-                serviceType.userPurposeStatus,
-                toggleUserPurpose,
-                (s) => setServiceType({ userPurposeStatus: s })
-              )}
-            </div>
-
-            {/* Spouse purposes */}
-            <div className="space-y-3">
-              <h4 className="font-bold text-primary">
-                {personalInfo.spouseName || "בן/בת זוג"}
-              </h4>
-              {renderPurposeList(
-                serviceType.spousePurposes,
-                serviceType.spousePurposeStatus,
-                toggleSpousePurpose,
-                (s) => setServiceType({ spousePurposeStatus: s })
-              )}
-            </div>
-          </div>
-        ) : (
-          renderPurposeList(
-            serviceType.userPurposes,
-            serviceType.userPurposeStatus,
-            toggleUserPurpose,
-            (s) => setServiceType({ userPurposeStatus: s })
-          )
-        )}
+        {isMarried ? renderTablePurposes() : renderSinglePurposeList()}
       </div>
 
       <FormNavigation
