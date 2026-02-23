@@ -18,8 +18,8 @@ export interface PersonalInfo {
 export interface ServiceType {
   userPurposes: string[];
   spousePurposes: string[];
-  userPurposeStatus: Record<string, "new" | "existing">;
-  spousePurposeStatus: Record<string, "new" | "existing">;
+  userPurposeStatus: Record<string, ("new" | "existing")[]>;
+  spousePurposeStatus: Record<string, ("new" | "existing")[]>;
 }
 
 // ─── Step 2 Interfaces ─────────────────────────────
