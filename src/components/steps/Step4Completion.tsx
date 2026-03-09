@@ -107,7 +107,7 @@ export const Step4Completion = () => {
           </div>
         </div>
 
-        <Button onClick={() => { setSubmitted(false); setCurrentStep(1); }} variant="outline">
+         <Button onClick={() => { setSubmitted(false); setCurrentStep(1); }} variant="outline">
           מלא שאלון חדש
         </Button>
       </div>
@@ -174,7 +174,7 @@ export const Step4Completion = () => {
 
       {/* Submit */}
       <div className="flex justify-between items-center mt-8 pt-6 border-t border-border">
-        <Button variant="outline" onClick={() => setCurrentStep(3)} disabled={loading}>
+        <Button variant="outline" onClick={() => setCurrentStep(4)} disabled={loading}>
           חזור
         </Button>
         <Button

@@ -338,7 +338,7 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       const step = Number(sessionStorage.getItem("formStep"));
-      if (step >= 1 && step <= 4) setCurrentStep(step);
+      if (step >= 1 && step <= 5) setCurrentStep(step);
 
       const pi = parse<PersonalInfo>("personalInfo");
       if (pi) setPI((prev) => ({ ...prev, ...pi }));

@@ -67,7 +67,7 @@ export const Step2PersonalInfo = () => {
       { silent: true }
     );
     setLoading(false);
-    setCurrentStep(3);
+    setCurrentStep(4);
   };
 
   const handleSendEmailList = async () => {
@@ -413,7 +413,7 @@ export const Step2PersonalInfo = () => {
 
       <FormNavigation
         onNext={handleNext}
-        onPrev={() => setCurrentStep(1)}
+        onPrev={() => setCurrentStep(2)}
         nextLabel="למעבר להעלאת המסמכים"
         loading={loading}
       />

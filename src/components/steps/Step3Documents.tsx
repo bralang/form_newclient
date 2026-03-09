@@ -47,7 +47,7 @@ export const Step3Documents = () => {
       { silent: true }
     );
     setLoading(false);
-    setCurrentStep(4);
+    setCurrentStep(5);
   };
 
   const FileUpload = ({ id, label, multiple = false, onChange }: { id: string; label: string; multiple?: boolean; onChange: (files: FileList | null) => void }) => (
@@ -220,7 +220,7 @@ export const Step3Documents = () => {
 
       <FormNavigation
         onNext={handleNext}
-        onPrev={() => setCurrentStep(2)}
+        onPrev={() => setCurrentStep(3)}
         loading={loading}
       />
     </div>

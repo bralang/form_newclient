@@ -1,5 +1,6 @@
 import { FormProvider, useFormContext } from "@/contexts/FormContext";
 import { FormLayout } from "@/components/FormLayout";
+import { Step0Welcome } from "@/components/steps/Step0Welcome";
 import { Step1Purpose } from "@/components/steps/Step1Purpose";
 import { Step2PersonalInfo } from "@/components/steps/Step2PersonalInfo";
 import { Step3Documents } from "@/components/steps/Step3Documents";
@@ -11,15 +12,17 @@ const FormContent = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <Step1Purpose />;
+        return <Step0Welcome />;
       case 2:
-        return <Step2PersonalInfo />;
+        return <Step1Purpose />;
       case 3:
-        return <Step3Documents />;
+        return <Step2PersonalInfo />;
       case 4:
+        return <Step3Documents />;
+      case 5:
         return <Step4Completion />;
       default:
-        return <Step1Purpose />;
+        return <Step0Welcome />;
     }
   };
 

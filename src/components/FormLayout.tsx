@@ -4,10 +4,11 @@ import mascot from "@/assets/mascot.jpeg";
 import logo from "@/assets/logo.png";
 
 const steps = [
-  { number: 1, title: "המטרה המשותפת" },
-  { number: 2, title: "מידע נחוץ" },
-  { number: 3, title: "עדכון מסמכים" },
-  { number: 4, title: "סיום" },
+  { number: 1, title: "ככה מתחילים לנגן…" },
+  { number: 2, title: "המטרה המשותפת" },
+  { number: 3, title: "מידע נחוץ" },
+  { number: 4, title: "עדכון מסמכים" },
+  { number: 5, title: "סיום" },
 ];
 
 interface FormLayoutProps {
