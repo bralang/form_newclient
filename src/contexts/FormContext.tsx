@@ -145,6 +145,42 @@ export interface BusinessInfo {
   }>;
 }
 
+// ─── Nonprofit Interfaces ───────────────────────────
+
+export interface NonprofitBoardMember {
+  name: string;
+  idNumber: string;
+  idFile?: File;
+  email: string;
+  phone: string;
+  address: string;
+  isAuthorizedSigner: boolean;
+}
+
+export interface NonprofitAuditMember {
+  name: string;
+  idNumber: string;
+}
+
+export interface NonprofitInfo {
+  // New nonprofit
+  requestedName1?: string;
+  requestedName2?: string;
+  requestedName3?: string;
+  objectives?: string;
+  boardMemberCount?: number;
+  boardMembers?: NonprofitBoardMember[];
+  auditCommittee?: NonprofitAuditMember[];
+  govPortalPassword?: string;
+
+  // Existing nonprofit
+  hasTaxFile?: boolean;
+  nonprofitName?: string;
+  nonprofitNumber?: string;
+  existingBoardMemberCount?: number;
+  existingBoardMemberNames?: string[];
+}
+
 // ─── Step 3 Interfaces ─────────────────────────────
 
 export interface DocumentsInfo {
@@ -204,6 +240,12 @@ interface FormContextType {
 
   spouseBusinessInfo: BusinessInfo;
   setSpouseBusinessInfo: (data: Partial<BusinessInfo>) => void;
+
+  nonprofitInfo: NonprofitInfo;
+  setNonprofitInfo: (data: Partial<NonprofitInfo>) => void;
+
+  spouseNonprofitInfo: NonprofitInfo;
+  setSpouseNonprofitInfo: (data: Partial<NonprofitInfo>) => void;
 
   documentsInfo: DocumentsInfo;
   setDocumentsInfo: (data: Partial<DocumentsInfo>) => void;
@@ -280,6 +322,8 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
   });
   const [businessInfo, setBI] = useState<BusinessInfo>({});
   const [spouseBusinessInfo, setSBI] = useState<BusinessInfo>({});
+  const [nonprofitInfo, setNI] = useState<NonprofitInfo>({});
+  const [spouseNonprofitInfo, setSNI] = useState<NonprofitInfo>({});
 
   // Step 3
   const [documentsInfo, setDocsI] = useState<DocumentsInfo>({});
@@ -305,6 +349,10 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     setBI((p) => ({ ...p, ...d }));
   const setSpouseBusinessInfo = (d: Partial<BusinessInfo>) =>
     setSBI((p) => ({ ...p, ...d }));
+  const setNonprofitInfo = (d: Partial<NonprofitInfo>) =>
+    setNI((p) => ({ ...p, ...d }));
+  const setSpouseNonprofitInfo = (d: Partial<NonprofitInfo>) =>
+    setSNI((p) => ({ ...p, ...d }));
   const setDocumentsInfo = (d: Partial<DocumentsInfo>) =>
     setDocsI((p) => ({ ...p, ...d }));
   const setFeedbackInfo = (d: Partial<FeedbackInfo>) =>
@@ -359,6 +407,58 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
       JSON.stringify(stripFiles(spouseBusinessInfo))
     );
   }, [spouseBusinessInfo]);
+
+  useEffect(() => {
+    const stripFiles = (obj: any) => {
+      const clean: Record<string, any> = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (v instanceof File || (Array.isArray(v) && v[0] instanceof File)) continue;
+        if (Array.isArray(v)) {
+          clean[k] = v.map((item: any) => {
+            if (typeof item === "object" && item !== null) {
+              const c: Record<string, any> = {};
+              for (const [ik, iv] of Object.entries(item)) {
+                if (iv instanceof File) continue;
+                c[ik] = iv;
+              }
+              return c;
+            }
+            return item;
+          });
+        } else {
+          clean[k] = v;
+        }
+      }
+      return clean;
+    };
+    sessionStorage.setItem("nonprofitInfo", JSON.stringify(stripFiles(nonprofitInfo)));
+  }, [nonprofitInfo]);
+
+  useEffect(() => {
+    const stripFiles = (obj: any) => {
+      const clean: Record<string, any> = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (v instanceof File || (Array.isArray(v) && v[0] instanceof File)) continue;
+        if (Array.isArray(v)) {
+          clean[k] = v.map((item: any) => {
+            if (typeof item === "object" && item !== null) {
+              const c: Record<string, any> = {};
+              for (const [ik, iv] of Object.entries(item)) {
+                if (iv instanceof File) continue;
+                c[ik] = iv;
+              }
+              return c;
+            }
+            return item;
+          });
+        } else {
+          clean[k] = v;
+        }
+      }
+      return clean;
+    };
+    sessionStorage.setItem("spouseNonprofitInfo", JSON.stringify(stripFiles(spouseNonprofitInfo)));
+  }, [spouseNonprofitInfo]);
 
   useEffect(() => {
     const stripFiles = (obj: any) => {
@@ -421,6 +521,12 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const sbi = parse<BusinessInfo>("spouseBusinessInfo");
       if (sbi) setSBI((prev) => ({ ...prev, ...sbi }));
+
+      const ni = parse<NonprofitInfo>("nonprofitInfo");
+      if (ni) setNI((prev) => ({ ...prev, ...ni }));
+
+      const sni = parse<NonprofitInfo>("spouseNonprofitInfo");
+      if (sni) setSNI((prev) => ({ ...prev, ...sni }));
 
       const docs = parse<DocumentsInfo>("documentsInfo");
       if (docs) setDocsI((prev) => ({ ...prev, ...docs }));
@@ -532,6 +638,10 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
         setSpouseBusinessInfo,
         documentsInfo,
         setDocumentsInfo,
+        nonprofitInfo,
+        setNonprofitInfo,
+        spouseNonprofitInfo,
+        setSpouseNonprofitInfo,
         feedbackInfo,
         setFeedbackInfo,
         sendToWebhook,
