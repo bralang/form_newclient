@@ -13,6 +13,9 @@ export interface PersonalInfo {
   spouseName: string;
   step1CompletedAt?: string;
   ref?: string;
+  agreeToMessages: boolean;
+  agreeToPrivacy: boolean;
+  otherPurposeDetails: string;
 }
 
 export interface ServiceType {
@@ -190,6 +193,9 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     email: "",
     maritalStatus: "",
     spouseName: "",
+    agreeToMessages: false,
+    agreeToPrivacy: false,
+    otherPurposeDetails: "",
   });
   const [serviceType, setST] = useState<ServiceType>({
     userPurposes: [],
