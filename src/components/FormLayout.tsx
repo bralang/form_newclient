@@ -73,16 +73,13 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             </nav>
           </div>
 
-          {/* Mascot + Contact */}
+          {/* Mascot */}
           <div className="mt-8 text-center">
             <img
               src={mascot}
               alt="דמותג ליבי חסידה"
               className="h-36 w-auto mx-auto rounded-2xl mb-5 shadow-lg"
             />
-            <p className="text-lg font-semibold opacity-95 mb-3">אנחנו כאן לסיוע במילוי השאלון</p>
-            <p className="text-lg font-bold opacity-95">טל׳ 0533160990</p>
-            <p className="text-lg font-bold opacity-95">teder@chasida.biz</p>
           </div>
         </aside>
 
