@@ -241,6 +241,12 @@ interface FormContextType {
   spouseBusinessInfo: BusinessInfo;
   setSpouseBusinessInfo: (data: Partial<BusinessInfo>) => void;
 
+  nonprofitInfo: NonprofitInfo;
+  setNonprofitInfo: (data: Partial<NonprofitInfo>) => void;
+
+  spouseNonprofitInfo: NonprofitInfo;
+  setSpouseNonprofitInfo: (data: Partial<NonprofitInfo>) => void;
+
   documentsInfo: DocumentsInfo;
   setDocumentsInfo: (data: Partial<DocumentsInfo>) => void;
 
