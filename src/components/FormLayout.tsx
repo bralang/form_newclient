@@ -162,14 +162,16 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
 
             {/* Left Panel - Mascot + Contact + Attention (pinned to bottom) */}
             <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col justify-end p-6 pb-10 gap-5">
-              {/* Attention Button */}
-              <button
-                onClick={() => setShowAttention(true)}
-                className="flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary font-bold px-5 py-3 rounded-xl transition-all border-2 border-primary/20 hover:border-primary/40 shadow-sm"
-              >
-                <AlertCircle className="w-5 h-5" />
-                <span>לתשומת ליבכם</span>
-              </button>
+              {/* Attention Button - hidden on step 1 */}
+              {currentStep !== 1 && (
+                <button
+                  onClick={() => setShowAttention(true)}
+                  className="flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary font-bold px-5 py-3 rounded-xl transition-all border-2 border-primary/20 hover:border-primary/40 shadow-sm"
+                >
+                  <AlertCircle className="w-5 h-5" />
+                  <span>לתשומת ליבכם</span>
+                </button>
+              )}
 
               {/* Mascot */}
               <img
