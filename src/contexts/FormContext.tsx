@@ -145,6 +145,42 @@ export interface BusinessInfo {
   }>;
 }
 
+// ─── Nonprofit Interfaces ───────────────────────────
+
+export interface NonprofitBoardMember {
+  name: string;
+  idNumber: string;
+  idFile?: File;
+  email: string;
+  phone: string;
+  address: string;
+  isAuthorizedSigner: boolean;
+}
+
+export interface NonprofitAuditMember {
+  name: string;
+  idNumber: string;
+}
+
+export interface NonprofitInfo {
+  // New nonprofit
+  requestedName1?: string;
+  requestedName2?: string;
+  requestedName3?: string;
+  objectives?: string;
+  boardMemberCount?: number;
+  boardMembers?: NonprofitBoardMember[];
+  auditCommittee?: NonprofitAuditMember[];
+  govPortalPassword?: string;
+
+  // Existing nonprofit
+  hasTaxFile?: boolean;
+  nonprofitName?: string;
+  nonprofitNumber?: string;
+  existingBoardMemberCount?: number;
+  existingBoardMemberNames?: string[];
+}
+
 // ─── Step 3 Interfaces ─────────────────────────────
 
 export interface DocumentsInfo {
