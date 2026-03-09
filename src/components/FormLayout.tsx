@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useFormContext } from "@/contexts/FormContext";
-import { Check } from "lucide-react";
+import { Check, Music, AlertCircle, X } from "lucide-react";
 import mascot from "@/assets/mascot.jpeg";
 import logo from "@/assets/logo.png";
 
@@ -11,12 +12,22 @@ const steps = [
   { number: 5, title: "סיום" },
 ];
 
+const ATTENTION_ITEMS = [
+  "המידע שתמסרו בשאלון זה מיועד עבור משרדנו כדי שנוכל להיות המייצגים החוקיים שלכם.",
+  "תשובותיכם לא מסונכרנות עם שום גורם ממשלתי או גוף נוסף.",
+  "מילוי השאלון לא כרוך בתשלום ואינו מחייב אתכם כלל לפתוח תיק או להיות לקוחות של חסידה ייעוץ מס.",
+  "השאלון מיועד רק להפקת מסמכי ייצוג, שבחתימה עליהם תוכלו להצטרף ללקוחותינו.",
+  "גם אם עצרתם באמצע מילוי השאלון, מכל סיבה שהיא — המידע נשמר עבורכם במערכת.",
+  "תוכלו להמשיך להשיב מהמקום בו עצרתם.",
+];
+
 interface FormLayoutProps {
   children: React.ReactNode;
 }
 
 export const FormLayout = ({ children }: FormLayoutProps) => {
   const { currentStep } = useFormContext();
+  const [showAttention, setShowAttention] = useState(false);
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -141,13 +152,71 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             </div>
           </div>
 
-          {/* Form Content */}
-          <div className="p-4 md:p-8 lg:p-10 max-w-3xl mx-auto">
+          {/* Desktop: Form + Left Panel */}
+          <div className="hidden lg:flex lg:flex-row min-h-screen">
+            {/* Form Content - closer to sidebar */}
+            <div className="flex-1 pr-4 pl-0 py-10">
+              <div className="max-w-3xl mr-0 ml-auto">
+                <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
+                  {children}
+                </div>
+              </div>
+            </div>
+
+            {/* Left Panel - Mascot + Contact + Attention */}
+            <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col items-center justify-center p-6 gap-6">
+              {/* Attention Button */}
+              <button
+                onClick={() => setShowAttention(!showAttention)}
+                className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary font-bold px-5 py-3 rounded-xl transition-all border-2 border-primary/20 hover:border-primary/40 shadow-sm"
+              >
+                <AlertCircle className="w-5 h-5" />
+                <span>לתשומת ליבכם</span>
+              </button>
+
+              {/* Attention Panel */}
+              {showAttention && (
+                <div className="bg-card rounded-2xl shadow-2xl border border-border p-5 w-full animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-bold text-foreground">לתשומת ליבכם</h3>
+                    <button onClick={() => setShowAttention(false)} className="text-muted-foreground hover:text-foreground">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {ATTENTION_ITEMS.map((item, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <Music className="w-4 h-4 text-primary shrink-0 mt-1" />
+                        <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mascot */}
+              <img
+                src={mascot}
+                alt="דמותג ליבי חסידה"
+                className="h-40 w-auto rounded-2xl shadow-lg"
+              />
+
+              {/* Contact Info */}
+              <div className="text-center space-y-1">
+                <p className="text-sm font-semibold text-foreground/80">אנחנו כאן לסיוע במילוי השאלון</p>
+                <a href="tel:0533160990" className="block text-base font-bold text-primary hover:underline">טל׳ 0533160990</a>
+                <a href="mailto:teder@chasida.biz" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile: Form Content */}
+          <div className="lg:hidden p-4 md:p-8">
             <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
               {children}
             </div>
 
-            {/* Contact info at bottom of page */}
+            {/* Mobile Contact info */}
             <div className="mt-8 mb-6 text-center space-y-2">
               <p className="text-base font-semibold text-foreground/80">אנחנו כאן לסיוע במילוי השאלון</p>
               <div className="flex items-center justify-center gap-4 flex-wrap">
