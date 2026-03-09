@@ -181,9 +181,10 @@ export const Step4Completion = () => {
           onClick={handleSubmit}
           disabled={!feedbackInfo.agreeToNotifications || loading}
           size="lg"
+          className="text-lg px-8"
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          שלח שאלון
+          🎵 אקורד התחלה – שלח שאלון
         </Button>
       </div>
     </div>
