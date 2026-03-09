@@ -322,6 +322,8 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
   });
   const [businessInfo, setBI] = useState<BusinessInfo>({});
   const [spouseBusinessInfo, setSBI] = useState<BusinessInfo>({});
+  const [nonprofitInfo, setNI] = useState<NonprofitInfo>({});
+  const [spouseNonprofitInfo, setSNI] = useState<NonprofitInfo>({});
 
   // Step 3
   const [documentsInfo, setDocsI] = useState<DocumentsInfo>({});
