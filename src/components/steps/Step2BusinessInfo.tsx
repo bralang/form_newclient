@@ -649,6 +649,11 @@ export const Step2BusinessInfo = () => {
             {company.shareholderType === "other" && renderShareholdersSection(
               company,
               (field: string, value: any) => updateExistingCompany(idx, field, value),
+              (updates: Record<string, any>) => {
+                const updated = [...(info.existingCompanies || [])];
+                updated[idx] = { ...updated[idx], ...updates };
+                setInfo({ existingCompanies: updated });
+              },
               `${prefix}existing_${idx}_`
             )}
           </div>
