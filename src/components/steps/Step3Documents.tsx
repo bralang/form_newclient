@@ -47,7 +47,7 @@ export const Step3Documents = () => {
       { silent: true }
     );
     setLoading(false);
-    setCurrentStep(4);
+    setCurrentStep(5);
   };
 
   const FileUpload = ({ id, label, multiple = false, onChange }: { id: string; label: string; multiple?: boolean; onChange: (files: FileList | null) => void }) => (
