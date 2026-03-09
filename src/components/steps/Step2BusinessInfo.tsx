@@ -201,6 +201,7 @@ export const Step2BusinessInfo = () => {
   const renderShareholdersSection = (
     company: any,
     updateCompany: (field: string, value: any) => void,
+    updateCompanyMulti: (updates: Record<string, any>) => void,
     prefix = ""
   ) => {
     const shareholders = company.shareholders || [];
@@ -215,8 +216,7 @@ export const Step2BusinessInfo = () => {
       const adjusted = Array.from({ length: count }, (_, i) =>
         shareholders[i] || { name: "", idNumber: "", phone: "", email: "", percentage: "", additionalIdType: "", additionalIdNumber: "" }
       );
-      updateCompany("shareholders", adjusted);
-      updateCompany("shareholderCount", count);
+      updateCompanyMulti({ shareholders: adjusted, shareholderCount: count });
     };
 
     return (
@@ -649,6 +649,11 @@ export const Step2BusinessInfo = () => {
             {company.shareholderType === "other" && renderShareholdersSection(
               company,
               (field: string, value: any) => updateExistingCompany(idx, field, value),
+              (updates: Record<string, any>) => {
+                const updated = [...(info.existingCompanies || [])];
+                updated[idx] = { ...updated[idx], ...updates };
+                setInfo({ existingCompanies: updated });
+              },
               `${prefix}existing_${idx}_`
             )}
           </div>
@@ -714,6 +719,11 @@ export const Step2BusinessInfo = () => {
               (field: string, value: any) => {
                 const updated = [...(info.newCompanies || [])];
                 updated[idx] = { ...updated[idx], [field]: value };
+                setInfo({ newCompanies: updated });
+              },
+              (updates: Record<string, any>) => {
+                const updated = [...(info.newCompanies || [])];
+                updated[idx] = { ...updated[idx], ...updates };
                 setInfo({ newCompanies: updated });
               },
               `${prefix}new_${idx}_`
