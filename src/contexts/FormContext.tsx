@@ -349,6 +349,10 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     setBI((p) => ({ ...p, ...d }));
   const setSpouseBusinessInfo = (d: Partial<BusinessInfo>) =>
     setSBI((p) => ({ ...p, ...d }));
+  const setNonprofitInfo = (d: Partial<NonprofitInfo>) =>
+    setNI((p) => ({ ...p, ...d }));
+  const setSpouseNonprofitInfo = (d: Partial<NonprofitInfo>) =>
+    setSNI((p) => ({ ...p, ...d }));
   const setDocumentsInfo = (d: Partial<DocumentsInfo>) =>
     setDocsI((p) => ({ ...p, ...d }));
   const setFeedbackInfo = (d: Partial<FeedbackInfo>) =>
