@@ -1,6 +1,6 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { FormNavigation } from "@/components/FormNavigation";
-import mascot from "@/assets/mascot.jpeg";
+
 
 const TIMELINE_STEPS = [
   {
@@ -99,18 +99,9 @@ export const Step0Welcome = () => {
           אז מה עליכם לעשות?
         </h3>
 
-        <div className="flex flex-col md:flex-row gap-6 md:gap-0 items-start">
-          {/* Mascot - desktop only */}
-          <div className="hidden md:flex md:w-40 shrink-0 items-start justify-center pt-4">
-            <img
-              src={mascot}
-              alt="דמותג חסידה"
-              className="w-32 h-auto rounded-2xl shadow-lg"
-            />
-          </div>
-
+      <div className="flex flex-col items-start">
           {/* Timeline */}
-          <div className="flex-1 relative">
+          <div className="w-full relative">
             {TIMELINE_STEPS.map((step, index) => (
               <div key={step.note} className="flex items-start gap-4 relative">
                 {/* Vertical line */}
@@ -122,16 +113,16 @@ export const Step0Welcome = () => {
                 )}
 
                 {/* Note circle */}
-                <div className="w-10 h-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-xs shrink-0 z-10 shadow-sm">
+                <div className="w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-sm">
                   {step.note}
                 </div>
 
                 {/* Content */}
                 <div className="pb-6 pt-1 flex-1 min-w-0">
-                  <p className="font-bold text-sm text-foreground">
+                  <p className="font-bold text-base text-foreground">
                     {step.title}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                     {step.description}
                   </p>
                 </div>

@@ -80,9 +80,9 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               alt="דמותג ליבי חסידה"
               className="h-36 w-auto mx-auto rounded-2xl mb-5 shadow-lg"
             />
-            <p className="text-base font-semibold opacity-95 mb-2">אנחנו כאן לסיוע במילוי השאלון</p>
-            <p className="text-base font-medium opacity-90">טל׳ 0533160990</p>
-            <p className="text-base font-medium opacity-90">teder@chasida.biz</p>
+            <p className="text-lg font-semibold opacity-95 mb-3">אנחנו כאן לסיוע במילוי השאלון</p>
+            <p className="text-lg font-bold opacity-95">טל׳ 0533160990</p>
+            <p className="text-lg font-bold opacity-95">teder@chasida.biz</p>
           </div>
         </aside>
 
