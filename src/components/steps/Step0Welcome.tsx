@@ -1,6 +1,6 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { FormNavigation } from "@/components/FormNavigation";
-import mascot from "@/assets/mascot.jpeg";
+
 
 const TIMELINE_STEPS = [
   {
