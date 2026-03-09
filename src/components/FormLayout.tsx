@@ -242,9 +242,9 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             {currentStep !== 1 && (
               <button
                 onClick={() => setShowAttention(true)}
-                className="fixed bottom-6 left-6 z-30 lg:hidden flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 animate-pulse"
+                className="fixed bottom-6 left-6 z-30 lg:hidden flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
               >
-                <Info className="w-5 h-5" />
+                <Info className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
                 <span className="text-sm">לתשומת ליבכם</span>
               </button>
             )}
