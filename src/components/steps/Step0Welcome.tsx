@@ -113,16 +113,16 @@ export const Step0Welcome = () => {
                 )}
 
                 {/* Note circle */}
-                <div className="w-10 h-10 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-xs shrink-0 z-10 shadow-sm">
+                <div className="w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-sm">
                   {step.note}
                 </div>
 
                 {/* Content */}
                 <div className="pb-6 pt-1 flex-1 min-w-0">
-                  <p className="font-bold text-sm text-foreground">
+                  <p className="font-bold text-base text-foreground">
                     {step.title}
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                     {step.description}
                   </p>
                 </div>
