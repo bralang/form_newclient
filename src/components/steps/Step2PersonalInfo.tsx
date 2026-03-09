@@ -54,7 +54,7 @@ export const Step2PersonalInfo = () => {
       ];
 
   const additionalIdOptions = [
-    { value: "parentId", label: "ת.ז. הורים" },
+    { value: "parentId", label: "מס׳ זהות של הורה" },
     { value: "license", label: "רישיון נהיגה" },
     { value: "passport", label: "דרכון" },
   ];
@@ -189,7 +189,7 @@ export const Step2PersonalInfo = () => {
 
         {/* Additional ID - multi-select */}
         <div className="space-y-3">
-          <Label>אמצעי זיהוי נוסף</Label>
+          <Label>אמצעי זיהוי נוסף *</Label>
           <div className="flex flex-wrap flex-row-reverse gap-3 justify-end">
             {additionalIdOptions.map((opt) => (
               <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
@@ -211,7 +211,7 @@ export const Step2PersonalInfo = () => {
 
           {detailedInfo.additionalIdTypes.includes("parentId") && (
             <div className="space-y-2 mr-6">
-              <Label htmlFor="parentIdNum">מספר ת.ז. של ההורה</Label>
+              <Label htmlFor="parentIdNum">מס׳ זהות של הורה</Label>
               <Input
                 id="parentIdNum"
                 value={detailedInfo.additionalIdNumber}
@@ -299,7 +299,7 @@ export const Step2PersonalInfo = () => {
 
           {/* Spouse Additional ID - multi-select */}
           <div className="space-y-3">
-            <Label>אמצעי זיהוי נוסף</Label>
+            <Label>אמצעי זיהוי נוסף *</Label>
             <div className="flex flex-wrap flex-row-reverse gap-3 justify-end">
               {additionalIdOptions.map((opt) => (
                 <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
@@ -321,7 +321,7 @@ export const Step2PersonalInfo = () => {
 
             {spouseInfo.additionalIdTypes.includes("parentId") && (
               <div className="space-y-2 mr-6">
-                <Label htmlFor="spouseParentIdNum">מספר ת.ז. של ההורה</Label>
+                <Label htmlFor="spouseParentIdNum">מס׳ זהות של הורה</Label>
                 <Input
                   id="spouseParentIdNum"
                   value={spouseInfo.additionalIdNumber}

@@ -2,7 +2,9 @@ import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { g } from "@/lib/gender-utils";
+import { AlertTriangle } from "lucide-react";
 
 export const Step2BusinessInfo = () => {
   const {
@@ -31,6 +33,7 @@ export const Step2BusinessInfo = () => {
   const spouseHasNonprofit = serviceType.spousePurposes.includes("nonprofit");
 
   const userName = personalInfo.firstName || "המשתמש";
+  const userLastName = personalInfo.lastName || "";
   const spouseName = personalInfo.spouseName || "בן/בת הזוג";
 
   // ─── Yes/No Select helper ───
@@ -55,11 +58,122 @@ export const Step2BusinessInfo = () => {
     </Select>
   );
 
+  // ─── Partnership Section ───
+  const renderPartnershipSection = (
+    info: any,
+    setInfo: any,
+    prefix = ""
+  ) => {
+    const partners = info.partners || [];
+
+    const updatePartner = (idx: number, field: string, value: any) => {
+      const updated = [...partners];
+      updated[idx] = { ...updated[idx], [field]: value };
+      // If marking as VAT representative, unmark others
+      if (field === "isVatRepresentative" && value === true) {
+        updated.forEach((p, i) => {
+          if (i !== idx) updated[i] = { ...updated[i], isVatRepresentative: false };
+        });
+      }
+      setInfo({ partners: updated });
+    };
+
+    const handlePartnerCountChange = (count: number) => {
+      const adjusted = Array.from({ length: count }, (_, i) =>
+        partners[i] || { name: "", idNumber: "", percentage: "", phone: "", email: "", address: "", isVatRepresentative: false }
+      );
+      setInfo({ partners: adjusted });
+    };
+
+    return (
+      <div className="space-y-5 mr-4">
+        <div className="space-y-2">
+          <Label htmlFor={`${prefix}partnerCount`}>מספר שותפים (כולל אותך)</Label>
+          <Input
+            id={`${prefix}partnerCount`}
+            type="number"
+            min="2"
+            value={partners.length || ""}
+            onChange={(e) => handlePartnerCountChange(parseInt(e.target.value) || 0)}
+          />
+        </div>
+
+        {partners.length > 0 && (
+          <div className="space-y-3">
+            <Label className="text-base font-semibold">שמות השותפים – סמן נציג מול מע״מ</Label>
+            {partners.map((partner: any, idx: number) => (
+              <div key={idx} className="flex items-center gap-3">
+                <Checkbox
+                  id={`${prefix}vatRep_${idx}`}
+                  checked={partner.isVatRepresentative || false}
+                  onCheckedChange={(checked) => updatePartner(idx, "isVatRepresentative", !!checked)}
+                />
+                <Input
+                  placeholder={`שם שותף ${idx + 1}`}
+                  value={partner.name || ""}
+                  onChange={(e) => updatePartner(idx, "name", e.target.value)}
+                  className="flex-1"
+                />
+                {partner.isVatRepresentative && (
+                  <span className="text-xs text-primary font-medium whitespace-nowrap">נציג מע״מ</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Detailed partner groups */}
+        {partners.map((partner: any, idx: number) => (
+          partner.name && (
+            <div key={`details-${idx}`} className="space-y-3 p-4 border border-border rounded-xl bg-card">
+              <h4 className="font-bold text-primary">פרטי שותף – {partner.name}</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>מס׳ תעודת זהות</Label>
+                  <Input value={partner.idNumber || ""} onChange={(e) => updatePartner(idx, "idNumber", e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label>אחוז בשותפות</Label>
+                  <Input value={partner.percentage || ""} onChange={(e) => updatePartner(idx, "percentage", e.target.value)} placeholder="לדוגמה: 50%" />
+                </div>
+                <div className="space-y-1">
+                  <Label>טלפון</Label>
+                  <Input type="tel" value={partner.phone || ""} onChange={(e) => updatePartner(idx, "phone", e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label>מייל</Label>
+                  <Input type="email" value={partner.email || ""} onChange={(e) => updatePartner(idx, "email", e.target.value)} />
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                  <Label>כתובת</Label>
+                  <Input value={partner.address || ""} onChange={(e) => updatePartner(idx, "address", e.target.value)} />
+                </div>
+              </div>
+            </div>
+          )
+        ))}
+
+        {/* Partnership agreement upload */}
+        {partners.length > 0 && (
+          <div className="space-y-2">
+            <Label htmlFor={`${prefix}partnershipAgreement`}>צרף הסכם שותפות</Label>
+            <Input
+              id={`${prefix}partnershipAgreement`}
+              type="file"
+              onChange={(e) => setInfo({ partnershipAgreementFile: e.target.files?.[0] })}
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // ─── New Business ───
   const renderNewBusiness = (
     info: any,
     setInfo: any,
     name: string,
+    lastName: string,
     gender: "male" | "female" | "",
     idNumber: string,
     prefix = ""
@@ -75,9 +189,9 @@ export const Step2BusinessInfo = () => {
           id={`${prefix}businessName`}
           value={info.businessName || ""}
           onChange={(e) => setInfo({ businessName: e.target.value })}
-          placeholder={`ברירת מחדל: ${name}`}
+          placeholder={`ברירת מחדל: ${name} ${lastName}`.trim()}
         />
-        <p className="text-xs text-muted-foreground">לא חייבים לבחור שם עסק, ברירת המחדל היא שמך</p>
+        <p className="text-xs text-muted-foreground">לא חייבים לבחור שם עסק, ברירת המחדל היא שמך המלא</p>
       </div>
 
       <div className="space-y-2">
@@ -128,6 +242,14 @@ export const Step2BusinessInfo = () => {
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה רוצה להיות עוסק זעיר?", "האם את רוצה להיות עוסקת זעירה?")}</Label>
         <YesNoSelect value={info.wantSmallBusiness} onChange={(v) => setInfo({ wantSmallBusiness: v })} />
+        {info.wantSmallBusiness === true && (
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg mt-2">
+            <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+            <p className="text-sm text-destructive">
+              הגדרת עוסק זעיר בחוק דורשת עמידה בתנאים שונים ולכן יש לתאם מועד לשיחת בירור.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -143,12 +265,7 @@ export const Step2BusinessInfo = () => {
         </Select>
       </div>
 
-      {info.ownershipType === "partnership" && (
-        <div className="space-y-2">
-          <Label htmlFor={`${prefix}businessNumber`}>מספר העוסק (שותפות)</Label>
-          <Input id={`${prefix}businessNumber`} value={info.businessNumber || ""} onChange={(e) => setInfo({ businessNumber: e.target.value })} />
-        </div>
-      )}
+      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, prefix)}
 
       <div className="space-y-2">
         <Label>האם העסק מתנהל מהבית?</Label>
@@ -419,13 +536,13 @@ export const Step2BusinessInfo = () => {
       </h2>
 
       {/* User sections */}
-      {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
+      {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userLastName, userGender, detailedInfo.idNumber)}
       {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
       {userHasNonprofit && renderNonprofitMessage(userName)}
       {userHasCompany && renderCompany(businessInfo, setBusinessInfo, userName, userGender)}
 
       {/* Spouse sections */}
-      {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_")}
+      {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, "", spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasNonprofit && renderNonprofitMessage(spouseName)}
       {isMarried && spouseHasCompany && renderCompany(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, "sp_")}
