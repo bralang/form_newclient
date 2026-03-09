@@ -80,17 +80,6 @@ export const Step0Welcome = () => {
           לבצע העברה למשרדנו.
         </p>
 
-        <div className="p-4 bg-muted/50 rounded-xl border border-border/50 space-y-4">
-          <p className="font-semibold text-foreground">לתשומת ליבכם:</p>
-          {ATTENTION_ITEMS.map((item, index) => (
-            <div key={index} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Music className="w-3.5 h-3.5 text-primary" />
-              </div>
-              <p className="leading-relaxed">{item}</p>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Timeline - Musical Notes */}
