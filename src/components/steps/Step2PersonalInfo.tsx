@@ -403,23 +403,15 @@ export const Step2PersonalInfo = () => {
                 <Phone className="ml-2 h-4 w-4" />
                 תזכורת לטלפון
               </Button>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Input
-                  type="date"
-                  value={reminderDate}
-                  onChange={(e) => setReminderDate(e.target.value)}
-                  className="w-40 h-9"
+                  type="time"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                  className="w-32 h-9"
+                  placeholder="שעה"
                 />
-                <div className="flex items-center gap-1">
-                  <Input
-                    type="time"
-                    value={reminderTime}
-                    onChange={(e) => setReminderTime(e.target.value)}
-                    className="w-32 h-9"
-                    placeholder="שעה"
-                  />
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">(שעה מועדפת)</span>
-                </div>
+                <span className="text-xs text-muted-foreground whitespace-nowrap">(שעה מועדפת)</span>
               </div>
             </div>
           </div>
