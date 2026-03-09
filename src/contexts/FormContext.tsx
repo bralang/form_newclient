@@ -522,6 +522,12 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
       const sbi = parse<BusinessInfo>("spouseBusinessInfo");
       if (sbi) setSBI((prev) => ({ ...prev, ...sbi }));
 
+      const ni = parse<NonprofitInfo>("nonprofitInfo");
+      if (ni) setNI((prev) => ({ ...prev, ...ni }));
+
+      const sni = parse<NonprofitInfo>("spouseNonprofitInfo");
+      if (sni) setSNI((prev) => ({ ...prev, ...sni }));
+
       const docs = parse<DocumentsInfo>("documentsInfo");
       if (docs) setDocsI((prev) => ({ ...prev, ...docs }));
 
