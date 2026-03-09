@@ -95,14 +95,52 @@ export interface BusinessInfo {
   // Company (purpose 4)
   existingCompanyCount?: number;
   newCompanyCount?: number;
-  existingCompanies?: Array<{ name: string; companyNumber: string }>;
+  existingCompanies?: Array<{
+    name: string;
+    companyNumber: string;
+    hasTaxFile?: boolean;
+    hasBankAccount?: boolean;
+    bankDetails?: {
+      bank: string;
+      branch: string;
+      accountNumber: string;
+      accountHolder: string;
+    };
+    bankConfirmationFile?: File;
+    activityStartDate?: string;
+    hasEmployees?: boolean;
+    shareholderType?: "alone" | "other" | "";
+    shareholderCount?: number;
+    shareholders?: Array<{
+      name: string;
+      idNumber: string;
+      idFile?: File;
+      phone: string;
+      email: string;
+      additionalIdType?: "parentId" | "license" | "passport" | "";
+      additionalIdNumber?: string;
+      additionalIdFile?: File;
+      percentage: string;
+    }>;
+  }>;
   newCompanies?: Array<{
     existsInRegistrar?: boolean;
     requestedName1?: string;
     requestedName2?: string;
     requestedName3?: string;
     shareholderType?: "alone" | "other" | "";
-    shareholderDetails?: string;
+    shareholderCount?: number;
+    shareholders?: Array<{
+      name: string;
+      idNumber: string;
+      idFile?: File;
+      phone: string;
+      email: string;
+      additionalIdType?: "parentId" | "license" | "passport" | "";
+      additionalIdNumber?: string;
+      additionalIdFile?: File;
+      percentage: string;
+    }>;
     planningEmployees?: boolean;
   }>;
 }

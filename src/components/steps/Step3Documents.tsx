@@ -148,7 +148,7 @@ export const Step3Documents = () => {
             <h3 className="font-bold text-lg">אישור ניהול חשבון – {personalInfo.firstName}</h3>
             <FileUpload
               id="bankConfFile"
-              label="העלאת טופס אישור ניהול חשבון"
+              label="אישור ניהול חשבון או צילום שיק"
               onChange={(files) => setDocumentsInfo({ bankConfirmationFile: files?.[0] || undefined })}
             />
           </div>
@@ -158,7 +158,7 @@ export const Step3Documents = () => {
             <h3 className="font-bold text-lg">אישור ניהול חשבון – {personalInfo.spouseName}</h3>
             <FileUpload
               id="spouseBankConfFile"
-              label="העלאת טופס אישור ניהול חשבון"
+              label="אישור ניהול חשבון או צילום שיק"
               onChange={(files) => setDocumentsInfo({ spouseBankConfirmationFile: files?.[0] || undefined })}
             />
           </div>
@@ -192,12 +192,19 @@ export const Step3Documents = () => {
             <h3 className="font-bold text-lg">מסמכי חברה</h3>
 
             {hasExistingCompanies && (
-              <FileUpload
-                id="incorporationFiles"
-                label="תעודת התאגדות ו/או נסח רשם החברות"
-                multiple
-                onChange={(files) => setDocumentsInfo({ incorporationFiles: files ? Array.from(files) : undefined })}
-              />
+              <>
+                <FileUpload
+                  id="incorporationFiles"
+                  label="תעודת התאגדות ו/או נסח רשם החברות"
+                  multiple
+                  onChange={(files) => setDocumentsInfo({ incorporationFiles: files ? Array.from(files) : undefined })}
+                />
+                <FileUpload
+                  id="companyBankConfFile"
+                  label="אישור ניהול חשבון או צילום שיק"
+                  onChange={(files) => setDocumentsInfo({ companyBankConfirmationFile: files?.[0] || undefined })}
+                />
+              </>
             )}
 
             {hasNewCompaniesNotInRegistrarButInRegistrar && (
@@ -206,11 +213,6 @@ export const Step3Documents = () => {
                   id="registrarFile"
                   label="תעודת התאגדות ו/או נסח רשם החברות (חברה חדשה קיימת ברשם)"
                   onChange={(files) => setDocumentsInfo({ registrarExtractFile: files?.[0] || undefined })}
-                />
-                <FileUpload
-                  id="companyBankFile"
-                  label="אישור ניהול חשבון של החברה"
-                  onChange={(files) => setDocumentsInfo({ companyBankConfirmationFile: files?.[0] || undefined })}
                 />
               </>
             )}
