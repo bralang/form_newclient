@@ -23,6 +23,7 @@ export const Step2PersonalInfo = () => {
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const [reminderDate, setReminderDate] = useState("");
+  const [reminderTime, setReminderTime] = useState("");
 
   const isMarried = personalInfo.maritalStatus === "married";
   const gender = detailedInfo.gender;
