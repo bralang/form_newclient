@@ -99,18 +99,9 @@ export const Step0Welcome = () => {
           אז מה עליכם לעשות?
         </h3>
 
-        <div className="flex flex-col md:flex-row gap-6 md:gap-0 items-start">
-          {/* Mascot - desktop only */}
-          <div className="hidden md:flex md:w-40 shrink-0 items-start justify-center pt-4">
-            <img
-              src={mascot}
-              alt="דמותג חסידה"
-              className="w-32 h-auto rounded-2xl shadow-lg"
-            />
-          </div>
-
+      <div className="flex flex-col items-start">
           {/* Timeline */}
-          <div className="flex-1 relative">
+          <div className="w-full relative">
             {TIMELINE_STEPS.map((step, index) => (
               <div key={step.note} className="flex items-start gap-4 relative">
                 {/* Vertical line */}
