@@ -412,6 +412,57 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     const stripFiles = (obj: any) => {
       const clean: Record<string, any> = {};
       for (const [k, v] of Object.entries(obj)) {
+        if (v instanceof File || (Array.isArray(v) && v[0] instanceof File)) continue;
+        if (Array.isArray(v)) {
+          clean[k] = v.map((item: any) => {
+            if (typeof item === "object" && item !== null) {
+              const c: Record<string, any> = {};
+              for (const [ik, iv] of Object.entries(item)) {
+                if (iv instanceof File) continue;
+                c[ik] = iv;
+              }
+              return c;
+            }
+            return item;
+          });
+        } else {
+          clean[k] = v;
+        }
+      }
+      return clean;
+    };
+    sessionStorage.setItem("nonprofitInfo", JSON.stringify(stripFiles(nonprofitInfo)));
+  }, [nonprofitInfo]);
+
+  useEffect(() => {
+    const stripFiles = (obj: any) => {
+      const clean: Record<string, any> = {};
+      for (const [k, v] of Object.entries(obj)) {
+        if (v instanceof File || (Array.isArray(v) && v[0] instanceof File)) continue;
+        if (Array.isArray(v)) {
+          clean[k] = v.map((item: any) => {
+            if (typeof item === "object" && item !== null) {
+              const c: Record<string, any> = {};
+              for (const [ik, iv] of Object.entries(item)) {
+                if (iv instanceof File) continue;
+                c[ik] = iv;
+              }
+              return c;
+            }
+            return item;
+          });
+        } else {
+          clean[k] = v;
+        }
+      }
+      return clean;
+    };
+    sessionStorage.setItem("spouseNonprofitInfo", JSON.stringify(stripFiles(spouseNonprofitInfo)));
+  }, [spouseNonprofitInfo]);
+
+    const stripFiles = (obj: any) => {
+      const clean: Record<string, any> = {};
+      for (const [k, v] of Object.entries(obj)) {
         if (v instanceof File || (Array.isArray(v) && v[0] instanceof File))
           continue;
         clean[k] = v;
