@@ -201,6 +201,7 @@ export const Step2BusinessInfo = () => {
   const renderShareholdersSection = (
     company: any,
     updateCompany: (field: string, value: any) => void,
+    updateCompanyMulti: (updates: Record<string, any>) => void,
     prefix = ""
   ) => {
     const shareholders = company.shareholders || [];
@@ -215,8 +216,7 @@ export const Step2BusinessInfo = () => {
       const adjusted = Array.from({ length: count }, (_, i) =>
         shareholders[i] || { name: "", idNumber: "", phone: "", email: "", percentage: "", additionalIdType: "", additionalIdNumber: "" }
       );
-      updateCompany("shareholders", adjusted);
-      updateCompany("shareholderCount", count);
+      updateCompanyMulti({ shareholders: adjusted, shareholderCount: count });
     };
 
     return (
