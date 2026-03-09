@@ -107,7 +107,7 @@ export const Step4Completion = () => {
           </div>
         </div>
 
-        <Button onClick={() => { setSubmitted(false); setCurrentStep(1); }} variant="outline">
+         <Button onClick={() => { setSubmitted(false); setCurrentStep(1); }} variant="outline">
           מלא שאלון חדש
         </Button>
       </div>
