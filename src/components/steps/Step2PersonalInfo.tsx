@@ -211,7 +211,7 @@ export const Step2PersonalInfo = () => {
 
           {detailedInfo.additionalIdTypes.includes("parentId") && (
             <div className="space-y-2 mr-6">
-              <Label htmlFor="parentIdNum">מספר ת.ז. של ההורה</Label>
+              <Label htmlFor="parentIdNum">מס׳ זהות של הורה</Label>
               <Input
                 id="parentIdNum"
                 value={detailedInfo.additionalIdNumber}
