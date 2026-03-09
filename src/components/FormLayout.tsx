@@ -13,12 +13,9 @@ const steps = [
 ];
 
 const ATTENTION_ITEMS = [
-  "המידע שתמסרו בשאלון זה מיועד עבור משרדנו כדי שנוכל להיות המייצגים החוקיים שלכם.",
-  "תשובותיכם לא מסונכרנות עם שום גורם ממשלתי או גוף נוסף.",
-  "מילוי השאלון לא כרוך בתשלום ואינו מחייב אתכם כלל לפתוח תיק או להיות לקוחות של חסידה ייעוץ מס.",
-  "השאלון מיועד רק להפקת מסמכי ייצוג, שבחתימה עליהם תוכלו להצטרף ללקוחותינו.",
-  "גם אם עצרתם באמצע מילוי השאלון, מכל סיבה שהיא — המידע נשמר עבורכם במערכת.",
-  "תוכלו להמשיך להשיב מהמקום בו עצרתם.",
+  "המידע שתמסרו בשאלון זה מיועד עבור משרדנו כדי שנוכל להיות המייצגים החוקיים שלכם, ותשובותיכם לא מסונכרנות עם שום גורם ממשלתי או גוף נוסף.",
+  "מילוי השאלון לא כרוך בתשלום ואינו מחייב אתכם כלל לפתוח תיק או להיות לקוחות של חסידה ייעוץ מס, אלא מיועד רק להפקת מסמכי ייצוג, שבחתימה עליהם תוכלו להצטרף ללקוחותינו.",
+  "גם אם עצרתם באמצע מילוי השאלון, מכל סיבה שהיא — המידע נשמר עבורכם במערכת ותוכלו להמשיך להשיב מהמקום בו עצרתם.",
 ];
 
 interface FormLayoutProps {
@@ -163,42 +160,22 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               </div>
             </div>
 
-            {/* Left Panel - Mascot + Contact + Attention */}
-            <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col items-center justify-center p-6 gap-6">
+            {/* Left Panel - Mascot + Contact + Attention (pinned to bottom) */}
+            <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col justify-end p-6 pb-10 gap-5">
               {/* Attention Button */}
               <button
-                onClick={() => setShowAttention(!showAttention)}
-                className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary font-bold px-5 py-3 rounded-xl transition-all border-2 border-primary/20 hover:border-primary/40 shadow-sm"
+                onClick={() => setShowAttention(true)}
+                className="flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary font-bold px-5 py-3 rounded-xl transition-all border-2 border-primary/20 hover:border-primary/40 shadow-sm"
               >
                 <AlertCircle className="w-5 h-5" />
                 <span>לתשומת ליבכם</span>
               </button>
 
-              {/* Attention Panel */}
-              {showAttention && (
-                <div className="bg-card rounded-2xl shadow-2xl border border-border p-5 w-full animate-in fade-in slide-in-from-top-2 duration-300">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-bold text-foreground">לתשומת ליבכם</h3>
-                    <button onClick={() => setShowAttention(false)} className="text-muted-foreground hover:text-foreground">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="space-y-3">
-                    {ATTENTION_ITEMS.map((item, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <Music className="w-4 h-4 text-primary shrink-0 mt-1" />
-                        <p className="text-sm text-muted-foreground leading-relaxed">{item}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Mascot */}
               <img
                 src={mascot}
                 alt="דמותג ליבי חסידה"
-                className="h-40 w-auto rounded-2xl shadow-lg"
+                className="h-40 w-auto rounded-2xl shadow-lg mx-auto"
               />
 
               {/* Contact Info */}
@@ -209,6 +186,45 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               </div>
             </div>
           </div>
+
+          {/* Attention Modal Overlay */}
+          {showAttention && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowAttention(false)}>
+              <div
+                className="bg-card rounded-2xl shadow-2xl border border-border p-8 w-full max-w-lg mx-4 animate-in fade-in zoom-in-95 duration-300"
+                dir="rtl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-foreground">🎵 לתשומת ליבכם</h3>
+                  <button
+                    onClick={() => setShowAttention(false)}
+                    className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="space-y-5">
+                  {ATTENTION_ITEMS.map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <Music className="w-4 h-4 text-primary" />
+                      </div>
+                      <p className="text-base text-foreground/80 leading-relaxed">{item}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 text-center">
+                  <button
+                    onClick={() => setShowAttention(false)}
+                    className="px-8 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors"
+                  >
+                    סגירה
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Mobile: Form Content */}
           <div className="lg:hidden p-4 md:p-8">

@@ -1,6 +1,6 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { FormNavigation } from "@/components/FormNavigation";
-
+import { Music } from "lucide-react";
 
 const TIMELINE_STEPS = [
   {
@@ -45,6 +45,12 @@ const TIMELINE_STEPS = [
   },
 ];
 
+const ATTENTION_ITEMS = [
+  "המידע שתמסרו בשאלון זה מיועד עבור משרדנו כדי שנוכל להיות המייצגים החוקיים שלכם, ותשובותיכם לא מסונכרנות עם שום גורם ממשלתי או גוף נוסף.",
+  "מילוי השאלון לא כרוך בתשלום ואינו מחייב אתכם כלל לפתוח תיק או להיות לקוחות של חסידה ייעוץ מס, אלא מיועד רק להפקת מסמכי ייצוג, שבחתימה עליהם תוכלו להצטרף ללקוחותינו.",
+  "גם אם עצרתם באמצע מילוי השאלון, מכל סיבה שהיא — המידע נשמר עבורכם במערכת ותוכלו להמשיך להשיב מהמקום בו עצרתם.",
+];
+
 export const Step0Welcome = () => {
   const { setCurrentStep } = useFormContext();
 
@@ -74,22 +80,16 @@ export const Step0Welcome = () => {
           לבצע העברה למשרדנו.
         </p>
 
-        <div className="p-4 bg-muted/50 rounded-xl border border-border/50 space-y-2">
+        <div className="p-4 bg-muted/50 rounded-xl border border-border/50 space-y-4">
           <p className="font-semibold text-foreground">לתשומת ליבכם:</p>
-          <p>
-            המידע שתמסרו בשאלון זה מיועד עבור משרדנו כדי שנוכל להיות המייצגים
-            החוקיים שלכם, ותשובותיכם לא מסונכרנות עם שום גורם ממשלתי או גוף
-            נוסף.
-          </p>
-          <p>
-            מילוי השאלון לא כרוך בתשלום ואינו מחייב אתכם כלל לפתוח תיק או
-            להיות לקוחות של חסידה ייעוץ מס, אלא מיועד רק להפקת מסמכי ייצוג,
-            שבחתימה עליהם תוכלו להצטרף ללקוחותינו.
-          </p>
-          <p>
-            גם אם עצרתם באמצע מילוי השאלון, מכל סיבה שהיא — המידע נשמר עבורכם
-            במערכת ותוכלו להמשיך להשיב מהמקום בו עצרתם.
-          </p>
+          {ATTENTION_ITEMS.map((item, index) => (
+            <div key={index} className="flex items-start gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <Music className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <p className="leading-relaxed">{item}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -99,25 +99,19 @@ export const Step0Welcome = () => {
           אז מה עליכם לעשות?
         </h3>
 
-      <div className="flex flex-col items-start">
-          {/* Timeline */}
+        <div className="flex flex-col items-start">
           <div className="w-full relative">
             {TIMELINE_STEPS.map((step, index) => (
               <div key={step.note} className="flex items-start gap-4 relative">
-                {/* Vertical line */}
                 {index < TIMELINE_STEPS.length - 1 && (
                   <div
                     className="absolute right-[1.15rem] top-10 w-0.5 bg-secondary"
                     style={{ height: "calc(100% - 0.5rem)" }}
                   />
                 )}
-
-                {/* Note circle */}
                 <div className="w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-sm">
                   {step.note}
                 </div>
-
-                {/* Content */}
                 <div className="pb-6 pt-1 flex-1 min-w-0">
                   <p className="font-bold text-base text-foreground">
                     {step.title}
