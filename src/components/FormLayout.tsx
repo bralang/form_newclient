@@ -22,12 +22,12 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
     <div className="min-h-screen bg-background" dir="rtl">
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* ─── Sidebar (Desktop) ─── */}
-        <aside className="hidden lg:flex lg:flex-col lg:w-72 xl:w-80 bg-gradient-to-b from-primary to-primary/80 text-primary-foreground sticky top-0 h-screen p-6 justify-between shrink-0">
+        <aside className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 bg-gradient-to-b from-primary to-primary/80 text-primary-foreground sticky top-0 h-screen p-8 justify-between shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-center mb-8 opacity-90">שאלון קבלת לקוח</h2>
+            <h2 className="text-2xl font-bold text-center mb-10 opacity-90">שאלון קבלת לקוח</h2>
 
             {/* Progress Steps */}
-            <nav className="space-y-2">
+            <nav className="space-y-3">
               {steps.map((step, index) => {
                 const isCompleted = step.number < currentStep;
                 const isActive = step.number === currentStep;
@@ -35,7 +35,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                 return (
                   <div key={step.number}>
                     <div
-                      className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
+                      className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${
                         isActive
                           ? "bg-primary-foreground/20 shadow-lg"
                           : isCompleted
@@ -44,7 +44,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                       }`}
                     >
                       <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 transition-all ${
+                        className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-base shrink-0 transition-all ${
                           isCompleted
                             ? "bg-green-400 text-white"
                             : isActive
@@ -52,16 +52,16 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                             : "bg-primary-foreground/20 text-primary-foreground"
                         }`}
                       >
-                        {isCompleted ? <Check className="w-5 h-5" /> : step.number}
+                        {isCompleted ? <Check className="w-6 h-6" /> : step.number}
                       </div>
-                      <span className={`text-sm font-medium ${isActive ? "font-bold" : ""}`}>
+                      <span className={`text-base font-medium ${isActive ? "font-bold text-lg" : ""}`}>
                         {step.title}
                       </span>
                     </div>
                     {index < steps.length - 1 && (
-                      <div className="flex justify-start mr-[1.45rem] my-1">
+                      <div className="flex justify-start mr-[1.7rem] my-1">
                         <div
-                          className={`w-0.5 h-4 rounded-full transition-all ${
+                          className={`w-0.5 h-5 rounded-full transition-all ${
                             isCompleted ? "bg-green-400" : "bg-primary-foreground/20"
                           }`}
                         />
@@ -74,15 +74,15 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
           </div>
 
           {/* Mascot + Contact */}
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <img
               src={mascot}
               alt="דמותג ליבי חסידה"
-              className="h-32 w-auto mx-auto rounded-2xl mb-4 shadow-lg"
+              className="h-36 w-auto mx-auto rounded-2xl mb-5 shadow-lg"
             />
-            <p className="text-sm font-semibold opacity-90 mb-1">אנחנו כאן לסיוע במילוי השאלון</p>
-            <p className="text-xs opacity-70">טל׳ 0533160990</p>
-            <p className="text-xs opacity-70">l0533160990@gmail.com</p>
+            <p className="text-base font-semibold opacity-95 mb-2">אנחנו כאן לסיוע במילוי השאלון</p>
+            <p className="text-base font-medium opacity-90">טל׳ 0533160990</p>
+            <p className="text-base font-medium opacity-90">teder@chasida.biz</p>
           </div>
         </aside>
 
