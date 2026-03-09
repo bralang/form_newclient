@@ -120,7 +120,7 @@ export const Step3Documents = () => {
 
             <FileUpload
               id="spouseIdCardFiles"
-              label="צילום ת.ז. + ספח (ניתן להעלות מספר קבצים)"
+              label="צילום ת.ז. + ספח * (ניתן להעלות מספר קבצים)"
               multiple
               onChange={(files) => setDocumentsInfo({ spouseIdCardFiles: files ? Array.from(files) : undefined })}
             />
