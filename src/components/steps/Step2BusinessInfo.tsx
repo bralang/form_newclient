@@ -721,6 +721,11 @@ export const Step2BusinessInfo = () => {
                 updated[idx] = { ...updated[idx], [field]: value };
                 setInfo({ newCompanies: updated });
               },
+              (updates: Record<string, any>) => {
+                const updated = [...(info.newCompanies || [])];
+                updated[idx] = { ...updated[idx], ...updates };
+                setInfo({ newCompanies: updated });
+              },
               `${prefix}new_${idx}_`
             )}
 
