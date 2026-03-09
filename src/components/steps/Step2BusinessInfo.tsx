@@ -1,10 +1,11 @@
-import { useFormContext } from "@/contexts/FormContext";
+import { useFormContext, NonprofitBoardMember, NonprofitAuditMember, NonprofitInfo } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { g } from "@/lib/gender-utils";
 import { AlertTriangle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Step2BusinessInfo = () => {
   const {
@@ -13,6 +14,10 @@ export const Step2BusinessInfo = () => {
     setBusinessInfo,
     spouseBusinessInfo,
     setSpouseBusinessInfo,
+    nonprofitInfo,
+    setNonprofitInfo,
+    spouseNonprofitInfo,
+    setSpouseNonprofitInfo,
     personalInfo,
     detailedInfo,
     spouseInfo,
