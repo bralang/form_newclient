@@ -80,10 +80,9 @@ export const Step2PersonalInfo = () => {
   };
 
   const handleSendReminder = async () => {
-    if (!reminderDate) return;
     await sendToWebhook(
       "https://n8n.chasida.biz/webhook/send-reminder",
-      { phone: personalInfo.phone, reminderDate, personalInfo, serviceType },
+      { phone: personalInfo.phone, reminderTime: reminderTime || undefined, personalInfo, serviceType },
       { silent: false }
     );
   };
