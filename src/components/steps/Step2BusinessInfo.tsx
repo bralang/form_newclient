@@ -234,63 +234,68 @@ export const Step2BusinessInfo = () => {
         {shareholders.map((sh: any, idx: number) => (
           <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
             <h4 className="font-bold text-primary">בעל מניות #{idx + 1}{sh.name ? ` – ${sh.name}` : ""}</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>שם מלא *</Label>
-                <Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label>מס׳ תעודת זהות *</Label>
-                <Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label>צילום ת.ז.</Label>
-                <Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "idFile", e.target.files?.[0])} />
-              </div>
-              <div className="space-y-1">
-                <Label>אחוזי אחזקה *</Label>
-                <Input value={sh.percentage || ""} onChange={(e) => updateShareholder(idx, "percentage", e.target.value)} placeholder="לדוגמה: 50%" />
-              </div>
-              <div className="space-y-1">
-                <Label>טלפון</Label>
-                <Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} />
-              </div>
-              <div className="space-y-1">
-                <Label>מייל</Label>
-                <Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} />
-              </div>
-            </div>
 
-            {/* Additional ID */}
             <div className="space-y-2">
-              <Label>אמצעי זיהוי נוסף {idx === 0 ? "*" : "(מומלץ)"}</Label>
+              <Label>סוג בעל המניות</Label>
               <Select
-                value={sh.additionalIdType || ""}
-                onValueChange={(v) => updateShareholder(idx, "additionalIdType", v)}
+                value={sh.holderType || "person"}
+                onValueChange={(v) => updateShareholder(idx, "holderType", v)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="בחר אמצעי זיהוי" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
-                  <SelectItem value="license">רישיון נהיגה</SelectItem>
-                  <SelectItem value="passport">דרכון</SelectItem>
+                  <SelectItem value="person">אדם פרטי</SelectItem>
+                  <SelectItem value="company">חברה</SelectItem>
                 </SelectContent>
               </Select>
-              {sh.additionalIdType && (
-                <>
-                  <Input
-                    placeholder="מספר אמצעי זיהוי"
-                    value={sh.additionalIdNumber || ""}
-                    onChange={(e) => updateShareholder(idx, "additionalIdNumber", e.target.value)}
-                  />
-                  <div className="space-y-1">
-                    <Label>צילום אמצעי זיהוי</Label>
-                    <Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "additionalIdFile", e.target.files?.[0])} />
-                  </div>
-                </>
-              )}
             </div>
+
+            {(sh.holderType || "person") === "person" ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "idFile", e.target.files?.[0])} /></div>
+                  <div className="space-y-1"><Label>אחוזי אחזקה *</Label><Input value={sh.percentage || ""} onChange={(e) => updateShareholder(idx, "percentage", e.target.value)} placeholder="לדוגמה: 50%" /></div>
+                  <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} /></div>
+                </div>
+                <div className="space-y-2">
+                  <Label>אמצעי זיהוי נוסף {idx === 0 ? "*" : "(מומלץ)"}</Label>
+                  <Select value={sh.additionalIdType || ""} onValueChange={(v) => updateShareholder(idx, "additionalIdType", v)}>
+                    <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                      <SelectItem value="license">רישיון נהיגה</SelectItem>
+                      <SelectItem value="passport">דרכון</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {sh.additionalIdType && (
+                    <>
+                      <Input placeholder="מספר אמצעי זיהוי" value={sh.additionalIdNumber || ""} onChange={(e) => updateShareholder(idx, "additionalIdNumber", e.target.value)} />
+                      <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "additionalIdFile", e.target.files?.[0])} /></div>
+                    </>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>אחוזי אחזקה *</Label><Input value={sh.percentage || ""} onChange={(e) => updateShareholder(idx, "percentage", e.target.value)} placeholder="לדוגמה: 50%" /></div>
+                </div>
+                <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
+                  <p className="text-sm text-muted-foreground mb-3">יש לציין את בעל המניות הסופי (אדם פרטי) של החברה המחזיקה, לצורך זיהוי במס הכנסה</p>
+                  <div className="space-y-2"><Label>שם בעל המניות הסופי (אדם פרטי) *</Label><Input value={sh.ultimateOwnerName || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerName", e.target.value)} /></div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.ultimateOwnerIdNumber || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerIdNumber", e.target.value)} /></div>
+                    <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "ultimateOwnerIdFile", e.target.files?.[0])} /></div>
+                    <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.ultimateOwnerPhone || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerPhone", e.target.value)} /></div>
+                    <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.ultimateOwnerEmail || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerEmail", e.target.value)} /></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
