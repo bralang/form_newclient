@@ -59,6 +59,18 @@ export interface BusinessInfo {
   hasEmployees?: boolean;
   hadPreviousBusiness?: boolean;
 
+  // Partnership details (new business)
+  partners?: Array<{
+    name: string;
+    idNumber: string;
+    percentage: string;
+    phone: string;
+    email: string;
+    address: string;
+    isVatRepresentative: boolean;
+  }>;
+  partnershipAgreementFile?: File;
+
   // New business
   businessName?: string;
   isUnemployedOrMaternity?: boolean;
