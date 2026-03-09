@@ -193,6 +193,9 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     email: "",
     maritalStatus: "",
     spouseName: "",
+    agreeToMessages: false,
+    agreeToPrivacy: false,
+    otherPurposeDetails: "",
   });
   const [serviceType, setST] = useState<ServiceType>({
     userPurposes: [],
