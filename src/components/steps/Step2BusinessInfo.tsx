@@ -58,7 +58,7 @@ export const Step2BusinessInfo = () => {
     </Select>
   );
 
-  // ─── Partnership Section ───
+  // ─── Partnership Section (shared for new & existing) ───
   const renderPartnershipSection = (
     info: any,
     setInfo: any,
@@ -69,7 +69,6 @@ export const Step2BusinessInfo = () => {
     const updatePartner = (idx: number, field: string, value: any) => {
       const updated = [...partners];
       updated[idx] = { ...updated[idx], [field]: value };
-      // If marking as VAT representative, unmark others
       if (field === "isVatRepresentative" && value === true) {
         updated.forEach((p, i) => {
           if (i !== idx) updated[i] = { ...updated[i], isVatRepresentative: false };
@@ -126,7 +125,10 @@ export const Step2BusinessInfo = () => {
         {partners.map((partner: any, idx: number) => (
           partner.name && (
             <div key={`details-${idx}`} className="space-y-3 p-4 border border-border rounded-xl bg-card">
-              <h4 className="font-bold text-primary">פרטי שותף – {partner.name}</h4>
+              <h4 className="font-bold text-primary">
+                פרטי שותף – {partner.name}
+                {partner.isVatRepresentative && <span className="text-xs mr-2 text-primary/70">(נציג מע״מ)</span>}
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label>מס׳ תעודת זהות</Label>
@@ -149,6 +151,33 @@ export const Step2BusinessInfo = () => {
                   <Input value={partner.address || ""} onChange={(e) => updatePartner(idx, "address", e.target.value)} />
                 </div>
               </div>
+
+              {/* Additional ID for VAT representative */}
+              {partner.isVatRepresentative && (
+                <div className="space-y-3 mt-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
+                  <Label className="font-semibold">אמצעי זיהוי נוסף (נציג מע״מ) *</Label>
+                  <Select
+                    value={partner.additionalIdType || ""}
+                    onValueChange={(v) => updatePartner(idx, "additionalIdType", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="בחר אמצעי זיהוי" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                      <SelectItem value="license">רישיון נהיגה</SelectItem>
+                      <SelectItem value="passport">דרכון</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {partner.additionalIdType && (
+                    <Input
+                      placeholder="מספר אמצעי זיהוי"
+                      value={partner.additionalIdNumber || ""}
+                      onChange={(e) => updatePartner(idx, "additionalIdNumber", e.target.value)}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           )
         ))}
@@ -164,6 +193,106 @@ export const Step2BusinessInfo = () => {
             />
           </div>
         )}
+      </div>
+    );
+  };
+
+  // ─── Shareholders Section (for company) ───
+  const renderShareholdersSection = (
+    company: any,
+    updateCompany: (field: string, value: any) => void,
+    prefix = ""
+  ) => {
+    const shareholders = company.shareholders || [];
+
+    const updateShareholder = (idx: number, field: string, value: any) => {
+      const updated = [...shareholders];
+      updated[idx] = { ...updated[idx], [field]: value };
+      updateCompany("shareholders", updated);
+    };
+
+    const handleShareholderCountChange = (count: number) => {
+      const adjusted = Array.from({ length: count }, (_, i) =>
+        shareholders[i] || { name: "", idNumber: "", phone: "", email: "", percentage: "", additionalIdType: "", additionalIdNumber: "" }
+      );
+      updateCompany("shareholders", adjusted);
+      updateCompany("shareholderCount", count);
+    };
+
+    return (
+      <div className="space-y-4 mr-4">
+        <div className="space-y-2">
+          <Label>כמה בעלי מניות יש בחברה?</Label>
+          <Input
+            type="number"
+            min="2"
+            value={company.shareholderCount || ""}
+            onChange={(e) => handleShareholderCountChange(parseInt(e.target.value) || 0)}
+          />
+        </div>
+
+        {shareholders.map((sh: any, idx: number) => (
+          <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
+            <h4 className="font-bold text-primary">בעל מניות #{idx + 1}{sh.name ? ` – ${sh.name}` : ""}</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>שם מלא *</Label>
+                <Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label>מס׳ תעודת זהות *</Label>
+                <Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label>צילום ת.ז.</Label>
+                <Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "idFile", e.target.files?.[0])} />
+              </div>
+              <div className="space-y-1">
+                <Label>אחוזי אחזקה *</Label>
+                <Input value={sh.percentage || ""} onChange={(e) => updateShareholder(idx, "percentage", e.target.value)} placeholder="לדוגמה: 50%" />
+              </div>
+              <div className="space-y-1">
+                <Label>טלפון</Label>
+                <Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label>מייל</Label>
+                <Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} />
+              </div>
+            </div>
+
+            {/* Additional ID */}
+            <div className="space-y-2">
+              <Label>אמצעי זיהוי נוסף {idx === 0 ? "*" : "(מומלץ)"}</Label>
+              <Select
+                value={sh.additionalIdType || ""}
+                onValueChange={(v) => updateShareholder(idx, "additionalIdType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="בחר אמצעי זיהוי" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                  <SelectItem value="license">רישיון נהיגה</SelectItem>
+                  <SelectItem value="passport">דרכון</SelectItem>
+                </SelectContent>
+              </Select>
+              {sh.additionalIdType && (
+                <>
+                  <Input
+                    placeholder="מספר אמצעי זיהוי"
+                    value={sh.additionalIdNumber || ""}
+                    onChange={(e) => updateShareholder(idx, "additionalIdNumber", e.target.value)}
+                  />
+                  <div className="space-y-1">
+                    <Label>צילום אמצעי זיהוי</Label>
+                    <Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "additionalIdFile", e.target.files?.[0])} />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     );
   };
@@ -226,15 +355,15 @@ export const Step2BusinessInfo = () => {
         </Select>
       </div>
 
-      {/* Bank details - immediately after selecting authorized */}
+      {/* Bank details for authorized - MANDATORY */}
       {info.businessType === "authorized" && (
         <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
-          <Label className="text-base font-semibold">פרטי חשבון</Label>
+          <Label className="text-base font-semibold">פרטי חשבון בנק של העסק *</Label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1"><Label>בנק</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} /></div>
-            <div className="space-y-1"><Label>סניף</Label><Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} /></div>
-            <div className="space-y-1"><Label>מספר חשבון</Label><Input value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} /></div>
-            <div className="space-y-1"><Label>שם בעל החשבון</Label><Input value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} /></div>
+            <div className="space-y-1"><Label>בנק *</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} /></div>
+            <div className="space-y-1"><Label>סניף *</Label><Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} /></div>
+            <div className="space-y-1"><Label>מספר חשבון *</Label><Input value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} /></div>
+            <div className="space-y-1"><Label>שם בעל החשבון *</Label><Input value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} /></div>
           </div>
         </div>
       )}
@@ -324,6 +453,15 @@ export const Step2BusinessInfo = () => {
       </h3>
 
       <div className="space-y-2">
+        <Label htmlFor={`${prefix}exBusinessNumber`}>מספר העוסק</Label>
+        <Input
+          id={`${prefix}exBusinessNumber`}
+          value={info.businessNumber || ""}
+          onChange={(e) => setInfo({ businessNumber: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")}</Label>
         <Select value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })}>
           <SelectTrigger>
@@ -336,16 +474,7 @@ export const Step2BusinessInfo = () => {
         </Select>
       </div>
 
-      {info.ownershipType === "partnership" && (
-        <div className="space-y-2">
-          <Label htmlFor={`${prefix}exBusinessNumber`}>מספר העוסק</Label>
-          <Input
-            id={`${prefix}exBusinessNumber`}
-            value={info.businessNumber || ""}
-            onChange={(e) => setInfo({ businessNumber: e.target.value })}
-          />
-        </div>
-      )}
+      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, prefix)}
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים?</Label>
@@ -362,8 +491,17 @@ export const Step2BusinessInfo = () => {
     _gender: "male" | "female" | "",
     prefix = ""
   ) => {
+    const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing");
+    const hasNewPurpose = serviceType.userPurposeStatus?.company?.includes("new") || serviceType.spousePurposeStatus?.company?.includes("new");
+
     const existingCount = info.existingCompanyCount || 0;
     const newCount = info.newCompanyCount || 0;
+
+    const updateExistingCompany = (idx: number, field: string, value: any) => {
+      const updated = [...(info.existingCompanies || [])];
+      updated[idx] = { ...updated[idx], [field]: value };
+      setInfo({ existingCompanies: updated });
+    };
 
     return (
       <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
@@ -372,66 +510,147 @@ export const Step2BusinessInfo = () => {
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות (עם תיק פתוח ברשות המיסים) מעוניין לקבל שירות?</Label>
-            <Input
-              id={`${prefix}existingCount`}
-              type="number"
-              min="0"
-              value={existingCount}
-              onChange={(e) => {
-                const count = parseInt(e.target.value) || 0;
-                const companies = info.existingCompanies || [];
-                const adjusted = Array.from({ length: count }, (_, i) => companies[i] || { name: "", companyNumber: "" });
-                setInfo({ existingCompanyCount: count, existingCompanies: adjusted });
-              }}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
-            <Input
-              id={`${prefix}newCount`}
-              type="number"
-              min="0"
-              value={newCount}
-              onChange={(e) => {
-                const count = parseInt(e.target.value) || 0;
-                const companies = info.newCompanies || [];
-                const adjusted = Array.from({ length: count }, (_, i) => companies[i] || {});
-                setInfo({ newCompanyCount: count, newCompanies: adjusted });
-              }}
-            />
-          </div>
+          {hasExistingPurpose && (
+            <div className="space-y-2">
+              <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות מעוניין לקבל שירות?</Label>
+              <Input
+                id={`${prefix}existingCount`}
+                type="number"
+                min="0"
+                value={existingCount}
+                onChange={(e) => {
+                  const count = parseInt(e.target.value) || 0;
+                  const companies = info.existingCompanies || [];
+                  const adjusted = Array.from({ length: count }, (_, i) => companies[i] || { name: "", companyNumber: "" });
+                  setInfo({ existingCompanyCount: count, existingCompanies: adjusted });
+                }}
+              />
+            </div>
+          )}
+          {hasNewPurpose && (
+            <div className="space-y-2">
+              <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
+              <Input
+                id={`${prefix}newCount`}
+                type="number"
+                min="0"
+                value={newCount}
+                onChange={(e) => {
+                  const count = parseInt(e.target.value) || 0;
+                  const companies = info.newCompanies || [];
+                  const adjusted = Array.from({ length: count }, (_, i) => companies[i] || {});
+                  setInfo({ newCompanyCount: count, newCompanies: adjusted });
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Existing companies */}
         {(info.existingCompanies || []).map((company: any, idx: number) => (
-          <div key={`existing-${idx}`} className="space-y-3 p-4 border border-border rounded-xl bg-card">
+          <div key={`existing-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
             <h4 className="font-bold text-primary">חברה קיימת #{idx + 1}</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>שם חברה</Label>
                 <Input
                   value={company.name || ""}
-                  onChange={(e) => {
-                    const updated = [...(info.existingCompanies || [])];
-                    updated[idx] = { ...updated[idx], name: e.target.value };
-                    setInfo({ existingCompanies: updated });
-                  }}
+                  onChange={(e) => updateExistingCompany(idx, "name", e.target.value)}
                 />
               </div>
               <div className="space-y-1">
                 <Label>ח.פ.</Label>
                 <Input
                   value={company.companyNumber || ""}
-                  onChange={(e) => {
-                    const updated = [...(info.existingCompanies || [])];
-                    updated[idx] = { ...updated[idx], companyNumber: e.target.value };
-                    setInfo({ existingCompanies: updated });
-                  }}
+                  onChange={(e) => updateExistingCompany(idx, "companyNumber", e.target.value)}
                 />
               </div>
             </div>
+
+            {/* Tax file question */}
+            <div className="space-y-2">
+              <Label>האם יש לחברה תיק ברשות המיסים?</Label>
+              <YesNoSelect
+                value={company.hasTaxFile}
+                onChange={(v) => updateExistingCompany(idx, "hasTaxFile", v)}
+              />
+            </div>
+
+            {company.hasTaxFile === false && (
+              <div className="space-y-4 mr-4">
+                {/* Bank account */}
+                <div className="space-y-2">
+                  <Label>האם יש לחברה חשבון בנק?</Label>
+                  <YesNoSelect
+                    value={company.hasBankAccount}
+                    onChange={(v) => updateExistingCompany(idx, "hasBankAccount", v)}
+                  />
+                </div>
+
+                {company.hasBankAccount === false && (
+                  <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+                    <p className="text-sm text-destructive">
+                      לא ניתן לפתוח לחברה תיק ברשויות טרם פתיחת חשבון בנק.
+                    </p>
+                  </div>
+                )}
+
+                {company.hasBankAccount === true && (
+                  <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
+                    <Label className="text-base font-semibold">פרטי חשבון בנק של החברה *</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1"><Label>בנק</Label><Input value={company.bankDetails?.bank || ""} onChange={(e) => updateExistingCompany(idx, "bankDetails", { ...company.bankDetails, bank: e.target.value })} /></div>
+                      <div className="space-y-1"><Label>סניף</Label><Input value={company.bankDetails?.branch || ""} onChange={(e) => updateExistingCompany(idx, "bankDetails", { ...company.bankDetails, branch: e.target.value })} /></div>
+                      <div className="space-y-1"><Label>מספר חשבון</Label><Input value={company.bankDetails?.accountNumber || ""} onChange={(e) => updateExistingCompany(idx, "bankDetails", { ...company.bankDetails, accountNumber: e.target.value })} /></div>
+                      <div className="space-y-1"><Label>שם בעל החשבון</Label><Input value={company.bankDetails?.accountHolder || ""} onChange={(e) => updateExistingCompany(idx, "bankDetails", { ...company.bankDetails, accountHolder: e.target.value })} /></div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>אישור ניהול חשבון או צילום שיק</Label>
+                      <Input type="file" accept="image/*,.pdf" onChange={(e) => updateExistingCompany(idx, "bankConfirmationFile", e.target.files?.[0])} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Activity start date */}
+                <div className="space-y-2">
+                  <Label>מתי התחילה הפעילות בחברה?</Label>
+                  <Input type="date" value={company.activityStartDate || ""} onChange={(e) => updateExistingCompany(idx, "activityStartDate", e.target.value)} />
+                </div>
+
+                {/* Has employees */}
+                <div className="space-y-2">
+                  <Label>האם החברה מעסיקה עובדים?</Label>
+                  <YesNoSelect
+                    value={company.hasEmployees}
+                    onChange={(v) => updateExistingCompany(idx, "hasEmployees", v)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Shareholders - always shown for existing companies */}
+            <div className="space-y-2">
+              <Label>מי בעלי המניות בחברה?</Label>
+              <Select
+                value={company.shareholderType || ""}
+                onValueChange={(v) => updateExistingCompany(idx, "shareholderType", v)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="בחר" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="alone">אני לבד</SelectItem>
+                  <SelectItem value="other">ביחד עם אחר</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {company.shareholderType === "other" && renderShareholdersSection(
+              company,
+              (field: string, value: any) => updateExistingCompany(idx, field, value),
+              `${prefix}existing_${idx}_`
+            )}
           </div>
         ))}
 
@@ -485,23 +704,19 @@ export const Step2BusinessInfo = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="alone">אני לבד</SelectItem>
-                  <SelectItem value="other">אחר</SelectItem>
+                  <SelectItem value="other">ביחד עם אחר</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {company.shareholderType === "other" && (
-              <div className="space-y-2">
-                <Label>פירוט בעלי מניות</Label>
-                <Input
-                  value={company.shareholderDetails || ""}
-                  onChange={(e) => {
-                    const updated = [...(info.newCompanies || [])];
-                    updated[idx] = { ...updated[idx], shareholderDetails: e.target.value };
-                    setInfo({ newCompanies: updated });
-                  }}
-                />
-              </div>
+            {company.shareholderType === "other" && renderShareholdersSection(
+              company,
+              (field: string, value: any) => {
+                const updated = [...(info.newCompanies || [])];
+                updated[idx] = { ...updated[idx], [field]: value };
+                setInfo({ newCompanies: updated });
+              },
+              `${prefix}new_${idx}_`
             )}
 
             <div className="space-y-2">
