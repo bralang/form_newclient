@@ -669,36 +669,39 @@ export const Step2BusinessInfo = () => {
           <div key={`new-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
             <h4 className="font-bold text-primary">חברה חדשה #{idx + 1}</h4>
 
+            {/* 3 requested names */}
+            <div className="space-y-3">
+              <Label className="font-semibold">3 שמות רצויים לחברה (לפי סדר עדיפות)</Label>
+              {[1, 2, 3].map((n) => (
+                <Input
+                  key={n}
+                  placeholder={`שם רצוי ${n}`}
+                  value={company[`requestedName${n}`] || ""}
+                  onChange={(e) => {
+                    const updated = [...(info.newCompanies || [])];
+                    updated[idx] = { ...updated[idx], [`requestedName${n}`]: e.target.value };
+                    setInfo({ newCompanies: updated });
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Gov portal password */}
             <div className="space-y-2">
-              <Label>האם החברה קיימת ברשם החברות?</Label>
-              <YesNoSelect
-                value={company.existsInRegistrar}
-                onChange={(v) => {
+              <Label>סיסמא לאזור אישי ממשלתי (לא חובה)</Label>
+              <Input
+                type="password"
+                value={company.govPortalPassword || ""}
+                onChange={(e) => {
                   const updated = [...(info.newCompanies || [])];
-                  updated[idx] = { ...updated[idx], existsInRegistrar: v };
+                  updated[idx] = { ...updated[idx], govPortalPassword: e.target.value };
                   setInfo({ newCompanies: updated });
                 }}
+                placeholder="לא חובה למילוי"
               />
             </div>
 
-            {company.existsInRegistrar === false && (
-              <div className="space-y-3">
-                <Label className="font-semibold">3 שמות מבוקשים</Label>
-                {[1, 2, 3].map((n) => (
-                  <Input
-                    key={n}
-                    placeholder={`שם מבוקש ${n}`}
-                    value={company[`requestedName${n}`] || ""}
-                    onChange={(e) => {
-                      const updated = [...(info.newCompanies || [])];
-                      updated[idx] = { ...updated[idx], [`requestedName${n}`]: e.target.value };
-                      setInfo({ newCompanies: updated });
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-
+            {/* Shareholders */}
             <div className="space-y-2">
               <Label>מי יהיו בעלי המניות בחברה?</Label>
               <Select
@@ -709,9 +712,7 @@ export const Step2BusinessInfo = () => {
                   setInfo({ newCompanies: updated });
                 }}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="בחר" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="alone">אני לבד</SelectItem>
                   <SelectItem value="other">ביחד עם אחר</SelectItem>
