@@ -166,12 +166,9 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               {currentStep !== 1 && (
                 <button
                   onClick={() => setShowAttention(true)}
-                  className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3.5 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98]"
+                  className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3.5 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98] animate-pulse"
                 >
-                  <div className="relative">
-                    <Info className="w-5 h-5" />
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse" />
-                  </div>
+                  <Info className="w-5 h-5" />
                   <span>לתשומת ליבכם</span>
                   <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
@@ -242,12 +239,9 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             {currentStep !== 1 && (
               <button
                 onClick={() => setShowAttention(true)}
-                className="fixed bottom-6 left-6 z-30 lg:hidden flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
+                className="fixed bottom-6 left-6 z-30 lg:hidden flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 animate-pulse"
               >
-                <div className="relative">
-                  <Info className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-secondary rounded-full animate-pulse" />
-                </div>
+                <Info className="w-5 h-5" />
                 <span className="text-sm">לתשומת ליבכם</span>
               </button>
             )}
