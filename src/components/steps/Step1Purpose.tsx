@@ -7,10 +7,12 @@ import { FormNavigation } from "@/components/FormNavigation";
 import { useState } from "react";
 
 const PURPOSES = [
-  { id: "business", label: "עבור עסק עצמאי", hasSubStatus: true },
-  { id: "company", label: "עבור חברה", hasSubStatus: true },
-  { id: "nonprofit", label: "עבור עמותה", hasSubStatus: true },
-  { id: "tax_refund", label: "להחזר מס", hasSubStatus: false },
+  { id: "business", label: "עסק עצמאי (זעיר / פטור / מורשה)", hasSubStatus: true },
+  { id: "company", label: "חברה", hasSubStatus: true },
+  { id: "nonprofit", label: "עמותה", hasSubStatus: true },
+  { id: "tax_refund", label: "החזר מס", hasSubStatus: false },
+  { id: "war_compensation", label: "פיצויי מלחמה - השגה או ערר", hasSubStatus: false },
+  { id: "other", label: "אחר", hasSubStatus: false },
 ];
 
 export const Step1Purpose = () => {
@@ -98,10 +100,10 @@ export const Step1Purpose = () => {
         <button
           type="button"
           onClick={() => toggleSubStatus(purposeId, "new", purposeStatus, setStatusFn)}
-          className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-all duration-150 border ${
+          className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 border ${
             current.includes("new")
               ? "bg-primary text-primary-foreground border-primary shadow-sm"
-              : "bg-transparent text-muted-foreground border-border/60 hover:border-primary/40 hover:text-foreground"
+              : "bg-transparent text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
           }`}
         >
           חדש
@@ -109,10 +111,10 @@ export const Step1Purpose = () => {
         <button
           type="button"
           onClick={() => toggleSubStatus(purposeId, "existing", purposeStatus, setStatusFn)}
-          className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium transition-all duration-150 border ${
+          className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 border ${
             current.includes("existing")
               ? "bg-primary text-primary-foreground border-primary shadow-sm"
-              : "bg-transparent text-muted-foreground border-border/60 hover:border-primary/40 hover:text-foreground"
+              : "bg-transparent text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
           }`}
         >
           קיים
@@ -126,30 +128,40 @@ export const Step1Purpose = () => {
       {PURPOSES.map((purpose) => {
         const isChecked = serviceType.userPurposes.includes(purpose.id);
         return (
-          <div
-            key={purpose.id}
-            className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
-              isChecked
-                ? "border-primary/40 bg-primary/5 shadow-sm"
-                : "border-border/50 hover:bg-muted/30"
-            }`}
-          >
-            <label className="flex items-center gap-3 cursor-pointer">
-              <Checkbox
-                checked={isChecked}
-                onCheckedChange={() => toggleUserPurpose(purpose.id)}
-              />
-              <span className={`text-sm font-medium ${isChecked ? "text-primary" : ""}`}>
-                {purpose.label}
-              </span>
-            </label>
-            {purpose.hasSubStatus && isChecked && (
-              <div className="animate-in fade-in slide-in-from-left-2 duration-200">
-                {renderSubStatus(
-                  purpose.id,
-                  serviceType.userPurposeStatus,
-                  (s) => setServiceType({ userPurposeStatus: s })
-                )}
+          <div key={purpose.id}>
+            <div
+              className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-200 ${
+                isChecked
+                  ? "border-primary/40 bg-primary/5 shadow-sm"
+                  : "border-border/50 hover:bg-muted/30"
+              }`}
+            >
+              <label className="flex items-center gap-3 cursor-pointer">
+                <Checkbox
+                  checked={isChecked}
+                  onCheckedChange={() => toggleUserPurpose(purpose.id)}
+                />
+                <span className={`text-sm font-medium ${isChecked ? "text-primary" : ""}`}>
+                  {purpose.label}
+                </span>
+              </label>
+              {purpose.hasSubStatus && isChecked && (
+                <div className="animate-in fade-in slide-in-from-left-2 duration-200">
+                  {renderSubStatus(
+                    purpose.id,
+                    serviceType.userPurposeStatus,
+                    (s) => setServiceType({ userPurposeStatus: s })
+                  )}
+                </div>
+              )}
+            </div>
+            {purpose.id === "other" && isChecked && (
+              <div className="mt-2 mr-8 animate-in fade-in duration-200">
+                <Input
+                  placeholder="פרט/י בבקשה..."
+                  value={personalInfo.otherPurposeDetails}
+                  onChange={(e) => setPersonalInfo({ otherPurposeDetails: e.target.value })}
+                />
               </div>
             )}
           </div>
@@ -187,13 +199,13 @@ export const Step1Purpose = () => {
                     <button
                       type="button"
                       onClick={() => toggleUserPurpose(purpose.id)}
-                      className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-150 ${
+                      className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all duration-150 ${
                         userChecked
                           ? "bg-primary border-primary text-primary-foreground"
-                          : "border-border/60 hover:border-primary/40"
+                          : "border-muted-foreground/40 hover:border-primary/60"
                       }`}
                     >
-                      {userChecked && <span className="text-xs">✓</span>}
+                      {userChecked && <span className="text-sm font-bold">✓</span>}
                     </button>
                     {purpose.hasSubStatus && userChecked && (
                       <div className="animate-in fade-in duration-200">
@@ -212,13 +224,13 @@ export const Step1Purpose = () => {
                     <button
                       type="button"
                       onClick={() => toggleSpousePurpose(purpose.id)}
-                      className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-150 ${
+                      className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all duration-150 ${
                         spouseChecked
                           ? "bg-primary border-primary text-primary-foreground"
-                          : "border-border/60 hover:border-primary/40"
+                          : "border-muted-foreground/40 hover:border-primary/60"
                       }`}
                     >
-                      {spouseChecked && <span className="text-xs">✓</span>}
+                      {spouseChecked && <span className="text-sm font-bold">✓</span>}
                     </button>
                     {purpose.hasSubStatus && spouseChecked && (
                       <div className="animate-in fade-in duration-200">
@@ -236,6 +248,17 @@ export const Step1Purpose = () => {
           })}
         </tbody>
       </table>
+      {/* Other details input below table */}
+      {(serviceType.userPurposes.includes("other") || serviceType.spousePurposes.includes("other")) && (
+        <div className="p-4 border-t border-border/20 animate-in fade-in duration-200">
+          <Label className="mb-2 block">פרטים נוספים עבור "אחר":</Label>
+          <Input
+            placeholder="פרט/י בבקשה..."
+            value={personalInfo.otherPurposeDetails}
+            onChange={(e) => setPersonalInfo({ otherPurposeDetails: e.target.value })}
+          />
+        </div>
+      )}
     </div>
   );
 
@@ -247,13 +270,6 @@ export const Step1Purpose = () => {
           המטרה המשותפת שלנו
         </h2>
         <div className="h-1 w-20 bg-primary rounded-full" />
-      </div>
-
-      {/* Marketing text placeholder */}
-      <div className="p-5 bg-gradient-to-r from-primary/5 to-secondary/20 rounded-xl border border-primary/10">
-        <p className="text-muted-foreground text-center">
-          מקום לטקסט שיווקי שיבוא בהמשך
-        </p>
       </div>
 
       {/* Basic Info */}
@@ -310,7 +326,7 @@ export const Step1Purpose = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="single">יחיד/ה</SelectItem>
-              <SelectItem value="married">בן/בת זוג</SelectItem>
+              <SelectItem value="married">יש לי בן/בת זוג</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -329,8 +345,28 @@ export const Step1Purpose = () => {
 
       {/* Purpose Selection */}
       <div className="space-y-5">
-        <h3 className="text-xl font-bold text-foreground">למה באת?</h3>
+        <h3 className="text-xl font-bold text-foreground">בעבור מה אני פונה לקבל שירות?</h3>
         {isMarried ? renderTablePurposes() : renderSinglePurposeList()}
+      </div>
+
+      {/* Consent Checkboxes */}
+      <div className="space-y-4 pt-2">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <Checkbox
+            checked={personalInfo.agreeToMessages}
+            onCheckedChange={(checked) => setPersonalInfo({ agreeToMessages: !!checked })}
+            className="mt-0.5"
+          />
+          <span className="text-sm text-foreground">אני מאשר/ת הרשמה לקבלת הודעות</span>
+        </label>
+        <label className="flex items-start gap-3 cursor-pointer">
+          <Checkbox
+            checked={personalInfo.agreeToPrivacy}
+            onCheckedChange={(checked) => setPersonalInfo({ agreeToPrivacy: !!checked })}
+            className="mt-0.5"
+          />
+          <span className="text-sm text-foreground">אני מאשר/ת את מדיניות הפרטיות של המשרד</span>
+        </label>
       </div>
 
       <FormNavigation
