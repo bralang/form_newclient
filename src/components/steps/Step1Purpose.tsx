@@ -10,8 +10,8 @@ const PURPOSES = [
   { id: "business", label: "עסק עצמאי (זעיר / פטור / מורשה)", hasSubStatus: true },
   { id: "company", label: "חברה", hasSubStatus: true },
   { id: "nonprofit", label: "עמותה", hasSubStatus: true },
-  { id: "tax_refund", label: "החזר מס", hasSubStatus: true },
-  { id: "war_compensation", label: "פיצויי מלחמה - השגה או ערר", hasSubStatus: true },
+  { id: "tax_refund", label: "החזר מס", hasSubStatus: false },
+  { id: "war_compensation", label: "פיצויי מלחמה - השגה או ערר", hasSubStatus: false },
   { id: "other", label: "אחר", hasSubStatus: false },
 ];
 
