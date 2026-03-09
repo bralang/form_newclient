@@ -44,23 +44,12 @@ const TIMELINE_STEPS = [
       "שלום וברכה לעוד לקוח מרוצה של חסידה ייעוץ מס אכפתי לעסקים. ביחד נעלה את הווליום בעסק שלך!",
   },
 ];
+
 const ATTENTION_ITEMS = [
   "המידע שתמסרו בשאלון זה מיועד עבור משרדנו כדי שנוכל להיות המייצגים החוקיים שלכם, ותשובותיכם לא מסונכרנות עם שום גורם ממשלתי או גוף נוסף.",
   "מילוי השאלון לא כרוך בתשלום ואינו מחייב אתכם כלל לפתוח תיק או להיות לקוחות של חסידה ייעוץ מס, אלא מיועד רק להפקת מסמכי ייצוג, שבחתימה עליהם תוכלו להצטרף ללקוחותינו.",
   "גם אם עצרתם באמצע מילוי השאלון, מכל סיבה שהיא — המידע נשמר עבורכם במערכת ותוכלו להמשיך להשיב מהמקום בו עצרתם.",
 ];
-
-        <div className="p-4 bg-muted/50 rounded-xl border border-border/50 space-y-4">
-          <p className="font-semibold text-foreground">לתשומת ליבכם:</p>
-          {ATTENTION_ITEMS.map((item, index) => (
-            <div key={index} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Music className="w-3.5 h-3.5 text-primary" />
-              </div>
-              <p className="leading-relaxed">{item}</p>
-            </div>
-          ))}
-        </div>
 
 export const Step0Welcome = () => {
   const { setCurrentStep } = useFormContext();
@@ -91,6 +80,17 @@ export const Step0Welcome = () => {
           לבצע העברה למשרדנו.
         </p>
 
+        <div className="p-4 bg-muted/50 rounded-xl border border-border/50 space-y-4">
+          <p className="font-semibold text-foreground">לתשומת ליבכם:</p>
+          {ATTENTION_ITEMS.map((item, index) => (
+            <div key={index} className="flex items-start gap-3">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <Music className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <p className="leading-relaxed">{item}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Timeline - Musical Notes */}
