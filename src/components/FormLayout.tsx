@@ -142,6 +142,16 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
               {children}
             </div>
+
+            {/* Contact info at bottom of page */}
+            <div className="mt-8 mb-6 text-center space-y-2">
+              <p className="text-base font-semibold text-foreground/80">אנחנו כאן לסיוע במילוי השאלון</p>
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <a href="tel:0533160990" className="text-lg font-bold text-primary hover:underline">טל׳ 0533160990</a>
+                <span className="text-muted-foreground">|</span>
+                <a href="mailto:teder@chasida.biz" className="text-lg font-bold text-primary hover:underline">teder@chasida.biz</a>
+              </div>
+            </div>
           </div>
         </main>
       </div>
