@@ -371,8 +371,7 @@ export const Step1Purpose = () => {
 
       <FormNavigation
         onNext={handleNext}
-        onPrev={() => {}}
-        showPrev={false}
+        onPrev={() => setCurrentStep(1)}
         loading={loading}
       />
     </div>
