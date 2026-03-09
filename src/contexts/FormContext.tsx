@@ -13,6 +13,9 @@ export interface PersonalInfo {
   spouseName: string;
   step1CompletedAt?: string;
   ref?: string;
+  agreeToMessages: boolean;
+  agreeToPrivacy: boolean;
+  otherPurposeDetails: string;
 }
 
 export interface ServiceType {
