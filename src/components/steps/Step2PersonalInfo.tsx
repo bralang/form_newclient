@@ -54,7 +54,7 @@ export const Step2PersonalInfo = () => {
       ];
 
   const additionalIdOptions = [
-    { value: "parentId", label: "ת.ז. הורים" },
+    { value: "parentId", label: "מס׳ זהות של הורה" },
     { value: "license", label: "רישיון נהיגה" },
     { value: "passport", label: "דרכון" },
   ];
