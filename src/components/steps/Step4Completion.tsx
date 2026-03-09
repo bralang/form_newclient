@@ -174,7 +174,7 @@ export const Step4Completion = () => {
 
       {/* Submit */}
       <div className="flex justify-between items-center mt-8 pt-6 border-t border-border">
-        <Button variant="outline" onClick={() => setCurrentStep(3)} disabled={loading}>
+        <Button variant="outline" onClick={() => setCurrentStep(4)} disabled={loading}>
           חזור
         </Button>
         <Button

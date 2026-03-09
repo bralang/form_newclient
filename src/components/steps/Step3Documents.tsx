@@ -220,7 +220,7 @@ export const Step3Documents = () => {
 
       <FormNavigation
         onNext={handleNext}
-        onPrev={() => setCurrentStep(2)}
+        onPrev={() => setCurrentStep(3)}
         loading={loading}
       />
     </div>
