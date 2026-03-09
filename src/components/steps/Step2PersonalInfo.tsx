@@ -67,7 +67,7 @@ export const Step2PersonalInfo = () => {
       { silent: true }
     );
     setLoading(false);
-    setCurrentStep(3);
+    setCurrentStep(4);
   };
 
   const handleSendEmailList = async () => {
