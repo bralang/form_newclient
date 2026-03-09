@@ -84,7 +84,7 @@ export const Step1Purpose = () => {
       { silent: true }
     );
     setLoading(false);
-    setCurrentStep(2);
+    setCurrentStep(3);
   };
 
   const renderSubStatus = (
