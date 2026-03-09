@@ -460,6 +460,7 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     sessionStorage.setItem("spouseNonprofitInfo", JSON.stringify(stripFiles(spouseNonprofitInfo)));
   }, [spouseNonprofitInfo]);
 
+  useEffect(() => {
     const stripFiles = (obj: any) => {
       const clean: Record<string, any> = {};
       for (const [k, v] of Object.entries(obj)) {
