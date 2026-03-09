@@ -23,6 +23,7 @@ export const Step2PersonalInfo = () => {
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const [reminderDate, setReminderDate] = useState("");
+  const [reminderTime, setReminderTime] = useState("");
 
   const isMarried = personalInfo.maritalStatus === "married";
   const gender = detailedInfo.gender;
@@ -383,10 +384,13 @@ export const Step2PersonalInfo = () => {
       <div className="space-y-5 pt-6 border-t border-border">
         <div className="p-5 bg-primary/5 rounded-xl border border-primary/15">
           <h3 className="font-bold text-lg text-foreground mb-3">
-            📋 כדי להתקדם עליך להכין את עצמך לשלב 3
+            📋 כדי להתקדם עליך להכין את עצמך לשלב 4
           </h3>
-          <p className="text-muted-foreground text-sm mb-5">
+          <p className="text-muted-foreground text-sm mb-3">
             ניתן להעלות כאן בשאלון טפסים במיידי, או להשאיר כך את השאלון ולהכין את המסמכים הנדרשים.
+          </p>
+          <p className="text-muted-foreground text-sm mb-5 bg-muted/60 p-3 rounded-lg border border-border/50">
+            💡 כדאי לדעת: הנתונים שהזנת עד כה נשמרים במערכת באופן אוטומטי, ויופיעו בכניסתך לשאלון בפעמים הבאות, גם אם לא סיימת למלא את השאלון או להעלות מסמכים.
           </p>
 
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
@@ -405,6 +409,12 @@ export const Step2PersonalInfo = () => {
                 value={reminderDate}
                 onChange={(e) => setReminderDate(e.target.value)}
                 className="w-40 h-9"
+              />
+              <Input
+                type="time"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+                className="w-32 h-9"
               />
             </div>
           </div>
