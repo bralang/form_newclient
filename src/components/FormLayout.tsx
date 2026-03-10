@@ -80,12 +80,6 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               })}
             </nav>
 
-            {/* Contact info after steps */}
-            <div className="mt-6 text-center space-y-1">
-              <p className="text-sm font-semibold opacity-90">אנחנו כאן לסיוע במילוי השאלון</p>
-              <p className="text-base font-bold opacity-95">טל׳ 0533160990</p>
-              <p className="text-base font-bold opacity-95">teder@chasida.biz</p>
-            </div>
           </div>
 
           {/* Mascot */}
