@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useFormContext } from "@/contexts/FormContext";
 import { Check, Music, Info, X, Sparkles } from "lucide-react";
-import mascot from "@/assets/mascot.jpeg";
+import mascot from "@/assets/mascot.png";
 import logo from "@/assets/logo.png";
 
 const steps = [
