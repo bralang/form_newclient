@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useFormContext } from "@/contexts/FormContext";
 import { Check, Music, Info, X, Sparkles } from "lucide-react";
-import mascot from "@/assets/mascot.jpeg";
+import mascot from "@/assets/mascot.png";
 import logo from "@/assets/logo.png";
 
 const steps = [
@@ -161,7 +161,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               <img
                 src={mascot}
                 alt="דמותג ליבי חסידה"
-                className="h-40 w-auto rounded-2xl shadow-lg mx-auto"
+                className="h-56 w-auto mx-auto"
               />
 
               {/* Contact Info */}
