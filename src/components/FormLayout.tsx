@@ -144,13 +144,11 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               {currentStep !== 1 && (
                 <button
                   onClick={() => setShowAttention(true)}
-                  className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3.5 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98]"
+                  className="group relative flex items-center justify-center gap-3 bg-gradient-to-br from-secondary/60 via-primary/10 to-secondary/40 hover:from-secondary/80 hover:via-primary/20 hover:to-secondary/60 text-primary font-bold px-6 py-4 rounded-[1.25rem] transition-all duration-500 border border-secondary/60 hover:border-primary/30 shadow-[0_4px_20px_-4px_hsl(var(--secondary)/0.5)] hover:shadow-[0_8px_30px_-4px_hsl(var(--primary)/0.3)] hover:scale-[1.04] active:scale-[0.97]"
                 >
-                  <div className="relative">
-                    <Bell className="w-5 h-5 animate-pulse" style={{ animationDuration: '2.5s' }} />
-                  </div>
-                  <span>לתשומת ליבכם</span>
-                  <Sparkles className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity duration-300 text-primary/70" />
+                  <span className="text-lg">🎵</span>
+                  <span className="text-sm">לתשומת ליבכם</span>
+                  <span className="text-lg opacity-70 group-hover:opacity-100 transition-opacity duration-300">✨</span>
                 </button>
               )}
 
