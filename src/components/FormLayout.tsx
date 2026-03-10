@@ -161,7 +161,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               <img
                 src={mascot}
                 alt="דמותג ליבי חסידה"
-                className="h-40 w-auto rounded-2xl shadow-lg mx-auto"
+                className="h-56 w-auto mx-auto"
               />
 
               {/* Contact Info */}
