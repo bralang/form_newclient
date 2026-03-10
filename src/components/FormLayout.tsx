@@ -88,10 +88,8 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
         <main className="flex-1 min-h-screen">
           {/* Mobile Header */}
           <div className="lg:hidden sticky top-0 z-20 bg-primary text-primary-foreground shadow-lg">
-            <div className="flex items-center justify-between p-3">
-              <img src={logo} alt="חסידה" className="h-10 w-auto" />
+            <div className="flex items-center justify-center p-3">
               <h1 className="text-sm font-bold">שאלון קבלת לקוח</h1>
-              <img src={mascot} alt="דמותג" className="h-10 w-10 rounded-lg object-cover" />
             </div>
 
             {/* Mobile Progress Bar */}
