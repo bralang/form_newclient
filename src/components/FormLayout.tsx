@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useFormContext } from "@/contexts/FormContext";
-import { Check, Music, X, Bell, Sparkles } from "lucide-react";
+import { Check, Music, Info, X, Sparkles } from "lucide-react";
 import mascot from "@/assets/mascot.png";
 import logo from "@/assets/logo.png";
 
@@ -144,11 +144,14 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               {currentStep !== 1 && (
                 <button
                   onClick={() => setShowAttention(true)}
-                  className="group relative flex items-center justify-center gap-3 bg-gradient-to-br from-secondary/60 via-primary/10 to-secondary/40 hover:from-secondary/80 hover:via-primary/20 hover:to-secondary/60 text-primary font-bold px-6 py-4 rounded-[1.25rem] transition-all duration-500 border border-secondary/60 hover:border-primary/30 shadow-[0_4px_20px_-4px_hsl(var(--secondary)/0.5)] hover:shadow-[0_8px_30px_-4px_hsl(var(--primary)/0.3)] hover:scale-[1.04] active:scale-[0.97]"
+                  className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3.5 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98]"
                 >
-                  <span className="text-lg">🎵</span>
-                  <span className="text-sm">לתשומת ליבכם</span>
-                  <span className="text-lg opacity-70 group-hover:opacity-100 transition-opacity duration-300">✨</span>
+                  <div className="relative">
+                    <Info className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full" />
+                  </div>
+                  <span>לתשומת ליבכם</span>
+                  <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
               )}
 
@@ -217,11 +220,10 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             {currentStep !== 1 && (
               <button
                 onClick={() => setShowAttention(true)}
-                className="fixed bottom-6 left-6 z-30 lg:hidden flex items-center gap-2 bg-gradient-to-br from-secondary via-secondary/80 to-primary/30 text-primary font-bold px-5 py-3.5 rounded-full shadow-[0_4px_20px_-4px_hsl(var(--secondary)/0.6)] hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border border-secondary/50"
+                className="fixed bottom-6 left-6 z-30 lg:hidden flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
               >
-                <span className="text-base">🎵</span>
+                <Info className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
                 <span className="text-sm">לתשומת ליבכם</span>
-                <span className="text-sm">✨</span>
               </button>
             )}
 
