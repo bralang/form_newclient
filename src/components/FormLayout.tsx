@@ -147,11 +147,10 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                   className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3.5 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98]"
                 >
                   <div className="relative">
-                    <Info className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full" />
+                    <Bell className="w-5 h-5 animate-pulse" style={{ animationDuration: '2.5s' }} />
                   </div>
                   <span>לתשומת ליבכם</span>
-                  <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Sparkles className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity duration-300 text-primary/70" />
                 </button>
               )}
 
