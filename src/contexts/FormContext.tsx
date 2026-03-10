@@ -275,7 +275,11 @@ export const useFormContext = () => {
 export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStepRaw] = useState(1);
+  const setCurrentStep = (step: number) => {
+    setCurrentStepRaw(step);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Step 1
   const [personalInfo, setPI] = useState<PersonalInfo>({

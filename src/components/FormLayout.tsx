@@ -82,14 +82,6 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
 
           </div>
 
-          {/* Mascot */}
-          <div className="mt-8 text-center">
-            <img
-              src={mascot}
-              alt="דמותג ליבי חסידה"
-              className="h-36 w-auto mx-auto rounded-2xl mb-5 shadow-lg"
-            />
-          </div>
         </aside>
 
         {/* ─── Main Content ─── */}
