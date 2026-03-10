@@ -55,7 +55,7 @@ export const Step0Welcome = () => {
   const { setCurrentStep } = useFormContext();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" style={{ fontWeight: 300, letterSpacing: 'normal' }}>
       {/* Title */}
       <div className="text-center">
         <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
