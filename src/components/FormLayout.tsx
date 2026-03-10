@@ -141,12 +141,6 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               </div>
             </div>
 
-            {/* Mobile contact strip */}
-            <div className="bg-primary/90 px-4 py-3 text-center border-t border-primary-foreground/10">
-              <p className="text-sm font-medium opacity-90">
-                לסיוע: 0533160990 | teder@chasida.biz
-              </p>
-            </div>
           </div>
 
           {/* Desktop: Form + Left Panel */}
