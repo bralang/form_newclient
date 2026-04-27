@@ -37,6 +37,10 @@ export const Step2BusinessInfo = () => {
   const spouseHasCompany = serviceType.spousePurposes.includes("company");
   const spouseHasNonprofit = serviceType.spousePurposes.includes("nonprofit");
 
+  const userHasWarCompensation = serviceType.userPurposes.includes("war_compensation");
+  const spouseHasWarCompensation = serviceType.spousePurposes.includes("war_compensation");
+  const showWarCompensation = userHasWarCompensation || spouseHasWarCompensation;
+
   const userName = personalInfo.firstName || "המשתמש";
   const userLastName = personalInfo.lastName || "";
   const spouseName = personalInfo.spouseName || "בן/בת הזוג";
