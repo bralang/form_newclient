@@ -157,7 +157,7 @@ export const Step1Purpose = () => {
                   checked={isChecked}
                   onCheckedChange={() => toggleUserPurpose(purpose.id)}
                 />
-                <span className={`text-sm font-medium ${isChecked ? "text-primary" : ""}`}>
+                <span className={`text-base font-bold ${isChecked ? "text-primary" : ""}`}>
                   {purpose.label}
                 </span>
               </label>
@@ -171,6 +171,11 @@ export const Step1Purpose = () => {
                 </div>
               )}
             </div>
+            {purpose.hasSubStatus && isChecked && getStatusHint(purpose.id, serviceType.userPurposeStatus[purpose.id] || []) && (
+              <p className="text-xs text-muted-foreground mt-1.5 mr-8 animate-in fade-in duration-200">
+                {getStatusHint(purpose.id, serviceType.userPurposeStatus[purpose.id] || [])}
+              </p>
+            )}
             {purpose.id === "other" && isChecked && (
               <div className="mt-2 mr-8 animate-in fade-in duration-200">
                 <Input
