@@ -555,15 +555,6 @@ export const Step2BusinessInfo = () => {
       </h3>
 
       <div className="space-y-2">
-        <Label htmlFor={`${prefix}exBusinessNumber`}>מספר העוסק</Label>
-        <Input
-          id={`${prefix}exBusinessNumber`}
-          value={info.businessNumber || ""}
-          onChange={(e) => setInfo({ businessNumber: e.target.value })}
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")}</Label>
         <Select value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })}>
           <SelectTrigger>
@@ -576,7 +567,19 @@ export const Step2BusinessInfo = () => {
         </Select>
       </div>
 
-      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, prefix)}
+      {/* Business / partnership number – only shown for partnership */}
+      {info.ownershipType === "partnership" && (
+        <div className="space-y-2">
+          <Label htmlFor={`${prefix}exBusinessNumber`}>מספר עוסק / שותפות</Label>
+          <Input
+            id={`${prefix}exBusinessNumber`}
+            value={info.businessNumber || ""}
+            onChange={(e) => setInfo({ businessNumber: e.target.value })}
+          />
+        </div>
+      )}
+
+      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים?</Label>
