@@ -167,6 +167,7 @@ export interface NonprofitBoardMember {
   phone: string;
   address: string;
   isAuthorizedSigner: boolean;
+  isAuditCommittee?: boolean;
 }
 
 export interface NonprofitAuditMember {
@@ -183,6 +184,9 @@ export interface NonprofitInfo {
   boardMemberCount?: number;
   boardMembers?: NonprofitBoardMember[];
   auditCommittee?: NonprofitAuditMember[];
+  // Government portal identification (for one of the board members)
+  govPortalBoardMemberIdx?: number;
+  govPortalIdMethods?: GovPortalIdMethod[];
   govPortalPassword?: string;
 
   // Existing nonprofit
@@ -191,6 +195,10 @@ export interface NonprofitInfo {
   nonprofitNumber?: string;
   existingBoardMemberCount?: number;
   existingBoardMemberNames?: string[];
+  // Full board details (used when no tax file yet)
+  existingBoardMembers?: NonprofitBoardMember[];
+  // Index of the board member used for representation (when tax file exists)
+  representativeBoardMemberIdx?: number;
 }
 
 // ─── Step 3 Interfaces ─────────────────────────────
