@@ -229,11 +229,16 @@ export const Step1Purpose = () => {
                       {userChecked && <span className="text-sm font-bold">✓</span>}
                     </button>
                     {purpose.hasSubStatus && userChecked && (
-                      <div className="animate-in fade-in duration-200">
+                      <div className="animate-in fade-in duration-200 flex flex-col items-center gap-1">
                         {renderSubStatus(
                           purpose.id,
                           serviceType.userPurposeStatus,
                           (s) => setServiceType({ userPurposeStatus: s })
+                        )}
+                        {getStatusHint(purpose.id, serviceType.userPurposeStatus[purpose.id] || []) && (
+                          <p className="text-[11px] text-muted-foreground text-center leading-tight max-w-[180px]">
+                            {getStatusHint(purpose.id, serviceType.userPurposeStatus[purpose.id] || [])}
+                          </p>
                         )}
                       </div>
                     )}
