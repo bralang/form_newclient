@@ -1,4 +1,4 @@
-import { useFormContext, NonprofitBoardMember, NonprofitAuditMember, NonprofitInfo } from "@/contexts/FormContext";
+import { useFormContext, NonprofitBoardMember, NonprofitAuditMember, NonprofitInfo, GovPortalIdMethod } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -36,6 +36,10 @@ export const Step2BusinessInfo = () => {
   const spouseHasExistingBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing");
   const spouseHasCompany = serviceType.spousePurposes.includes("company");
   const spouseHasNonprofit = serviceType.spousePurposes.includes("nonprofit");
+
+  const userHasWarCompensation = serviceType.userPurposes.includes("war_compensation");
+  const spouseHasWarCompensation = serviceType.spousePurposes.includes("war_compensation");
+  const showWarCompensation = userHasWarCompensation || spouseHasWarCompensation;
 
   const userName = personalInfo.firstName || "המשתמש";
   const userLastName = personalInfo.lastName || "";
@@ -1027,6 +1031,59 @@ export const Step2BusinessInfo = () => {
     );
   };
 
+  // ─── Gov Portal Identification helpers ───
+  const GOV_PORTAL_OPTIONS: { value: GovPortalIdMethod; label: string; icon: string }[] = [
+    { value: "password", label: "סיסמא", icon: "🔑" },
+    { value: "smartCard", label: "כרטיס חכם", icon: "💳" },
+    { value: "biometricId", label: "תעודת זהות ביומטרית", icon: "🪪" },
+    { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆" },
+  ];
+
+  const renderGovPortalSection = (
+    methods: GovPortalIdMethod[] | undefined,
+    password: string | undefined,
+    onMethodsChange: (m: GovPortalIdMethod[]) => void,
+    onPasswordChange: (p: string) => void,
+  ) => {
+    const selected = methods || [];
+    const toggle = (m: GovPortalIdMethod) => {
+      const next = selected.includes(m) ? selected.filter(x => x !== m) : [...selected, m];
+      onMethodsChange(next);
+    };
+    return (
+      <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {GOV_PORTAL_OPTIONS.map(opt => {
+            const checked = selected.includes(opt.value);
+            return (
+              <label
+                key={opt.value}
+                className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${
+                  checked ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
+                }`}
+              >
+                <Checkbox checked={checked} onCheckedChange={() => toggle(opt.value)} />
+                <span className="text-lg">{opt.icon}</span>
+                <span className="text-sm font-semibold">{opt.label}</span>
+              </label>
+            );
+          })}
+        </div>
+        {selected.includes("password") && (
+          <div className="space-y-1">
+            <Label>סיסמא לאזור אישי ממשלתי</Label>
+            <Input
+              type="password"
+              value={password || ""}
+              onChange={(e) => onPasswordChange(e.target.value)}
+              placeholder="הקלד/י סיסמא"
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // ─── New Nonprofit ───
   const renderNewNonprofit = (
     info: NonprofitInfo,
@@ -1034,7 +1091,6 @@ export const Step2BusinessInfo = () => {
     name: string,
   ) => {
     const boardMembers = info.boardMembers || [];
-    const auditCommittee = info.auditCommittee || [{ name: "", idNumber: "" }, { name: "", idNumber: "" }];
 
     const updateBoardMember = (idx: number, field: string, value: any) => {
       const updated = [...boardMembers];
@@ -1042,33 +1098,27 @@ export const Step2BusinessInfo = () => {
       setInfo({ boardMembers: updated });
     };
 
-    const updateAuditMember = (idx: number, field: string, value: any) => {
-      const updated = [...auditCommittee];
-      updated[idx] = { ...updated[idx], [field]: value };
-      setInfo({ auditCommittee: updated });
-    };
-
     const handleBoardCountChange = (count: number) => {
       if (count < 7) count = 7;
       const adjusted: NonprofitBoardMember[] = Array.from({ length: count }, (_, i) =>
-        boardMembers[i] || { name: "", idNumber: "", email: "", phone: "", address: "", isAuthorizedSigner: false }
+        boardMembers[i] || { name: "", idNumber: "", email: "", phone: "", address: "", isAuthorizedSigner: false, isAuditCommittee: false }
       );
       setInfo({ boardMemberCount: count, boardMembers: adjusted });
     };
 
-    // Validation: authorized signers can't be in audit committee
-    const authorizedSignerIds = boardMembers
-      .filter(m => m.isAuthorizedSigner)
-      .map(m => m.idNumber)
-      .filter(Boolean);
-
     const authorizedSignerCount = boardMembers.filter(m => m.isAuthorizedSigner).length;
+    const auditCommitteeCount = boardMembers.filter(m => m.isAuditCommittee).length;
 
     return (
       <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
         <h3 className="text-xl font-bold text-primary">
           עמותה חדשה – <span className="underline decoration-primary/50">{name}</span>
         </h3>
+
+        <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
+          ⚠️ <strong>שים/י לב:</strong> בעמותה, ממלא/ת השאלון לרוב <strong>אינו</strong> חבר ועד (בשונה מחברה).
+          יש למלא פרטים מלאים של כל 7 חברי הועד.
+        </div>
 
         {/* 3 requested names */}
         <div className="space-y-3">
@@ -1106,77 +1156,115 @@ export const Step2BusinessInfo = () => {
         </div>
 
         {/* Board members details */}
-        {boardMembers.map((member, idx) => (
-          <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
-            <div className="flex items-center justify-between">
+        {boardMembers.map((member, idx) => {
+          const blockSigner = !!member.isAuditCommittee;
+          const blockAudit = !!member.isAuthorizedSigner;
+          return (
+            <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
               <h4 className="font-bold text-primary">חבר ועד #{idx + 1}{member.name ? ` – ${member.name}` : ""}</h4>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id={`signer_${idx}`}
-                  checked={member.isAuthorizedSigner || false}
-                  onCheckedChange={(checked) => updateBoardMember(idx, "isAuthorizedSigner", !!checked)}
-                />
-                <Label htmlFor={`signer_${idx}`} className="text-sm cursor-pointer">מורשה חתימה</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} /></div>
+                <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} /></div>
+                <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateBoardMember(idx, "idFile", e.target.files?.[0])} /></div>
+                <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
+                <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
+                <div className="space-y-1"><Label>כתובת *</Label><Input value={member.address || ""} onChange={(e) => updateBoardMember(idx, "address", e.target.value)} /></div>
+              </div>
+
+              {/* Role checkboxes */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-border/50">
+                <label
+                  htmlFor={`signer_${idx}`}
+                  className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${
+                    member.isAuthorizedSigner
+                      ? "border-primary bg-primary/10"
+                      : blockSigner
+                        ? "border-border bg-muted/30 opacity-50 cursor-not-allowed"
+                        : "border-border bg-card hover:border-primary/40"
+                  }`}
+                >
+                  <Checkbox
+                    id={`signer_${idx}`}
+                    checked={member.isAuthorizedSigner || false}
+                    disabled={blockSigner}
+                    onCheckedChange={(checked) => updateBoardMember(idx, "isAuthorizedSigner", !!checked)}
+                  />
+                  <span className="text-sm font-semibold">✍️ מורשה חתימה</span>
+                </label>
+                <label
+                  htmlFor={`audit_${idx}`}
+                  className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${
+                    member.isAuditCommittee
+                      ? "border-primary bg-primary/10"
+                      : blockAudit
+                        ? "border-border bg-muted/30 opacity-50 cursor-not-allowed"
+                        : "border-border bg-card hover:border-primary/40"
+                  }`}
+                >
+                  <Checkbox
+                    id={`audit_${idx}`}
+                    checked={member.isAuditCommittee || false}
+                    disabled={blockAudit}
+                    onCheckedChange={(checked) => updateBoardMember(idx, "isAuditCommittee", !!checked)}
+                  />
+                  <span className="text-sm font-semibold">🔍 חבר ועדת ביקורת</span>
+                </label>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} /></div>
-              <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} /></div>
-              <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateBoardMember(idx, "idFile", e.target.files?.[0])} /></div>
-              <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
-              <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
-              <div className="space-y-1"><Label>כתובת *</Label><Input value={member.address || ""} onChange={(e) => updateBoardMember(idx, "address", e.target.value)} /></div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
 
-        {/* Authorized signers validation */}
-        {boardMembers.length > 0 && authorizedSignerCount < 2 && (
+        {/* Validation: signers */}
+        {boardMembers.length > 0 && authorizedSignerCount !== 2 && (
           <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
             <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-            <p className="text-sm text-destructive">יש לסמן לפחות 2 מורשי חתימה מבין חברי הועד.</p>
+            <p className="text-sm text-destructive">יש לסמן בדיוק 2 מורשי חתימה מבין חברי הועד (סומנו {authorizedSignerCount}).</p>
           </div>
         )}
 
-        {/* Audit committee */}
+        {/* Validation: audit committee */}
+        {boardMembers.length > 0 && auditCommitteeCount !== 2 && (
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
+            <p className="text-sm text-destructive">יש לסמן בדיוק 2 חברי ועדת ביקורת מבין חברי הועד (סומנו {auditCommitteeCount}).</p>
+          </div>
+        )}
+
+        {/* Gov portal identification - select board member */}
         <div className="space-y-3 p-4 bg-primary/5 rounded-xl border border-primary/15">
-          <Label className="text-base font-semibold">ועדת ביקורת (2 חברים – לא מורשי חתימה)</Label>
-          {[0, 1].map((idx) => (
-            <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label>שם חבר ביקורת #{idx + 1} *</Label>
-                <Input
-                  value={auditCommittee[idx]?.name || ""}
-                  onChange={(e) => updateAuditMember(idx, "name", e.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label>מס׳ תעודת זהות *</Label>
-                <Input
-                  value={auditCommittee[idx]?.idNumber || ""}
-                  onChange={(e) => updateAuditMember(idx, "idNumber", e.target.value)}
-                />
-              </div>
-            </div>
-          ))}
-          {/* Warn if audit member is also an authorized signer */}
-          {auditCommittee.some(a => a.idNumber && authorizedSignerIds.includes(a.idNumber)) && (
-            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-              <p className="text-sm text-destructive">חבר ועדת ביקורת לא יכול להיות מורשה חתימה.</p>
+          <Label className="text-base font-semibold">🔐 הזדהות לאזור אישי ממשלתי</Label>
+          <p className="text-xs text-muted-foreground">
+            נדרש לאחד מחברי הועד (כיום בד"כ עושים זאת בטלפון יחד עם חבר הועד).
+          </p>
+          <div className="space-y-1">
+            <Label>בחר/י חבר ועד להזדהות</Label>
+            <Select
+              value={info.govPortalBoardMemberIdx !== undefined ? String(info.govPortalBoardMemberIdx) : ""}
+              onValueChange={(v) => setInfo({ govPortalBoardMemberIdx: parseInt(v) })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="בחר חבר ועד" />
+              </SelectTrigger>
+              <SelectContent>
+                {boardMembers.map((m, idx) => (
+                  <SelectItem key={idx} value={String(idx)} disabled={!m.name}>
+                    {m.name || `חבר ועד ${idx + 1}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {info.govPortalBoardMemberIdx !== undefined && (
+            <div className="space-y-2">
+              <Label>אופן הזדהות (לא חובה)</Label>
+              {renderGovPortalSection(
+                info.govPortalIdMethods,
+                info.govPortalPassword,
+                (m) => setInfo({ govPortalIdMethods: m }),
+                (p) => setInfo({ govPortalPassword: p }),
+              )}
             </div>
           )}
-        </div>
-
-        {/* Gov portal password */}
-        <div className="space-y-2">
-          <Label>קוד לאזור אישי ממשלתי של אחד מחברי הועד (לא חובה)</Label>
-          <Input
-            type="password"
-            value={info.govPortalPassword || ""}
-            onChange={(e) => setInfo({ govPortalPassword: e.target.value })}
-            placeholder="לא חובה למילוי"
-          />
         </div>
       </div>
     );
@@ -1188,17 +1276,19 @@ export const Step2BusinessInfo = () => {
     setInfo: (d: Partial<NonprofitInfo>) => void,
     name: string,
   ) => {
-    const boardNames = info.existingBoardMemberNames || [];
+    const boardMembers = info.existingBoardMembers || [];
 
-    const updateBoardName = (idx: number, value: string) => {
-      const updated = [...boardNames];
-      updated[idx] = value;
-      setInfo({ existingBoardMemberNames: updated });
+    const updateBoardMember = (idx: number, field: string, value: any) => {
+      const updated = [...boardMembers];
+      updated[idx] = { ...updated[idx], [field]: value };
+      setInfo({ existingBoardMembers: updated });
     };
 
     const handleCountChange = (count: number) => {
-      const adjusted = Array.from({ length: count }, (_, i) => boardNames[i] || "");
-      setInfo({ existingBoardMemberCount: count, existingBoardMemberNames: adjusted });
+      const adjusted: NonprofitBoardMember[] = Array.from({ length: count }, (_, i) =>
+        boardMembers[i] || { name: "", idNumber: "", email: "", phone: "", address: "", isAuthorizedSigner: false }
+      );
+      setInfo({ existingBoardMemberCount: count, existingBoardMembers: adjusted });
     };
 
     return (
@@ -1206,24 +1296,6 @@ export const Step2BusinessInfo = () => {
         <h3 className="text-xl font-bold text-primary">
           עמותה קיימת – <span className="underline decoration-primary/50">{name}</span>
         </h3>
-
-        {/* Tax file question */}
-        <div className="space-y-2">
-          <Label>האם לעמותה קיים תיק ברשות המיסים?</Label>
-          <YesNoSelect
-            value={info.hasTaxFile}
-            onChange={(v) => setInfo({ hasTaxFile: v })}
-          />
-        </div>
-
-        {info.hasTaxFile === false && (
-          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-            <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-            <p className="text-sm text-destructive">
-              לא ניתן לפתוח לעמותה תיק ברשויות טרם פתיחת חשבון בנק.
-            </p>
-          </div>
-        )}
 
         {/* Name and number */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1243,28 +1315,147 @@ export const Step2BusinessInfo = () => {
           </div>
         </div>
 
-        {/* Board member count and names */}
+        {/* Tax file question - drives the entire flow */}
         <div className="space-y-2">
-          <Label>מספר חברי ועד</Label>
-          <Input
-            type="number"
-            min="1"
-            value={info.existingBoardMemberCount || ""}
-            onChange={(e) => handleCountChange(parseInt(e.target.value) || 0)}
+          <Label>האם לעמותה קיים תיק ברשות המיסים?</Label>
+          <YesNoSelect
+            value={info.hasTaxFile}
+            onChange={(v) => setInfo({ hasTaxFile: v })}
           />
         </div>
 
-        {boardNames.length > 0 && (
-          <div className="space-y-2">
-            <Label className="font-semibold">שמות חברי הועד</Label>
-            {boardNames.map((n, idx) => (
+        {/* WITH tax file: only need one board member for representation */}
+        {info.hasTaxFile === true && (
+          <div className="space-y-4 mr-4">
+            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
+              ✅ מאחר שיש לעמותה תיק ברשות המיסים, מספיק חבר ועד אחד לצורך הפקת ייצוג.
+            </div>
+
+            <div className="space-y-2">
+              <Label>מספר חברי ועד</Label>
               <Input
-                key={idx}
-                placeholder={`שם חבר ועד ${idx + 1}`}
-                value={n}
-                onChange={(e) => updateBoardName(idx, e.target.value)}
+                type="number"
+                min="1"
+                value={info.existingBoardMemberCount || ""}
+                onChange={(e) => handleCountChange(parseInt(e.target.value) || 0)}
               />
+            </div>
+
+            {boardMembers.length > 0 && (
+              <div className="space-y-2">
+                <Label className="font-semibold">שמות חברי הועד</Label>
+                {boardMembers.map((m, idx) => (
+                  <Input
+                    key={idx}
+                    placeholder={`שם חבר ועד ${idx + 1}`}
+                    value={m.name || ""}
+                    onChange={(e) => updateBoardMember(idx, "name", e.target.value)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {boardMembers.length > 0 && (
+              <div className="space-y-2 p-4 bg-primary/5 rounded-xl border border-primary/15">
+                <Label className="text-base font-semibold">חבר הועד שיופיע בייצוג *</Label>
+                <Select
+                  value={info.representativeBoardMemberIdx !== undefined ? String(info.representativeBoardMemberIdx) : ""}
+                  onValueChange={(v) => setInfo({ representativeBoardMemberIdx: parseInt(v) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="בחר חבר ועד" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {boardMembers.map((m, idx) => (
+                      <SelectItem key={idx} value={String(idx)} disabled={!m.name}>
+                        {m.name || `חבר ועד ${idx + 1}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Gov portal */}
+            <div className="space-y-3 p-4 bg-primary/5 rounded-xl border border-primary/15">
+              <Label className="text-base font-semibold">🔐 הזדהות לאזור אישי ממשלתי</Label>
+              <p className="text-xs text-muted-foreground">
+                לא חוסם הפקת ייצוגים, אך נדרש לטיפול בתיק.
+              </p>
+              {renderGovPortalSection(
+                info.govPortalIdMethods,
+                info.govPortalPassword,
+                (m) => setInfo({ govPortalIdMethods: m }),
+                (p) => setInfo({ govPortalPassword: p }),
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* WITHOUT tax file: need full details of all board members */}
+        {info.hasTaxFile === false && (
+          <div className="space-y-4 mr-4">
+            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
+              ℹ️ מאחר שאין תיק ברשות המיסים, נדרשים פרטים מלאים של כל חברי הועד (לפחות אחד נדרש להפקת ייצוג).
+            </div>
+
+            <div className="space-y-2">
+              <Label>מספר חברי ועד</Label>
+              <Input
+                type="number"
+                min="1"
+                value={info.existingBoardMemberCount || ""}
+                onChange={(e) => handleCountChange(parseInt(e.target.value) || 0)}
+              />
+            </div>
+
+            {boardMembers.map((member, idx) => (
+              <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
+                <h4 className="font-bold text-primary">חבר ועד #{idx + 1}{member.name ? ` – ${member.name}` : ""}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>צילום ת.ז. *</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateBoardMember(idx, "idFile", e.target.files?.[0])} /></div>
+                  <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
+                </div>
+              </div>
             ))}
+
+            {boardMembers.length > 0 && (
+              <div className="space-y-2 p-4 bg-primary/5 rounded-xl border border-primary/15">
+                <Label className="text-base font-semibold">חבר הועד שיופיע בייצוג (לפחות אחד) *</Label>
+                <Select
+                  value={info.representativeBoardMemberIdx !== undefined ? String(info.representativeBoardMemberIdx) : ""}
+                  onValueChange={(v) => setInfo({ representativeBoardMemberIdx: parseInt(v) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="בחר חבר ועד" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {boardMembers.map((m, idx) => (
+                      <SelectItem key={idx} value={String(idx)} disabled={!m.name}>
+                        {m.name || `חבר ועד ${idx + 1}`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {/* Gov portal */}
+            <div className="space-y-3 p-4 bg-primary/5 rounded-xl border border-primary/15">
+              <Label className="text-base font-semibold">🔐 הזדהות לאזור אישי ממשלתי</Label>
+              <p className="text-xs text-muted-foreground">
+                לא חוסם הפקת ייצוגים, אך נדרש לטיפול בתיק.
+              </p>
+              {renderGovPortalSection(
+                info.govPortalIdMethods,
+                info.govPortalPassword,
+                (m) => setInfo({ govPortalIdMethods: m }),
+                (p) => setInfo({ govPortalPassword: p }),
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -1321,6 +1512,28 @@ export const Step2BusinessInfo = () => {
         personalInfo.email,
         true,
         "sp_"
+      )}
+
+      {/* War compensation - informational only with meeting CTA */}
+      {showWarCompensation && (
+        <div className="space-y-4 p-5 bg-primary/5 rounded-xl border-2 border-primary/30">
+          <h3 className="text-xl font-bold text-primary flex items-center gap-2">
+            ⚖️ פיצויי מלחמה – השגה או ערר
+          </h3>
+          <p className="text-sm text-foreground leading-relaxed">
+            הטיפול בפיצויי מלחמה (השגה / ערר) מצריך ליווי אישי וקבלת פרטים מורחבים שלא ניתן למלא בשאלון.
+            <br />
+            לרוב זה מתחיל בשיחה ראשונית אצלנו במשרד, ולאחר מכן נתאם פגישה לקבלת כל הפרטים והמסמכים הנדרשים.
+          </p>
+          <a
+            href="https://chasida.biz/schedule"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all shadow-sm"
+          >
+            📅 לתיאום פגישה
+          </a>
+        </div>
       )}
     </div>
   );
