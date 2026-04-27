@@ -1287,14 +1287,41 @@ export const Step2BusinessInfo = () => {
       {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
       {userHasNewNonprofit && renderNewNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
-      {userHasCompany && renderCompany(businessInfo, setBusinessInfo, userName, userGender)}
+      {userHasCompany && renderCompany(
+        businessInfo,
+        setBusinessInfo,
+        userName,
+        userGender,
+        detailedInfo.idNumber,
+        personalInfo.phone,
+        personalInfo.email,
+        spouseName,
+        spouseInfo.idNumber,
+        spouseInfo.phone,
+        spouseInfo.email,
+        isMarried
+      )}
 
       {/* Spouse sections */}
       {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, "", spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasNewNonprofit && renderNewNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
       {isMarried && spouseHasExistingNonprofit && renderExistingNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
-      {isMarried && spouseHasCompany && renderCompany(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, "sp_")}
+      {isMarried && spouseHasCompany && renderCompany(
+        spouseBusinessInfo,
+        setSpouseBusinessInfo,
+        spouseName,
+        spouseGender,
+        spouseInfo.idNumber,
+        spouseInfo.phone,
+        spouseInfo.email,
+        userName,
+        detailedInfo.idNumber,
+        personalInfo.phone,
+        personalInfo.email,
+        true,
+        "sp_"
+      )}
     </div>
   );
 };
