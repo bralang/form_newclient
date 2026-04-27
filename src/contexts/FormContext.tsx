@@ -27,6 +27,8 @@ export interface ServiceType {
 
 // ─── Step 2 Interfaces ─────────────────────────────
 
+export type GovPortalIdMethod = "password" | "smartCard" | "biometricId" | "fastLogin";
+
 export interface DetailedPersonalInfo {
   idNumber: string;
   homePhone: string;
@@ -38,6 +40,8 @@ export interface DetailedPersonalInfo {
   additionalIdNumber: string;
   additionalLicenseNumber: string;
   additionalPassportNumber: string;
+  govPortalIdMethods?: GovPortalIdMethod[];
+  govPortalPassword?: string;
 }
 
 export interface SpouseDetailedInfo {
@@ -50,6 +54,8 @@ export interface SpouseDetailedInfo {
   additionalLicenseNumber: string;
   additionalPassportNumber: string;
   availability: string;
+  govPortalIdMethods?: GovPortalIdMethod[];
+  govPortalPassword?: string;
 }
 
 export interface BusinessInfo {
