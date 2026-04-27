@@ -118,6 +118,8 @@ export interface BusinessInfo {
     shareholderType?: "alone" | "other" | "";
     shareholderCount?: number;
     shareholders?: Array<{
+      isSelf?: boolean;
+      isSpouse?: boolean;
       name: string;
       idNumber: string;
       idFile?: File;
@@ -128,6 +130,7 @@ export interface BusinessInfo {
       additionalIdFile?: File;
       percentage: string;
     }>;
+    spouseIsShareholder?: boolean;
   }>;
   newCompanies?: Array<{
     existsInRegistrar?: boolean;
@@ -137,6 +140,8 @@ export interface BusinessInfo {
     shareholderType?: "alone" | "other" | "";
     shareholderCount?: number;
     shareholders?: Array<{
+      isSelf?: boolean;
+      isSpouse?: boolean;
       name: string;
       idNumber: string;
       idFile?: File;
@@ -147,6 +152,7 @@ export interface BusinessInfo {
       additionalIdFile?: File;
       percentage: string;
     }>;
+    spouseIsShareholder?: boolean;
     planningEmployees?: boolean;
   }>;
 }
