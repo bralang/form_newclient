@@ -67,6 +67,8 @@ export const Step2BusinessInfo = () => {
   const renderPartnershipSection = (
     info: any,
     setInfo: any,
+    selfName: string,
+    selfIdNumber: string,
     prefix = ""
   ) => {
     const partners = info.partners || [];
@@ -83,9 +85,26 @@ export const Step2BusinessInfo = () => {
     };
 
     const handlePartnerCountChange = (count: number) => {
-      const adjusted = Array.from({ length: count }, (_, i) =>
-        partners[i] || { name: "", idNumber: "", percentage: "", phone: "", email: "", address: "", isVatRepresentative: false }
-      );
+      const adjusted = Array.from({ length: count }, (_, i) => {
+        if (i === 0) {
+          // Partner #1 is always the questionnaire filler – auto-fill
+          return {
+            ...(partners[0] || {}),
+            isSelf: true,
+            name: selfName,
+            idNumber: selfIdNumber,
+          };
+        }
+        return partners[i] || {
+          name: "",
+          idNumber: "",
+          percentage: "",
+          phone: "",
+          email: "",
+          address: "",
+          isVatRepresentative: false,
+        };
+      });
       setInfo({ partners: adjusted });
     };
 
@@ -103,64 +122,114 @@ export const Step2BusinessInfo = () => {
         </div>
 
         {partners.length > 0 && (
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">שמות השותפים – סמן נציג מול מע״מ</Label>
-            {partners.map((partner: any, idx: number) => (
-              <div key={idx} className="flex items-center gap-3">
-                <Checkbox
-                  id={`${prefix}vatRep_${idx}`}
-                  checked={partner.isVatRepresentative || false}
-                  onCheckedChange={(checked) => updatePartner(idx, "isVatRepresentative", !!checked)}
-                />
-                <Input
-                  placeholder={`שם שותף ${idx + 1}`}
-                  value={partner.name || ""}
-                  onChange={(e) => updatePartner(idx, "name", e.target.value)}
-                  className="flex-1"
-                />
-                {partner.isVatRepresentative && (
-                  <span className="text-xs text-primary font-medium whitespace-nowrap">נציג מע״מ</span>
-                )}
-              </div>
-            ))}
+          <div className="space-y-3 p-4 rounded-xl border-2 border-primary/30 bg-primary/5">
+            <Label className="text-lg font-bold text-primary block">
+              נציג השותפות למע״מ
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              סמנו מי מהשותפים יהיה הנציג מול מע״מ
+            </p>
+            <div className="space-y-2">
+              {partners.map((partner: any, idx: number) => {
+                const displayName =
+                  idx === 0 ? selfName : partner.name || `שותף ${idx + 1}`;
+                return (
+                  <label
+                    key={idx}
+                    htmlFor={`${prefix}vatRep_${idx}`}
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      partner.isVatRepresentative
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-card hover:border-primary/40"
+                    }`}
+                  >
+                    <Checkbox
+                      id={`${prefix}vatRep_${idx}`}
+                      checked={partner.isVatRepresentative || false}
+                      onCheckedChange={(checked) =>
+                        updatePartner(idx, "isVatRepresentative", !!checked)
+                      }
+                    />
+                    <span className="text-base font-bold flex-1">
+                      {displayName}
+                      {idx === 0 && (
+                        <span className="text-xs text-muted-foreground font-normal mr-2">
+                          (אני – ממלא/ת השאלון)
+                        </span>
+                      )}
+                    </span>
+                    {idx > 0 && (
+                      <Input
+                        placeholder={`שם שותף ${idx + 1}`}
+                        value={partner.name || ""}
+                        onChange={(e) => updatePartner(idx, "name", e.target.value)}
+                        className="flex-1 max-w-[260px]"
+                        onClick={(e) => e.preventDefault()}
+                      />
+                    )}
+                  </label>
+                );
+              })}
+            </div>
           </div>
         )}
 
         {/* Detailed partner groups */}
-        {partners.map((partner: any, idx: number) => (
-          partner.name && (
+        {partners.map((partner: any, idx: number) => {
+          const isSelf = idx === 0;
+          const displayName = isSelf ? selfName : partner.name;
+          if (!displayName) return null;
+          return (
             <div key={`details-${idx}`} className="space-y-3 p-4 border border-border rounded-xl bg-card">
-              <h4 className="font-bold text-primary">
-                פרטי שותף – {partner.name}
-                {partner.isVatRepresentative && <span className="text-xs mr-2 text-primary/70">(נציג מע״מ)</span>}
+              <h4 className="font-bold text-primary text-lg">
+                פרטי שותף – {displayName}
+                {isSelf && <span className="text-xs mr-2 text-muted-foreground font-normal">(הפרטים מולאו אוטומטית)</span>}
+                {partner.isVatRepresentative && <span className="text-xs mr-2 text-primary/70">(נציג השותפות למע״מ)</span>}
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <Label>מס׳ תעודת זהות</Label>
-                  <Input value={partner.idNumber || ""} onChange={(e) => updatePartner(idx, "idNumber", e.target.value)} />
-                </div>
+                {!isSelf && (
+                  <div className="space-y-1">
+                    <Label>מס׳ תעודת זהות</Label>
+                    <Input value={partner.idNumber || ""} onChange={(e) => updatePartner(idx, "idNumber", e.target.value)} />
+                  </div>
+                )}
                 <div className="space-y-1">
                   <Label>אחוז בשותפות</Label>
-                  <Input value={partner.percentage || ""} onChange={(e) => updatePartner(idx, "percentage", e.target.value)} placeholder="לדוגמה: 50%" />
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={partner.percentage || ""}
+                      onChange={(e) => updatePartner(idx, "percentage", e.target.value)}
+                      placeholder="לדוגמה: 50"
+                      className="pl-9"
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">%</span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <Label>טלפון</Label>
-                  <Input type="tel" value={partner.phone || ""} onChange={(e) => updatePartner(idx, "phone", e.target.value)} />
-                </div>
-                <div className="space-y-1">
-                  <Label>מייל</Label>
-                  <Input type="email" value={partner.email || ""} onChange={(e) => updatePartner(idx, "email", e.target.value)} />
-                </div>
-                <div className="space-y-1 md:col-span-2">
-                  <Label>כתובת</Label>
-                  <Input value={partner.address || ""} onChange={(e) => updatePartner(idx, "address", e.target.value)} />
-                </div>
+                {!isSelf && (
+                  <>
+                    <div className="space-y-1">
+                      <Label>טלפון</Label>
+                      <Input type="tel" value={partner.phone || ""} onChange={(e) => updatePartner(idx, "phone", e.target.value)} />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>מייל</Label>
+                      <Input type="email" value={partner.email || ""} onChange={(e) => updatePartner(idx, "email", e.target.value)} />
+                    </div>
+                    <div className="space-y-1 md:col-span-2">
+                      <Label>כתובת</Label>
+                      <Input value={partner.address || ""} onChange={(e) => updatePartner(idx, "address", e.target.value)} />
+                    </div>
+                  </>
+                )}
               </div>
 
-              {/* Additional ID for VAT representative */}
-              {partner.isVatRepresentative && (
+              {/* Additional ID for VAT representative (only if not self – self already provided in personal step) */}
+              {partner.isVatRepresentative && !isSelf && (
                 <div className="space-y-3 mt-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                  <Label className="font-semibold">אמצעי זיהוי נוסף (נציג מע״מ) *</Label>
+                  <Label className="font-semibold">אמצעי זיהוי נוסף (נציג השותפות למע״מ) *</Label>
                   <Select
                     value={partner.additionalIdType || ""}
                     onValueChange={(v) => updatePartner(idx, "additionalIdType", v)}
@@ -184,8 +253,8 @@ export const Step2BusinessInfo = () => {
                 </div>
               )}
             </div>
-          )
-        ))}
+          );
+        })}
 
         {/* Partnership agreement upload */}
         {partners.length > 0 && (
