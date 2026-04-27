@@ -473,12 +473,35 @@ export const Step2BusinessInfo = () => {
         </Select>
       </div>
 
-      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, prefix)}
+      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
 
       <div className="space-y-2">
         <Label>האם העסק מתנהל מהבית?</Label>
         <YesNoSelect value={info.isHomeOffice} onChange={(v) => setInfo({ isHomeOffice: v })} />
       </div>
+
+      {/* For partnerships – ask which partner's home */}
+      {info.isHomeOffice === true && info.ownershipType === "partnership" && (info.partners || []).length > 0 && (
+        <div className="space-y-2 mr-4 p-4 rounded-xl border border-primary/20 bg-primary/5">
+          <Label className="text-base font-bold">מהבית של איזה שותף?</Label>
+          <Select
+            value={info.homeOfficePartnerIdx !== undefined ? String(info.homeOfficePartnerIdx) : ""}
+            onValueChange={(v) => setInfo({ homeOfficePartnerIdx: parseInt(v) })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="בחר שותף" />
+            </SelectTrigger>
+            <SelectContent>
+              {(info.partners || []).map((partner: any, idx: number) => {
+                const displayName = idx === 0 ? name : partner.name || `שותף ${idx + 1}`;
+                return (
+                  <SelectItem key={idx} value={String(idx)}>{displayName}</SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {info.isHomeOffice === false && (
         <div className="space-y-3 mr-4">
