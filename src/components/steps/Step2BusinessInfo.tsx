@@ -758,6 +758,14 @@ export const Step2BusinessInfo = () => {
     setInfo: any,
     name: string,
     _gender: "male" | "female" | "",
+    selfIdNumber: string,
+    selfPhone: string,
+    selfEmail: string,
+    spouseDisplayName: string,
+    spouseIdNumber: string,
+    spousePhone: string,
+    spouseEmail: string,
+    showSpouseOption: boolean,
     prefix = ""
   ) => {
     const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing");
