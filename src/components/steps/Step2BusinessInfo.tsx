@@ -786,21 +786,6 @@ export const Step2BusinessInfo = () => {
               ))}
             </div>
 
-            {/* Gov portal password */}
-            <div className="space-y-2">
-              <Label>סיסמא לאזור אישי ממשלתי (לא חובה)</Label>
-              <Input
-                type="password"
-                value={company.govPortalPassword || ""}
-                onChange={(e) => {
-                  const updated = [...(info.newCompanies || [])];
-                  updated[idx] = { ...updated[idx], govPortalPassword: e.target.value };
-                  setInfo({ newCompanies: updated });
-                }}
-                placeholder="לא חובה למילוי"
-              />
-            </div>
-
             {/* Shareholders */}
             <div className="space-y-2">
               <Label>מי יהיו בעלי המניות בחברה?</Label>
