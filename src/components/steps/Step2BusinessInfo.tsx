@@ -276,9 +276,19 @@ export const Step2BusinessInfo = () => {
     company: any,
     updateCompany: (field: string, value: any) => void,
     updateCompanyMulti: (updates: Record<string, any>) => void,
+    selfName: string,
+    selfIdNumber: string,
+    selfPhone: string,
+    selfEmail: string,
+    spouseDisplayName: string,
+    spouseIdNumber: string,
+    spousePhone: string,
+    spouseEmail: string,
+    showSpouseOption: boolean,
     prefix = ""
   ) => {
     const shareholders = company.shareholders || [];
+    const spouseIsShareholder = !!company.spouseIsShareholder;
 
     const updateShareholder = (idx: number, field: string, value: any) => {
       const updated = [...shareholders];
@@ -286,92 +296,246 @@ export const Step2BusinessInfo = () => {
       updateCompany("shareholders", updated);
     };
 
+    // Build the list with auto-filled self (#1) and optional spouse (#2)
+    const buildShareholders = (totalCount: number, spouseFlag: boolean) => {
+      const result: any[] = [];
+      // #1 — always self (auto-filled from personal info)
+      result.push({
+        ...(shareholders[0] || {}),
+        isSelf: true,
+        isSpouse: false,
+        name: selfName,
+        idNumber: selfIdNumber,
+        phone: selfPhone,
+        email: selfEmail,
+      });
+      let nextIdx = 1;
+      // #2 — spouse if flagged
+      if (spouseFlag) {
+        result.push({
+          ...(shareholders[nextIdx] || {}),
+          isSelf: false,
+          isSpouse: true,
+          name: spouseDisplayName,
+          idNumber: spouseIdNumber,
+          phone: spousePhone,
+          email: spouseEmail,
+        });
+        nextIdx++;
+      }
+      // Remaining manual shareholders
+      for (let i = nextIdx; i < totalCount; i++) {
+        // Find the next non-auto shareholder from existing data
+        const existingManual = shareholders
+          .filter((s: any) => !s?.isSelf && !s?.isSpouse)
+          .map((s: any) => ({ ...s, isSelf: false, isSpouse: false }));
+        const manualIdx = i - nextIdx;
+        result.push(
+          existingManual[manualIdx] || {
+            isSelf: false,
+            isSpouse: false,
+            name: "",
+            idNumber: "",
+            phone: "",
+            email: "",
+            percentage: "",
+            additionalIdType: "",
+            additionalIdNumber: "",
+          }
+        );
+      }
+      return result;
+    };
+
     const handleShareholderCountChange = (count: number) => {
-      const adjusted = Array.from({ length: count }, (_, i) =>
-        shareholders[i] || { name: "", idNumber: "", phone: "", email: "", percentage: "", additionalIdType: "", additionalIdNumber: "" }
-      );
+      if (count < 1) count = 1;
+      const adjusted = buildShareholders(count, spouseIsShareholder);
       updateCompanyMulti({ shareholders: adjusted, shareholderCount: count });
+    };
+
+    const toggleSpouseHolder = (checked: boolean) => {
+      const currentCount = company.shareholderCount || shareholders.length || (checked ? 2 : 1);
+      // Ensure count includes spouse slot
+      let newCount = currentCount;
+      if (checked && currentCount < 2) newCount = 2;
+      const adjusted = buildShareholders(newCount, checked);
+      updateCompanyMulti({
+        shareholders: adjusted,
+        shareholderCount: newCount,
+        spouseIsShareholder: checked,
+      });
     };
 
     return (
       <div className="space-y-4 mr-4">
         <div className="space-y-2">
-          <Label>כמה בעלי מניות יש בחברה?</Label>
+          <Label>כמה בעלי מניות יש בחברה? (כולל אותך)</Label>
           <Input
             type="number"
-            min="2"
+            min="1"
             value={company.shareholderCount || ""}
             onChange={(e) => handleShareholderCountChange(parseInt(e.target.value) || 0)}
           />
+          <p className="text-xs text-muted-foreground">
+            בעל מניות #1 הוא ממלא השאלון – הפרטים מולאו אוטומטית.
+          </p>
         </div>
 
-        {shareholders.map((sh: any, idx: number) => (
-          <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
-            <h4 className="font-bold text-primary">בעל מניות #{idx + 1}{sh.name ? ` – ${sh.name}` : ""}</h4>
+        {showSpouseOption && (
+          <label
+            htmlFor={`${prefix}spouseHolder`}
+            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+              spouseIsShareholder
+                ? "border-primary bg-primary/10"
+                : "border-border bg-card hover:border-primary/40"
+            }`}
+          >
+            <Checkbox
+              id={`${prefix}spouseHolder`}
+              checked={spouseIsShareholder}
+              onCheckedChange={(c) => toggleSpouseHolder(!!c)}
+            />
+            <span className="text-base font-bold">
+              גם {spouseDisplayName} (בן/בת הזוג) הוא בעל מניות
+            </span>
+          </label>
+        )}
 
-            <div className="space-y-2">
-              <Label>סוג בעל המניות</Label>
-              <Select
-                value={sh.holderType || "person"}
-                onValueChange={(v) => updateShareholder(idx, "holderType", v)}
-              >
-                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="person">אדם פרטי</SelectItem>
-                  <SelectItem value="company">חברה</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        {shareholders.map((sh: any, idx: number) => {
+          const isAuto = sh?.isSelf || sh?.isSpouse;
+          const displayName = sh?.isSelf
+            ? selfName
+            : sh?.isSpouse
+            ? spouseDisplayName
+            : sh.name || `בעל מניות ${idx + 1}`;
+          return (
+            <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
+              <h4 className="font-bold text-primary">
+                בעל מניות #{idx + 1} – {displayName}
+                {sh?.isSelf && (
+                  <span className="text-xs mr-2 text-muted-foreground font-normal">
+                    (אני – ממלא/ת השאלון, הפרטים מולאו אוטומטית)
+                  </span>
+                )}
+                {sh?.isSpouse && (
+                  <span className="text-xs mr-2 text-muted-foreground font-normal">
+                    (בן/בת הזוג, הפרטים מולאו אוטומטית)
+                  </span>
+                )}
+              </h4>
 
-            {(sh.holderType || "person") === "person" ? (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "idFile", e.target.files?.[0])} /></div>
-                  <div className="space-y-1"><Label>אחוזי אחזקה *</Label><Input value={sh.percentage || ""} onChange={(e) => updateShareholder(idx, "percentage", e.target.value)} placeholder="לדוגמה: 50%" /></div>
-                  <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} /></div>
-                </div>
-                <div className="space-y-2">
-                  <Label>אמצעי זיהוי נוסף {idx === 0 ? "*" : "(מומלץ)"}</Label>
-                  <Select value={sh.additionalIdType || ""} onValueChange={(v) => updateShareholder(idx, "additionalIdType", v)}>
-                    <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
-                      <SelectItem value="license">רישיון נהיגה</SelectItem>
-                      <SelectItem value="passport">דרכון</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {sh.additionalIdType && (
-                    <>
-                      <Input placeholder="מספר אמצעי זיהוי" value={sh.additionalIdNumber || ""} onChange={(e) => updateShareholder(idx, "additionalIdNumber", e.target.value)} />
-                      <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "additionalIdFile", e.target.files?.[0])} /></div>
-                    </>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>אחוזי אחזקה *</Label><Input value={sh.percentage || ""} onChange={(e) => updateShareholder(idx, "percentage", e.target.value)} placeholder="לדוגמה: 50%" /></div>
-                </div>
-                <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
-                  <p className="text-sm text-muted-foreground mb-3">יש לציין את בעל המניות הסופי (אדם פרטי) של החברה המחזיקה, לצורך זיהוי במס הכנסה</p>
-                  <div className="space-y-2"><Label>שם בעל המניות הסופי (אדם פרטי) *</Label><Input value={sh.ultimateOwnerName || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerName", e.target.value)} /></div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.ultimateOwnerIdNumber || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerIdNumber", e.target.value)} /></div>
-                    <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "ultimateOwnerIdFile", e.target.files?.[0])} /></div>
-                    <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.ultimateOwnerPhone || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerPhone", e.target.value)} /></div>
-                    <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.ultimateOwnerEmail || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerEmail", e.target.value)} /></div>
+              {isAuto ? (
+                <div className="space-y-1 max-w-xs">
+                  <Label>אחוזי אחזקה *</Label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={sh.percentage || ""}
+                      onChange={(e) => updateShareholder(idx, "percentage", e.target.value)}
+                      placeholder="לדוגמה: 50"
+                      className="pl-9"
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">%</span>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ))}
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label>סוג בעל המניות</Label>
+                    <Select
+                      value={sh.holderType || "person"}
+                      onValueChange={(v) => updateShareholder(idx, "holderType", v)}
+                    >
+                      <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="person">אדם פרטי</SelectItem>
+                        <SelectItem value="company">חברה</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {(sh.holderType || "person") === "person" ? (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
+                        <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
+                        <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "idFile", e.target.files?.[0])} /></div>
+                        <div className="space-y-1">
+                          <Label>אחוזי אחזקה *</Label>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={sh.percentage || ""}
+                              onChange={(e) => updateShareholder(idx, "percentage", e.target.value)}
+                              placeholder="לדוגמה: 50"
+                              className="pl-9"
+                            />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">%</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} /></div>
+                        <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} /></div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
+                        <Select value={sh.additionalIdType || ""} onValueChange={(v) => updateShareholder(idx, "additionalIdType", v)}>
+                          <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                            <SelectItem value="license">רישיון נהיגה</SelectItem>
+                            <SelectItem value="passport">דרכון</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {sh.additionalIdType && (
+                          <>
+                            <Input placeholder="מספר אמצעי זיהוי" value={sh.additionalIdNumber || ""} onChange={(e) => updateShareholder(idx, "additionalIdNumber", e.target.value)} />
+                            <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "additionalIdFile", e.target.files?.[0])} /></div>
+                          </>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
+                        <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
+                        <div className="space-y-1">
+                          <Label>אחוזי אחזקה *</Label>
+                          <div className="relative">
+                            <Input
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={sh.percentage || ""}
+                              onChange={(e) => updateShareholder(idx, "percentage", e.target.value)}
+                              placeholder="לדוגמה: 50"
+                              className="pl-9"
+                            />
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
+                        <p className="text-sm text-muted-foreground mb-3">יש לציין את בעל המניות הסופי (אדם פרטי) של החברה המחזיקה, לצורך זיהוי במס הכנסה</p>
+                        <div className="space-y-2"><Label>שם בעל המניות הסופי (אדם פרטי) *</Label><Input value={sh.ultimateOwnerName || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerName", e.target.value)} /></div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                          <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.ultimateOwnerIdNumber || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerIdNumber", e.target.value)} /></div>
+                          <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "ultimateOwnerIdFile", e.target.files?.[0])} /></div>
+                          <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.ultimateOwnerPhone || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerPhone", e.target.value)} /></div>
+                          <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.ultimateOwnerEmail || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerEmail", e.target.value)} /></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -594,6 +758,14 @@ export const Step2BusinessInfo = () => {
     setInfo: any,
     name: string,
     _gender: "male" | "female" | "",
+    selfIdNumber: string,
+    selfPhone: string,
+    selfEmail: string,
+    spouseDisplayName: string,
+    spouseIdNumber: string,
+    spousePhone: string,
+    spouseEmail: string,
+    showSpouseOption: boolean,
     prefix = ""
   ) => {
     const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing");
@@ -759,6 +931,15 @@ export const Step2BusinessInfo = () => {
                 updated[idx] = { ...updated[idx], ...updates };
                 setInfo({ existingCompanies: updated });
               },
+              name,
+              selfIdNumber,
+              selfPhone,
+              selfEmail,
+              spouseDisplayName,
+              spouseIdNumber,
+              spousePhone,
+              spouseEmail,
+              showSpouseOption,
               `${prefix}existing_${idx}_`
             )}
           </div>
@@ -817,6 +998,15 @@ export const Step2BusinessInfo = () => {
                 updated[idx] = { ...updated[idx], ...updates };
                 setInfo({ newCompanies: updated });
               },
+              name,
+              selfIdNumber,
+              selfPhone,
+              selfEmail,
+              spouseDisplayName,
+              spouseIdNumber,
+              spousePhone,
+              spouseEmail,
+              showSpouseOption,
               `${prefix}new_${idx}_`
             )}
 
@@ -1097,14 +1287,41 @@ export const Step2BusinessInfo = () => {
       {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
       {userHasNewNonprofit && renderNewNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
-      {userHasCompany && renderCompany(businessInfo, setBusinessInfo, userName, userGender)}
+      {userHasCompany && renderCompany(
+        businessInfo,
+        setBusinessInfo,
+        userName,
+        userGender,
+        detailedInfo.idNumber,
+        personalInfo.phone,
+        personalInfo.email,
+        spouseName,
+        spouseInfo.idNumber,
+        spouseInfo.phone,
+        spouseInfo.email,
+        isMarried
+      )}
 
       {/* Spouse sections */}
       {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, "", spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasNewNonprofit && renderNewNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
       {isMarried && spouseHasExistingNonprofit && renderExistingNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
-      {isMarried && spouseHasCompany && renderCompany(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, "sp_")}
+      {isMarried && spouseHasCompany && renderCompany(
+        spouseBusinessInfo,
+        setSpouseBusinessInfo,
+        spouseName,
+        spouseGender,
+        spouseInfo.idNumber,
+        spouseInfo.phone,
+        spouseInfo.email,
+        userName,
+        detailedInfo.idNumber,
+        personalInfo.phone,
+        personalInfo.email,
+        true,
+        "sp_"
+      )}
     </div>
   );
 };

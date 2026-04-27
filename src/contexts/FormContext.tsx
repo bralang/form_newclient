@@ -27,6 +27,8 @@ export interface ServiceType {
 
 // ─── Step 2 Interfaces ─────────────────────────────
 
+export type GovPortalIdMethod = "password" | "smartCard" | "biometricId" | "fastLogin";
+
 export interface DetailedPersonalInfo {
   idNumber: string;
   homePhone: string;
@@ -38,6 +40,8 @@ export interface DetailedPersonalInfo {
   additionalIdNumber: string;
   additionalLicenseNumber: string;
   additionalPassportNumber: string;
+  govPortalIdMethods?: GovPortalIdMethod[];
+  govPortalPassword?: string;
 }
 
 export interface SpouseDetailedInfo {
@@ -50,6 +54,8 @@ export interface SpouseDetailedInfo {
   additionalLicenseNumber: string;
   additionalPassportNumber: string;
   availability: string;
+  govPortalIdMethods?: GovPortalIdMethod[];
+  govPortalPassword?: string;
 }
 
 export interface BusinessInfo {
@@ -112,6 +118,8 @@ export interface BusinessInfo {
     shareholderType?: "alone" | "other" | "";
     shareholderCount?: number;
     shareholders?: Array<{
+      isSelf?: boolean;
+      isSpouse?: boolean;
       name: string;
       idNumber: string;
       idFile?: File;
@@ -122,6 +130,7 @@ export interface BusinessInfo {
       additionalIdFile?: File;
       percentage: string;
     }>;
+    spouseIsShareholder?: boolean;
   }>;
   newCompanies?: Array<{
     existsInRegistrar?: boolean;
@@ -131,6 +140,8 @@ export interface BusinessInfo {
     shareholderType?: "alone" | "other" | "";
     shareholderCount?: number;
     shareholders?: Array<{
+      isSelf?: boolean;
+      isSpouse?: boolean;
       name: string;
       idNumber: string;
       idFile?: File;
@@ -141,6 +152,7 @@ export interface BusinessInfo {
       additionalIdFile?: File;
       percentage: string;
     }>;
+    spouseIsShareholder?: boolean;
     planningEmployees?: boolean;
   }>;
 }
