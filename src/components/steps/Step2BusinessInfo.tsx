@@ -509,7 +509,7 @@ export const Step2BusinessInfo = () => {
                         <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
                         <div className="space-y-1">
                           <Label>אחוזי אחזקה *</Label>
-                          <div className="relative">
+                          <div className="flex items-center gap-2">
                             <Input
                               type="number"
                               min="0"
@@ -517,9 +517,9 @@ export const Step2BusinessInfo = () => {
                               value={sh.percentage || ""}
                               onChange={(e) => updateShareholder(idx, "percentage", e.target.value)}
                               placeholder="לדוגמה: 50"
-                              className="pl-9"
+                              className="text-lg font-semibold"
                             />
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">%</span>
+                            <span className="text-2xl font-bold text-primary leading-none">%</span>
                           </div>
                         </div>
                       </div>
