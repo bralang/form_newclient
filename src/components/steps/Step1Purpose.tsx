@@ -89,6 +89,22 @@ export const Step1Purpose = () => {
     setCurrentStep(3);
   };
 
+  const getStatusHint = (purposeId: string, statuses: ("new" | "existing")[]) => {
+    if (purposeId === "company") {
+      const parts: string[] = [];
+      if (statuses.includes("new")) parts.push("חדש = החברה עדיין לא נרשמה ברשם החברות");
+      if (statuses.includes("existing")) parts.push("קיים = החברה נרשמה ברשם החברות");
+      return parts.join(" • ");
+    }
+    if (purposeId === "nonprofit") {
+      const parts: string[] = [];
+      if (statuses.includes("new")) parts.push("חדש = העמותה עדיין לא הוקמה ברשם העמותות");
+      if (statuses.includes("existing")) parts.push("קיים = העמותה הוקמה ברשם העמותות");
+      return parts.join(" • ");
+    }
+    return "";
+  };
+
   const renderSubStatus = (
     purposeId: string,
     purposeStatus: Record<string, ("new" | "existing")[]>,
