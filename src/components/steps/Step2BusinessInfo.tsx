@@ -931,6 +931,15 @@ export const Step2BusinessInfo = () => {
                 updated[idx] = { ...updated[idx], ...updates };
                 setInfo({ existingCompanies: updated });
               },
+              name,
+              selfIdNumber,
+              selfPhone,
+              selfEmail,
+              spouseDisplayName,
+              spouseIdNumber,
+              spousePhone,
+              spouseEmail,
+              showSpouseOption,
               `${prefix}existing_${idx}_`
             )}
           </div>
