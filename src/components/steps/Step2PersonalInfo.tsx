@@ -253,6 +253,60 @@ export const Step2PersonalInfo = () => {
             </div>
           )}
         </div>
+
+        {/* Gov portal identification — only for company / nonprofit */}
+        {userNeedsGovPortal && (
+          <div className="space-y-3 p-4 rounded-xl border-2 border-primary/20 bg-primary/5">
+            <Label className="text-lg font-bold text-primary block">
+              🔐 אופן הזדהות לאזור האישי הממשלתי (אופציונלי)
+            </Label>
+            <p className="text-sm text-muted-foreground">
+              נדרש לטיפול בחברות / עמותות. ניתן לסמן יותר מאפשרות אחת.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {govPortalOptions.map((opt) => {
+                const checked = (detailedInfo.govPortalIdMethods || []).includes(opt.value);
+                return (
+                  <label
+                    key={opt.value}
+                    htmlFor={`govId_${opt.value}`}
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      checked
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-card hover:border-primary/40"
+                    }`}
+                  >
+                    <Checkbox
+                      id={`govId_${opt.value}`}
+                      checked={checked}
+                      onCheckedChange={(c) => {
+                        const current = detailedInfo.govPortalIdMethods || [];
+                        const updated = c
+                          ? [...current, opt.value]
+                          : current.filter((v) => v !== opt.value);
+                        setDetailedInfo({ govPortalIdMethods: updated as any });
+                      }}
+                    />
+                    <span className="text-xl">{opt.icon}</span>
+                    <span className="text-base font-bold">{opt.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {(detailedInfo.govPortalIdMethods || []).includes("password") && (
+              <div className="space-y-2 pt-2">
+                <Label htmlFor="govPortalPassword">סיסמא לאזור האישי הממשלתי</Label>
+                <Input
+                  id="govPortalPassword"
+                  type="password"
+                  value={detailedInfo.govPortalPassword || ""}
+                  onChange={(e) => setDetailedInfo({ govPortalPassword: e.target.value })}
+                  placeholder="לא חובה למילוי"
+                />
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ─── Spouse Personal Details ─── */}
