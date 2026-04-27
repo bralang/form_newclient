@@ -89,6 +89,22 @@ export const Step1Purpose = () => {
     setCurrentStep(3);
   };
 
+  const getStatusHint = (purposeId: string, statuses: ("new" | "existing")[]) => {
+    if (purposeId === "company") {
+      const parts: string[] = [];
+      if (statuses.includes("new")) parts.push("חדש = החברה עדיין לא נרשמה ברשם החברות");
+      if (statuses.includes("existing")) parts.push("קיים = החברה נרשמה ברשם החברות");
+      return parts.join(" • ");
+    }
+    if (purposeId === "nonprofit") {
+      const parts: string[] = [];
+      if (statuses.includes("new")) parts.push("חדש = העמותה עדיין לא הוקמה ברשם העמותות");
+      if (statuses.includes("existing")) parts.push("קיים = העמותה הוקמה ברשם העמותות");
+      return parts.join(" • ");
+    }
+    return "";
+  };
+
   const renderSubStatus = (
     purposeId: string,
     purposeStatus: Record<string, ("new" | "existing")[]>,
@@ -141,7 +157,7 @@ export const Step1Purpose = () => {
                   checked={isChecked}
                   onCheckedChange={() => toggleUserPurpose(purpose.id)}
                 />
-                <span className={`text-sm font-medium ${isChecked ? "text-primary" : ""}`}>
+                <span className={`text-base font-bold ${isChecked ? "text-primary" : ""}`}>
                   {purpose.label}
                 </span>
               </label>
@@ -155,6 +171,11 @@ export const Step1Purpose = () => {
                 </div>
               )}
             </div>
+            {purpose.hasSubStatus && isChecked && getStatusHint(purpose.id, serviceType.userPurposeStatus[purpose.id] || []) && (
+              <p className="text-xs text-muted-foreground mt-1.5 mr-8 animate-in fade-in duration-200">
+                {getStatusHint(purpose.id, serviceType.userPurposeStatus[purpose.id] || [])}
+              </p>
+            )}
             {purpose.id === "other" && isChecked && (
               <div className="mt-2 mr-8 animate-in fade-in duration-200">
                 <Input
@@ -208,11 +229,16 @@ export const Step1Purpose = () => {
                       {userChecked && <span className="text-sm font-bold">✓</span>}
                     </button>
                     {purpose.hasSubStatus && userChecked && (
-                      <div className="animate-in fade-in duration-200">
+                      <div className="animate-in fade-in duration-200 flex flex-col items-center gap-1">
                         {renderSubStatus(
                           purpose.id,
                           serviceType.userPurposeStatus,
                           (s) => setServiceType({ userPurposeStatus: s })
+                        )}
+                        {getStatusHint(purpose.id, serviceType.userPurposeStatus[purpose.id] || []) && (
+                          <p className="text-[11px] text-muted-foreground text-center leading-tight max-w-[180px]">
+                            {getStatusHint(purpose.id, serviceType.userPurposeStatus[purpose.id] || [])}
+                          </p>
                         )}
                       </div>
                     )}
@@ -233,11 +259,16 @@ export const Step1Purpose = () => {
                       {spouseChecked && <span className="text-sm font-bold">✓</span>}
                     </button>
                     {purpose.hasSubStatus && spouseChecked && (
-                      <div className="animate-in fade-in duration-200">
+                      <div className="animate-in fade-in duration-200 flex flex-col items-center gap-1">
                         {renderSubStatus(
                           purpose.id,
                           serviceType.spousePurposeStatus,
                           (s) => setServiceType({ spousePurposeStatus: s })
+                        )}
+                        {getStatusHint(purpose.id, serviceType.spousePurposeStatus[purpose.id] || []) && (
+                          <p className="text-[11px] text-muted-foreground text-center leading-tight max-w-[180px]">
+                            {getStatusHint(purpose.id, serviceType.spousePurposeStatus[purpose.id] || [])}
+                          </p>
                         )}
                       </div>
                     )}

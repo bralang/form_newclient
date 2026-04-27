@@ -392,26 +392,34 @@ export const Step2PersonalInfo = () => {
             💡 כדאי לדעת: הנתונים שהזנת עד כה נשמרים במערכת באופן אוטומטי, ויופיעו בכניסתך לשאלון בפעמים הבאות, גם אם לא סיימת למלא את השאלון או להעלות מסמכים.
           </p>
 
-          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-            <Button variant="outline" size="sm" onClick={handleSendEmailList}>
-              <Mail className="ml-2 h-4 w-4" />
-              אני רוצה לקבל רשימה למייל
-            </Button>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleSendReminder}>
-                <Phone className="ml-2 h-4 w-4" />
-                תזכורת לטלפון
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs text-muted-foreground">שלחו לי רשימה למייל</Label>
+              <Button variant="outline" size="sm" onClick={handleSendEmailList}>
+                <Mail className="ml-2 h-4 w-4" />
+                אני רוצה לקבל רשימה למייל
               </Button>
-              <div className="flex items-center gap-1">
-                <Input
-                  type="time"
-                  value={reminderTime}
-                  onChange={(e) => setReminderTime(e.target.value)}
-                  className="w-32 h-9"
-                  placeholder="שעה"
-                />
-                <span className="text-xs text-muted-foreground whitespace-nowrap">(שעה מועדפת)</span>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs text-muted-foreground">תזכורת ב-SMS</Label>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleSendReminder}>
+                  <Phone className="ml-2 h-4 w-4" />
+                  תזכורת לטלפון
+                </Button>
+                <div className="flex flex-col">
+                  <Label htmlFor="reminderTime" className="text-[11px] text-muted-foreground mb-1">
+                    שעה ודקות מועדפים
+                  </Label>
+                  <Input
+                    id="reminderTime"
+                    type="time"
+                    value={reminderTime}
+                    onChange={(e) => setReminderTime(e.target.value)}
+                    className="w-32 h-9"
+                  />
+                </div>
               </div>
             </div>
           </div>
