@@ -45,6 +45,31 @@ export const Step2BusinessInfo = () => {
   const userLastName = personalInfo.lastName || "";
   const spouseName = personalInfo.spouseName || "בן/בת הזוג";
 
+  const PercentageInput = ({
+    value,
+    onChange,
+    placeholder = "לדוגמה: 50",
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+  }) => (
+    <div className="relative max-w-xs">
+      <Input
+        type="number"
+        min="0"
+        max="100"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="h-14 rounded-2xl pl-12 pr-4 text-right text-xl font-bold"
+      />
+      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-3xl font-black text-primary leading-none">
+        %
+      </span>
+    </div>
+  );
+
   // ─── Yes/No Select helper ───
   const YesNoSelect = ({
     value,
@@ -197,20 +222,12 @@ export const Step2BusinessInfo = () => {
                     <Input value={partner.idNumber || ""} onChange={(e) => updatePartner(idx, "idNumber", e.target.value)} />
                   </div>
                 )}
-                 <div className="space-y-1">
+                <div className="space-y-1">
                   <Label>אחוז בשותפות</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={partner.percentage || ""}
-                      onChange={(e) => updatePartner(idx, "percentage", e.target.value)}
-                      placeholder="לדוגמה: 50"
-                      className="text-lg font-semibold"
-                    />
-                    <span className="text-2xl font-bold text-primary leading-none">%</span>
-                  </div>
+                   <PercentageInput
+                     value={partner.percentage || ""}
+                     onChange={(value) => updatePartner(idx, "percentage", value)}
+                   />
                 </div>
                 {!isSelf && (
                   <>
@@ -431,18 +448,10 @@ export const Step2BusinessInfo = () => {
               {isAuto ? (
                 <div className="space-y-1 max-w-xs">
                   <Label>אחוזי אחזקה *</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={sh.percentage || ""}
-                      onChange={(e) => updateShareholder(idx, "percentage", e.target.value)}
-                      placeholder="לדוגמה: 50"
-                      className="text-lg font-semibold"
-                    />
-                    <span className="text-2xl font-bold text-primary leading-none">%</span>
-                  </div>
+                  <PercentageInput
+                    value={sh.percentage || ""}
+                    onChange={(value) => updateShareholder(idx, "percentage", value)}
+                  />
                 </div>
               ) : (
                 <>
@@ -468,18 +477,10 @@ export const Step2BusinessInfo = () => {
                         <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "idFile", e.target.files?.[0])} /></div>
                         <div className="space-y-1">
                           <Label>אחוזי אחזקה *</Label>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={sh.percentage || ""}
-                              onChange={(e) => updateShareholder(idx, "percentage", e.target.value)}
-                              placeholder="לדוגמה: 50"
-                              className="text-lg font-semibold"
-                            />
-                            <span className="text-2xl font-bold text-primary leading-none">%</span>
-                          </div>
+                          <PercentageInput
+                            value={sh.percentage || ""}
+                            onChange={(value) => updateShareholder(idx, "percentage", value)}
+                          />
                         </div>
                         <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} /></div>
                         <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} /></div>
@@ -509,18 +510,10 @@ export const Step2BusinessInfo = () => {
                         <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
                         <div className="space-y-1">
                           <Label>אחוזי אחזקה *</Label>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              value={sh.percentage || ""}
-                              onChange={(e) => updateShareholder(idx, "percentage", e.target.value)}
-                              placeholder="לדוגמה: 50"
-                              className="text-lg font-semibold"
-                            />
-                            <span className="text-2xl font-bold text-primary leading-none">%</span>
-                          </div>
+                          <PercentageInput
+                            value={sh.percentage || ""}
+                            onChange={(value) => updateShareholder(idx, "percentage", value)}
+                          />
                         </div>
                       </div>
                       <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
