@@ -30,6 +30,19 @@ export const Step2PersonalInfo = () => {
   const hasAnyPurpose =
     serviceType.userPurposes.length > 0 || serviceType.spousePurposes.length > 0;
 
+  // Gov portal identification is relevant only for company/nonprofit purposes (not for sole proprietor / tax refund)
+  const userNeedsGovPortal =
+    serviceType.userPurposes.includes("company") || serviceType.userPurposes.includes("nonprofit");
+  const spouseNeedsGovPortal =
+    serviceType.spousePurposes.includes("company") || serviceType.spousePurposes.includes("nonprofit");
+
+  const govPortalOptions: { value: "password" | "smartCard" | "biometricId" | "fastLogin"; label: string; icon: string }[] = [
+    { value: "password", label: "סיסמא", icon: "🔑" },
+    { value: "smartCard", label: "כרטיס חכם", icon: "💳" },
+    { value: "biometricId", label: "תעודת זהות ביומטרית", icon: "🪪" },
+    { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆" },
+  ];
+
   // Auto-set spouse gender to opposite
   useEffect(() => {
     if (detailedInfo.gender && !spouseInfo.gender) {
