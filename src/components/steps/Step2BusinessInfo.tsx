@@ -1513,6 +1513,28 @@ export const Step2BusinessInfo = () => {
         true,
         "sp_"
       )}
+
+      {/* War compensation - informational only with meeting CTA */}
+      {showWarCompensation && (
+        <div className="space-y-4 p-5 bg-primary/5 rounded-xl border-2 border-primary/30">
+          <h3 className="text-xl font-bold text-primary flex items-center gap-2">
+            ⚖️ פיצויי מלחמה – השגה או ערר
+          </h3>
+          <p className="text-sm text-foreground leading-relaxed">
+            הטיפול בפיצויי מלחמה (השגה / ערר) מצריך ליווי אישי וקבלת פרטים מורחבים שלא ניתן למלא בשאלון.
+            <br />
+            לרוב זה מתחיל בשיחה ראשונית אצלנו במשרד, ולאחר מכן נתאם פגישה לקבלת כל הפרטים והמסמכים הנדרשים.
+          </p>
+          <a
+            href="https://chasida.biz/schedule"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-all shadow-sm"
+          >
+            📅 לתיאום פגישה
+          </a>
+        </div>
+      )}
     </div>
   );
 };
