@@ -236,17 +236,6 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                 <span className="text-muted-foreground">|</span>
                 <a href="mailto:teder@chasida.biz" className="text-lg font-bold text-primary hover:underline">teder@chasida.biz</a>
               </div>
-              <p className="pt-2 text-xs text-muted-foreground">
-                פיתוח{" "}
-                <a
-                  href="https://link-up.co.il/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-primary hover:underline"
-                >
-                  LinkUp
-                </a>
-              </p>
             </div>
           </div>
         </main>
