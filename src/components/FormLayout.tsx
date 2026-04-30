@@ -250,9 +250,8 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
           className="inline-flex items-center gap-1.5 text-primary hover:opacity-80 transition-opacity font-semibold"
         >
           <img src={linkupLogo} alt="LinkUp" className="h-5 w-5 rounded-full" />
-          <span className="underline">LinkUp</span>
+          <span>פיתוח ואוטומציות</span>
         </a>
-        <span className="mr-1">פיתוח ואוטומציות</span>
       </footer>
     </div>
   );
