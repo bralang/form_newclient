@@ -247,11 +247,11 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
           href="https://link-up.co.il"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-primary hover:opacity-80 transition-opacity font-semibold"
+          className="text-primary hover:opacity-80 transition-opacity font-semibold underline"
         >
-          <img src={linkupLogo} alt="LinkUp" className="h-5 w-5 rounded-full" />
-          <span>פיתוח ואוטומציות</span>
+          LinkUp
         </a>
+        <span className="mr-1">פיתוח ואוטומציות</span>
       </footer>
     </div>
   );
