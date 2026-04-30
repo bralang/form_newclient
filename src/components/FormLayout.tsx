@@ -240,6 +240,20 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
           </div>
         </main>
       </div>
+
+      {/* Global Credit Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-sm border-t border-border py-2 text-center text-xs text-muted-foreground">
+        <a
+          href="https://link-up.co.il"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-primary hover:opacity-80 transition-opacity font-semibold"
+        >
+          <img src={linkupLogo} alt="LinkUp" className="h-5 w-5 rounded-full" />
+          <span className="underline">LinkUp</span>
+        </a>
+        <span className="mr-1">פיתוח ואוטומציות</span>
+      </footer>
     </div>
   );
 };
