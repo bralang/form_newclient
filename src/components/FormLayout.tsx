@@ -28,7 +28,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
   const [showAttention, setShowAttention] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background pb-10" dir="rtl">
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* ─── Sidebar (Desktop) ─── */}
         <aside className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 bg-gradient-to-b from-primary to-primary/80 text-primary-foreground sticky top-0 h-screen p-8 justify-between shrink-0">
