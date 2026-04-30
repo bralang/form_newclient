@@ -3,6 +3,7 @@ import { useFormContext } from "@/contexts/FormContext";
 import { Check, Music, Info, X, Sparkles } from "lucide-react";
 import mascot from "@/assets/mascot.png";
 import logo from "@/assets/logo.png";
+import linkupLogo from "@/assets/linkup-logo.png";
 
 const steps = [
   { number: 1, title: "ככה מתחילים לנגן…" },
@@ -27,7 +28,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
   const [showAttention, setShowAttention] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background pb-10" dir="rtl">
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* ─── Sidebar (Desktop) ─── */}
         <aside className="hidden lg:flex lg:flex-col lg:w-80 xl:w-96 bg-gradient-to-b from-primary to-primary/80 text-primary-foreground sticky top-0 h-screen p-8 justify-between shrink-0">
@@ -167,17 +168,6 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                 <p className="text-sm font-semibold text-foreground/80">אנחנו כאן לסיוע במילוי השאלון</p>
                 <a href="tel:0533160990" className="block text-base font-bold text-primary hover:underline">טל׳ 0533160990</a>
                 <a href="mailto:teder@chasida.biz" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
-                <p className="pt-3 text-xs text-muted-foreground">
-                  פיתוח{" "}
-                  <a
-                    href="https://link-up.co.il/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-primary hover:underline"
-                  >
-                    LinkUp
-                  </a>
-                </p>
               </div>
             </div>
           </div>
@@ -231,7 +221,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             {currentStep !== 1 && (
               <button
                 onClick={() => setShowAttention(true)}
-                className="fixed bottom-6 left-6 z-30 lg:hidden flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
+                className="fixed bottom-12 left-6 z-30 lg:hidden flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold px-4 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
               >
                 <Info className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
                 <span className="text-sm">לתשומת ליבכם</span>
@@ -246,21 +236,24 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                 <span className="text-muted-foreground">|</span>
                 <a href="mailto:teder@chasida.biz" className="text-lg font-bold text-primary hover:underline">teder@chasida.biz</a>
               </div>
-              <p className="pt-2 text-xs text-muted-foreground">
-                פיתוח{" "}
-                <a
-                  href="https://link-up.co.il/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-primary hover:underline"
-                >
-                  LinkUp
-                </a>
-              </p>
             </div>
           </div>
         </main>
       </div>
+
+      {/* Global Credit Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-sm border-t border-border py-2 text-center text-xs text-muted-foreground">
+        <a
+          href="https://link-up.co.il"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-primary hover:opacity-80 transition-opacity font-semibold"
+        >
+          <img src={linkupLogo} alt="LinkUp" className="h-5 w-5 rounded-full" />
+          <span className="underline">LinkUp</span>
+        </a>
+        <span className="mr-1">פיתוח ואוטומציות</span>
+      </footer>
     </div>
   );
 };
