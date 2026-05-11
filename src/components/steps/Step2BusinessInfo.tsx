@@ -169,19 +169,25 @@ export const Step2BusinessInfo = () => {
   const userGender = detailedInfo.gender;
   const spouseGender = spouseInfo.gender;
 
+  const userWarEntities = serviceType.userWarCompensationEntities || [];
+  const spouseWarEntities = serviceType.spouseWarCompensationEntities || [];
+
   const userHasNewBusiness = serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("new");
-  const userHasExistingBusiness = serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing");
-  const userHasCompany = serviceType.userPurposes.includes("company");
-  const userHasNonprofit = serviceType.userPurposes.includes("nonprofit");
+  const userHasExistingBusiness = (serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing")) || userWarEntities.includes("business");
+  const userHasCompany = serviceType.userPurposes.includes("company") || userWarEntities.includes("company");
+  const userHasNonprofit = serviceType.userPurposes.includes("nonprofit") || userWarEntities.includes("nonprofit");
 
   const spouseHasNewBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("new");
-  const spouseHasExistingBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing");
-  const spouseHasCompany = serviceType.spousePurposes.includes("company");
-  const spouseHasNonprofit = serviceType.spousePurposes.includes("nonprofit");
+  const spouseHasExistingBusiness = (serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing")) || spouseWarEntities.includes("business");
+  const spouseHasCompany = serviceType.spousePurposes.includes("company") || spouseWarEntities.includes("company");
+  const spouseHasNonprofit = serviceType.spousePurposes.includes("nonprofit") || spouseWarEntities.includes("nonprofit");
 
   const userHasWarCompensation = serviceType.userPurposes.includes("war_compensation");
   const spouseHasWarCompensation = serviceType.spousePurposes.includes("war_compensation");
-  const showWarCompensation = userHasWarCompensation || spouseHasWarCompensation;
+  // Show the generic war-compensation CTA only if war_compensation was selected without specifying any related entity
+  const showWarCompensation =
+    (userHasWarCompensation && userWarEntities.length === 0) ||
+    (spouseHasWarCompensation && spouseWarEntities.length === 0);
 
   const userName = personalInfo.firstName || "המשתמש";
   const userLastName = personalInfo.lastName || "";
