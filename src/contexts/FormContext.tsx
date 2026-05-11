@@ -166,6 +166,8 @@ export interface NonprofitBoardMember {
   email: string;
   phone: string;
   address: string;
+  city?: string;
+  zip?: string;
   isAuthorizedSigner: boolean;
   isAuditCommittee?: boolean;
 }
