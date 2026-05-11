@@ -1340,73 +1340,84 @@ export const Step2BusinessInfo = () => {
           />
         </div>
 
-        {/* WITH tax file: only need one board member for representation */}
-        {info.hasTaxFile === true && (
-          <div className="space-y-4 mr-4">
-            <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
-              ✅ מאחר שיש לעמותה תיק ברשות המיסים, מספיק חבר ועד אחד לצורך הפקת ייצוג.
-            </div>
-
-            <div className="space-y-2">
-              <Label>מספר חברי ועד</Label>
-              <Input
-                type="number"
-                min="1"
-                value={info.existingBoardMemberCount || ""}
-                onChange={(e) => handleCountChange(parseInt(e.target.value) || 0)}
-              />
-            </div>
-
-            {boardMembers.length > 0 && (
-              <div className="space-y-2">
-                <Label className="font-semibold">שמות חברי הועד</Label>
-                {boardMembers.map((m, idx) => (
-                  <Input
-                    key={idx}
-                    placeholder={`שם חבר ועד ${idx + 1}`}
-                    value={m.name || ""}
-                    onChange={(e) => updateBoardMember(idx, "name", e.target.value)}
-                  />
-                ))}
+        {/* WITH tax file: only need full details of one representative board member */}
+        {info.hasTaxFile === true && (() => {
+          const rep = info.representativeMember || ({} as NonNullable<NonprofitInfo["representativeMember"]>);
+          const updateRep = (field: string, value: any) =>
+            setInfo({ representativeMember: { ...(rep as any), [field]: value } });
+          const additionalIdTypes = rep.additionalIdTypes || [];
+          const toggleAdditional = (t: "parentId" | "license" | "passport") => {
+            const next = additionalIdTypes.includes(t)
+              ? additionalIdTypes.filter((x) => x !== t)
+              : [...additionalIdTypes, t];
+            updateRep("additionalIdTypes", next);
+          };
+          return (
+            <div className="space-y-4 mr-4">
+              <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
+                ✅ מאחר שיש לעמותה תיק ברשות המיסים, מספיק חבר ועד אחד לצורך הפקת ייצוג.
               </div>
-            )}
 
-            {boardMembers.length > 0 && (
-              <div className="space-y-2 p-4 bg-primary/5 rounded-xl border border-primary/15">
-                <Label className="text-base font-semibold">חבר הועד שיופיע בייצוג *</Label>
-                <Select
-                  value={info.representativeBoardMemberIdx !== undefined ? String(info.representativeBoardMemberIdx) : ""}
-                  onValueChange={(v) => setInfo({ representativeBoardMemberIdx: parseInt(v) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="בחר חבר ועד" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {boardMembers.map((m, idx) => (
-                      <SelectItem key={idx} value={String(idx)} disabled={!m.name}>
-                        {m.name || `חבר ועד ${idx + 1}`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-3 p-4 border border-border rounded-xl bg-card">
+                <h4 className="font-bold text-primary">חבר הועד שיופיע בייצוג{rep.name ? ` – ${rep.name}` : ""}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1"><Label>שם מלא *</Label><Input value={rep.name || ""} onChange={(e) => updateRep("name", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={rep.idNumber || ""} onChange={(e) => updateRep("idNumber", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>צילום ת.ז. כולל ספח</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateRep("idFile", e.target.files?.[0])} /></div>
+                  <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={rep.phone || ""} onChange={(e) => updateRep("phone", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={rep.email || ""} onChange={(e) => updateRep("email", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>כתובת *</Label><Input value={rep.address || ""} onChange={(e) => updateRep("address", e.target.value)} placeholder="רחוב ומספר" /></div>
+                  <div className="space-y-1"><Label>עיר *</Label><Input value={rep.city || ""} onChange={(e) => updateRep("city", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מיקוד (עדיף)</Label><Input value={rep.zip || ""} onChange={(e) => updateRep("zip", e.target.value)} /></div>
+                </div>
+
+                {/* Additional ID */}
+                <div className="space-y-2 pt-3 border-t border-border/50">
+                  <Label className="font-semibold">אמצעי זיהוי נוסף *</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      { value: "passport" as const, label: "דרכון" },
+                      { value: "license" as const, label: "רישיון נהיגה" },
+                      { value: "parentId" as const, label: "מס׳ זהות של הורה" },
+                    ].map((opt) => {
+                      const checked = additionalIdTypes.includes(opt.value);
+                      return (
+                        <label
+                          key={opt.value}
+                          className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${
+                            checked ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
+                          }`}
+                        >
+                          <Checkbox checked={checked} onCheckedChange={() => toggleAdditional(opt.value)} />
+                          <span className="text-sm font-semibold">{opt.label}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+
+                  {additionalIdTypes.includes("passport") && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                      <div className="space-y-1"><Label>מספר דרכון</Label><Input value={rep.additionalPassportNumber || ""} onChange={(e) => updateRep("additionalPassportNumber", e.target.value)} /></div>
+                      <div className="space-y-1"><Label>צילום דרכון</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateRep("additionalPassportFile", e.target.files?.[0])} /></div>
+                    </div>
+                  )}
+                  {additionalIdTypes.includes("license") && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                      <div className="space-y-1"><Label>מספר רישיון נהיגה</Label><Input value={rep.additionalLicenseNumber || ""} onChange={(e) => updateRep("additionalLicenseNumber", e.target.value)} /></div>
+                      <div className="space-y-1"><Label>צילום רישיון נהיגה</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateRep("additionalLicenseFile", e.target.files?.[0])} /></div>
+                    </div>
+                  )}
+                  {additionalIdTypes.includes("parentId") && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                      <div className="space-y-1"><Label>מס׳ זהות של הורה</Label><Input value={rep.additionalIdNumber || ""} onChange={(e) => updateRep("additionalIdNumber", e.target.value)} /></div>
+                      <div className="space-y-1"><Label>צילום ת.ז. הורה</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateRep("additionalIdFile", e.target.files?.[0])} /></div>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-
-            {/* Gov portal */}
-            <div className="space-y-3 p-4 bg-primary/5 rounded-xl border border-primary/15">
-              <Label className="text-base font-semibold">🔐 הזדהות לאזור אישי ממשלתי</Label>
-              <p className="text-xs text-muted-foreground">
-                לא חוסם הפקת ייצוגים, אך נדרש לטיפול בתיק.
-              </p>
-              {renderGovPortalSection(
-                info.govPortalIdMethods,
-                info.govPortalPassword,
-                (m) => setInfo({ govPortalIdMethods: m }),
-                (p) => setInfo({ govPortalPassword: p }),
-              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* WITHOUT tax file: need full details of all board members */}
         {info.hasTaxFile === false && (
@@ -1459,18 +1470,13 @@ export const Step2BusinessInfo = () => {
               </div>
             )}
 
-            {/* Gov portal */}
-            <div className="space-y-3 p-4 bg-primary/5 rounded-xl border border-primary/15">
-              <Label className="text-base font-semibold">🔐 הזדהות לאזור אישי ממשלתי</Label>
-              <p className="text-xs text-muted-foreground">
-                לא חוסם הפקת ייצוגים, אך נדרש לטיפול בתיק.
-              </p>
-              {renderGovPortalSection(
-                info.govPortalIdMethods,
-                info.govPortalPassword,
-                (m) => setInfo({ govPortalIdMethods: m }),
-                (p) => setInfo({ govPortalPassword: p }),
-              )}
+            {/* Plans to hire employees */}
+            <div className="space-y-2 p-4 bg-primary/5 rounded-xl border border-primary/15">
+              <Label className="text-base font-semibold">האם מתוכנן העסקת עובדים?</Label>
+              <YesNoSelect
+                value={info.plansEmployees}
+                onChange={(v) => setInfo({ plansEmployees: v })}
+              />
             </div>
           </div>
         )}
