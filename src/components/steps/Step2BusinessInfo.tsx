@@ -250,7 +250,7 @@ export const Step2BusinessInfo = () => {
               {/* Additional ID for VAT representative (only if not self – self already provided in personal step) */}
               {partner.isVatRepresentative && !isSelf && (
                 <div className="space-y-3 mt-3 p-3 bg-primary/5 rounded-lg border border-primary/10">
-                  <Label className="font-semibold">אמצעי זיהוי נוסף (נציג השותפות למע״מ) *</Label>
+                  <Label className="font-semibold">אמצעי זיהוי נוסף *</Label>
                   <Select
                     value={partner.additionalIdType || ""}
                     onValueChange={(v) => updatePartner(idx, "additionalIdType", v)}
