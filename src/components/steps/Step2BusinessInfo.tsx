@@ -1759,9 +1759,9 @@ export const Step2BusinessInfo = () => {
   };
 
   const userHasNewNonprofit = userHasNonprofit && serviceType.userPurposeStatus?.nonprofit?.includes("new");
-  const userHasExistingNonprofit = userHasNonprofit && serviceType.userPurposeStatus?.nonprofit?.includes("existing");
+  const userHasExistingNonprofit = userHasNonprofit && (serviceType.userPurposeStatus?.nonprofit?.includes("existing") || userWarEntities.includes("nonprofit"));
   const spouseHasNewNonprofit = spouseHasNonprofit && serviceType.spousePurposeStatus?.nonprofit?.includes("new");
-  const spouseHasExistingNonprofit = spouseHasNonprofit && serviceType.spousePurposeStatus?.nonprofit?.includes("existing");
+  const spouseHasExistingNonprofit = spouseHasNonprofit && (serviceType.spousePurposeStatus?.nonprofit?.includes("existing") || spouseWarEntities.includes("nonprofit"));
 
   return (
     <div className="space-y-6">
