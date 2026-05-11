@@ -1005,13 +1005,46 @@ export const Step2BusinessInfo = () => {
           )}
         </div>
 
+        {/* Upfront names list for existing companies */}
+        {existingCount > 0 && (
+          <div className="space-y-2 p-3 border border-border/60 rounded-lg bg-background/50">
+            <Label className="font-semibold">שמות החברות הקיימות</Label>
+            {(info.existingCompanies || []).map((company: any, idx: number) => (
+              <Input
+                key={`exname-${idx}`}
+                placeholder={`שם חברה קיימת #${idx + 1}`}
+                value={company.name || ""}
+                onChange={(e) => updateExistingCompany(idx, "name", e.target.value)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Upfront names list for new companies */}
+        {newCount > 0 && (
+          <div className="space-y-2 p-3 border border-border/60 rounded-lg bg-background/50">
+            <Label className="font-semibold">שמות רצויים לחברות החדשות</Label>
+            {(info.newCompanies || []).map((company: any, idx: number) => (
+              <Input
+                key={`newname-${idx}`}
+                placeholder={`שם רצוי לחברה חדשה #${idx + 1}`}
+                value={company.requestedName1 || ""}
+                onChange={(e) => {
+                  const updated = [...(info.newCompanies || [])];
+                  updated[idx] = { ...updated[idx], requestedName1: e.target.value };
+                  setInfo({ newCompanies: updated });
+                }}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Existing companies */}
         {(info.existingCompanies || []).map((company: any, idx: number) => (
-          <div key={`existing-${idx}`} className="space-y-2">
-            <h4 className="font-bold text-primary text-base px-1">
+          <div key={`existing-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
+            <h4 className="font-bold text-primary text-base">
               חברה קיימת #{idx + 1}{company.name ? ` – ${company.name}` : ""}
             </h4>
-            <div className="space-y-4 p-4 border border-border rounded-xl bg-card">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>שם חברה</Label>
