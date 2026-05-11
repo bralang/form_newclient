@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { g } from "@/lib/gender-utils";
 import { AlertTriangle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
@@ -509,17 +510,67 @@ export const Step2BusinessInfo = () => {
                         <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
                         <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
                         <div className="space-y-1">
-                          <Label>אחוזי אחזקה *</Label>
+                          <Label>אחוזי אחזקה בחברה החדשה *</Label>
                           <PercentageInput
                             value={sh.percentage || ""}
                             onChange={(value) => updateShareholder(idx, "percentage", value)}
                           />
                         </div>
                       </div>
+
+                      {/* Holding chain - company holds company holds company... */}
+                      <div className="space-y-2 p-3 bg-card rounded-lg border border-border/50">
+                        <Label className="text-sm font-semibold">שרשרת חברות מחזיקות (אם קיימת)</Label>
+                        <p className="text-xs text-muted-foreground">
+                          אם החברה המחזיקה מוחזקת בעצמה ע"י חברה נוספת – יש להוסיף כל חוליה בשרשרת עד לבעל המניות הסופי (אדם פרטי).
+                        </p>
+                        {(sh.holdingChain || []).map((link: any, lIdx: number) => (
+                          <div key={lIdx} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end p-2 rounded-md bg-muted/40 border border-border/40">
+                            <div className="space-y-1 md:col-span-2"><Label className="text-xs">בעל מניות בחברת {lIdx === 0 ? (sh.companyName || "המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "הקודמת")}</Label><Input placeholder="שם החברה" value={link.companyName || ""} onChange={(e) => {
+                              const chain = [...(sh.holdingChain || [])];
+                              chain[lIdx] = { ...chain[lIdx], companyName: e.target.value };
+                              updateShareholder(idx, "holdingChain", chain);
+                            }} /></div>
+                            <div className="space-y-1"><Label className="text-xs">ח.פ.</Label><Input value={link.companyNumber || ""} onChange={(e) => {
+                              const chain = [...(sh.holdingChain || [])];
+                              chain[lIdx] = { ...chain[lIdx], companyNumber: e.target.value };
+                              updateShareholder(idx, "holdingChain", chain);
+                            }} /></div>
+                            <div className="space-y-1"><Label className="text-xs">שיעור אחזקה</Label>
+                              <div className="flex gap-1">
+                                <PercentageInput
+                                  value={link.percentage || ""}
+                                  onChange={(value) => {
+                                    const chain = [...(sh.holdingChain || [])];
+                                    chain[lIdx] = { ...chain[lIdx], percentage: value };
+                                    updateShareholder(idx, "holdingChain", chain);
+                                  }}
+                                />
+                                <Button type="button" variant="ghost" size="sm" onClick={() => {
+                                  const chain = [...(sh.holdingChain || [])];
+                                  chain.splice(lIdx, 1);
+                                  updateShareholder(idx, "holdingChain", chain);
+                                }}>✕</Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <Button type="button" variant="outline" size="sm" onClick={() => {
+                          const chain = [...(sh.holdingChain || []), { companyName: "", companyNumber: "", percentage: "" }];
+                          updateShareholder(idx, "holdingChain", chain);
+                        }}>+ הוסף חברה נוספת בשרשרת</Button>
+                      </div>
+
                       <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
-                        <p className="text-sm text-muted-foreground mb-3">יש לציין את בעל המניות הסופי (אדם פרטי) של החברה המחזיקה, לצורך זיהוי במס הכנסה</p>
-                        <div className="space-y-2"><Label>שם בעל המניות הסופי (אדם פרטי) *</Label><Input value={sh.ultimateOwnerName || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerName", e.target.value)} /></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                        <p className="text-sm text-muted-foreground mb-3">יש לציין את בעל המניות הסופי (אדם פרטי) של {((sh.holdingChain || []).length > 0 ? (sh.holdingChain[sh.holdingChain.length - 1]?.companyName || "החברה האחרונה בשרשרת") : (sh.companyName || "החברה המחזיקה"))}, לצורך זיהוי במס הכנסה</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-1"><Label>שם בעל המניות הסופי (אדם פרטי) *</Label><Input value={sh.ultimateOwnerName || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerName", e.target.value)} /></div>
+                          <div className="space-y-1"><Label>שיעור אחזקה</Label>
+                            <PercentageInput
+                              value={sh.ultimateOwnerPercentage || ""}
+                              onChange={(v) => updateShareholder(idx, "ultimateOwnerPercentage", v)}
+                            />
+                          </div>
                           <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.ultimateOwnerIdNumber || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerIdNumber", e.target.value)} /></div>
                           <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "ultimateOwnerIdFile", e.target.files?.[0])} /></div>
                           <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.ultimateOwnerPhone || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerPhone", e.target.value)} /></div>
@@ -533,6 +584,22 @@ export const Step2BusinessInfo = () => {
             </div>
           );
         })}
+
+        {/* 100% total validation */}
+        {shareholders.length > 0 && (() => {
+          const total = shareholders.reduce((s: number, sh: any) => s + (parseFloat(sh.percentage) || 0), 0);
+          const ok = Math.abs(total - 100) < 0.01;
+          return (
+            <div className={`flex items-start gap-2 p-3 rounded-lg border ${
+              ok ? "bg-primary/5 border-primary/30 text-primary" : "bg-destructive/10 border-destructive/30 text-destructive"
+            }`}>
+              {!ok && <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />}
+              <p className="text-sm font-semibold">
+                סה"כ שיעורי האחזקה בחברה: {total}% {ok ? "✓" : "(נדרש להגיע ל-100%)"}
+              </p>
+            </div>
+          );
+        })()}
       </div>
     );
   };
@@ -1025,11 +1092,11 @@ export const Step2BusinessInfo = () => {
   };
 
   // ─── Gov Portal Identification helpers ───
-  const GOV_PORTAL_OPTIONS: { value: GovPortalIdMethod; label: string; icon: string }[] = [
+  const GOV_PORTAL_OPTIONS: { value: GovPortalIdMethod; label: string; icon: string; desc?: string }[] = [
     { value: "password", label: "סיסמא", icon: "🔑" },
     { value: "smartCard", label: "כרטיס חכם", icon: "💳" },
     { value: "biometricId", label: "תעודת זהות ביומטרית", icon: "🪪" },
-    { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆" },
+    { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆", desc: "כניסה ללא סיסמה בעזרת זיהוי ביומטרי מטלפון חכם" },
   ];
 
   const renderGovPortalSection = (
@@ -1051,13 +1118,16 @@ export const Step2BusinessInfo = () => {
             return (
               <label
                 key={opt.value}
-                className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${
+                className={`flex items-start gap-2 p-3 rounded-lg border cursor-pointer transition-all ${
                   checked ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
                 }`}
               >
-                <Checkbox checked={checked} onCheckedChange={() => toggle(opt.value)} />
-                <span className="text-lg">{opt.icon}</span>
-                <span className="text-sm font-semibold">{opt.label}</span>
+                <Checkbox checked={checked} onCheckedChange={() => toggle(opt.value)} className="mt-0.5" />
+                <span className="text-lg leading-tight">{opt.icon}</span>
+                <span className="flex flex-col">
+                  <span className="text-sm font-semibold">{opt.label}</span>
+                  {opt.desc && <span className="text-[11px] text-muted-foreground leading-snug">{opt.desc}</span>}
+                </span>
               </label>
             );
           })}
