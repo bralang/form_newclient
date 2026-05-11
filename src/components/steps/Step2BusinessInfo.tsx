@@ -584,6 +584,7 @@ export const Step2BusinessInfo = () => {
                       <SelectContent>
                         <SelectItem value="person">אדם פרטי</SelectItem>
                         <SelectItem value="company">חברה</SelectItem>
+                        <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -622,94 +623,78 @@ export const Step2BusinessInfo = () => {
                         )}
                       </div>
                     </>
+                  ) : (sh.holderType === "self_via_company") ? (
+                    <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                      <p className="text-xs text-muted-foreground">אני (ממלא/ת השאלון) מחזיק/ה ב{parentCompanyName || "חברה זו"} באמצעות חברה.</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1"><Label>שם החברה דרכה אני מחזיק/ה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
+                        <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
+                        {isNewCompany && (
+                          <div className="space-y-1">
+                            <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
+                            <PercentageInput
+                              value={sh.percentage || ""}
+                              onChange={(value) => updateShareholder(idx, "percentage", value)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   ) : (
                     <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
                         <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
-                        <div className="space-y-1">
-                          <Label>אחוזי אחזקה בחברה החדשה *</Label>
-                          <PercentageInput
-                            value={sh.percentage || ""}
-                            onChange={(value) => updateShareholder(idx, "percentage", value)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Holding chain - company holds company holds company... */}
-                      <div className="space-y-2 p-3 bg-card rounded-lg border border-border/50">
-                        <Label className="text-sm font-semibold">שרשרת חברות מחזיקות (אם קיימת)</Label>
-                        <p className="text-xs text-muted-foreground">
-                          אם החברה המחזיקה מוחזקת בעצמה ע"י חברה נוספת – יש להוסיף כל חוליה בשרשרת עד לבעל המניות הסופי (אדם פרטי).
-                        </p>
-                        {(sh.holdingChain || []).map((link: any, lIdx: number) => {
-                          const pct = parseFloat(link.percentage);
-                          const linkValid = !isNaN(pct) && pct > 0 && pct <= 100;
-                          const heldName = lIdx === 0 ? (sh.companyName || "החברה המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "החברה הקודמת");
-                          return (
-                          <div key={lIdx} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 items-end p-2 rounded-md bg-muted/40 border border-border/40">
-                            <div className="space-y-1 sm:col-span-2 lg:col-span-3"><Label className="text-xs">בעל מניות בחברת {lIdx === 0 ? (sh.companyName || "המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "הקודמת")}</Label><Input placeholder="שם החברה" value={link.companyName || ""} onChange={(e) => {
-                              const chain = [...(sh.holdingChain || [])];
-                              chain[lIdx] = { ...chain[lIdx], companyName: e.target.value };
-                              updateShareholder(idx, "holdingChain", chain);
-                            }} /></div>
-                            <div className="space-y-1"><Label className="text-xs">ח.פ.</Label><Input value={link.companyNumber || ""} onChange={(e) => {
-                              const chain = [...(sh.holdingChain || [])];
-                              chain[lIdx] = { ...chain[lIdx], companyNumber: e.target.value };
-                              updateShareholder(idx, "holdingChain", chain);
-                            }} /></div>
-                            <div className="space-y-1 lg:col-span-2"><Label className="text-xs">שיעור אחזקה</Label>
-                              <div className="flex gap-1 items-center">
-                                <div className="flex-1 min-w-0">
-                                  <PercentageInput
-                                    value={link.percentage || ""}
-                                    onChange={(value) => {
-                                      const chain = [...(sh.holdingChain || [])];
-                                      chain[lIdx] = { ...chain[lIdx], percentage: value };
-                                      updateShareholder(idx, "holdingChain", chain);
-                                    }}
-                                  />
-                                </div>
-                                <Button type="button" variant="ghost" size="icon" className="shrink-0 h-10 w-10" onClick={() => {
-                                  const chain = [...(sh.holdingChain || [])];
-                                  chain.splice(lIdx, 1);
-                                  updateShareholder(idx, "holdingChain", chain);
-                                }}>✕</Button>
-                              </div>
-                            </div>
-                            {link.percentage && !linkValid && (
-                              <div className="sm:col-span-2 lg:col-span-6 text-xs text-destructive">שיעור האחזקה חייב להיות בין 0 ל-100</div>
-                            )}
-                            {link.companyName && (
-                              <div className="sm:col-span-2 lg:col-span-6 text-xs text-muted-foreground">
-                                {link.companyName} מחזיקה {link.percentage || "—"}% מ{heldName}
-                              </div>
-                            )}
-                          </div>
-                          );
-                        })}
-                        <Button type="button" variant="outline" size="sm" onClick={() => {
-                          const chain = [...(sh.holdingChain || []), { companyName: "", companyNumber: "", percentage: "" }];
-                          updateShareholder(idx, "holdingChain", chain);
-                        }}>+ הוסף חברה נוספת בשרשרת</Button>
-                      </div>
-
-                      <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
-                        <p className="text-sm text-muted-foreground mb-3">יש לציין את בעל המניות הסופי (אדם פרטי) של {((sh.holdingChain || []).length > 0 ? (sh.holdingChain[sh.holdingChain.length - 1]?.companyName || "החברה האחרונה בשרשרת") : (sh.companyName || "החברה המחזיקה"))}, לצורך זיהוי במס הכנסה</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div className="space-y-1"><Label>שם בעל המניות הסופי (אדם פרטי) *</Label><Input value={sh.ultimateOwnerName || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerName", e.target.value)} /></div>
-                          <div className="space-y-1"><Label>שיעור אחזקה</Label>
+                        {isNewCompany && (
+                          <div className="space-y-1">
+                            <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
                             <PercentageInput
-                              value={sh.ultimateOwnerPercentage || ""}
-                              onChange={(v) => updateShareholder(idx, "ultimateOwnerPercentage", v)}
+                              value={sh.percentage || ""}
+                              onChange={(value) => updateShareholder(idx, "percentage", value)}
                             />
                           </div>
-                          <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.ultimateOwnerIdNumber || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerIdNumber", e.target.value)} /></div>
-                          <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "ultimateOwnerIdFile", e.target.files?.[0])} /></div>
-                          <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.ultimateOwnerPhone || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerPhone", e.target.value)} /></div>
-                          <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.ultimateOwnerEmail || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerEmail", e.target.value)} /></div>
-                        </div>
+                        )}
                       </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold">סוג בעל המניות של {sh.companyName || "החברה המחזיקה"}</Label>
+                        <Select value={sh.subOwnerType || ""} onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}>
+                          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="person">אדם פרטי</SelectItem>
+                            <SelectItem value="company">חברה</SelectItem>
+                            <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {sh.subOwnerType === "person" && (
+                        <div className="space-y-3 p-3 bg-card rounded-lg border border-border/50">
+                          <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {sh.companyName || "החברה המחזיקה"}</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), name: e.target.value })} /></div>
+                            <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idNumber: e.target.value })} /></div>
+                            <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idFile: e.target.files?.[0] })} /></div>
+                            <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.personOwner?.phone || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), phone: e.target.value })} /></div>
+                            <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.personOwner?.email || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), email: e.target.value })} /></div>
+                          </div>
+                        </div>
+                      )}
+
+                      {sh.subOwnerType === "self_via_company" && (
+                        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                          <p className="text-sm">אני (ממלא/ת השאלון) הוא בעל המניות הסופי של {sh.companyName || "החברה המחזיקה"}.</p>
+                        </div>
+                      )}
+
+                      {sh.subOwnerType === "company" && (
+                        <CompanyChainBlock
+                          data={sh.childCompany || {}}
+                          onChange={(c) => updateShareholder(idx, "childCompany", c)}
+                          heldName={sh.companyName || "החברה הקודמת"}
+                          depth={1}
+                        />
+                      )}
                     </div>
                   )}
                 </>
