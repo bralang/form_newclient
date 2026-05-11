@@ -36,6 +36,119 @@ const PercentageInput = ({
   </div>
 );
 
+// Recursive block representing a holding company (and who owns it)
+type CompanyNode = {
+  companyName?: string;
+  companyNumber?: string;
+  subOwnerType?: "person" | "company" | "self_via_company" | "";
+  personOwner?: {
+    name?: string;
+    idNumber?: string;
+    idFile?: File;
+    phone?: string;
+    email?: string;
+    additionalIdType?: "parentId" | "license" | "passport" | "";
+    additionalIdNumber?: string;
+    additionalIdFile?: File;
+  };
+  childCompany?: CompanyNode;
+};
+
+const CompanyChainBlock = ({
+  data,
+  onChange,
+  heldName,
+  depth = 0,
+}: {
+  data: CompanyNode;
+  onChange: (next: CompanyNode) => void;
+  heldName: string; // name of the entity this company holds (for label)
+  depth?: number;
+}) => {
+  const update = (patch: Partial<CompanyNode>) => onChange({ ...data, ...patch });
+  const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
+  const subOwnerType = data.subOwnerType || "";
+
+  return (
+    <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
+      {depth > 0 && (
+        <p className="text-xs text-muted-foreground">
+          חברה אב: <span className="font-semibold">{heldName}</span>
+        </p>
+      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label>שם החברה המחזיקה את {heldName} *</Label>
+          <Input value={data.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
+        </div>
+        <div className="space-y-1">
+          <Label>ח.פ. *</Label>
+          <Input value={data.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>סוג בעל המניות של {data.companyName || "החברה המחזיקה"}</Label>
+        <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="person">אדם פרטי</SelectItem>
+            <SelectItem value="company">חברה</SelectItem>
+            <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {subOwnerType === "person" && (
+        <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+          <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {data.companyName || "החברה המחזיקה"}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
+            <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
+            <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ idFile: e.target.files?.[0] })} /></div>
+            <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
+            <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
+          </div>
+          <div className="space-y-2">
+            <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
+            <Select value={data.personOwner?.additionalIdType || ""} onValueChange={(v: any) => updatePerson({ additionalIdType: v })}>
+              <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                <SelectItem value="license">רישיון נהיגה</SelectItem>
+                <SelectItem value="passport">דרכון</SelectItem>
+              </SelectContent>
+            </Select>
+            {data.personOwner?.additionalIdType && (
+              <>
+                <Input placeholder="מספר אמצעי זיהוי" value={data.personOwner?.additionalIdNumber || ""} onChange={(e) => updatePerson({ additionalIdNumber: e.target.value })} />
+                <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ additionalIdFile: e.target.files?.[0] })} /></div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {subOwnerType === "self_via_company" && (
+        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+          <p className="text-sm">
+            אני (ממלא/ת השאלון) הוא בעל המניות הסופי של {data.companyName || "החברה המחזיקה"}.
+          </p>
+        </div>
+      )}
+
+      {subOwnerType === "company" && (
+        <CompanyChainBlock
+          data={data.childCompany || {}}
+          onChange={(c) => update({ childCompany: c })}
+          heldName={data.companyName || "החברה הקודמת"}
+          depth={depth + 1}
+        />
+      )}
+    </div>
+  );
+};
+
 export const Step2BusinessInfo = () => {
   const {
     serviceType,
