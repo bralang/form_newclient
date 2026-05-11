@@ -188,6 +188,7 @@ export interface NonprofitInfo {
   auditCommittee?: NonprofitAuditMember[];
   // Government portal identification (for one of the board members)
   govPortalBoardMemberIdx?: number;
+  govPortalBoardMemberIdxs?: number[];
   govPortalIdMethods?: GovPortalIdMethod[];
   govPortalPassword?: string;
 
