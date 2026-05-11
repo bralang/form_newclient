@@ -286,6 +286,7 @@ export const Step1Purpose = () => {
                           </p>
                         )}
                       </div>
+                    )}
                     {purpose.id === "war_compensation" && userChecked && (
                       <div className="animate-in fade-in duration-200 flex flex-col items-center gap-1">
                         {renderWarEntities(
