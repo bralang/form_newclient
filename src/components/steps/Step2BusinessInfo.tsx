@@ -569,13 +569,17 @@ export const Step2BusinessInfo = () => {
               </h4>
 
               {isAuto ? (
-                <div className="space-y-1 max-w-xs">
-                  <Label>אחוזי אחזקה *</Label>
-                  <PercentageInput
-                    value={sh.percentage || ""}
-                    onChange={(value) => updateShareholder(idx, "percentage", value)}
-                  />
-                </div>
+                isNewCompany ? (
+                  <div className="space-y-1 max-w-xs">
+                    <Label>אחוזי אחזקה *</Label>
+                    <PercentageInput
+                      value={sh.percentage || ""}
+                      onChange={(value) => updateShareholder(idx, "percentage", value)}
+                    />
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">הפרטים מולאו אוטומטית.</p>
+                )
               ) : (
                 <>
                   <div className="space-y-2">
