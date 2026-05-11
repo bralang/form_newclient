@@ -603,13 +603,15 @@ export const Step2BusinessInfo = () => {
                         <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
                         <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
                         <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "idFile", e.target.files?.[0])} /></div>
-                        <div className="space-y-1">
-                          <Label>אחוזי אחזקה *</Label>
-                          <PercentageInput
-                            value={sh.percentage || ""}
-                            onChange={(value) => updateShareholder(idx, "percentage", value)}
-                          />
-                        </div>
+                        {isNewCompany && (
+                          <div className="space-y-1">
+                            <Label>אחוזי אחזקה *</Label>
+                            <PercentageInput
+                              value={sh.percentage || ""}
+                              onChange={(value) => updateShareholder(idx, "percentage", value)}
+                            />
+                          </div>
+                        )}
                         <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} /></div>
                         <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} /></div>
                       </div>
