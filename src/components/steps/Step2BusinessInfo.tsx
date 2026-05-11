@@ -528,8 +528,8 @@ export const Step2BusinessInfo = () => {
                           אם החברה המחזיקה מוחזקת בעצמה ע"י חברה נוספת – יש להוסיף כל חוליה בשרשרת עד לבעל המניות הסופי (אדם פרטי).
                         </p>
                         {(sh.holdingChain || []).map((link: any, lIdx: number) => (
-                          <div key={lIdx} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end p-2 rounded-md bg-muted/40 border border-border/40">
-                            <div className="space-y-1 md:col-span-2"><Label className="text-xs">בעל מניות בחברת {lIdx === 0 ? (sh.companyName || "המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "הקודמת")}</Label><Input placeholder="שם החברה" value={link.companyName || ""} onChange={(e) => {
+                          <div key={lIdx} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 items-end p-2 rounded-md bg-muted/40 border border-border/40">
+                            <div className="space-y-1 sm:col-span-2 lg:col-span-3"><Label className="text-xs">בעל מניות בחברת {lIdx === 0 ? (sh.companyName || "המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "הקודמת")}</Label><Input placeholder="שם החברה" value={link.companyName || ""} onChange={(e) => {
                               const chain = [...(sh.holdingChain || [])];
                               chain[lIdx] = { ...chain[lIdx], companyName: e.target.value };
                               updateShareholder(idx, "holdingChain", chain);
@@ -539,17 +539,19 @@ export const Step2BusinessInfo = () => {
                               chain[lIdx] = { ...chain[lIdx], companyNumber: e.target.value };
                               updateShareholder(idx, "holdingChain", chain);
                             }} /></div>
-                            <div className="space-y-1"><Label className="text-xs">שיעור אחזקה</Label>
-                              <div className="flex gap-1">
-                                <PercentageInput
-                                  value={link.percentage || ""}
-                                  onChange={(value) => {
-                                    const chain = [...(sh.holdingChain || [])];
-                                    chain[lIdx] = { ...chain[lIdx], percentage: value };
-                                    updateShareholder(idx, "holdingChain", chain);
-                                  }}
-                                />
-                                <Button type="button" variant="ghost" size="sm" onClick={() => {
+                            <div className="space-y-1 lg:col-span-2"><Label className="text-xs">שיעור אחזקה</Label>
+                              <div className="flex gap-1 items-center">
+                                <div className="flex-1 min-w-0">
+                                  <PercentageInput
+                                    value={link.percentage || ""}
+                                    onChange={(value) => {
+                                      const chain = [...(sh.holdingChain || [])];
+                                      chain[lIdx] = { ...chain[lIdx], percentage: value };
+                                      updateShareholder(idx, "holdingChain", chain);
+                                    }}
+                                  />
+                                </div>
+                                <Button type="button" variant="ghost" size="icon" className="shrink-0 h-10 w-10" onClick={() => {
                                   const chain = [...(sh.holdingChain || [])];
                                   chain.splice(lIdx, 1);
                                   updateShareholder(idx, "holdingChain", chain);
