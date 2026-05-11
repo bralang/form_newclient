@@ -139,6 +139,42 @@ export const Step1Purpose = () => {
     );
   };
 
+  const WAR_ENTITIES: { id: "business" | "company" | "nonprofit"; label: string }[] = [
+    { id: "business", label: "עסק" },
+    { id: "company", label: "חברה" },
+    { id: "nonprofit", label: "עמותה" },
+  ];
+
+  const renderWarEntities = (
+    entities: ("business" | "company" | "nonprofit")[],
+    setEntities: (e: ("business" | "company" | "nonprofit")[]) => void,
+    centered = false
+  ) => (
+    <div className={`flex flex-wrap items-center gap-1.5 ${centered ? "justify-center" : ""}`}>
+      {WAR_ENTITIES.map((ent) => {
+        const active = entities.includes(ent.id);
+        return (
+          <button
+            key={ent.id}
+            type="button"
+            onClick={() =>
+              setEntities(
+                active ? entities.filter((e) => e !== ent.id) : [...entities, ent.id]
+              )
+            }
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-all duration-150 border ${
+              active
+                ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                : "bg-transparent text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+            }`}
+          >
+            {ent.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
   const renderSinglePurposeList = () => (
     <div className="space-y-2">
       {PURPOSES.map((purpose) => {
