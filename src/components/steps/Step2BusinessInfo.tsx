@@ -757,8 +757,8 @@ export const Step2BusinessInfo = () => {
           );
         })}
 
-        {/* 100% total validation */}
-        {shareholders.length > 0 && (() => {
+        {/* 100% total validation - only for new companies (existing don't ask percentages) */}
+        {isNewCompany && shareholders.length > 0 && (() => {
           const total = shareholders.reduce((s: number, sh: any) => s + (parseFloat(sh.percentage) || 0), 0);
           const ok = Math.abs(total - 100) < 0.01;
           return (
