@@ -24,6 +24,7 @@ export const Step2PersonalInfo = () => {
   const [loading, setLoading] = useState(false);
   const [reminderDate, setReminderDate] = useState("");
   const [reminderTime, setReminderTime] = useState("");
+  const [emailReminderTime, setEmailReminderTime] = useState("");
 
   const isMarried = personalInfo.maritalStatus === "married";
   const gender = detailedInfo.gender;
@@ -96,6 +97,14 @@ export const Step2PersonalInfo = () => {
     await sendToWebhook(
       "https://n8n.chasida.biz/webhook/send-reminder",
       { phone: personalInfo.phone, reminderTime: reminderTime || undefined, personalInfo, serviceType },
+      { silent: false }
+    );
+  };
+
+  const handleSendEmailReminder = async () => {
+    await sendToWebhook(
+      "https://n8n.chasida.biz/webhook/send-email-reminder",
+      { email: personalInfo.email, reminderTime: emailReminderTime || undefined, personalInfo, serviceType },
       { silent: false }
     );
   };
@@ -538,6 +547,28 @@ export const Step2PersonalInfo = () => {
                     type="time"
                     value={reminderTime}
                     onChange={(e) => setReminderTime(e.target.value)}
+                    className="w-32 h-9"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs text-muted-foreground">תזכורת במייל</Label>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleSendEmailReminder}>
+                  <Mail className="ml-2 h-4 w-4" />
+                  תזכורת למייל
+                </Button>
+                <div className="flex flex-col">
+                  <Label htmlFor="emailReminderTime" className="text-[11px] text-muted-foreground mb-1">
+                    שעה ודקות מועדפים
+                  </Label>
+                  <Input
+                    id="emailReminderTime"
+                    type="time"
+                    value={emailReminderTime}
+                    onChange={(e) => setEmailReminderTime(e.target.value)}
                     className="w-32 h-9"
                   />
                 </div>

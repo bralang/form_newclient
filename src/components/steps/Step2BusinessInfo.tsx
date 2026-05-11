@@ -1231,7 +1231,7 @@ export const Step2BusinessInfo = () => {
 
         {/* Gov portal identification - select board members (multi) */}
         <div className="space-y-3 p-4 bg-primary/5 rounded-xl border border-primary/15">
-          <Label className="text-base font-semibold">🔐 הזדהות לאזור אישי ממשלתי</Label>
+          <Label className="text-base font-semibold">🔐 הזדהות לאזור אישי ממשלתי (אופציונלי)</Label>
           <p className="text-xs text-muted-foreground">
             נדרש לאחד מחברי הועד (עדיף יותר מאחד). סמנ/י את חברי הועד שניתן להזדהות באמצעותם.
           </p>
