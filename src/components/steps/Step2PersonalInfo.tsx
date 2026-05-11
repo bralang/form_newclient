@@ -465,7 +465,7 @@ export const Step2PersonalInfo = () => {
                     <label
                       key={opt.value}
                       htmlFor={`spouseGovId_${opt.value}`}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                         checked
                           ? "border-primary bg-primary/10"
                           : "border-border bg-card hover:border-primary/40"
@@ -481,9 +481,13 @@ export const Step2PersonalInfo = () => {
                             : current.filter((v) => v !== opt.value);
                           setSpouseInfo({ govPortalIdMethods: updated as any });
                         }}
+                        className="mt-0.5"
                       />
-                      <span className="text-xl">{opt.icon}</span>
-                      <span className="text-base font-bold">{opt.label}</span>
+                      <span className="text-xl leading-tight">{opt.icon}</span>
+                      <span className="flex flex-col">
+                        <span className="text-base font-bold">{opt.label}</span>
+                        {opt.desc && <span className="text-[11px] text-muted-foreground leading-snug">{opt.desc}</span>}
+                      </span>
                     </label>
                   );
                 })}
