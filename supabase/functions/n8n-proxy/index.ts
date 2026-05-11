@@ -13,6 +13,9 @@ const N8N_ENDPOINTS: Record<string, string> = {
   "chasida-client-intake-step2": "https://n8n.chasida.biz/webhook/client-intake-step2",
   "chasida-client-intake-step3": "https://n8n.chasida.biz/webhook/client-intake-step3",
   "chasida-client-intake-final": "https://n8n.chasida.biz/webhook/client-intake-final",
+  "chasida-send-document-list": "https://n8n.chasida.biz/webhook/send-document-list",
+  "chasida-send-reminder": "https://n8n.chasida.biz/webhook/send-reminder",
+  "chasida-send-email-reminder": "https://n8n.chasida.biz/webhook/send-email-reminder",
 };
 
 type RequestBody = {
