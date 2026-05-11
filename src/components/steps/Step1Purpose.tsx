@@ -221,6 +221,15 @@ export const Step1Purpose = () => {
                 />
               </div>
             )}
+            {purpose.id === "war_compensation" && isChecked && (
+              <div className="mt-2 mr-8 space-y-1.5 animate-in fade-in duration-200">
+                <p className="text-xs text-muted-foreground">לאיזה תיק רלוונטי? (ניתן לבחור יותר מאחד)</p>
+                {renderWarEntities(
+                  serviceType.userWarCompensationEntities || [],
+                  (e) => setServiceType({ userWarCompensationEntities: e })
+                )}
+              </div>
+            )}
           </div>
         );
       })}
