@@ -23,6 +23,8 @@ export interface ServiceType {
   spousePurposes: string[];
   userPurposeStatus: Record<string, ("new" | "existing")[]>;
   spousePurposeStatus: Record<string, ("new" | "existing")[]>;
+  userWarCompensationEntities?: ("business" | "company" | "nonprofit")[];
+  spouseWarCompensationEntities?: ("business" | "company" | "nonprofit")[];
 }
 
 // ─── Step 2 Interfaces ─────────────────────────────
