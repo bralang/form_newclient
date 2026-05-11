@@ -169,19 +169,25 @@ export const Step2BusinessInfo = () => {
   const userGender = detailedInfo.gender;
   const spouseGender = spouseInfo.gender;
 
+  const userWarEntities = serviceType.userWarCompensationEntities || [];
+  const spouseWarEntities = serviceType.spouseWarCompensationEntities || [];
+
   const userHasNewBusiness = serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("new");
-  const userHasExistingBusiness = serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing");
-  const userHasCompany = serviceType.userPurposes.includes("company");
-  const userHasNonprofit = serviceType.userPurposes.includes("nonprofit");
+  const userHasExistingBusiness = (serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing")) || userWarEntities.includes("business");
+  const userHasCompany = serviceType.userPurposes.includes("company") || userWarEntities.includes("company");
+  const userHasNonprofit = serviceType.userPurposes.includes("nonprofit") || userWarEntities.includes("nonprofit");
 
   const spouseHasNewBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("new");
-  const spouseHasExistingBusiness = serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing");
-  const spouseHasCompany = serviceType.spousePurposes.includes("company");
-  const spouseHasNonprofit = serviceType.spousePurposes.includes("nonprofit");
+  const spouseHasExistingBusiness = (serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing")) || spouseWarEntities.includes("business");
+  const spouseHasCompany = serviceType.spousePurposes.includes("company") || spouseWarEntities.includes("company");
+  const spouseHasNonprofit = serviceType.spousePurposes.includes("nonprofit") || spouseWarEntities.includes("nonprofit");
 
   const userHasWarCompensation = serviceType.userPurposes.includes("war_compensation");
   const spouseHasWarCompensation = serviceType.spousePurposes.includes("war_compensation");
-  const showWarCompensation = userHasWarCompensation || spouseHasWarCompensation;
+  // Show the generic war-compensation CTA only if war_compensation was selected without specifying any related entity
+  const showWarCompensation =
+    (userHasWarCompensation && userWarEntities.length === 0) ||
+    (spouseHasWarCompensation && spouseWarEntities.length === 0);
 
   const userName = personalInfo.firstName || "המשתמש";
   const userLastName = personalInfo.lastName || "";
@@ -260,8 +266,7 @@ export const Step2BusinessInfo = () => {
           <Label htmlFor={`${prefix}partnerCount`}>מספר שותפים (כולל אותך)</Label>
           <Input
             id={`${prefix}partnerCount`}
-            type="number"
-            min="2"
+            type="text" inputMode="numeric" pattern="[0-9]*"
             value={partners.length || ""}
             onChange={(e) => handlePartnerCountChange(parseInt(e.target.value) || 0)}
           />
@@ -511,8 +516,7 @@ export const Step2BusinessInfo = () => {
         <div className="space-y-2">
           <Label>כמה בעלי מניות יש בחברה? (כולל אותך)</Label>
           <Input
-            type="number"
-            min="1"
+            type="text" inputMode="numeric" pattern="[0-9]*"
             value={company.shareholderCount || ""}
             onChange={(e) => handleShareholderCountChange(parseInt(e.target.value) || 0)}
           />
@@ -994,7 +998,7 @@ export const Step2BusinessInfo = () => {
     showSpouseOption: boolean,
     prefix = ""
   ) => {
-    const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing");
+    const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing") || userWarEntities.includes("company") || spouseWarEntities.includes("company");
     const hasNewPurpose = serviceType.userPurposeStatus?.company?.includes("new") || serviceType.spousePurposeStatus?.company?.includes("new");
 
     const existingCount = info.existingCompanyCount || 0;
@@ -1018,8 +1022,7 @@ export const Step2BusinessInfo = () => {
               <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות מעוניין לקבל שירות?</Label>
               <Input
                 id={`${prefix}existingCount`}
-                type="number"
-                min="0"
+                type="text" inputMode="numeric" pattern="[0-9]*"
                 value={existingCount}
                 onChange={(e) => {
                   const count = parseInt(e.target.value) || 0;
@@ -1035,8 +1038,7 @@ export const Step2BusinessInfo = () => {
               <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
               <Input
                 id={`${prefix}newCount`}
-                type="number"
-                min="0"
+                type="text" inputMode="numeric" pattern="[0-9]*"
                 value={newCount}
                 onChange={(e) => {
                   const count = parseInt(e.target.value) || 0;
@@ -1419,8 +1421,7 @@ export const Step2BusinessInfo = () => {
         <div className="space-y-2">
           <Label>מספר חברי ועד (מינימום 7)</Label>
           <Input
-            type="number"
-            min="7"
+            type="text" inputMode="numeric" pattern="[0-9]*"
             value={info.boardMemberCount || ""}
             onChange={(e) => handleBoardCountChange(parseInt(e.target.value) || 7)}
           />
@@ -1703,8 +1704,7 @@ export const Step2BusinessInfo = () => {
             <div className="space-y-2">
               <Label>מספר חברי ועד</Label>
               <Input
-                type="number"
-                min="1"
+                type="text" inputMode="numeric" pattern="[0-9]*"
                 value={info.existingBoardMemberCount || ""}
                 onChange={(e) => handleCountChange(parseInt(e.target.value) || 0)}
               />
@@ -1759,9 +1759,9 @@ export const Step2BusinessInfo = () => {
   };
 
   const userHasNewNonprofit = userHasNonprofit && serviceType.userPurposeStatus?.nonprofit?.includes("new");
-  const userHasExistingNonprofit = userHasNonprofit && serviceType.userPurposeStatus?.nonprofit?.includes("existing");
+  const userHasExistingNonprofit = userHasNonprofit && (serviceType.userPurposeStatus?.nonprofit?.includes("existing") || userWarEntities.includes("nonprofit"));
   const spouseHasNewNonprofit = spouseHasNonprofit && serviceType.spousePurposeStatus?.nonprofit?.includes("new");
-  const spouseHasExistingNonprofit = spouseHasNonprofit && serviceType.spousePurposeStatus?.nonprofit?.includes("existing");
+  const spouseHasExistingNonprofit = spouseHasNonprofit && (serviceType.spousePurposeStatus?.nonprofit?.includes("existing") || spouseWarEntities.includes("nonprofit"));
 
   return (
     <div className="space-y-6">
