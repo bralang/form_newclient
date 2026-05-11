@@ -1276,10 +1276,20 @@ export const Step2BusinessInfo = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="alone">אני לבד</SelectItem>
+                  <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
                   <SelectItem value="other">ביחד עם אחר</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {company.shareholderType === "self_via_company" && (
+              <SelfViaCompanyBlock
+                data={company.selfViaCompany || {}}
+                onChange={(d) => updateExistingCompany(idx, "selfViaCompany", d)}
+                parentCompanyName={company.name || `החברה הקיימת #${idx + 1}`}
+                isNewCompany={false}
+              />
+            )}
 
             {company.shareholderType === "other" && renderShareholdersSection(
               company,
