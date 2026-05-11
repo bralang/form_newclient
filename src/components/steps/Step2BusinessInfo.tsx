@@ -8,6 +8,34 @@ import { g } from "@/lib/gender-utils";
 import { AlertTriangle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
+const PercentageInput = ({
+  value,
+  onChange,
+  placeholder = "לדוגמה: 50",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) => (
+  <div className="relative w-full min-w-0">
+    <Input
+      type="text"
+      inputMode="decimal"
+      pattern="[0-9]*\.?[0-9]*"
+      value={value}
+      onChange={(e) => {
+        const v = e.target.value.replace(/[^0-9.]/g, "");
+        onChange(v);
+      }}
+      placeholder={placeholder}
+      className="h-14 rounded-2xl pl-9 pr-3 text-right text-xl font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    />
+    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xl font-black text-primary leading-none">
+      %
+    </span>
+  </div>
+);
+
 export const Step2BusinessInfo = () => {
   const {
     serviceType,
@@ -45,34 +73,6 @@ export const Step2BusinessInfo = () => {
   const userName = personalInfo.firstName || "המשתמש";
   const userLastName = personalInfo.lastName || "";
   const spouseName = personalInfo.spouseName || "בן/בת הזוג";
-
-  const PercentageInput = ({
-    value,
-    onChange,
-    placeholder = "לדוגמה: 50",
-  }: {
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-  }) => (
-    <div className="relative w-full min-w-[7rem]">
-      <Input
-        type="text"
-        inputMode="decimal"
-        pattern="[0-9]*\.?[0-9]*"
-        value={value}
-        onChange={(e) => {
-          const v = e.target.value.replace(/[^0-9.]/g, "");
-          onChange(v);
-        }}
-        placeholder={placeholder}
-        className="h-14 rounded-2xl pl-10 pr-3 text-right text-xl font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-      />
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-2xl font-black text-primary leading-none">
-        %
-      </span>
-    </div>
-  );
 
   // ─── Yes/No Select helper ───
   const YesNoSelect = ({
@@ -528,8 +528,8 @@ export const Step2BusinessInfo = () => {
                           אם החברה המחזיקה מוחזקת בעצמה ע"י חברה נוספת – יש להוסיף כל חוליה בשרשרת עד לבעל המניות הסופי (אדם פרטי).
                         </p>
                         {(sh.holdingChain || []).map((link: any, lIdx: number) => (
-                          <div key={lIdx} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end p-2 rounded-md bg-muted/40 border border-border/40">
-                            <div className="space-y-1 md:col-span-2"><Label className="text-xs">בעל מניות בחברת {lIdx === 0 ? (sh.companyName || "המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "הקודמת")}</Label><Input placeholder="שם החברה" value={link.companyName || ""} onChange={(e) => {
+                          <div key={lIdx} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 items-end p-2 rounded-md bg-muted/40 border border-border/40">
+                            <div className="space-y-1 sm:col-span-2 lg:col-span-3"><Label className="text-xs">בעל מניות בחברת {lIdx === 0 ? (sh.companyName || "המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "הקודמת")}</Label><Input placeholder="שם החברה" value={link.companyName || ""} onChange={(e) => {
                               const chain = [...(sh.holdingChain || [])];
                               chain[lIdx] = { ...chain[lIdx], companyName: e.target.value };
                               updateShareholder(idx, "holdingChain", chain);
@@ -539,17 +539,19 @@ export const Step2BusinessInfo = () => {
                               chain[lIdx] = { ...chain[lIdx], companyNumber: e.target.value };
                               updateShareholder(idx, "holdingChain", chain);
                             }} /></div>
-                            <div className="space-y-1"><Label className="text-xs">שיעור אחזקה</Label>
-                              <div className="flex gap-1">
-                                <PercentageInput
-                                  value={link.percentage || ""}
-                                  onChange={(value) => {
-                                    const chain = [...(sh.holdingChain || [])];
-                                    chain[lIdx] = { ...chain[lIdx], percentage: value };
-                                    updateShareholder(idx, "holdingChain", chain);
-                                  }}
-                                />
-                                <Button type="button" variant="ghost" size="sm" onClick={() => {
+                            <div className="space-y-1 lg:col-span-2"><Label className="text-xs">שיעור אחזקה</Label>
+                              <div className="flex gap-1 items-center">
+                                <div className="flex-1 min-w-0">
+                                  <PercentageInput
+                                    value={link.percentage || ""}
+                                    onChange={(value) => {
+                                      const chain = [...(sh.holdingChain || [])];
+                                      chain[lIdx] = { ...chain[lIdx], percentage: value };
+                                      updateShareholder(idx, "holdingChain", chain);
+                                    }}
+                                  />
+                                </div>
+                                <Button type="button" variant="ghost" size="icon" className="shrink-0 h-10 w-10" onClick={() => {
                                   const chain = [...(sh.holdingChain || [])];
                                   chain.splice(lIdx, 1);
                                   updateShareholder(idx, "holdingChain", chain);
