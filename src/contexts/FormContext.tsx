@@ -166,6 +166,8 @@ export interface NonprofitBoardMember {
   email: string;
   phone: string;
   address: string;
+  city?: string;
+  zip?: string;
   isAuthorizedSigner: boolean;
   isAuditCommittee?: boolean;
 }
@@ -186,6 +188,7 @@ export interface NonprofitInfo {
   auditCommittee?: NonprofitAuditMember[];
   // Government portal identification (for one of the board members)
   govPortalBoardMemberIdx?: number;
+  govPortalBoardMemberIdxs?: number[];
   govPortalIdMethods?: GovPortalIdMethod[];
   govPortalPassword?: string;
 
