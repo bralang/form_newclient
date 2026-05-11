@@ -1102,10 +1102,14 @@ export const Step2BusinessInfo = () => {
     const authorizedSignerCount = boardMembers.filter(m => m.isAuthorizedSigner).length;
     const auditCommitteeCount = boardMembers.filter(m => m.isAuditCommittee).length;
 
+    const requestedNamesDisplay = [info.requestedName1, info.requestedName2, info.requestedName3]
+      .filter((n) => n && n.trim())
+      .join(" / ");
+
     return (
       <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
         <h3 className="text-xl font-bold text-primary">
-          עמותה חדשה – <span className="underline decoration-primary/50">{name}</span>
+          עמותה חדשה{requestedNamesDisplay ? <> – <span className="underline decoration-primary/50">{requestedNamesDisplay}</span></> : <> – <span className="underline decoration-primary/50">{name}</span></>}
         </h3>
 
         <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
