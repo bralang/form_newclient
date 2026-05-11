@@ -527,7 +527,11 @@ export const Step2BusinessInfo = () => {
                         <p className="text-xs text-muted-foreground">
                           אם החברה המחזיקה מוחזקת בעצמה ע"י חברה נוספת – יש להוסיף כל חוליה בשרשרת עד לבעל המניות הסופי (אדם פרטי).
                         </p>
-                        {(sh.holdingChain || []).map((link: any, lIdx: number) => (
+                        {(sh.holdingChain || []).map((link: any, lIdx: number) => {
+                          const pct = parseFloat(link.percentage);
+                          const linkValid = !isNaN(pct) && pct > 0 && pct <= 100;
+                          const heldName = lIdx === 0 ? (sh.companyName || "החברה המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "החברה הקודמת");
+                          return (
                           <div key={lIdx} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 items-end p-2 rounded-md bg-muted/40 border border-border/40">
                             <div className="space-y-1 sm:col-span-2 lg:col-span-3"><Label className="text-xs">בעל מניות בחברת {lIdx === 0 ? (sh.companyName || "המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "הקודמת")}</Label><Input placeholder="שם החברה" value={link.companyName || ""} onChange={(e) => {
                               const chain = [...(sh.holdingChain || [])];
@@ -558,8 +562,17 @@ export const Step2BusinessInfo = () => {
                                 }}>✕</Button>
                               </div>
                             </div>
+                            {link.percentage && !linkValid && (
+                              <div className="sm:col-span-2 lg:col-span-6 text-xs text-destructive">שיעור האחזקה חייב להיות בין 0 ל-100</div>
+                            )}
+                            {link.companyName && (
+                              <div className="sm:col-span-2 lg:col-span-6 text-xs text-muted-foreground">
+                                {link.companyName} מחזיקה {link.percentage || "—"}% מ{heldName}
+                              </div>
+                            )}
                           </div>
-                        ))}
+                          );
+                        })}
                         <Button type="button" variant="outline" size="sm" onClick={() => {
                           const chain = [...(sh.holdingChain || []), { companyName: "", companyNumber: "", percentage: "" }];
                           updateShareholder(idx, "holdingChain", chain);
