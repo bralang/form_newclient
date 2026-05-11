@@ -1122,7 +1122,9 @@ export const Step2BusinessInfo = () => {
               spousePhone,
               spouseEmail,
               showSpouseOption,
-              `${prefix}existing_${idx}_`
+              `${prefix}existing_${idx}_`,
+              false,
+              company.name || `החברה הקיימת #${idx + 1}`
             )}
           </div>
         ))}
