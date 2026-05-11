@@ -213,7 +213,7 @@ export const Step2BusinessInfo = () => {
               <h4 className="font-bold text-primary text-lg">
                 פרטי שותף – {displayName}
                 {isSelf && <span className="text-xs mr-2 text-muted-foreground font-normal">(הפרטים מולאו אוטומטית)</span>}
-                {partner.isVatRepresentative && <span className="text-xs mr-2 text-primary/70">(נציג השותפות למע״מ)</span>}
+                
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {!isSelf && (
