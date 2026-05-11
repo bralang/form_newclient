@@ -1007,8 +1007,11 @@ export const Step2BusinessInfo = () => {
 
         {/* Existing companies */}
         {(info.existingCompanies || []).map((company: any, idx: number) => (
-          <div key={`existing-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
-            <h4 className="font-bold text-primary">חברה קיימת #{idx + 1}{company.name ? ` – ${company.name}` : ""}</h4>
+          <div key={`existing-${idx}`} className="space-y-2">
+            <h4 className="font-bold text-primary text-base px-1">
+              חברה קיימת #{idx + 1}{company.name ? ` – ${company.name}` : ""}
+            </h4>
+            <div className="space-y-4 p-4 border border-border rounded-xl bg-card">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>שם חברה</Label>
@@ -1126,13 +1129,17 @@ export const Step2BusinessInfo = () => {
               false,
               company.name || `החברה הקיימת #${idx + 1}`
             )}
+            </div>
           </div>
         ))}
 
         {/* New companies */}
         {(info.newCompanies || []).map((company: any, idx: number) => (
-          <div key={`new-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
-            <h4 className="font-bold text-primary">חברה חדשה #{idx + 1}{company.requestedName1 ? ` – ${company.requestedName1}` : ""}</h4>
+          <div key={`new-${idx}`} className="space-y-2">
+            <h4 className="font-bold text-primary text-base px-1">
+              חברה חדשה #{idx + 1}{company.requestedName1 ? ` – ${company.requestedName1}` : ""}
+            </h4>
+            <div className="space-y-4 p-4 border border-border rounded-xl bg-card">
 
             {/* 3 requested names */}
             <div className="space-y-3">
@@ -1206,6 +1213,7 @@ export const Step2BusinessInfo = () => {
                   setInfo({ newCompanies: updated });
                 }}
               />
+            </div>
             </div>
           </div>
         ))}
