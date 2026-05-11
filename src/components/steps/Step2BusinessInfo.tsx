@@ -1191,7 +1191,9 @@ export const Step2BusinessInfo = () => {
               spousePhone,
               spouseEmail,
               showSpouseOption,
-              `${prefix}new_${idx}_`
+              `${prefix}new_${idx}_`,
+              true,
+              company.requestedName1 || `החברה החדשה #${idx + 1}`
             )}
 
             <div className="space-y-2">
