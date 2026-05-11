@@ -625,7 +625,7 @@ export const Step2BusinessInfo = () => {
                     </>
                   ) : (sh.holderType === "self_via_company") ? (
                     <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-                      <p className="text-xs text-muted-foreground">אני (ממלא/ת השאלון) מחזיק/ה ב{parentCompanyName || "חברה זו"} באמצעות חברה.</p>
+                      <p className="text-xs text-primary font-semibold">אני (ממלא/ת השאלון) מחזיק/ה ב{parentCompanyName || "חברה זו"} באמצעות חברה.</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1"><Label>שם החברה דרכה אני מחזיק/ה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
                         <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
@@ -639,6 +639,50 @@ export const Step2BusinessInfo = () => {
                           </div>
                         )}
                       </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold">סוג בעל המניות של {sh.companyName || "החברה דרכה אני מחזיק/ה"}</Label>
+                        <Select
+                          value={sh.subOwnerType || "self_via_company"}
+                          onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}
+                        >
+                          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="self_via_company">אני (לבד בחברה זו)</SelectItem>
+                            <SelectItem value="person">אדם פרטי נוסף</SelectItem>
+                            <SelectItem value="company">חברה</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">ברירת מחדל: אני לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
+                      </div>
+
+                      {(sh.subOwnerType || "self_via_company") === "self_via_company" && (
+                        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                          <p className="text-sm">אני (ממלא/ת השאלון) הוא בעל המניות היחיד של {sh.companyName || "החברה המחזיקה"}.</p>
+                        </div>
+                      )}
+
+                      {sh.subOwnerType === "person" && (
+                        <div className="space-y-3 p-3 bg-card rounded-lg border border-border/50">
+                          <p className="text-xs text-muted-foreground">בעל מניות נוסף (אדם פרטי) של {sh.companyName || "החברה המחזיקה"}</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), name: e.target.value })} /></div>
+                            <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idNumber: e.target.value })} /></div>
+                            <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idFile: e.target.files?.[0] })} /></div>
+                            <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.personOwner?.phone || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), phone: e.target.value })} /></div>
+                            <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.personOwner?.email || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), email: e.target.value })} /></div>
+                          </div>
+                        </div>
+                      )}
+
+                      {sh.subOwnerType === "company" && (
+                        <CompanyChainBlock
+                          data={sh.childCompany || {}}
+                          onChange={(c) => updateShareholder(idx, "childCompany", c)}
+                          heldName={sh.companyName || "החברה המחזיקה"}
+                          depth={1}
+                        />
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
