@@ -1165,9 +1165,9 @@ export const Step2BusinessInfo = () => {
                 <div className="space-y-1"><Label>צילום ת.ז. כולל ספח</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateBoardMember(idx, "idFile", e.target.files?.[0])} /></div>
                 <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
                 <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
-                <div className="space-y-1 md:col-span-2"><Label>כתובת *</Label><Input value={member.address || ""} onChange={(e) => updateBoardMember(idx, "address", e.target.value)} placeholder="רחוב ומספר" /></div>
+                <div className="space-y-1"><Label>כתובת *</Label><Input value={member.address || ""} onChange={(e) => updateBoardMember(idx, "address", e.target.value)} placeholder="רחוב ומספר" /></div>
                 <div className="space-y-1"><Label>עיר *</Label><Input value={member.city || ""} onChange={(e) => updateBoardMember(idx, "city", e.target.value)} /></div>
-                <div className="space-y-1"><Label>מיקוד *</Label><Input value={member.zip || ""} onChange={(e) => updateBoardMember(idx, "zip", e.target.value)} /></div>
+                <div className="space-y-1"><Label>מיקוד (עדיף)</Label><Input value={member.zip || ""} onChange={(e) => updateBoardMember(idx, "zip", e.target.value)} /></div>
               </div>
 
               {/* Role checkboxes */}
