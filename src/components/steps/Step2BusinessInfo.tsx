@@ -1162,17 +1162,15 @@ export const Step2BusinessInfo = () => {
               false,
               company.name || `החברה הקיימת #${idx + 1}`
             )}
-            </div>
           </div>
         ))}
 
         {/* New companies */}
         {(info.newCompanies || []).map((company: any, idx: number) => (
-          <div key={`new-${idx}`} className="space-y-2">
-            <h4 className="font-bold text-primary text-base px-1">
+          <div key={`new-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
+            <h4 className="font-bold text-primary text-base">
               חברה חדשה #{idx + 1}{company.requestedName1 ? ` – ${company.requestedName1}` : ""}
             </h4>
-            <div className="space-y-4 p-4 border border-border rounded-xl bg-card">
 
             {/* 3 requested names */}
             <div className="space-y-3">
