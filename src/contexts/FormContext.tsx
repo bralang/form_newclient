@@ -202,6 +202,20 @@ export interface NonprofitInfo {
   existingBoardMembers?: NonprofitBoardMember[];
   // Index of the board member used for representation (when tax file exists)
   representativeBoardMemberIdx?: number;
+  // Existing nonprofit (without tax file): plans to hire employees
+  plansEmployees?: boolean;
+  // Existing nonprofit (with tax file): single representative member with optional additional ID
+  representativeMember?: NonprofitBoardMember & {
+    city?: string;
+    zip?: string;
+    additionalIdTypes?: ("parentId" | "license" | "passport")[];
+    additionalIdNumber?: string;
+    additionalLicenseNumber?: string;
+    additionalPassportNumber?: string;
+    additionalIdFile?: File;
+    additionalLicenseFile?: File;
+    additionalPassportFile?: File;
+  };
 }
 
 // ─── Step 3 Interfaces ─────────────────────────────
