@@ -326,6 +326,15 @@ export const Step1Purpose = () => {
                         )}
                       </div>
                     )}
+                    {purpose.id === "war_compensation" && spouseChecked && (
+                      <div className="animate-in fade-in duration-200 flex flex-col items-center gap-1">
+                        {renderWarEntities(
+                          serviceType.spouseWarCompensationEntities || [],
+                          (e) => setServiceType({ spouseWarCompensationEntities: e }),
+                          true
+                        )}
+                      </div>
+                    )}
                   </div>
                 </td>
               </tr>
