@@ -1025,11 +1025,11 @@ export const Step2BusinessInfo = () => {
   };
 
   // ─── Gov Portal Identification helpers ───
-  const GOV_PORTAL_OPTIONS: { value: GovPortalIdMethod; label: string; icon: string }[] = [
+  const GOV_PORTAL_OPTIONS: { value: GovPortalIdMethod; label: string; icon: string; desc?: string }[] = [
     { value: "password", label: "סיסמא", icon: "🔑" },
     { value: "smartCard", label: "כרטיס חכם", icon: "💳" },
     { value: "biometricId", label: "תעודת זהות ביומטרית", icon: "🪪" },
-    { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆" },
+    { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆", desc: "כניסה ללא סיסמה בעזרת זיהוי ביומטרי מטלפון חכם" },
   ];
 
   const renderGovPortalSection = (
@@ -1051,13 +1051,16 @@ export const Step2BusinessInfo = () => {
             return (
               <label
                 key={opt.value}
-                className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${
+                className={`flex items-start gap-2 p-3 rounded-lg border cursor-pointer transition-all ${
                   checked ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/40"
                 }`}
               >
-                <Checkbox checked={checked} onCheckedChange={() => toggle(opt.value)} />
-                <span className="text-lg">{opt.icon}</span>
-                <span className="text-sm font-semibold">{opt.label}</span>
+                <Checkbox checked={checked} onCheckedChange={() => toggle(opt.value)} className="mt-0.5" />
+                <span className="text-lg leading-tight">{opt.icon}</span>
+                <span className="flex flex-col">
+                  <span className="text-sm font-semibold">{opt.label}</span>
+                  {opt.desc && <span className="text-[11px] text-muted-foreground leading-snug">{opt.desc}</span>}
+                </span>
               </label>
             );
           })}
