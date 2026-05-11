@@ -101,6 +101,14 @@ export const Step2PersonalInfo = () => {
     );
   };
 
+  const handleSendEmailReminder = async () => {
+    await sendToWebhook(
+      "https://n8n.chasida.biz/webhook/send-email-reminder",
+      { email: personalInfo.email, reminderTime: emailReminderTime || undefined, personalInfo, serviceType },
+      { silent: false }
+    );
+  };
+
   return (
     <div className="space-y-8">
       {/* Section Header */}
