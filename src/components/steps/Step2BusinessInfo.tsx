@@ -8,6 +8,34 @@ import { g } from "@/lib/gender-utils";
 import { AlertTriangle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
+const PercentageInput = ({
+  value,
+  onChange,
+  placeholder = "לדוגמה: 50",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}) => (
+  <div className="relative w-full min-w-0">
+    <Input
+      type="text"
+      inputMode="decimal"
+      pattern="[0-9]*\.?[0-9]*"
+      value={value}
+      onChange={(e) => {
+        const v = e.target.value.replace(/[^0-9.]/g, "");
+        onChange(v);
+      }}
+      placeholder={placeholder}
+      className="h-14 rounded-2xl pl-9 pr-3 text-right text-xl font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    />
+    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xl font-black text-primary leading-none">
+      %
+    </span>
+  </div>
+);
+
 export const Step2BusinessInfo = () => {
   const {
     serviceType,
