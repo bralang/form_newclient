@@ -75,8 +75,6 @@ export const Step2BusinessInfo = () => {
   const spouseName = personalInfo.spouseName || "בן/בת הזוג";
 
   // ─── Yes/No Select helper ───
-
-  // ─── Yes/No Select helper ───
   const YesNoSelect = ({
     value,
     onChange,
