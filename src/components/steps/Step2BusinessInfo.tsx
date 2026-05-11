@@ -260,8 +260,7 @@ export const Step2BusinessInfo = () => {
           <Label htmlFor={`${prefix}partnerCount`}>מספר שותפים (כולל אותך)</Label>
           <Input
             id={`${prefix}partnerCount`}
-            type="number"
-            min="2"
+            type="text" inputMode="numeric" pattern="[0-9]*"
             value={partners.length || ""}
             onChange={(e) => handlePartnerCountChange(parseInt(e.target.value) || 0)}
           />
@@ -511,8 +510,7 @@ export const Step2BusinessInfo = () => {
         <div className="space-y-2">
           <Label>כמה בעלי מניות יש בחברה? (כולל אותך)</Label>
           <Input
-            type="number"
-            min="1"
+            type="text" inputMode="numeric" pattern="[0-9]*"
             value={company.shareholderCount || ""}
             onChange={(e) => handleShareholderCountChange(parseInt(e.target.value) || 0)}
           />
@@ -1018,8 +1016,7 @@ export const Step2BusinessInfo = () => {
               <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות מעוניין לקבל שירות?</Label>
               <Input
                 id={`${prefix}existingCount`}
-                type="number"
-                min="0"
+                type="text" inputMode="numeric" pattern="[0-9]*"
                 value={existingCount}
                 onChange={(e) => {
                   const count = parseInt(e.target.value) || 0;
@@ -1035,8 +1032,7 @@ export const Step2BusinessInfo = () => {
               <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
               <Input
                 id={`${prefix}newCount`}
-                type="number"
-                min="0"
+                type="text" inputMode="numeric" pattern="[0-9]*"
                 value={newCount}
                 onChange={(e) => {
                   const count = parseInt(e.target.value) || 0;
@@ -1419,8 +1415,7 @@ export const Step2BusinessInfo = () => {
         <div className="space-y-2">
           <Label>מספר חברי ועד (מינימום 7)</Label>
           <Input
-            type="number"
-            min="7"
+            type="text" inputMode="numeric" pattern="[0-9]*"
             value={info.boardMemberCount || ""}
             onChange={(e) => handleBoardCountChange(parseInt(e.target.value) || 7)}
           />
@@ -1703,8 +1698,7 @@ export const Step2BusinessInfo = () => {
             <div className="space-y-2">
               <Label>מספר חברי ועד</Label>
               <Input
-                type="number"
-                min="1"
+                type="text" inputMode="numeric" pattern="[0-9]*"
                 value={info.existingBoardMemberCount || ""}
                 onChange={(e) => handleCountChange(parseInt(e.target.value) || 0)}
               />
