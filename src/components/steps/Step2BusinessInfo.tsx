@@ -1132,7 +1132,7 @@ export const Step2BusinessInfo = () => {
         {/* New companies */}
         {(info.newCompanies || []).map((company: any, idx: number) => (
           <div key={`new-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
-            <h4 className="font-bold text-primary">חברה חדשה #{idx + 1}</h4>
+            <h4 className="font-bold text-primary">חברה חדשה #{idx + 1}{company.requestedName1 ? ` – ${company.requestedName1}` : ""}</h4>
 
             {/* 3 requested names */}
             <div className="space-y-3">
