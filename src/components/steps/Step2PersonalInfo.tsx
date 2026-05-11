@@ -30,11 +30,11 @@ export const Step2PersonalInfo = () => {
   const hasAnyPurpose =
     serviceType.userPurposes.length > 0 || serviceType.spousePurposes.length > 0;
 
-  // Gov portal identification is relevant only for company/nonprofit purposes (not for sole proprietor / tax refund)
+  // Gov portal identification is relevant only for company purposes (nonprofit handled per board member)
   const userNeedsGovPortal =
-    serviceType.userPurposes.includes("company") || serviceType.userPurposes.includes("nonprofit");
+    serviceType.userPurposes.includes("company");
   const spouseNeedsGovPortal =
-    serviceType.spousePurposes.includes("company") || serviceType.spousePurposes.includes("nonprofit");
+    serviceType.spousePurposes.includes("company");
 
   const govPortalOptions: { value: "password" | "smartCard" | "biometricId" | "fastLogin"; label: string; icon: string }[] = [
     { value: "password", label: "סיסמא", icon: "🔑" },
