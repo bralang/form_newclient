@@ -998,7 +998,7 @@ export const Step2BusinessInfo = () => {
     showSpouseOption: boolean,
     prefix = ""
   ) => {
-    const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing");
+    const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing") || userWarEntities.includes("company") || spouseWarEntities.includes("company");
     const hasNewPurpose = serviceType.userPurposeStatus?.company?.includes("new") || serviceType.spousePurposeStatus?.company?.includes("new");
 
     const existingCount = info.existingCompanyCount || 0;
