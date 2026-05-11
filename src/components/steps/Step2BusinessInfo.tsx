@@ -423,7 +423,9 @@ export const Step2BusinessInfo = () => {
     spousePhone: string,
     spouseEmail: string,
     showSpouseOption: boolean,
-    prefix = ""
+    prefix = "",
+    isNewCompany = false,
+    parentCompanyName = ""
   ) => {
     const shareholders = company.shareholders || [];
     const spouseIsShareholder = !!company.spouseIsShareholder;
