@@ -236,6 +236,8 @@ const SelfViaCompanyBlock = ({
     </div>
   );
 };
+
+export const Step2BusinessInfo = () => {
   const {
     serviceType,
     businessInfo,
