@@ -1217,7 +1217,7 @@ export const Step2BusinessInfo = () => {
         {boardMembers.length > 0 && authorizedSignerCount !== 2 && (
           <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
             <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-            <p className="text-sm text-destructive">יש לסמן בדיוק 2 מורשי חתימה מבין חברי הועד (סומנו {authorizedSignerCount}).</p>
+            <p className="text-sm text-destructive">יש לסמן 2 מורשי חתימה מבין חברי הועד (סומנו {authorizedSignerCount}).</p>
           </div>
         )}
 
@@ -1225,35 +1225,52 @@ export const Step2BusinessInfo = () => {
         {boardMembers.length > 0 && auditCommitteeCount !== 2 && (
           <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
             <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
-            <p className="text-sm text-destructive">יש לסמן בדיוק 2 חברי ועדת ביקורת מבין חברי הועד (סומנו {auditCommitteeCount}).</p>
+            <p className="text-sm text-destructive">יש לסמן 2 חברי ועדת ביקורת מבין חברי הועד (סומנו {auditCommitteeCount}).</p>
           </div>
         )}
 
-        {/* Gov portal identification - select board member */}
+        {/* Gov portal identification - select board members (multi) */}
         <div className="space-y-3 p-4 bg-primary/5 rounded-xl border border-primary/15">
           <Label className="text-base font-semibold">🔐 הזדהות לאזור אישי ממשלתי</Label>
           <p className="text-xs text-muted-foreground">
-            נדרש לאחד מחברי הועד (כיום בד"כ עושים זאת בטלפון יחד עם חבר הועד).
+            נדרש לאחד מחברי הועד (עדיף יותר מאחד). סמנ/י את חברי הועד שניתן להזדהות באמצעותם.
           </p>
-          <div className="space-y-1">
-            <Label>בחר/י חבר ועד להזדהות</Label>
-            <Select
-              value={info.govPortalBoardMemberIdx !== undefined ? String(info.govPortalBoardMemberIdx) : ""}
-              onValueChange={(v) => setInfo({ govPortalBoardMemberIdx: parseInt(v) })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="בחר חבר ועד" />
-              </SelectTrigger>
-              <SelectContent>
-                {boardMembers.map((m, idx) => (
-                  <SelectItem key={idx} value={String(idx)} disabled={!m.name}>
-                    {m.name || `חבר ועד ${idx + 1}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {boardMembers.length === 0 && (
+            <p className="text-sm text-muted-foreground">יש למלא תחילה את חברי הועד.</p>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {boardMembers.map((m, idx) => {
+              const selectedIdxs = info.govPortalBoardMemberIdxs || [];
+              const checked = selectedIdxs.includes(idx);
+              const disabled = !m.name;
+              return (
+                <label
+                  key={idx}
+                  className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${
+                    checked
+                      ? "border-primary bg-primary/10"
+                      : disabled
+                        ? "border-border bg-muted/30 opacity-50 cursor-not-allowed"
+                        : "border-border bg-card hover:border-primary/40"
+                  }`}
+                >
+                  <Checkbox
+                    checked={checked}
+                    disabled={disabled}
+                    onCheckedChange={(c) => {
+                      const current = info.govPortalBoardMemberIdxs || [];
+                      const updated = c
+                        ? [...current, idx]
+                        : current.filter((v) => v !== idx);
+                      setInfo({ govPortalBoardMemberIdxs: updated });
+                    }}
+                  />
+                  <span className="text-sm font-semibold">{m.name || `חבר ועד ${idx + 1}`}</span>
+                </label>
+              );
+            })}
           </div>
-          {info.govPortalBoardMemberIdx !== undefined && (
+          {(info.govPortalBoardMemberIdxs || []).length > 0 && (
             <div className="space-y-2">
               <Label>אופן הזדהות (לא חובה)</Label>
               {renderGovPortalSection(
