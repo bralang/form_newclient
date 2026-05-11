@@ -37,11 +37,11 @@ export const Step2PersonalInfo = () => {
   const spouseNeedsGovPortal =
     serviceType.spousePurposes.includes("company");
 
-  const govPortalOptions: { value: "password" | "smartCard" | "biometricId" | "fastLogin"; label: string; icon: string }[] = [
+  const govPortalOptions: { value: "password" | "smartCard" | "biometricId" | "fastLogin"; label: string; icon: string; desc?: string }[] = [
     { value: "password", label: "סיסמא", icon: "🔑" },
     { value: "smartCard", label: "כרטיס חכם", icon: "💳" },
     { value: "biometricId", label: "תעודת זהות ביומטרית", icon: "🪪" },
-    { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆" },
+    { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆", desc: "כניסה ללא סיסמה בעזרת זיהוי ביומטרי מטלפון חכם" },
   ];
 
   // Auto-set spouse gender to opposite
