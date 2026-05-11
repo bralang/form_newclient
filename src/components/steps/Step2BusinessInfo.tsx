@@ -509,17 +509,67 @@ export const Step2BusinessInfo = () => {
                         <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
                         <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
                         <div className="space-y-1">
-                          <Label>אחוזי אחזקה *</Label>
+                          <Label>אחוזי אחזקה בחברה החדשה *</Label>
                           <PercentageInput
                             value={sh.percentage || ""}
                             onChange={(value) => updateShareholder(idx, "percentage", value)}
                           />
                         </div>
                       </div>
+
+                      {/* Holding chain - company holds company holds company... */}
+                      <div className="space-y-2 p-3 bg-card rounded-lg border border-border/50">
+                        <Label className="text-sm font-semibold">שרשרת חברות מחזיקות (אם קיימת)</Label>
+                        <p className="text-xs text-muted-foreground">
+                          אם החברה המחזיקה מוחזקת בעצמה ע"י חברה נוספת – יש להוסיף כל חוליה בשרשרת עד לבעל המניות הסופי (אדם פרטי).
+                        </p>
+                        {(sh.holdingChain || []).map((link: any, lIdx: number) => (
+                          <div key={lIdx} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-end p-2 rounded-md bg-muted/40 border border-border/40">
+                            <div className="space-y-1 md:col-span-2"><Label className="text-xs">בעל מניות בחברת {lIdx === 0 ? (sh.companyName || "המחזיקה") : ((sh.holdingChain[lIdx - 1]?.companyName) || "הקודמת")}</Label><Input placeholder="שם החברה" value={link.companyName || ""} onChange={(e) => {
+                              const chain = [...(sh.holdingChain || [])];
+                              chain[lIdx] = { ...chain[lIdx], companyName: e.target.value };
+                              updateShareholder(idx, "holdingChain", chain);
+                            }} /></div>
+                            <div className="space-y-1"><Label className="text-xs">ח.פ.</Label><Input value={link.companyNumber || ""} onChange={(e) => {
+                              const chain = [...(sh.holdingChain || [])];
+                              chain[lIdx] = { ...chain[lIdx], companyNumber: e.target.value };
+                              updateShareholder(idx, "holdingChain", chain);
+                            }} /></div>
+                            <div className="space-y-1"><Label className="text-xs">שיעור אחזקה</Label>
+                              <div className="flex gap-1">
+                                <PercentageInput
+                                  value={link.percentage || ""}
+                                  onChange={(value) => {
+                                    const chain = [...(sh.holdingChain || [])];
+                                    chain[lIdx] = { ...chain[lIdx], percentage: value };
+                                    updateShareholder(idx, "holdingChain", chain);
+                                  }}
+                                />
+                                <Button type="button" variant="ghost" size="sm" onClick={() => {
+                                  const chain = [...(sh.holdingChain || [])];
+                                  chain.splice(lIdx, 1);
+                                  updateShareholder(idx, "holdingChain", chain);
+                                }}>✕</Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        <Button type="button" variant="outline" size="sm" onClick={() => {
+                          const chain = [...(sh.holdingChain || []), { companyName: "", companyNumber: "", percentage: "" }];
+                          updateShareholder(idx, "holdingChain", chain);
+                        }}>+ הוסף חברה נוספת בשרשרת</Button>
+                      </div>
+
                       <div className="p-3 bg-primary/5 rounded-lg border border-primary/10">
-                        <p className="text-sm text-muted-foreground mb-3">יש לציין את בעל המניות הסופי (אדם פרטי) של החברה המחזיקה, לצורך זיהוי במס הכנסה</p>
-                        <div className="space-y-2"><Label>שם בעל המניות הסופי (אדם פרטי) *</Label><Input value={sh.ultimateOwnerName || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerName", e.target.value)} /></div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                        <p className="text-sm text-muted-foreground mb-3">יש לציין את בעל המניות הסופי (אדם פרטי) של {((sh.holdingChain || []).length > 0 ? (sh.holdingChain[sh.holdingChain.length - 1]?.companyName || "החברה האחרונה בשרשרת") : (sh.companyName || "החברה המחזיקה"))}, לצורך זיהוי במס הכנסה</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-1"><Label>שם בעל המניות הסופי (אדם פרטי) *</Label><Input value={sh.ultimateOwnerName || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerName", e.target.value)} /></div>
+                          <div className="space-y-1"><Label>שיעור אחזקה</Label>
+                            <PercentageInput
+                              value={sh.ultimateOwnerPercentage || ""}
+                              onChange={(v) => updateShareholder(idx, "ultimateOwnerPercentage", v)}
+                            />
+                          </div>
                           <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.ultimateOwnerIdNumber || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerIdNumber", e.target.value)} /></div>
                           <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "ultimateOwnerIdFile", e.target.files?.[0])} /></div>
                           <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.ultimateOwnerPhone || ""} onChange={(e) => updateShareholder(idx, "ultimateOwnerPhone", e.target.value)} /></div>
