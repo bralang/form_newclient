@@ -562,8 +562,17 @@ export const Step2BusinessInfo = () => {
                                 }}>✕</Button>
                               </div>
                             </div>
+                            {link.percentage && !linkValid && (
+                              <div className="sm:col-span-2 lg:col-span-6 text-xs text-destructive">שיעור האחזקה חייב להיות בין 0 ל-100</div>
+                            )}
+                            {link.companyName && (
+                              <div className="sm:col-span-2 lg:col-span-6 text-xs text-muted-foreground">
+                                {link.companyName} מחזיקה {link.percentage || "—"}% מ{heldName}
+                              </div>
+                            )}
                           </div>
-                        ))}
+                          );
+                        })}
                         <Button type="button" variant="outline" size="sm" onClick={() => {
                           const chain = [...(sh.holdingChain || []), { companyName: "", companyNumber: "", percentage: "" }];
                           updateShareholder(idx, "holdingChain", chain);
