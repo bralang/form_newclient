@@ -55,17 +55,20 @@ export const Step2BusinessInfo = () => {
     onChange: (value: string) => void;
     placeholder?: string;
   }) => (
-    <div className="relative max-w-xs">
+    <div className="relative w-full min-w-[7rem]">
       <Input
-        type="number"
-        min="0"
-        max="100"
+        type="text"
+        inputMode="decimal"
+        pattern="[0-9]*\.?[0-9]*"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const v = e.target.value.replace(/[^0-9.]/g, "");
+          onChange(v);
+        }}
         placeholder={placeholder}
-        className="h-14 rounded-2xl pl-12 pr-4 text-right text-xl font-bold"
+        className="h-14 rounded-2xl pl-10 pr-3 text-right text-xl font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
       />
-      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-3xl font-black text-primary leading-none">
+      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-2xl font-black text-primary leading-none">
         %
       </span>
     </div>
