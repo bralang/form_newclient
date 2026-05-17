@@ -491,6 +491,7 @@ export const Step2BusinessInfo = () => {
         {partners.length > 0 && (
           <div className="space-y-2">
             <Label htmlFor={`${prefix}partnershipAgreement`}>צרף הסכם שותפות</Label>
+            <p className="text-sm text-muted-foreground">מומלץ לצרף הסכם שותפות</p>
             <Input
               id={`${prefix}partnershipAgreement`}
               type="file"
