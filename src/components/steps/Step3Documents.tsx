@@ -229,26 +229,50 @@ export const Step3Documents = () => {
           const setInfo = who === "user" ? setNonprofitInfo : setSpouseNonprofitInfo;
           const purposes = who === "user" ? userPurposes : spousePurposes;
           if (!purposes.includes("nonprofit")) return null;
-          const members = info.boardMembers || [];
-          if (members.length === 0) return null;
+          const newMembers = info.boardMembers || [];
+          const existingMembers = info.existingBoardMembers || [];
+          const rep = info.representativeMember;
+          const hasRep = !!rep && info.hasTaxFile === true;
+          if (newMembers.length === 0 && existingMembers.length === 0 && !hasRep) return null;
           const ownerName = who === "user" ? personalInfo.firstName : personalInfo.spouseName;
           return (
             <div key={who} className="space-y-4 p-5 bg-muted/40 rounded-xl">
               <h3 className="font-bold text-lg">
-                צילומי ת.ז. – חברי ועד עמותה חדשה{ownerName ? ` (${ownerName})` : ""}
+                צילומי ת.ז. – חברי ועד עמותה{ownerName ? ` (${ownerName})` : ""}
               </h3>
-              {members.map((m: any, idx: number) => (
+              {newMembers.map((m: any, idx: number) => (
                 <FileUpload
-                  key={idx}
-                  id={`${who}-board-${idx}-id`}
+                  key={`new-${idx}`}
+                  id={`${who}-board-new-${idx}-id`}
                   label={`צילום ת.ז. + ספח של ${m.name || `חבר ועד #${idx + 1}`}`}
                   onChange={(files) => {
-                    const updated = [...members];
+                    const updated = [...newMembers];
                     updated[idx] = { ...updated[idx], idFile: files?.[0] };
                     setInfo({ boardMembers: updated });
                   }}
                 />
               ))}
+              {existingMembers.map((m: any, idx: number) => (
+                <FileUpload
+                  key={`existing-${idx}`}
+                  id={`${who}-board-existing-${idx}-id`}
+                  label={`צילום ת.ז. + ספח של ${m.name || `חבר ועד #${idx + 1}`}`}
+                  onChange={(files) => {
+                    const updated = [...existingMembers];
+                    updated[idx] = { ...updated[idx], idFile: files?.[0] };
+                    setInfo({ existingBoardMembers: updated });
+                  }}
+                />
+              ))}
+              {hasRep && (
+                <FileUpload
+                  id={`${who}-board-rep-id`}
+                  label={`צילום ת.ז. + ספח של ${rep!.name || "חבר הועד שיופיע בייצוג"}`}
+                  onChange={(files) => {
+                    setInfo({ representativeMember: { ...(rep as any), idFile: files?.[0] } });
+                  }}
+                />
+              )}
             </div>
           );
         })}
