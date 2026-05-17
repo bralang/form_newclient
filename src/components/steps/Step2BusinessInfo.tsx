@@ -1729,7 +1729,7 @@ export const Step2BusinessInfo = () => {
               </div>
 
               <div className="space-y-3 p-4 border border-border rounded-xl bg-card">
-                <h4 className="font-bold text-primary">חבר הועד שיופיע בייצוג{rep.name ? ` – ${rep.name}` : ""}</h4>
+                <h4 className="font-bold text-primary">חבר ועד לצורך הפקת ייצוג{rep.name ? ` – ${rep.name}` : ""}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1"><Label>שם מלא *</Label><Input value={rep.name || ""} onChange={(e) => updateRep("name", e.target.value)} /></div>
                   <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={rep.idNumber || ""} onChange={(e) => updateRep("idNumber", e.target.value)} /></div>
