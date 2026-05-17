@@ -540,7 +540,7 @@ export const Step2PersonalInfo = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3 p-3 bg-background/60 rounded-lg border border-border/50">
-              <Label className="text-sm text-muted-foreground min-w-[140px]">תזכורת ב-SMS</Label>
+              <Label className="text-sm text-muted-foreground min-w-[140px]">תזכורת לטלפון</Label>
               <Button variant="outline" size="sm" onClick={handleSendReminder}>
                 <Phone className="ml-2 h-4 w-4" />
                 תזכורת לטלפון
