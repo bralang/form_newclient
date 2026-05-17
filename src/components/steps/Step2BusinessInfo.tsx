@@ -1143,7 +1143,7 @@ export const Step2BusinessInfo = () => {
         )}
 
         {/* Upfront names list for new companies */}
-        {newCount > 0 && (
+        {hasNewPurpose && newCount > 0 && (
           <div className="space-y-2 p-3 border border-border/60 rounded-lg bg-background/50">
             <Label className="font-semibold">שמות רצויים לחברות החדשות</Label>
             {(info.newCompanies || []).map((company: any, idx: number) => (
