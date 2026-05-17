@@ -199,6 +199,7 @@ export const Step2PersonalInfo = () => {
           </div>
         </div>
 
+        {!userOnlyNewNonprofit && (
         <div className="space-y-2">
           <Label>מצב משפחתי מפורט</Label>
           <Select
@@ -215,8 +216,10 @@ export const Step2PersonalInfo = () => {
             </SelectContent>
           </Select>
         </div>
+        )}
 
         {/* Additional ID - multi-select */}
+        {!userOnlyNewNonprofit && (
         <div className="space-y-3">
           <Label>אמצעי זיהוי נוסף *</Label>
           <div className="flex flex-wrap flex-row-reverse gap-3 justify-end">
@@ -269,6 +272,7 @@ export const Step2PersonalInfo = () => {
             </div>
           )}
         </div>
+        )}
 
         {/* Gov portal identification — only for company / nonprofit */}
         {userNeedsGovPortal && (
