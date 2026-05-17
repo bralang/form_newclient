@@ -1222,10 +1222,6 @@ export const Step2BusinessInfo = () => {
                       <div className="space-y-1"><Label>מספר חשבון</Label><Input value={company.bankDetails?.accountNumber || ""} onChange={(e) => updateExistingCompany(idx, "bankDetails", { ...company.bankDetails, accountNumber: e.target.value })} /></div>
                       <div className="space-y-1"><Label>שם בעל החשבון</Label><Input value={company.bankDetails?.accountHolder || ""} onChange={(e) => updateExistingCompany(idx, "bankDetails", { ...company.bankDetails, accountHolder: e.target.value })} /></div>
                     </div>
-                    <div className="space-y-1">
-                      <Label>אישור ניהול חשבון או צילום שיק</Label>
-                      <Input type="file" accept="image/*,.pdf" onChange={(e) => updateExistingCompany(idx, "bankConfirmationFile", e.target.files?.[0])} />
-                    </div>
                   </div>
                 )}
 
