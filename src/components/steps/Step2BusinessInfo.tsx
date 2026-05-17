@@ -1868,7 +1868,7 @@ export const Step2BusinessInfo = () => {
 
       {/* User sections */}
       {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userLastName, userGender, detailedInfo.idNumber)}
-      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
+      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber, "", userWarEntities.includes("business") && !(serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing")))}
       {userHasNewNonprofit && renderNewNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasCompany && renderCompany(
