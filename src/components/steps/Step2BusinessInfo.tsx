@@ -1038,10 +1038,10 @@ export const Step2BusinessInfo = () => {
         </Select>
       </div>
 
-      {/* Business / partnership number – only shown for partnership */}
-      {info.ownershipType === "partnership" && (
+      {/* Business / partnership number */}
+      {info.ownershipType && (
         <div className="space-y-2">
-          <Label htmlFor={`${prefix}exBusinessNumber`}>מספר עוסק / שותפות</Label>
+          <Label htmlFor={`${prefix}exBusinessNumber`}>{info.ownershipType === "partnership" ? "מספר עוסק / שותפות" : "מספר עוסק"}</Label>
           <Input
             id={`${prefix}exBusinessNumber`}
             value={info.businessNumber || ""}
@@ -1052,7 +1052,7 @@ export const Step2BusinessInfo = () => {
 
       {info.ownershipType === "partnership" && !isWarOnly && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
 
-      {!isWarOnly && (
+      {info.ownershipType && !isWarOnly && (
         <div className="space-y-2">
           <Label>האם העסק מעסיק עובדים?</Label>
           <YesNoSelect value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} />
