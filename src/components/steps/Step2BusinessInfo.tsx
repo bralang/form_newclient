@@ -926,6 +926,9 @@ export const Step2BusinessInfo = () => {
       {info.businessType === "authorized" && (
         <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
           <Label className="text-base font-semibold">פרטי חשבון בנק של העסק *</Label>
+          <p className="text-sm text-muted-foreground">
+            לתשומת ליבך — ניתן לעדכן כל חשבון בנק של בעל העסק ואין חובה לפתוח חשבון נפרד לעסק, אם כי מומלץ.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1"><Label>בנק *</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} /></div>
             <div className="space-y-1"><Label>סניף *</Label><Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} /></div>
