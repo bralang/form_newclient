@@ -12,6 +12,10 @@ export const Step3Documents = () => {
     serviceType,
     businessInfo,
     spouseBusinessInfo,
+    nonprofitInfo,
+    setNonprofitInfo,
+    spouseNonprofitInfo,
+    setSpouseNonprofitInfo,
     documentsInfo,
     setDocumentsInfo,
     setCurrentStep,
@@ -218,6 +222,36 @@ export const Step3Documents = () => {
             )}
           </div>
         )}
+
+        {/* Nonprofit board members ID photos */}
+        {(["user", "spouse"] as const).map((who) => {
+          const info = who === "user" ? nonprofitInfo : spouseNonprofitInfo;
+          const setInfo = who === "user" ? setNonprofitInfo : setSpouseNonprofitInfo;
+          const purposes = who === "user" ? userPurposes : spousePurposes;
+          if (!purposes.includes("nonprofit")) return null;
+          const members = info.boardMembers || [];
+          if (members.length === 0) return null;
+          const ownerName = who === "user" ? personalInfo.firstName : personalInfo.spouseName;
+          return (
+            <div key={who} className="space-y-4 p-5 bg-muted/40 rounded-xl">
+              <h3 className="font-bold text-lg">
+                צילומי ת.ז. – חברי ועד עמותה חדשה{ownerName ? ` (${ownerName})` : ""}
+              </h3>
+              {members.map((m: any, idx: number) => (
+                <FileUpload
+                  key={idx}
+                  id={`${who}-board-${idx}-id`}
+                  label={`צילום ת.ז. + ספח של ${m.name || `חבר ועד #${idx + 1}`}`}
+                  onChange={(files) => {
+                    const updated = [...members];
+                    updated[idx] = { ...updated[idx], idFile: files?.[0] };
+                    setInfo({ boardMembers: updated });
+                  }}
+                />
+              ))}
+            </div>
+          );
+        })}
       </div>
 
       <FormNavigation
