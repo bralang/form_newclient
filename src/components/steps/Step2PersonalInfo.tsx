@@ -31,6 +31,13 @@ export const Step2PersonalInfo = () => {
   const hasAnyPurpose =
     serviceType.userPurposes.length > 0 || serviceType.spousePurposes.length > 0;
 
+  // If the only purpose the user has is opening a NEW nonprofit, skip personal ID/marital fields
+  const userOnlyNewNonprofit =
+    serviceType.userPurposes.length === 1 &&
+    serviceType.userPurposes[0] === "nonprofit" &&
+    (serviceType.userPurposeStatus?.nonprofit || []).length === 1 &&
+    (serviceType.userPurposeStatus?.nonprofit || [])[0] === "new";
+
   // Gov portal identification is relevant only for company purposes (nonprofit handled per board member)
   const userNeedsGovPortal =
     serviceType.userPurposes.includes("company");
@@ -192,6 +199,7 @@ export const Step2PersonalInfo = () => {
           </div>
         </div>
 
+        {!userOnlyNewNonprofit && (
         <div className="space-y-2">
           <Label>מצב משפחתי מפורט</Label>
           <Select
@@ -208,8 +216,10 @@ export const Step2PersonalInfo = () => {
             </SelectContent>
           </Select>
         </div>
+        )}
 
         {/* Additional ID - multi-select */}
+        {!userOnlyNewNonprofit && (
         <div className="space-y-3">
           <Label>אמצעי זיהוי נוסף *</Label>
           <div className="flex flex-wrap flex-row-reverse gap-3 justify-end">
@@ -262,6 +272,7 @@ export const Step2PersonalInfo = () => {
             </div>
           )}
         </div>
+        )}
 
         {/* Gov portal identification — only for company / nonprofit */}
         {userNeedsGovPortal && (
