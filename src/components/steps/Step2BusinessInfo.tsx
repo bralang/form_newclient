@@ -1534,7 +1534,6 @@ export const Step2BusinessInfo = () => {
                 <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} /></div>
                 <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} /></div>
                 <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
-                <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
                 <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
                 <div className="space-y-1"><Label>כתובת *</Label><Input value={member.address || ""} onChange={(e) => updateBoardMember(idx, "address", e.target.value)} placeholder="רחוב ומספר" /></div>
                 <div className="space-y-1"><Label>עיר *</Label><Input value={member.city || ""} onChange={(e) => updateBoardMember(idx, "city", e.target.value)} /></div>
