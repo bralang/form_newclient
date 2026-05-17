@@ -1162,7 +1162,7 @@ export const Step2BusinessInfo = () => {
         )}
 
         {/* Existing companies */}
-        {(info.existingCompanies || []).map((company: any, idx: number) => (
+        {hasExistingPurpose && existingCount > 0 && (info.existingCompanies || []).map((company: any, idx: number) => (
           <div key={`existing-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
             <h4 className="font-bold text-primary text-base">
               חברה קיימת #{idx + 1}{company.name ? ` – ${company.name}` : ""}
