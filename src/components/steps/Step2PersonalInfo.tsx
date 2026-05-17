@@ -31,6 +31,13 @@ export const Step2PersonalInfo = () => {
   const hasAnyPurpose =
     serviceType.userPurposes.length > 0 || serviceType.spousePurposes.length > 0;
 
+  // If the only purpose the user has is opening a NEW nonprofit, skip personal ID/marital fields
+  const userOnlyNewNonprofit =
+    serviceType.userPurposes.length === 1 &&
+    serviceType.userPurposes[0] === "nonprofit" &&
+    (serviceType.userPurposeStatus?.nonprofit || []).length === 1 &&
+    (serviceType.userPurposeStatus?.nonprofit || [])[0] === "new";
+
   // Gov portal identification is relevant only for company purposes (nonprofit handled per board member)
   const userNeedsGovPortal =
     serviceType.userPurposes.includes("company");
