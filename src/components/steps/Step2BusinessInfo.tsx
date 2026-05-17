@@ -1128,7 +1128,7 @@ export const Step2BusinessInfo = () => {
         </div>
 
         {/* Upfront names list for existing companies */}
-        {existingCount > 0 && (
+        {hasExistingPurpose && existingCount > 0 && (
           <div className="space-y-2 p-3 border border-border/60 rounded-lg bg-background/50">
             <Label className="font-semibold">שמות החברות הקיימות</Label>
             {(info.existingCompanies || []).map((company: any, idx: number) => (
