@@ -1888,7 +1888,9 @@ export const Step2BusinessInfo = () => {
         spouseInfo.idNumber,
         spouseInfo.phone,
         spouseInfo.email,
-        isMarried
+        isMarried,
+        "",
+        userWarEntities.includes("company")
       )}
 
       {/* Spouse sections */}
