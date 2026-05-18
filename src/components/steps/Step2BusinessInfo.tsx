@@ -155,11 +155,13 @@ const SelfViaCompanyBlock = ({
   onChange,
   parentCompanyName,
   isNewCompany,
+  fillerName = "אני",
 }: {
   data: any;
   onChange: (next: any) => void;
   parentCompanyName: string;
   isNewCompany: boolean;
+  fillerName?: string;
 }) => {
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
   const updatePerson = (patch: any) =>
