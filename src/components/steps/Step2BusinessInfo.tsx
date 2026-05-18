@@ -1664,6 +1664,7 @@ export const Step2BusinessInfo = () => {
     info: NonprofitInfo,
     setInfo: (d: Partial<NonprofitInfo>) => void,
     name: string,
+    isWarComp: boolean = false,
   ) => {
     const boardMembers = info.existingBoardMembers || [];
 
@@ -1704,17 +1705,19 @@ export const Step2BusinessInfo = () => {
           </div>
         </div>
 
-        {/* Tax file question - drives the entire flow */}
-        <div className="space-y-2">
-          <Label>האם לעמותה קיים תיק ברשות המיסים?</Label>
-          <YesNoSelect
-            value={info.hasTaxFile}
-            onChange={(v) => setInfo({ hasTaxFile: v })}
-          />
-        </div>
+        {/* Tax file question - drives the entire flow (hidden for war compensation: tax file is required) */}
+        {!isWarComp && (
+          <div className="space-y-2">
+            <Label>האם לעמותה קיים תיק ברשות המיסים?</Label>
+            <YesNoSelect
+              value={info.hasTaxFile}
+              onChange={(v) => setInfo({ hasTaxFile: v })}
+            />
+          </div>
+        )}
 
         {/* WITH tax file: only need full details of one representative board member */}
-        {info.hasTaxFile === true && (() => {
+        {(isWarComp || info.hasTaxFile === true) && (() => {
           const rep = info.representativeMember || ({} as NonNullable<NonprofitInfo["representativeMember"]>);
           const updateRep = (field: string, value: any) =>
             setInfo({ representativeMember: { ...(rep as any), [field]: value } });
@@ -1792,7 +1795,7 @@ export const Step2BusinessInfo = () => {
         })()}
 
         {/* WITHOUT tax file: need full details of all board members */}
-        {info.hasTaxFile === false && (
+        {!isWarComp && info.hasTaxFile === false && (
           <div className="space-y-4 mr-4">
             <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
               ℹ️ מאחר שאין תיק ברשות המיסים, נדרשים פרטים מלאים של כל חברי הועד (לפחות אחד נדרש להפקת ייצוג).
@@ -1869,7 +1872,7 @@ export const Step2BusinessInfo = () => {
       {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userLastName, userGender, detailedInfo.idNumber)}
       {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber, "", userWarEntities.includes("business"))}
       {userHasNewNonprofit && renderNewNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
-      {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
+      {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName, userWarEntities.includes("nonprofit"))}
       {userHasCompany && renderCompany(
         businessInfo,
         setBusinessInfo,
@@ -1889,7 +1892,7 @@ export const Step2BusinessInfo = () => {
       {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, "", spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_", spouseWarEntities.includes("business"))}
       {isMarried && spouseHasNewNonprofit && renderNewNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
-      {isMarried && spouseHasExistingNonprofit && renderExistingNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
+      {isMarried && spouseHasExistingNonprofit && renderExistingNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName, spouseWarEntities.includes("nonprofit"))}
       {isMarried && spouseHasCompany && renderCompany(
         spouseBusinessInfo,
         setSpouseBusinessInfo,
