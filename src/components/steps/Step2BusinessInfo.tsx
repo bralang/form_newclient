@@ -414,8 +414,7 @@ export const Step2BusinessInfo = () => {
           </div>
         )}
 
-        {/* Detailed partner groups */}
-        {partners.map((partner: any, idx: number) => {
+        {!isWarComp && partners.map((partner: any, idx: number) => {
           const isSelf = idx === 0;
           const displayName = isSelf ? selfName : partner.name;
           if (!displayName) return null;
