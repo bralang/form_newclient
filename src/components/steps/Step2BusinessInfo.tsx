@@ -73,7 +73,7 @@ const CompanyChainBlock = ({
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
       {depth > 0 && (
         <p className="text-xs text-muted-foreground">
-          חברה אב: <span className="font-semibold">{heldName}</span>
+          חברה אם: <span className="font-semibold">{heldName}</span>
         </p>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -149,6 +149,10 @@ const CompanyChainBlock = ({
   );
 };
 
+// Combine the prefix "ב" with a name, avoiding the double "ה" (ב + הX → בX).
+const withBet = (name: string) =>
+  name?.startsWith("ה") ? `ב${name.slice(1)}` : `ב${name}`;
+
 // "אני באמצעות חברה" outer block - the user holds the parent company via a holding company
 const SelfViaCompanyBlock = ({
   data,
@@ -156,26 +160,32 @@ const SelfViaCompanyBlock = ({
   parentCompanyName,
   isNewCompany,
   fillerName = "אני",
+  gender = "",
 }: {
   data: any;
   onChange: (next: any) => void;
   parentCompanyName: string;
   isNewCompany: boolean;
   fillerName?: string;
+  gender?: "male" | "female" | "";
 }) => {
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
   const updatePerson = (patch: any) =>
     onChange({ ...(data || {}), personOwner: { ...((data || {}).personOwner || {}), ...patch } });
   const subOwnerType = data?.subOwnerType || "self_via_company";
+  const holds = gender ? g(gender, "מחזיק", "מחזיקה") : "מחזיק/ה";
+  const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
+  const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
+  const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
 
   return (
     <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
       <p className="text-xs text-primary font-semibold">
-        {fillerName} מחזיק/ה ב{parentCompanyName} באמצעות חברה.
+        {fillerName} {holds} {withBet(parentCompanyName)} באמצעות חברה.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label>שם החברה דרכה אני מחזיק/ה *</Label>
+          <Label>שם החברה דרכה אני {holds} *</Label>
           <Input value={data?.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
         </div>
         <div className="space-y-1">
@@ -184,7 +194,7 @@ const SelfViaCompanyBlock = ({
         </div>
         {isNewCompany && (
           <div className="space-y-1">
-            <Label>אחוזי אחזקה ב{parentCompanyName} *</Label>
+            <Label>אחוזי אחזקה {withBet(parentCompanyName)} *</Label>
             <PercentageInput
               value={data?.percentage || ""}
               onChange={(value) => update({ percentage: value })}
@@ -195,7 +205,7 @@ const SelfViaCompanyBlock = ({
 
       <div className="space-y-2">
         <Label className="text-sm font-semibold">
-          סוג בעל המניות של {data?.companyName || "החברה דרכה אני מחזיק/ה"}
+          סוג בעל המניות של {data?.companyName || `החברה דרכה אני ${holds}`}
         </Label>
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
@@ -210,7 +220,7 @@ const SelfViaCompanyBlock = ({
 
       {subOwnerType === "self_via_company" && (
         <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm">{fillerName} הוא/היא בעל/ת המניות היחיד/ה של {data?.companyName || "החברה המחזיקה"}.</p>
+          <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {data?.companyName || "החברה המחזיקה"}.</p>
         </div>
       )}
 
