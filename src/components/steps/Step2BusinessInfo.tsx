@@ -1037,10 +1037,10 @@ export const Step2BusinessInfo = () => {
         </Select>
       </div>
 
-      {/* Business / partnership number */}
-      {info.ownershipType && (
+      {/* Business / partnership number – only shown for partnership */}
+      {info.ownershipType === "partnership" && (
         <div className="space-y-2">
-          <Label htmlFor={`${prefix}exBusinessNumber`}>{info.ownershipType === "partnership" ? "מספר עוסק / שותפות" : "מספר עוסק"}</Label>
+          <Label htmlFor={`${prefix}exBusinessNumber`}>מספר עוסק / שותפות</Label>
           <Input
             id={`${prefix}exBusinessNumber`}
             value={info.businessNumber || ""}
@@ -1051,15 +1051,12 @@ export const Step2BusinessInfo = () => {
 
       {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
 
-      {info.ownershipType && (
-        <div className="space-y-2">
-          <Label>האם העסק מעסיק עובדים?</Label>
-          <YesNoSelect value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} />
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label>האם העסק מעסיק עובדים?</Label>
+        <YesNoSelect value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} />
+      </div>
     </div>
   );
-
 
   // ─── Company (Purpose 4) ───
   const renderCompany = (
@@ -1867,7 +1864,7 @@ export const Step2BusinessInfo = () => {
 
       {/* User sections */}
       {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userLastName, userGender, detailedInfo.idNumber)}
-      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber, "")}
+      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
       {userHasNewNonprofit && renderNewNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasCompany && renderCompany(
