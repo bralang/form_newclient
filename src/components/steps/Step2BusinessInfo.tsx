@@ -1336,9 +1336,9 @@ export const Step2BusinessInfo = () => {
               >
                 <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="alone">אני לבד</SelectItem>
-                  <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
-                  <SelectItem value="other">ביחד עם אחר</SelectItem>
+                  <SelectItem value="alone">{name} לבד</SelectItem>
+                  <SelectItem value="self_via_company">{name} באמצעות חברה</SelectItem>
+                  <SelectItem value="other">{name} ביחד עם אחר</SelectItem>
                 </SelectContent>
               </Select>
             </div>
