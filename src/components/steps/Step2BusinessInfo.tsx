@@ -1872,7 +1872,7 @@ export const Step2BusinessInfo = () => {
       {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userLastName, userGender, detailedInfo.idNumber)}
       {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber, "", userWarEntities.includes("business"))}
       {userHasNewNonprofit && renderNewNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
-      {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
+      {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName, userWarEntities.includes("nonprofit"))}
       {userHasCompany && renderCompany(
         businessInfo,
         setBusinessInfo,
