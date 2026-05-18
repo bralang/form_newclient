@@ -1664,6 +1664,7 @@ export const Step2BusinessInfo = () => {
     info: NonprofitInfo,
     setInfo: (d: Partial<NonprofitInfo>) => void,
     name: string,
+    isWarComp: boolean = false,
   ) => {
     const boardMembers = info.existingBoardMembers || [];
 
