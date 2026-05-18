@@ -171,7 +171,7 @@ const SelfViaCompanyBlock = ({
   return (
     <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
       <p className="text-xs text-primary font-semibold">
-        אני (ממלא/ת השאלון) מחזיק/ה ב{parentCompanyName} באמצעות חברה.
+        {fillerName} מחזיק/ה ב{parentCompanyName} באמצעות חברה.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="space-y-1">
