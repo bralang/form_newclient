@@ -59,15 +59,22 @@ const CompanyChainBlock = ({
   onChange,
   heldName,
   depth = 0,
+  fillerName = "אני",
+  gender = "",
 }: {
   data: CompanyNode;
   onChange: (next: CompanyNode) => void;
   heldName: string; // name of the entity this company holds (for label)
   depth?: number;
+  fillerName?: string;
+  gender?: "male" | "female" | "";
 }) => {
   const update = (patch: Partial<CompanyNode>) => onChange({ ...data, ...patch });
   const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
   const subOwnerType = data.subOwnerType || "";
+  const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
+  const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
+  const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
