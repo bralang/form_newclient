@@ -351,7 +351,7 @@ export const Step2BusinessInfo = () => {
 
     return (
       <div className="space-y-5 mr-4">
-        {!isWarComp ? (
+        {!isWarComp && (
           <div className="space-y-2">
             <Label htmlFor={`${prefix}partnerCount`}>מספר שותפים (כולל אותך)</Label>
             <Input
@@ -359,17 +359,6 @@ export const Step2BusinessInfo = () => {
               type="text" inputMode="numeric" pattern="[0-9]*"
               value={partners.length || ""}
               onChange={(e) => handlePartnerCountChange(parseInt(e.target.value) || 0)}
-            />
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <Label htmlFor={`${prefix}partnershipNumber`}>מספר השותפות</Label>
-            <Input
-              id={`${prefix}partnershipNumber`}
-              type="text" inputMode="numeric" pattern="[0-9]*"
-              placeholder="מספר תיק השותפות במע״מ / רשם השותפויות"
-              value={info.partnershipNumber || ""}
-              onChange={(e) => setInfo({ partnershipNumber: e.target.value })}
             />
           </div>
         )}
