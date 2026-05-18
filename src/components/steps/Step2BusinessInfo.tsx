@@ -1911,7 +1911,8 @@ export const Step2BusinessInfo = () => {
         personalInfo.phone,
         personalInfo.email,
         true,
-        "sp_"
+        "sp_",
+        spouseWarEntities.includes("company")
       )}
 
       {/* War compensation - informational only with meeting CTA */}
