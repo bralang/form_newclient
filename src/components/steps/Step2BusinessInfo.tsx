@@ -1078,7 +1078,7 @@ export const Step2BusinessInfo = () => {
     info: any,
     setInfo: any,
     name: string,
-    _gender: "male" | "female" | "",
+    gender: "male" | "female" | "",
     selfIdNumber: string,
     selfPhone: string,
     selfEmail: string,
