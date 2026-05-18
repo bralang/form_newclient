@@ -155,11 +155,13 @@ const SelfViaCompanyBlock = ({
   onChange,
   parentCompanyName,
   isNewCompany,
+  fillerName = "אני",
 }: {
   data: any;
   onChange: (next: any) => void;
   parentCompanyName: string;
   isNewCompany: boolean;
+  fillerName?: string;
 }) => {
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
   const updatePerson = (patch: any) =>
@@ -169,7 +171,7 @@ const SelfViaCompanyBlock = ({
   return (
     <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
       <p className="text-xs text-primary font-semibold">
-        אני (ממלא/ת השאלון) מחזיק/ה ב{parentCompanyName} באמצעות חברה.
+        {fillerName} מחזיק/ה ב{parentCompanyName} באמצעות חברה.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="space-y-1">
@@ -198,17 +200,17 @@ const SelfViaCompanyBlock = ({
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="self_via_company">אני (לבד בחברה זו)</SelectItem>
+            <SelectItem value="self_via_company">{fillerName} (לבד בחברה זו)</SelectItem>
             <SelectItem value="person">אדם פרטי נוסף</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">ברירת מחדל: אני לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
+        <p className="text-xs text-muted-foreground">ברירת מחדל: {fillerName} לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
       </div>
 
       {subOwnerType === "self_via_company" && (
         <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm">אני (ממלא/ת השאלון) הוא בעל המניות היחיד של {data?.companyName || "החברה המחזיקה"}.</p>
+          <p className="text-sm">{fillerName} הוא/היא בעל/ת המניות היחיד/ה של {data?.companyName || "החברה המחזיקה"}.</p>
         </div>
       )}
 
@@ -1259,9 +1261,9 @@ export const Step2BusinessInfo = () => {
                   <SelectValue placeholder="בחר" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="alone">אני לבד</SelectItem>
-                  <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
-                  <SelectItem value="other">ביחד עם אחר</SelectItem>
+                  <SelectItem value="alone">{name} לבד</SelectItem>
+                  <SelectItem value="self_via_company">{name} באמצעות חברה</SelectItem>
+                  <SelectItem value="other">{name} ביחד עם אחר</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1272,6 +1274,7 @@ export const Step2BusinessInfo = () => {
                 onChange={(d) => updateExistingCompany(idx, "selfViaCompany", d)}
                 parentCompanyName={company.name || `החברה הקיימת #${idx + 1}`}
                 isNewCompany={false}
+                fillerName={name}
               />
             )}
 
@@ -1336,9 +1339,9 @@ export const Step2BusinessInfo = () => {
               >
                 <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="alone">אני לבד</SelectItem>
-                  <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
-                  <SelectItem value="other">ביחד עם אחר</SelectItem>
+                  <SelectItem value="alone">{name} לבד</SelectItem>
+                  <SelectItem value="self_via_company">{name} באמצעות חברה</SelectItem>
+                  <SelectItem value="other">{name} ביחד עם אחר</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1353,6 +1356,7 @@ export const Step2BusinessInfo = () => {
                 }}
                 parentCompanyName={company.requestedName1 || `החברה החדשה #${idx + 1}`}
                 isNewCompany={true}
+                fillerName={name}
               />
             )}
 
