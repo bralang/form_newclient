@@ -309,7 +309,8 @@ export const Step2BusinessInfo = () => {
     setInfo: any,
     selfName: string,
     selfIdNumber: string,
-    prefix = ""
+    prefix = "",
+    isWarComp = false
   ) => {
     const partners = info.partners || [];
 
@@ -360,7 +361,7 @@ export const Step2BusinessInfo = () => {
           />
         </div>
 
-        {partners.length > 0 && (
+        {!isWarComp && partners.length > 0 && (
           <div className="space-y-3 p-4 rounded-xl border-2 border-primary/30 bg-primary/5">
             <Label className="text-lg font-bold text-primary block">
               נציג השותפות למע״מ
@@ -413,8 +414,7 @@ export const Step2BusinessInfo = () => {
           </div>
         )}
 
-        {/* Detailed partner groups */}
-        {partners.map((partner: any, idx: number) => {
+        {!isWarComp && partners.map((partner: any, idx: number) => {
           const isSelf = idx === 0;
           const displayName = isSelf ? selfName : partner.name;
           if (!displayName) return null;
@@ -488,7 +488,7 @@ export const Step2BusinessInfo = () => {
         })}
 
         {/* Partnership agreement upload */}
-        {partners.length > 0 && (
+        {!isWarComp && partners.length > 0 && (
           <div className="space-y-2">
             <Label htmlFor={`${prefix}partnershipAgreement`}>צרף הסכם שותפות</Label>
             <p className="text-sm text-muted-foreground">מומלץ לצרף הסכם שותפות</p>
@@ -1017,7 +1017,8 @@ export const Step2BusinessInfo = () => {
     name: string,
     gender: "male" | "female" | "",
     idNumber: string,
-    prefix = ""
+    prefix = "",
+    isWarComp = false
   ) => (
     <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
       <h3 className="text-xl font-bold text-primary">
@@ -1049,7 +1050,7 @@ export const Step2BusinessInfo = () => {
         </div>
       )}
 
-      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
+      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix, isWarComp)}
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים?</Label>
@@ -1864,7 +1865,7 @@ export const Step2BusinessInfo = () => {
 
       {/* User sections */}
       {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userLastName, userGender, detailedInfo.idNumber)}
-      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber)}
+      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber, "", userWarEntities.includes("business"))}
       {userHasNewNonprofit && renderNewNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasCompany && renderCompany(
@@ -1884,7 +1885,7 @@ export const Step2BusinessInfo = () => {
 
       {/* Spouse sections */}
       {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, "", spouseGender, spouseInfo.idNumber, "sp_")}
-      {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_")}
+      {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_", spouseWarEntities.includes("business"))}
       {isMarried && spouseHasNewNonprofit && renderNewNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
       {isMarried && spouseHasExistingNonprofit && renderExistingNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
       {isMarried && spouseHasCompany && renderCompany(
