@@ -1,81 +1,54 @@
+## מטרה
 
-## שינוי מבנה בחירת המטרות - שלב 1 ושלב 2
+בתרחיש **פיצויי מלחמה ← עסק ← שותפות** להציג רק את שדה **"מספר השותפות"** (מזהה השותפות במע"מ/רשם השותפויות), ולא לאסוף מספר שותפים או פרטי שותפים.
 
-### מה ישתנה למשתמש
+## מצב נוכחי
 
-במקום 5 אפשרויות שטוחות (עסק חדש, עסק קיים, עמותה, חברה, החזר מס), המבנה החדש:
+ב־`Step2BusinessInfo.tsx` בתוך `renderPartnershipSection`:
+- כאשר `isWarComp = true` כבר מוסתרים: מסגרת נציג מע"מ, פרטי שותפים, צירוף הסכם שותפות.
+- אבל עדיין מוצג שדה **"מספר שותפים (כולל אותך)"** (שורות 354–362) שאינו רלוונטי בפיצויי מלחמה.
 
-**4 אפשרויות ראשיות:**
-1. עבור עסק עצמאי
-2. עבור חברה
-3. עבור עמותה
-4. להחזר מס
+## השינוי
 
-כשבוחרים אחת מ-3 הראשונות, נפתח מתחתיה שדה עם שתי אפשרויות: **חדש** או **קיים**.
-"להחזר מס" - ללא שאלת משנה.
+ב־`renderPartnershipSection`, לעטוף את בלוק "מספר שותפים" ב־`{!isWarComp && ...}`.
 
-למצב נשוי - שתי רשימות נפרדות (לא טבלה).
+במקומו, כאשר `isWarComp = true`, להציג שדה חדש:
+- **תווית:** "מספר השותפות"
+- **placeholder/הסבר:** "מספר תיק השותפות במע״מ / רשם השותפויות"
+- **קלט:** טקסט מספרי בלבד (`inputMode="numeric"`, ספרות), נשמר כ־`info.partnershipNumber`.
 
-### מיפוי לוגיקה
+כך בתרחיש פיצויי מלחמה + עסק + שותפות יוצג רק שדה בודד אחד: "מספר השותפות".
 
-הלוגיקה הקיימת בשלב 2 נשארת זהה, רק הדרך לזהות אותה משתנה:
+## פירוט טכני
 
-```text
-עסק עצמאי + חדש  -->  כמו "new_business" הנוכחי (renderNewBusiness)
-עסק עצמאי + קיים -->  כמו "existing_business" הנוכחי (renderExistingBusiness)
-חברה + חדש/קיים  -->  כמו "company" הנוכחי (renderCompany)
-עמותה + חדש/קיים -->  כמו "nonprofit" הנוכחי (renderNonprofitMessage)
-להחזר מס         -->  כמו "tax_refund" הנוכחי (ללא שדות עסקיים)
-```
+קובץ: `src/components/steps/Step2BusinessInfo.tsx`
 
-### פירוט טכני
+1. בשורות 353–362, להפוך את הבלוק לתנאי:
+   ```tsx
+   {!isWarComp ? (
+     <div className="space-y-2">
+       <Label htmlFor={`${prefix}partnerCount`}>מספר שותפים (כולל אותך)</Label>
+       <Input ... />
+     </div>
+   ) : (
+     <div className="space-y-2">
+       <Label htmlFor={`${prefix}partnershipNumber`}>מספר השותפות</Label>
+       <Input
+         id={`${prefix}partnershipNumber`}
+         type="text" inputMode="numeric" pattern="[0-9]*"
+         placeholder="מספר תיק השותפות במע״מ / רשם השותפויות"
+         value={info.partnershipNumber || ""}
+         onChange={(e) => setInfo({ partnershipNumber: e.target.value })}
+       />
+     </div>
+   )}
+   ```
 
-#### 1. FormContext.tsx
+2. אין צורך בשינוי ב־`FormContext` – הערך נשמר תחת אותו `businessInfo`/`spouseBusinessInfo` כשדה דינמי `partnershipNumber` (כפי שכבר עובדים שדות אחרים שם). אם רוצים typing מפורש, נוסיף שדה אופציונלי `partnershipNumber?: string` ל־interface הרלוונטי.
 
-הוספת שדות חדשים ל-`ServiceType`:
-```typescript
-export interface ServiceType {
-  userPurposes: string[];        // ["business", "company", "tax_refund"]
-  spousePurposes: string[];
-  userPurposeStatus: Record<string, "new" | "existing">;    // { business: "new" }
-  spousePurposeStatus: Record<string, "new" | "existing">;
-}
-```
+3. השדה ייכלל אוטומטית בפיילואד שנשלח לוובהוק n8n כחלק מאובייקט ה־businessInfo.
 
-עדכון ה-initial state להוסיף `userPurposeStatus: {}` ו-`spousePurposeStatus: {}`.
-עדכון session storage save/load בהתאם.
+## מה לא משתנה
 
-#### 2. Step1Purpose.tsx
-
-- שינוי רשימת PURPOSES:
-  - `business` - "עבור עסק עצמאי" (hasSubStatus: true)
-  - `company` - "עבור חברה" (hasSubStatus: true)
-  - `nonprofit` - "עבור עמותה" (hasSubStatus: true)
-  - `tax_refund` - "להחזר מס" (hasSubStatus: false)
-
-- כשבוחרים אפשרות עם hasSubStatus, נפתח מתחתיה RadioGroup עם "חדש" / "קיים"
-- כשמבטלים בחירה, מוחקים את הסטטוס שלה מ-purposeStatus
-- למצב נשוי: שתי רשימות checkbox נפרדות עם כותרות (שם המשתמש / שם בן הזוג) במקום טבלה
-
-#### 3. Step2BusinessInfo.tsx
-
-שינוי הבדיקות בשורות 23-31 מ:
-```typescript
-const userHasNewBusiness = serviceType.userPurposes.includes("new_business");
-const userHasExistingBusiness = serviceType.userPurposes.includes("existing_business");
-```
-ל:
-```typescript
-const userHasNewBusiness = serviceType.userPurposes.includes("business") 
-  && serviceType.userPurposeStatus?.business === "new";
-const userHasExistingBusiness = serviceType.userPurposes.includes("business") 
-  && serviceType.userPurposeStatus?.business === "existing";
-```
-
-אותו דבר לבן/בת זוג עם `spousePurposeStatus`.
-
-ה-render functions עצמן (renderNewBusiness, renderExistingBusiness, renderCompany, renderNonprofitMessage) נשארות בדיוק כמו שהן - רק הבדיקות שמפעילות אותן משתנות.
-
-#### 4. קבצים נוספים שעשויים להשתנות
-
-בדיקה אם יש התייחסויות ל-`new_business` / `existing_business` בקבצים אחרים (Step3Documents, Step4Completion) - ועדכונן בהתאם לשמות החדשים.
+- ההתנהגות בכל יתר התרחישים (לא־פיצויי־מלחמה) נשארת זהה: שדה "מספר שותפים" + פרטי שותפים + נציג מע"מ + הסכם שותפות.
+- שמות שדות קיימים, ולידציות וניווט לא משתנים.
