@@ -1017,7 +1017,8 @@ export const Step2BusinessInfo = () => {
     name: string,
     gender: "male" | "female" | "",
     idNumber: string,
-    prefix = ""
+    prefix = "",
+    isWarComp = false
   ) => (
     <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
       <h3 className="text-xl font-bold text-primary">
