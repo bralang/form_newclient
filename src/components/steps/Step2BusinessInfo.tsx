@@ -210,7 +210,7 @@ const SelfViaCompanyBlock = ({
 
       {subOwnerType === "self_via_company" && (
         <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm">אני (ממלא/ת השאלון) הוא בעל המניות היחיד של {data?.companyName || "החברה המחזיקה"}.</p>
+          <p className="text-sm">{fillerName} הוא/היא בעל/ת המניות היחיד/ה של {data?.companyName || "החברה המחזיקה"}.</p>
         </div>
       )}
 
