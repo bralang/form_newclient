@@ -1075,7 +1075,8 @@ export const Step2BusinessInfo = () => {
     spousePhone: string,
     spouseEmail: string,
     showSpouseOption: boolean,
-    prefix = ""
+    prefix = "",
+    isWarComp: boolean = false
   ) => {
     const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing") || userWarEntities.includes("company") || spouseWarEntities.includes("company");
     const hasNewPurpose = serviceType.userPurposeStatus?.company?.includes("new") || serviceType.spousePurposeStatus?.company?.includes("new");
@@ -1187,16 +1188,18 @@ export const Step2BusinessInfo = () => {
               </div>
             </div>
 
-            {/* Tax file question */}
-            <div className="space-y-2">
-              <Label>האם יש לחברה תיק ברשות המיסים?</Label>
-              <YesNoSelect
-                value={company.hasTaxFile}
-                onChange={(v) => updateExistingCompany(idx, "hasTaxFile", v)}
-              />
-            </div>
+            {/* Tax file question (hidden for war compensation: tax file is required) */}
+            {!isWarComp && (
+              <div className="space-y-2">
+                <Label>האם יש לחברה תיק ברשות המיסים?</Label>
+                <YesNoSelect
+                  value={company.hasTaxFile}
+                  onChange={(v) => updateExistingCompany(idx, "hasTaxFile", v)}
+                />
+              </div>
+            )}
 
-            {company.hasTaxFile === false && (
+            {!isWarComp && company.hasTaxFile === false && (
               <div className="space-y-4 mr-4">
                 {/* Bank account */}
                 <div className="space-y-2">
@@ -1885,7 +1888,9 @@ export const Step2BusinessInfo = () => {
         spouseInfo.idNumber,
         spouseInfo.phone,
         spouseInfo.email,
-        isMarried
+        isMarried,
+        "",
+        userWarEntities.includes("company")
       )}
 
       {/* Spouse sections */}
@@ -1906,7 +1911,8 @@ export const Step2BusinessInfo = () => {
         personalInfo.phone,
         personalInfo.email,
         true,
-        "sp_"
+        "sp_",
+        spouseWarEntities.includes("company")
       )}
 
       {/* War compensation - informational only with meeting CTA */}
