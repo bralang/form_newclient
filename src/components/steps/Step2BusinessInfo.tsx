@@ -1075,7 +1075,8 @@ export const Step2BusinessInfo = () => {
     spousePhone: string,
     spouseEmail: string,
     showSpouseOption: boolean,
-    prefix = ""
+    prefix = "",
+    isWarComp: boolean = false
   ) => {
     const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing") || userWarEntities.includes("company") || spouseWarEntities.includes("company");
     const hasNewPurpose = serviceType.userPurposeStatus?.company?.includes("new") || serviceType.spousePurposeStatus?.company?.includes("new");
