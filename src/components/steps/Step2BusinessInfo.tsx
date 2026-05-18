@@ -1274,6 +1274,7 @@ export const Step2BusinessInfo = () => {
                 onChange={(d) => updateExistingCompany(idx, "selfViaCompany", d)}
                 parentCompanyName={company.name || `החברה הקיימת #${idx + 1}`}
                 isNewCompany={false}
+                fillerName={name}
               />
             )}
 
