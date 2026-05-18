@@ -1017,8 +1017,7 @@ export const Step2BusinessInfo = () => {
     name: string,
     gender: "male" | "female" | "",
     idNumber: string,
-    prefix = "",
-    isWarOnly = false
+    prefix = ""
   ) => (
     <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
       <h3 className="text-xl font-bold text-primary">
@@ -1050,9 +1049,9 @@ export const Step2BusinessInfo = () => {
         </div>
       )}
 
-      {info.ownershipType === "partnership" && !isWarOnly && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
+      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
 
-      {info.ownershipType && !isWarOnly && (
+      {info.ownershipType && (
         <div className="space-y-2">
           <Label>האם העסק מעסיק עובדים?</Label>
           <YesNoSelect value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} />
@@ -1868,7 +1867,7 @@ export const Step2BusinessInfo = () => {
 
       {/* User sections */}
       {userHasNewBusiness && renderNewBusiness(businessInfo, setBusinessInfo, userName, userLastName, userGender, detailedInfo.idNumber)}
-      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber, "", userWarEntities.includes("business") && !(serviceType.userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing")))}
+      {userHasExistingBusiness && renderExistingBusiness(businessInfo, setBusinessInfo, userName, userGender, detailedInfo.idNumber, "")}
       {userHasNewNonprofit && renderNewNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasExistingNonprofit && renderExistingNonprofit(nonprofitInfo, setNonprofitInfo, userName)}
       {userHasCompany && renderCompany(
@@ -1888,7 +1887,7 @@ export const Step2BusinessInfo = () => {
 
       {/* Spouse sections */}
       {isMarried && spouseHasNewBusiness && renderNewBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, "", spouseGender, spouseInfo.idNumber, "sp_")}
-      {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_", spouseWarEntities.includes("business") && !(serviceType.spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing")))}
+      {isMarried && spouseHasExistingBusiness && renderExistingBusiness(spouseBusinessInfo, setSpouseBusinessInfo, spouseName, spouseGender, spouseInfo.idNumber, "sp_")}
       {isMarried && spouseHasNewNonprofit && renderNewNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
       {isMarried && spouseHasExistingNonprofit && renderExistingNonprofit(spouseNonprofitInfo, setSpouseNonprofitInfo, spouseName)}
       {isMarried && spouseHasCompany && renderCompany(
