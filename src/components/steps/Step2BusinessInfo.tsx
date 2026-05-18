@@ -1263,9 +1263,9 @@ export const Step2BusinessInfo = () => {
               </div>
             )}
 
-            {/* Shareholders - always shown for existing companies */}
+            {/* Shareholders - simplified for existing companies: only filler details needed */}
             <div className="space-y-2">
-              <Label>מי בעלי המניות בחברה?</Label>
+              <Label>פרטי אחד מבעלי המניות</Label>
               <Select
                 value={company.shareholderType || ""}
                 onValueChange={(v) => updateExistingCompany(idx, "shareholderType", v)}
@@ -1274,9 +1274,8 @@ export const Step2BusinessInfo = () => {
                   <SelectValue placeholder="בחר" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="alone">{name} לבד</SelectItem>
+                  <SelectItem value="alone">{name} לבד או ביחד עם אחר</SelectItem>
                   <SelectItem value="self_via_company">{name} באמצעות חברה</SelectItem>
-                  <SelectItem value="other">{name} ביחד עם אחר</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1290,28 +1289,6 @@ export const Step2BusinessInfo = () => {
                 fillerName={name}
                 gender={gender}
               />
-            )}
-
-            {company.shareholderType === "other" && renderShareholdersSection(
-              company,
-              (field: string, value: any) => updateExistingCompany(idx, field, value),
-              (updates: Record<string, any>) => {
-                const updated = [...(info.existingCompanies || [])];
-                updated[idx] = { ...updated[idx], ...updates };
-                setInfo({ existingCompanies: updated });
-              },
-              name,
-              selfIdNumber,
-              selfPhone,
-              selfEmail,
-              spouseDisplayName,
-              spouseIdNumber,
-              spousePhone,
-              spouseEmail,
-              showSpouseOption,
-              `${prefix}existing_${idx}_`,
-              false,
-              company.name || `החברה הקיימת #${idx + 1}`
             )}
           </div>
         ))}
