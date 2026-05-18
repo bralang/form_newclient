@@ -1356,6 +1356,7 @@ export const Step2BusinessInfo = () => {
                 }}
                 parentCompanyName={company.requestedName1 || `החברה החדשה #${idx + 1}`}
                 isNewCompany={true}
+                fillerName={name}
               />
             )}
 
