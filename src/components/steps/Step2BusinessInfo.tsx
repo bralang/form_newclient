@@ -200,12 +200,12 @@ const SelfViaCompanyBlock = ({
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="self_via_company">אני (לבד בחברה זו)</SelectItem>
+            <SelectItem value="self_via_company">{fillerName} (לבד בחברה זו)</SelectItem>
             <SelectItem value="person">אדם פרטי נוסף</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">ברירת מחדל: אני לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
+        <p className="text-xs text-muted-foreground">ברירת מחדל: {fillerName} לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
       </div>
 
       {subOwnerType === "self_via_company" && (
