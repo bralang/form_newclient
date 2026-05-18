@@ -40,7 +40,7 @@ const PercentageInput = ({
 type CompanyNode = {
   companyName?: string;
   companyNumber?: string;
-  subOwnerType?: "person" | "company" | "self_via_company" | "";
+  subOwnerType?: "person" | "company" | "self_via_company" | "self" | "";
   personOwner?: {
     name?: string;
     idNumber?: string;
