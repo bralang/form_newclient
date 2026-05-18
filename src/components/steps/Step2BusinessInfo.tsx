@@ -1795,7 +1795,7 @@ export const Step2BusinessInfo = () => {
         })()}
 
         {/* WITHOUT tax file: need full details of all board members */}
-        {info.hasTaxFile === false && (
+        {!isWarComp && info.hasTaxFile === false && (
           <div className="space-y-4 mr-4">
             <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm text-muted-foreground">
               ℹ️ מאחר שאין תיק ברשות המיסים, נדרשים פרטים מלאים של כל חברי הועד (לפחות אחד נדרש להפקת ייצוג).
