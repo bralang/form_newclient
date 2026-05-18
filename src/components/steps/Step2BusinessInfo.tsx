@@ -99,21 +99,12 @@ const CompanyChainBlock = ({
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="self">{fillerName}</SelectItem>
             <SelectItem value="person">אדם פרטי</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
             <SelectItem value="self_via_company">{fillerName} באמצעות חברה</SelectItem>
           </SelectContent>
         </Select>
       </div>
-
-      {subOwnerType === "self" && (
-        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm">
-            {fillerName} {heShe} {owner} המניות {sole} של {data.companyName || "החברה המחזיקה"}.
-          </p>
-        </div>
-      )}
 
       {subOwnerType === "person" && (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
