@@ -361,7 +361,7 @@ export const Step2BusinessInfo = () => {
           />
         </div>
 
-        {partners.length > 0 && (
+        {!isWarComp && partners.length > 0 && (
           <div className="space-y-3 p-4 rounded-xl border-2 border-primary/30 bg-primary/5">
             <Label className="text-lg font-bold text-primary block">
               נציג השותפות למע״מ
