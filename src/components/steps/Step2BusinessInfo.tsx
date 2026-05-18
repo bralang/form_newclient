@@ -1705,17 +1705,19 @@ export const Step2BusinessInfo = () => {
           </div>
         </div>
 
-        {/* Tax file question - drives the entire flow */}
-        <div className="space-y-2">
-          <Label>האם לעמותה קיים תיק ברשות המיסים?</Label>
-          <YesNoSelect
-            value={info.hasTaxFile}
-            onChange={(v) => setInfo({ hasTaxFile: v })}
-          />
-        </div>
+        {/* Tax file question - drives the entire flow (hidden for war compensation: tax file is required) */}
+        {!isWarComp && (
+          <div className="space-y-2">
+            <Label>האם לעמותה קיים תיק ברשות המיסים?</Label>
+            <YesNoSelect
+              value={info.hasTaxFile}
+              onChange={(v) => setInfo({ hasTaxFile: v })}
+            />
+          </div>
+        )}
 
         {/* WITH tax file: only need full details of one representative board member */}
-        {info.hasTaxFile === true && (() => {
+        {(isWarComp || info.hasTaxFile === true) && (() => {
           const rep = info.representativeMember || ({} as NonNullable<NonprofitInfo["representativeMember"]>);
           const updateRep = (field: string, value: any) =>
             setInfo({ representativeMember: { ...(rep as any), [field]: value } });
