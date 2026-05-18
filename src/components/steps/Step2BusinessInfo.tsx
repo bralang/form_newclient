@@ -488,7 +488,7 @@ export const Step2BusinessInfo = () => {
         })}
 
         {/* Partnership agreement upload */}
-        {partners.length > 0 && (
+        {!isWarComp && partners.length > 0 && (
           <div className="space-y-2">
             <Label htmlFor={`${prefix}partnershipAgreement`}>צרף הסכם שותפות</Label>
             <p className="text-sm text-muted-foreground">מומלץ לצרף הסכם שותפות</p>
