@@ -309,7 +309,8 @@ export const Step2BusinessInfo = () => {
     setInfo: any,
     selfName: string,
     selfIdNumber: string,
-    prefix = ""
+    prefix = "",
+    isWarComp = false
   ) => {
     const partners = info.partners || [];
 
