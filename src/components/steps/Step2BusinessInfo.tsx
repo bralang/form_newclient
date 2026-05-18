@@ -253,6 +253,8 @@ const SelfViaCompanyBlock = ({
           onChange={(c) => update({ childCompany: c })}
           heldName={data?.companyName || "החברה המחזיקה"}
           depth={1}
+          fillerName={fillerName}
+          gender={gender}
         />
       )}
     </div>
