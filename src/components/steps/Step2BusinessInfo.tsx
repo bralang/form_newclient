@@ -40,7 +40,7 @@ const PercentageInput = ({
 type CompanyNode = {
   companyName?: string;
   companyNumber?: string;
-  subOwnerType?: "person" | "company" | "self_via_company" | "";
+  subOwnerType?: "person" | "company" | "self_via_company" | "self" | "";
   personOwner?: {
     name?: string;
     idNumber?: string;
@@ -59,15 +59,22 @@ const CompanyChainBlock = ({
   onChange,
   heldName,
   depth = 0,
+  fillerName = "אני",
+  gender = "",
 }: {
   data: CompanyNode;
   onChange: (next: CompanyNode) => void;
   heldName: string; // name of the entity this company holds (for label)
   depth?: number;
+  fillerName?: string;
+  gender?: "male" | "female" | "";
 }) => {
   const update = (patch: Partial<CompanyNode>) => onChange({ ...data, ...patch });
   const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
   const subOwnerType = data.subOwnerType || "";
+  const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
+  const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
+  const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
@@ -92,12 +99,21 @@ const CompanyChainBlock = ({
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="self">{fillerName}</SelectItem>
             <SelectItem value="person">אדם פרטי</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
-            <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
+            <SelectItem value="self_via_company">{fillerName} באמצעות חברה</SelectItem>
           </SelectContent>
         </Select>
       </div>
+
+      {subOwnerType === "self" && (
+        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+          <p className="text-sm">
+            {fillerName} {heShe} {owner} המניות {sole} של {data.companyName || "החברה המחזיקה"}.
+          </p>
+        </div>
+      )}
 
       {subOwnerType === "person" && (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
@@ -129,20 +145,14 @@ const CompanyChainBlock = ({
         </div>
       )}
 
-      {subOwnerType === "self_via_company" && (
-        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm">
-            אני (ממלא/ת השאלון) הוא בעל המניות הסופי של {data.companyName || "החברה המחזיקה"}.
-          </p>
-        </div>
-      )}
-
-      {subOwnerType === "company" && (
+      {(subOwnerType === "company" || subOwnerType === "self_via_company") && (
         <CompanyChainBlock
           data={data.childCompany || {}}
           onChange={(c) => update({ childCompany: c })}
           heldName={data.companyName || "החברה הקודמת"}
           depth={depth + 1}
+          fillerName={fillerName}
+          gender={gender}
         />
       )}
     </div>
@@ -243,6 +253,8 @@ const SelfViaCompanyBlock = ({
           onChange={(c) => update({ childCompany: c })}
           heldName={data?.companyName || "החברה המחזיקה"}
           depth={1}
+          fillerName={fillerName}
+          gender={gender}
         />
       )}
     </div>
