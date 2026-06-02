@@ -36,6 +36,63 @@ const PercentageInput = ({
   </div>
 );
 
+// Checkbox-style option card (replaces radio/Select for shareholder type)
+const OptionCard = ({
+  label,
+  selected,
+  onClick,
+  description,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+  description?: string;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`w-full text-right p-3 rounded-xl border-2 transition-all flex items-center gap-3 ${
+      selected
+        ? "border-primary bg-primary/10 shadow-sm"
+        : "border-border bg-card hover:border-primary/40"
+    }`}
+  >
+    <span
+      className={`shrink-0 w-6 h-6 rounded-md border-2 flex items-center justify-center ${
+        selected ? "bg-primary border-primary text-primary-foreground" : "border-muted-foreground/40"
+      }`}
+    >
+      {selected && <span className="text-sm font-bold">✓</span>}
+    </span>
+    <span className="flex-1">
+      <span className={`block text-base font-bold ${selected ? "text-primary" : ""}`}>{label}</span>
+      {description && <span className="block text-xs text-muted-foreground mt-0.5">{description}</span>}
+    </span>
+  </button>
+);
+
+const OptionCardGroup = ({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: string; label: string; description?: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) => (
+  <div className="grid grid-cols-1 gap-2">
+    {options.map((opt) => (
+      <OptionCard
+        key={opt.value}
+        label={opt.label}
+        description={opt.description}
+        selected={value === opt.value}
+        onClick={() => onChange(opt.value)}
+      />
+    ))}
+  </div>
+);
+
 // Recursive block representing a holding company (and who owns it)
 type CompanyNode = {
   companyName?: string;
