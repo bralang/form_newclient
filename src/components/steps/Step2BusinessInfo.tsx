@@ -1417,22 +1417,20 @@ export const Step2BusinessInfo = () => {
 
             {/* Shareholders */}
             <div className="space-y-2">
-              <Label>מי יהיו בעלי המניות בחברה?</Label>
-              <Select
+              <Label className="text-base font-semibold">מי יהיו בעלי המניות בחברה?</Label>
+              <OptionCardGroup
                 value={company.shareholderType || ""}
-                onValueChange={(v) => {
+                onChange={(v) => {
                   const updated = [...(info.newCompanies || [])];
                   updated[idx] = { ...updated[idx], shareholderType: v };
                   setInfo({ newCompanies: updated });
                 }}
-              >
-                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alone">{name} לבד</SelectItem>
-                  <SelectItem value="self_via_company">{name} באמצעות חברה</SelectItem>
-                  <SelectItem value="other">{name} ביחד עם אחר</SelectItem>
-                </SelectContent>
-              </Select>
+                options={[
+                  { value: "alone", label: `${name} ישירות – 100% אחזקה`, description: "ממלא/ת השאלון מחזיק/ה בכל המניות ישירות" },
+                  { value: "self_via_company", label: `${name} באמצעות חברה`, description: "חברת אחזקות שמחזיקה בחברה החדשה" },
+                  { value: "other", label: `${name} יחד עם אחר`, description: "ביחד עם אדם פרטי או חברה נוספת" },
+                ]}
+              />
             </div>
 
             {company.shareholderType === "self_via_company" && (
