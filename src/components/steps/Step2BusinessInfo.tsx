@@ -118,20 +118,24 @@ const CompanyChainBlock = ({
   depth = 0,
   fillerName = "אני",
   gender = "",
+  chainAllowsNewCompany = false,
 }: {
-  data: CompanyNode;
-  onChange: (next: CompanyNode) => void;
-  heldName: string; // name of the entity this company holds (for label)
+  data: CompanyNode & { isExistingCompany?: boolean };
+  onChange: (next: CompanyNode & { isExistingCompany?: boolean }) => void;
+  heldName: string;
   depth?: number;
   fillerName?: string;
   gender?: "male" | "female" | "";
+  chainAllowsNewCompany?: boolean;
 }) => {
-  const update = (patch: Partial<CompanyNode>) => onChange({ ...data, ...patch });
+  const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean }>) =>
+    onChange({ ...data, ...patch });
   const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
   const subOwnerType = data.subOwnerType || "";
   const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
   const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
   const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
+  const isExistingCompany = chainAllowsNewCompany ? (data.isExistingCompany ?? true) : true;
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
@@ -140,27 +144,45 @@ const CompanyChainBlock = ({
           חברה אם: <span className="font-semibold">{heldName}</span>
         </p>
       )}
+
+      {chainAllowsNewCompany && (
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">האם החברה המחזיקה כבר קיימת או טרם הוקמה?</Label>
+          <OptionCardGroup
+            value={isExistingCompany ? "existing" : "new"}
+            onChange={(v) => update({ isExistingCompany: v === "existing" })}
+            options={[
+              { value: "existing", label: "חברה קיימת (רשומה ברשם החברות)" },
+              { value: "new", label: "חברה חדשה (טרם הוקמה)" },
+            ]}
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label>שם החברה המחזיקה את {heldName} *</Label>
           <Input value={data.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
         </div>
-        <div className="space-y-1">
-          <Label>ח.פ. *</Label>
-          <Input value={data.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
-        </div>
+        {isExistingCompany && (
+          <div className="space-y-1">
+            <Label>ח.פ. *</Label>
+            <Input value={data.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
-        <Label>סוג בעל המניות של {data.companyName || "החברה המחזיקה"}</Label>
-        <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
-          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="person">אדם פרטי</SelectItem>
-            <SelectItem value="company">חברה</SelectItem>
-            <SelectItem value="self_via_company">{fillerName} באמצעות חברה</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label className="text-sm font-semibold">סוג בעל המניות של {data.companyName || "החברה המחזיקה"}</Label>
+        <OptionCardGroup
+          value={subOwnerType}
+          onChange={(v) => update({ subOwnerType: v as any })}
+          options={[
+            { value: "person", label: "אדם פרטי" },
+            { value: "company", label: "חברה" },
+            { value: "self_via_company", label: `${fillerName} באמצעות חברה` },
+          ]}
+        />
       </div>
 
       {subOwnerType === "person" && (
@@ -201,6 +223,7 @@ const CompanyChainBlock = ({
           depth={depth + 1}
           fillerName={fillerName}
           gender={gender}
+          chainAllowsNewCompany={chainAllowsNewCompany}
         />
       )}
     </div>
@@ -235,21 +258,41 @@ const SelfViaCompanyBlock = ({
   const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
   const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
   const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
+  // For NEW parent company: the holding company can be "new (not yet established)".
+  // For EXISTING parent: the entire chain must consist of existing companies.
+  const isExistingHolding = isNewCompany ? (data?.isExistingCompany ?? true) : true;
 
   return (
     <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
       <p className="text-xs text-primary font-semibold">
         {fillerName} {holds} {withBet(parentCompanyName)} באמצעות חברה.
       </p>
+
+      {isNewCompany && (
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">האם חברת האחזקות כבר קיימת או טרם הוקמה?</Label>
+          <OptionCardGroup
+            value={isExistingHolding ? "existing" : "new"}
+            onChange={(v) => update({ isExistingCompany: v === "existing" })}
+            options={[
+              { value: "existing", label: "חברה קיימת (רשומה ברשם החברות)" },
+              { value: "new", label: "חברה חדשה (טרם הוקמה)" },
+            ]}
+          />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label>שם החברה דרכה אני {holds} *</Label>
           <Input value={data?.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
         </div>
-        <div className="space-y-1">
-          <Label>ח.פ. *</Label>
-          <Input value={data?.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
-        </div>
+        {isExistingHolding && (
+          <div className="space-y-1">
+            <Label>ח.פ. *</Label>
+            <Input value={data?.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
+          </div>
+        )}
         {isNewCompany && (
           <div className="space-y-1">
             <Label>אחוזי אחזקה {withBet(parentCompanyName)} *</Label>
@@ -265,14 +308,15 @@ const SelfViaCompanyBlock = ({
         <Label className="text-sm font-semibold">
           סוג בעל המניות של {data?.companyName || `החברה דרכה אני ${holds}`}
         </Label>
-        <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
-          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="self_via_company">{fillerName} (לבד בחברה זו)</SelectItem>
-            <SelectItem value="person">אדם פרטי נוסף</SelectItem>
-            <SelectItem value="company">חברה</SelectItem>
-          </SelectContent>
-        </Select>
+        <OptionCardGroup
+          value={subOwnerType}
+          onChange={(v) => update({ subOwnerType: v as any })}
+          options={[
+            { value: "self_via_company", label: `${fillerName} (לבד בחברה זו)` },
+            { value: "person", label: "אדם פרטי נוסף" },
+            { value: "company", label: "חברה" },
+          ]}
+        />
         <p className="text-xs text-muted-foreground">ברירת מחדל: {fillerName} לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
       </div>
 
@@ -303,6 +347,7 @@ const SelfViaCompanyBlock = ({
           depth={1}
           fillerName={fillerName}
           gender={gender}
+          chainAllowsNewCompany={isNewCompany}
         />
       )}
     </div>
