@@ -176,6 +176,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                 <a href="tel:0533160990" className="block text-base font-bold text-primary hover:underline">טל׳ 0533160990</a>
                 <a href="mailto:teder@chasida.biz" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
               </div>
+              </div>
             </div>
           </div>
 
