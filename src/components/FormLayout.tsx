@@ -4,6 +4,7 @@ import { Check, Music, Info, X, Sparkles } from "lucide-react";
 import mascot from "@/assets/mascot.png";
 import logo from "@/assets/logo.png";
 import linkupLogo from "@/assets/linkup-logo.png";
+import { OwnershipTree } from "@/components/OwnershipTree";
 
 const steps = [
   { number: 1, title: "ככה מתחילים לנגן…" },
