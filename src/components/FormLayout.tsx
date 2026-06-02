@@ -221,6 +221,9 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
 
           {/* Mobile: Form Content */}
           <div className="lg:hidden p-4 md:p-8">
+            <div className="mb-4">
+              <OwnershipTree compact />
+            </div>
             <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
               {children}
             </div>
