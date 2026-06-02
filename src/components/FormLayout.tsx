@@ -4,6 +4,7 @@ import { Check, Music, Info, X, Sparkles } from "lucide-react";
 import mascot from "@/assets/mascot.png";
 import logo from "@/assets/logo.png";
 import linkupLogo from "@/assets/linkup-logo.png";
+import { OwnershipTree } from "@/components/OwnershipTree";
 
 const steps = [
   { number: 1, title: "ככה מתחילים לנגן…" },
@@ -139,9 +140,15 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               </div>
             </div>
 
-            {/* Left Panel - Mascot + Contact + Attention (pinned to bottom) */}
-            <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col justify-end p-6 pb-10 gap-5">
-              {/* Attention Button - hidden on step 1 */}
+            {/* Left Panel - Ownership Tree (step 2 only) + Mascot + Contact + Attention */}
+            <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col p-6 pb-10 gap-4">
+              {/* Ownership tree (auto-hidden when not on Step 2) */}
+              <div className="overflow-y-auto">
+                <OwnershipTree />
+              </div>
+
+              <div className="mt-auto flex flex-col gap-5">
+                {/* Attention Button - hidden on step 1 */}
               {currentStep !== 1 && (
                 <button
                   onClick={() => setShowAttention(true)}
@@ -168,6 +175,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                 <p className="text-sm font-semibold text-foreground/80">אנחנו כאן לסיוע במילוי השאלון</p>
                 <a href="tel:0533160990" className="block text-base font-bold text-primary hover:underline">טל׳ 0533160990</a>
                 <a href="mailto:teder@chasida.biz" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
+              </div>
               </div>
             </div>
           </div>
@@ -213,6 +221,9 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
 
           {/* Mobile: Form Content */}
           <div className="lg:hidden p-4 md:p-8">
+            <div className="mb-4">
+              <OwnershipTree compact />
+            </div>
             <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
               {children}
             </div>
