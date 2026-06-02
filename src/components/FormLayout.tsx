@@ -140,9 +140,15 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               </div>
             </div>
 
-            {/* Left Panel - Mascot + Contact + Attention (pinned to bottom) */}
-            <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col justify-end p-6 pb-10 gap-5">
-              {/* Attention Button - hidden on step 1 */}
+            {/* Left Panel - Ownership Tree (step 2 only) + Mascot + Contact + Attention */}
+            <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col p-6 pb-10 gap-4">
+              {/* Ownership tree (auto-hidden when not on Step 2) */}
+              <div className="overflow-y-auto">
+                <OwnershipTree />
+              </div>
+
+              <div className="mt-auto flex flex-col gap-5">
+                {/* Attention Button - hidden on step 1 */}
               {currentStep !== 1 && (
                 <button
                   onClick={() => setShowAttention(true)}
