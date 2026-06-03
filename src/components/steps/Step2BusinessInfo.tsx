@@ -627,6 +627,37 @@ export const Step2BusinessInfo = () => {
           );
         })}
 
+        {/* Partnership percentages total validation */}
+        {!isWarComp && partners.length > 0 && (() => {
+          const total = partners.reduce(
+            (s: number, p: any) => s + (parseFloat(p?.percentage) || 0),
+            0
+          );
+          const isValid = Math.abs(total - 100) < 0.01;
+          if (isValid) {
+            return (
+              <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                <p className="text-sm font-semibold text-primary">
+                  סה״כ אחוזי השותפות: 100% ✓
+                </p>
+              </div>
+            );
+          }
+          return (
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 border-2 border-destructive rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-destructive">
+                  סה״כ אחוזי השותפות חייב להיות בדיוק 100% (כרגע: {total}%)
+                </p>
+                <p className="text-xs text-destructive/90">
+                  סכום אחוזי כל השותפים יחד חייב להסתכם ל-100%. אנא עדכנו את האחוזים כך שיתאזנו ל-100%, אחרת לא ניתן יהיה להמשיך הלאה.
+                </p>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Partnership agreement upload */}
         {!isWarComp && partners.length > 0 && (
           <div className="space-y-2">
