@@ -1514,19 +1514,45 @@ export const Step2BusinessInfo = () => {
             {/* Shareholders */}
             <div className="space-y-2">
               <Label className="text-base font-semibold">מי יהיו בעלי המניות בחברה?</Label>
-              <OptionCardGroup
-                value={company.shareholderType || ""}
-                onChange={(v) => {
+              {(() => {
+                const st = company.shareholderType || "";
+                const topValue = st === "self_via_company" ? "self_via_company" : st ? "direct" : "";
+                const subValue = st === "alone" || st === "other" ? st : "";
+                const updateST = (v: string) => {
                   const updated = [...(info.newCompanies || [])];
                   updated[idx] = { ...updated[idx], shareholderType: v };
                   setInfo({ newCompanies: updated });
-                }}
-                options={[
-                  { value: "alone", label: `${name} ישירות – 100% אחזקה`, description: "ממלא/ת השאלון מחזיק/ה בכל המניות ישירות" },
-                  { value: "self_via_company", label: `${name} באמצעות חברה`, description: "חברת אחזקות שמחזיקה בחברה החדשה" },
-                  { value: "other", label: `${name} יחד עם אחר`, description: "ביחד עם אדם פרטי או חברה נוספת" },
-                ]}
-              />
+                };
+                return (
+                  <div className="space-y-3">
+                    <PillGroup
+                      value={topValue}
+                      onChange={(v) => {
+                        if (v === "self_via_company") updateST("self_via_company");
+                        else updateST("alone"); // default direct → alone
+                      }}
+                      options={[
+                        { value: "direct", label: `${name} ישירות` },
+                        { value: "self_via_company", label: `${name} באמצעות חברה` },
+                      ]}
+                    />
+                    {topValue === "direct" && (
+                      <div className="pr-2 border-r-2 border-primary/30 pr-3">
+                        <p className="text-xs text-muted-foreground mb-1.5">איך {name} יחזיק/תחזיק במניות?</p>
+                        <PillGroup
+                          value={subValue}
+                          onChange={(v) => updateST(v)}
+                          options={[
+                            { value: "alone", label: "לבד – 100% אחזקה" },
+                            { value: "other", label: "יחד עם אחר" },
+                          ]}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
             </div>
 
             {company.shareholderType === "self_via_company" && (
