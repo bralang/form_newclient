@@ -452,15 +452,7 @@ const SelfViaCompanyBlock = ({
         </Select>
       </div>
 
-      {subOwnerType === "person" && (
-        <div className="space-y-3 p-3 bg-card rounded-lg border border-border/50">
-          <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-            <p className="text-sm">
-              {effectiveSelfName} {owner} המניות {sole} של {holdingDisplayName}.
-            </p>
-          </div>
-        </div>
-      )}
+      {subOwnerType === "person" && null}
 
       {subOwnerType === "company" && (
         <CompanyChainBlock
