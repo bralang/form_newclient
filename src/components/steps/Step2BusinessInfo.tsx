@@ -380,7 +380,135 @@ const CompanyChainBlock = ({
 // Multi-shareholder section for a NEW company inside the ownership chain.
 // Mirrors outer "new company" UX: count + list of shareholders, each can be
 // the filler directly, another person, or another company (recursive).
-const Ch
+const ChainNewCompanyShareholders = ({
+  data,
+  update,
+  displayName,
+  fillerName,
+  gender,
+  effectiveSelfName,
+  spouseName,
+  showSpouseOption,
+  depth,
+  chainAllowsNewCompany,
+}: {
+  data: any;
+  update: (patch: any) => void;
+  displayName: string;
+  fillerName: string;
+  gender: "male" | "female" | "";
+  effectiveSelfName: string;
+  spouseName?: string;
+  showSpouseOption: boolean;
+  depth: number;
+  chainAllowsNewCompany: boolean;
+}) => {
+  const list: any[] = Array.isArray(data.shareholdersList) ? data.shareholdersList : [];
+  const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
+  const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
+
+  const setCount = (count: number) => {
+    if (count < 1) count = 1;
+    const adjusted = Array.from({ length: count }, (_, i) => list[i] || { ownerType: "" });
+    update({ shareholdersList: adjusted });
+  };
+  const updateAt = (idx: number, patch: any) => {
+    const next = [...list];
+    next[idx] = { ...(next[idx] || {}), ...patch };
+    update({ shareholdersList: next });
+  };
+  const updatePerson = (idx: number, patch: any) => {
+    const cur = list[idx] || {};
+    updateAt(idx, { personOwner: { ...(cur.personOwner || {}), ...patch } });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <Label className="text-sm font-semibold">כמה בעלי מניות יהיו ב{displayName}?</Label>
+        <Input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          value={list.length || ""}
+          onChange={(e) => setCount(parseInt(e.target.value) || 0)}
+        />
+      </div>
+
+      {list.map((sh: any, idx: number) => {
+        const ownerType = sh.ownerType || "";
+        const personType = sh.personType || "";
+        return (
+          <div key={idx} className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+            <p className="text-xs text-muted-foreground">בעל מניות #{idx + 1} של {displayName}</p>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">סוג בעל המניות</Label>
+              <Select value={ownerType} onValueChange={(v: any) => updateAt(idx, { ownerType: v })}>
+                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="person">אדם פרטי</SelectItem>
+                  <SelectItem value="company">חברה</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {ownerType === "person" && (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">מי בעל המניות?</Label>
+                  <PillGroup
+                    value={personType}
+                    onChange={(v) => updateAt(idx, { personType: v as any })}
+                    options={[
+                      { value: "self", label: effectiveSelfName },
+                      ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
+                      { value: "other", label: "אחר" },
+                    ]}
+                  />
+                </div>
+                {(personType === "self" || personType === "spouse") && (
+                  <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                    <p className="text-sm">
+                      {personType === "self" ? effectiveSelfName : spouseName} {heShe} {owner} מניות ב{displayName}.
+                    </p>
+                  </div>
+                )}
+                {personType === "other" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updatePerson(idx, { name: e.target.value })} /></div>
+                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updatePerson(idx, { idNumber: e.target.value })} /></div>
+                    <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson(idx, { idFile: e.target.files?.[0] })} /></div>
+                    <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.personOwner?.phone || ""} onChange={(e) => updatePerson(idx, { phone: e.target.value })} /></div>
+                    <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.personOwner?.email || ""} onChange={(e) => updatePerson(idx, { email: e.target.value })} /></div>
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <Label>אחוז אחזקה ב{displayName} *</Label>
+                  <PercentageInput value={sh.percentage || ""} onChange={(v) => updateAt(idx, { percentage: v })} />
+                </div>
+              </>
+            )}
+
+            {ownerType === "company" && (
+              <CompanyChainBlock
+                data={sh.childCompany || {}}
+                onChange={(c) => updateAt(idx, { childCompany: c })}
+                heldName={displayName}
+                depth={depth + 1}
+                fillerName={fillerName}
+                gender={gender}
+                chainAllowsNewCompany={chainAllowsNewCompany}
+                selfName={effectiveSelfName}
+                spouseName={spouseName}
+                showSpouseOption={showSpouseOption}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 // Combine the prefix "ב" with a name, avoiding the double "ה" (ב + הX → בX).
 const withBet = (name: string) =>
