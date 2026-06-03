@@ -997,9 +997,24 @@ export const Step2BusinessInfo = () => {
                     </div>
                   ) : (
                     <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                      {isNewCompany && (
+                        <div className="space-y-2">
+                          <Label className="text-sm font-semibold">האם החברה המחזיקה כבר קיימת או טרם הוקמה?</Label>
+                          <PillGroup
+                            value={(sh.isExistingCompany ?? true) ? "existing" : "new"}
+                            onChange={(v) => updateShareholder(idx, "isExistingCompany", v === "existing")}
+                            options={[
+                              { value: "existing", label: "חברה קיימת" },
+                              { value: "new", label: "חברה חדשה" },
+                            ]}
+                          />
+                        </div>
+                      )}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
-                        <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
+                        {(sh.isExistingCompany ?? true) && (
+                          <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
+                        )}
                         {isNewCompany && (
                           <div className="space-y-1">
                             <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
@@ -1011,6 +1026,7 @@ export const Step2BusinessInfo = () => {
                           </div>
                         )}
                       </div>
+
 
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold">סוג בעל המניות של {sh.companyName || "החברה המחזיקה"}</Label>
