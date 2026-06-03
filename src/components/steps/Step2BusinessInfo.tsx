@@ -463,7 +463,7 @@ export const Step2BusinessInfo = () => {
           if (i !== idx) updated[i] = { ...updated[i], isVatRepresentative: false };
         });
       }
-      setInfo({ partners: updated });
+      setInfo({ [partnersKey]: updated });
     };
 
     const handlePartnerCountChange = (count: number) => {
