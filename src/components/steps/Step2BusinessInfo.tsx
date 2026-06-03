@@ -903,6 +903,7 @@ export const Step2BusinessInfo = () => {
                             <PercentageInput
                               value={sh.percentage || ""}
                               onChange={(value) => updateShareholder(idx, "percentage", value)}
+                              max={maxPct}
                             />
                           </div>
                         )}
