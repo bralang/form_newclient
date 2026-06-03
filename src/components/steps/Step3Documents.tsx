@@ -200,6 +200,47 @@ export const Step3Documents = () => {
           </div>
         )}
 
+        {/* Partnership agreement uploads */}
+        {(userNewPartnership || userExistingPartnership) && (
+          <div className="space-y-4 p-5 bg-muted/40 rounded-xl">
+            <h3 className="font-bold text-lg">מומלץ לצרף הסכם שותפות – {personalInfo.firstName}</h3>
+            {userNewPartnership && (
+              <FileUpload
+                id="partnershipAgreementNew"
+                label={userExistingPartnership ? "הסכם שותפות – עסק חדש" : "הסכם שותפות"}
+                onChange={(files) => setBusinessInfo({ partnershipAgreementFile: files?.[0] || undefined })}
+              />
+            )}
+            {userExistingPartnership && (
+              <FileUpload
+                id="partnershipAgreementExisting"
+                label={userNewPartnership ? "הסכם שותפות – עסק קיים" : "הסכם שותפות"}
+                onChange={(files) => setBusinessInfo({ existingPartnershipAgreementFile: files?.[0] || undefined })}
+              />
+            )}
+          </div>
+        )}
+        {(spouseNewPartnership || spouseExistingPartnership) && (
+          <div className="space-y-4 p-5 bg-muted/40 rounded-xl">
+            <h3 className="font-bold text-lg">מומלץ לצרף הסכם שותפות – {personalInfo.spouseName}</h3>
+            {spouseNewPartnership && (
+              <FileUpload
+                id="spousePartnershipAgreementNew"
+                label={spouseExistingPartnership ? "הסכם שותפות – עסק חדש" : "הסכם שותפות"}
+                onChange={(files) => setSpouseBusinessInfo({ partnershipAgreementFile: files?.[0] || undefined })}
+              />
+            )}
+            {spouseExistingPartnership && (
+              <FileUpload
+                id="spousePartnershipAgreementExisting"
+                label={spouseNewPartnership ? "הסכם שותפות – עסק קיים" : "הסכם שותפות"}
+                onChange={(files) => setSpouseBusinessInfo({ existingPartnershipAgreementFile: files?.[0] || undefined })}
+              />
+            )}
+          </div>
+        )}
+
+
         {/* Company documents */}
         {(userHasCompany || spouseHasCompany) && (
           <div className="space-y-4 p-5 bg-muted/40 rounded-xl">
