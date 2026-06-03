@@ -44,6 +44,29 @@ const PercentageInput = ({
   </div>
 );
 
+// Wrapper that auto-fills the remaining percentage when all other slots are filled
+const AutoPercentageInput = ({
+  value,
+  onChange,
+  autoFillTo,
+  ...rest
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  autoFillTo?: number;
+  placeholder?: string;
+  max?: number;
+}) => {
+  React.useEffect(() => {
+    if (autoFillTo !== undefined && autoFillTo > 0 && !value) {
+      onChange(String(Math.round(autoFillTo * 100) / 100));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoFillTo, value]);
+  return <PercentageInput value={value} onChange={onChange} {...rest} />;
+};
+
+
 // Helper: validate partnership percentages sum to exactly 100
 export const isPartnershipValid = (info: any, partnersKey: string = "partners"): boolean => {
   if (!info || info.ownershipType !== "partnership") return true;
