@@ -1089,6 +1089,7 @@ export const Step2BusinessInfo = () => {
                           onChange={(c) => updateShareholder(idx, "childCompany", c)}
                           heldName={sh.companyName || "החברה הקודמת"}
                           depth={1}
+                          chainAllowsNewCompany={isNewCompany && sh.isExistingCompany === false}
                         />
                       )}
                     </div>
