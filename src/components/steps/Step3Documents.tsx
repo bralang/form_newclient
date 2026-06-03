@@ -45,6 +45,14 @@ export const Step3Documents = () => {
   const hasNewCompaniesInRegistrar = businessInfo.newCompanies?.some((c) => c.existsInRegistrar) || spouseBusinessInfo.newCompanies?.some((c) => c.existsInRegistrar);
   const hasNewCompaniesNotInRegistrarButInRegistrar = businessInfo.newCompanies?.some((c) => c.existsInRegistrar === true) || spouseBusinessInfo.newCompanies?.some((c) => c.existsInRegistrar === true);
 
+  const userHasExistingBusiness = userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing");
+  const spouseHasExistingBusiness = spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing");
+
+  const userNewPartnership = userHasNewBusiness && businessInfo.ownershipType === "partnership" && (businessInfo.partners?.length || 0) > 0;
+  const userExistingPartnership = userHasExistingBusiness && businessInfo.ownershipType === "partnership" && (businessInfo.existingPartners?.length || 0) > 0;
+  const spouseNewPartnership = spouseHasNewBusiness && spouseBusinessInfo.ownershipType === "partnership" && (spouseBusinessInfo.partners?.length || 0) > 0;
+  const spouseExistingPartnership = spouseHasExistingBusiness && spouseBusinessInfo.ownershipType === "partnership" && (spouseBusinessInfo.existingPartners?.length || 0) > 0;
+
   const handleNext = async () => {
     setLoading(true);
     await sendToWebhook(
