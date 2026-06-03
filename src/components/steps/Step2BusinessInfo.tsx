@@ -191,6 +191,7 @@ const CompanyChainBlock = ({
   const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
   const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
   const isExistingCompany = chainAllowsNewCompany ? (data.isExistingCompany ?? true) : true;
+  const displayName = data.companyName || (data as any).requestedName1 || "החברה המחזיקה";
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
