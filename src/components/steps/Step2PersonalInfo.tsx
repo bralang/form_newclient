@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FormNavigation } from "@/components/FormNavigation";
-import { Step2BusinessInfo } from "./Step2BusinessInfo";
+import { Step2BusinessInfo, isPartnershipValid } from "./Step2BusinessInfo";
 import { useState, useEffect } from "react";
 import { g } from "@/lib/gender-utils";
 import { Mail, Phone } from "lucide-react";
@@ -18,6 +18,8 @@ export const Step2PersonalInfo = () => {
     spouseInfo,
     setSpouseInfo,
     serviceType,
+    businessInfo,
+    spouseBusinessInfo,
     setCurrentStep,
     sendToWebhook,
   } = useFormContext();
@@ -598,6 +600,7 @@ export const Step2PersonalInfo = () => {
         onPrev={() => setCurrentStep(2)}
         nextLabel="למעבר להעלאת המסמכים"
         loading={loading}
+        disabled={!isPartnershipValid(businessInfo) || !isPartnershipValid(spouseBusinessInfo)}
       />
     </div>
   );

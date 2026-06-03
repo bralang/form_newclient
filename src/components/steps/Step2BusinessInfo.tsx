@@ -12,10 +12,12 @@ const PercentageInput = ({
   value,
   onChange,
   placeholder = "לדוגמה: 50",
+  max,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  max?: number;
 }) => (
   <div className="relative w-full min-w-0">
     <Input
@@ -24,7 +26,13 @@ const PercentageInput = ({
       pattern="[0-9]*\.?[0-9]*"
       value={value}
       onChange={(e) => {
-        const v = e.target.value.replace(/[^0-9.]/g, "");
+        let v = e.target.value.replace(/[^0-9.]/g, "");
+        if (typeof max === "number" && v !== "") {
+          const num = parseFloat(v);
+          if (!isNaN(num) && num > max) {
+            v = String(Math.max(0, Math.round(max * 100) / 100));
+          }
+        }
         onChange(v);
       }}
       placeholder={placeholder}
@@ -35,6 +43,18 @@ const PercentageInput = ({
     </span>
   </div>
 );
+
+// Helper: validate partnership percentages sum to exactly 100
+export const isPartnershipValid = (info: any): boolean => {
+  if (!info || info.ownershipType !== "partnership") return true;
+  const partners = info.partners || [];
+  if (partners.length === 0) return true;
+  const total = partners.reduce(
+    (s: number, p: any) => s + (parseFloat(p?.percentage) || 0),
+    0
+  );
+  return Math.abs(total - 100) < 0.01;
+};
 
 // Checkbox-style option card (replaces radio/Select for shareholder type)
 const OptionCard = ({
@@ -556,6 +576,7 @@ export const Step2BusinessInfo = () => {
                    <PercentageInput
                      value={partner.percentage || ""}
                      onChange={(value) => updatePartner(idx, "percentage", value)}
+                     max={100 - partners.reduce((s: number, p: any, i: number) => i === idx ? s : s + (parseFloat(p?.percentage) || 0), 0)}
                    />
                 </div>
                 {!isSelf && (
@@ -605,6 +626,37 @@ export const Step2BusinessInfo = () => {
             </div>
           );
         })}
+
+        {/* Partnership percentages total validation */}
+        {!isWarComp && partners.length > 0 && (() => {
+          const total = partners.reduce(
+            (s: number, p: any) => s + (parseFloat(p?.percentage) || 0),
+            0
+          );
+          const isValid = Math.abs(total - 100) < 0.01;
+          if (isValid) {
+            return (
+              <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                <p className="text-sm font-semibold text-primary">
+                  סה״כ אחוזי השותפות: 100% ✓
+                </p>
+              </div>
+            );
+          }
+          return (
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 border-2 border-destructive rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-destructive">
+                  סה״כ אחוזי השותפות חייב להיות בדיוק 100% (כרגע: {total}%)
+                </p>
+                <p className="text-xs text-destructive/90">
+                  סכום אחוזי כל השותפים יחד חייב להסתכם ל-100%. אנא עדכנו את האחוזים כך שיתאזנו ל-100%, אחרת לא ניתן יהיה להמשיך הלאה.
+                </p>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Partnership agreement upload */}
         {!isWarComp && partners.length > 0 && (
