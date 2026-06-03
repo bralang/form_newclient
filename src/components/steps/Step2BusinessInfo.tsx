@@ -279,7 +279,7 @@ const CompanyChainBlock = ({
               options={[
                 { value: "self", label: effectiveSelfName },
                 ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
-                { value: "other", label: "אחר" },
+                ...(restrictToPersonOrCompany ? [] : [{ value: "other", label: "אחר" }]),
               ]}
             />
           </div>
