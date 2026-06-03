@@ -18,6 +18,8 @@ export const Step2PersonalInfo = () => {
     spouseInfo,
     setSpouseInfo,
     serviceType,
+    businessInfo,
+    spouseBusinessInfo,
     setCurrentStep,
     sendToWebhook,
   } = useFormContext();
