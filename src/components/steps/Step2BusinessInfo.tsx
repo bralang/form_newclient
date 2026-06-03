@@ -270,6 +270,12 @@ const CompanyChainBlock = ({
         </div>
       )}
 
+      {subOwnerType === "self" && (
+        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+          <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {data.companyName || "החברה המחזיקה"}.</p>
+        </div>
+      )}
+
       {(subOwnerType === "company" || subOwnerType === "self_via_company") && (
         <CompanyChainBlock
           data={data.childCompany || {}}
