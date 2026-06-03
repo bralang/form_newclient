@@ -699,11 +699,19 @@ export const Step2BusinessInfo = () => {
                 )}
                 <div className="space-y-1">
                   <Label>אחוז בשותפות</Label>
-                   <PercentageInput
-                     value={partner.percentage || ""}
-                     onChange={(value) => updatePartner(idx, "percentage", value)}
-                     max={100 - partners.reduce((s: number, p: any, i: number) => i === idx ? s : s + (parseFloat(p?.percentage) || 0), 0)}
-                   />
+                  {(() => {
+                    const othersSum = partners.reduce((s: number, p: any, i: number) => i === idx ? s : s + (parseFloat(p?.percentage) || 0), 0);
+                    const othersAllFilled = partners.length > 1 && partners.every((p: any, i: number) => i === idx || (parseFloat(p?.percentage) || 0) > 0);
+                    const remainder = Math.max(0, 100 - othersSum);
+                    return (
+                      <AutoPercentageInput
+                        value={partner.percentage || ""}
+                        onChange={(value) => updatePartner(idx, "percentage", value)}
+                        max={remainder}
+                        autoFillTo={othersAllFilled ? remainder : undefined}
+                      />
+                    );
+                  })()}
                 </div>
                 {!isSelf && (
                   <>
