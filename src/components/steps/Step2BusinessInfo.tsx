@@ -348,6 +348,7 @@ const CompanyChainBlock = ({
           selfName={selfName}
           spouseName={spouseName}
           showSpouseOption={showSpouseOption}
+          restrictToPersonOrCompany={restrictToPersonOrCompany}
         />
       )}
     </div>
