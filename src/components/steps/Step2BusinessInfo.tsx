@@ -1041,6 +1041,9 @@ export const Step2BusinessInfo = () => {
                           onChange={(c) => updateShareholder(idx, "childCompany", c)}
                           heldName={sh.companyName || "החברה המחזיקה"}
                           depth={1}
+                          selfName={selfName}
+                          spouseName={spouseDisplayName}
+                          showSpouseOption={showSpouseOption}
                         />
                       )}
                     </div>
