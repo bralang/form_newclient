@@ -258,8 +258,12 @@ const CompanyChainBlock = ({
           <SelectContent>
             <SelectItem value="person">אדם פרטי</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
-            <SelectItem value="self">{`${fillerName} ישירות`}</SelectItem>
-            <SelectItem value="self_via_company">{`${fillerName} באמצעות חברה`}</SelectItem>
+            {!restrictToPersonOrCompany && (
+              <>
+                <SelectItem value="self">{`${fillerName} ישירות`}</SelectItem>
+                <SelectItem value="self_via_company">{`${fillerName} באמצעות חברה`}</SelectItem>
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>
