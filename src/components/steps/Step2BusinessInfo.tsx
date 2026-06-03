@@ -458,13 +458,6 @@ const SelfViaCompanyBlock = ({
             <p className="text-sm">
               {effectiveSelfName} {owner} המניות {sole} של {holdingDisplayName}.
             </p>
-            <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <Checkbox
-                checked={personOwnerWithOther}
-                onCheckedChange={(v) => update({ personOwnerWithOther: !!v })}
-              />
-              <span>יחד עם אחר</span>
-            </label>
           </div>
         </div>
       )}
