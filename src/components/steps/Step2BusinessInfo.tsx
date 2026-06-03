@@ -229,15 +229,14 @@ const CompanyChainBlock = ({
 
       <div className="space-y-2">
         <Label className="text-sm font-semibold">סוג בעל המניות של {data.companyName || "החברה המחזיקה"}</Label>
-        <OptionCardGroup
-          value={subOwnerType}
-          onChange={(v) => update({ subOwnerType: v as any })}
-          options={[
-            { value: "person", label: "אדם פרטי" },
-            { value: "company", label: "חברה" },
-            { value: "self_via_company", label: `${fillerName} באמצעות חברה` },
-          ]}
-        />
+        <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="person">אדם פרטי</SelectItem>
+            <SelectItem value="company">חברה</SelectItem>
+            <SelectItem value="self_via_company">{`${fillerName} באמצעות חברה`}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {subOwnerType === "person" && (
@@ -363,15 +362,14 @@ const SelfViaCompanyBlock = ({
         <Label className="text-sm font-semibold">
           סוג בעל המניות של {data?.companyName || `החברה דרכה אני ${holds}`}
         </Label>
-        <OptionCardGroup
-          value={subOwnerType}
-          onChange={(v) => update({ subOwnerType: v as any })}
-          options={[
-            { value: "self_via_company", label: `${fillerName} (לבד בחברה זו)` },
-            { value: "person", label: "אדם פרטי נוסף" },
-            { value: "company", label: "חברה" },
-          ]}
-        />
+        <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="self_via_company">{`${fillerName} (לבד בחברה זו)`}</SelectItem>
+            <SelectItem value="person">אדם פרטי נוסף</SelectItem>
+            <SelectItem value="company">חברה</SelectItem>
+          </SelectContent>
+        </Select>
         <p className="text-xs text-muted-foreground">ברירת מחדל: {fillerName} לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
       </div>
 
