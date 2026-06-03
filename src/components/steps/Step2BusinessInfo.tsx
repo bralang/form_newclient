@@ -839,6 +839,12 @@ export const Step2BusinessInfo = () => {
             : sh?.isSpouse
             ? spouseDisplayName
             : sh.name || `בעל מניות ${idx + 1}`;
+          const othersTotal = shareholders.reduce(
+            (s: number, p: any, i: number) =>
+              i === idx ? s : s + (parseFloat(p?.percentage) || 0),
+            0
+          );
+          const maxPct = Math.max(0, 100 - othersTotal);
           return (
             <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
               <h4 className="font-bold text-primary">
@@ -862,6 +868,7 @@ export const Step2BusinessInfo = () => {
                     <PercentageInput
                       value={sh.percentage || ""}
                       onChange={(value) => updateShareholder(idx, "percentage", value)}
+                      max={maxPct}
                     />
                   </div>
                 ) : (
@@ -896,6 +903,7 @@ export const Step2BusinessInfo = () => {
                             <PercentageInput
                               value={sh.percentage || ""}
                               onChange={(value) => updateShareholder(idx, "percentage", value)}
+                              max={maxPct}
                             />
                           </div>
                         )}
@@ -932,6 +940,7 @@ export const Step2BusinessInfo = () => {
                             <PercentageInput
                               value={sh.percentage || ""}
                               onChange={(value) => updateShareholder(idx, "percentage", value)}
+                              max={maxPct}
                             />
                           </div>
                         )}
@@ -992,6 +1001,7 @@ export const Step2BusinessInfo = () => {
                             <PercentageInput
                               value={sh.percentage || ""}
                               onChange={(value) => updateShareholder(idx, "percentage", value)}
+                              max={maxPct}
                             />
                           </div>
                         )}
