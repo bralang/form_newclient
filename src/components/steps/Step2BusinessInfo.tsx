@@ -264,30 +264,55 @@ const CompanyChainBlock = ({
       {subOwnerType === "person" && (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
           <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
-            <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
-            <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ idFile: e.target.files?.[0] })} /></div>
-            <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
-            <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
-          </div>
           <div className="space-y-2">
-            <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
-            <Select value={data.personOwner?.additionalIdType || ""} onValueChange={(v: any) => updatePerson({ additionalIdType: v })}>
-              <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
-                <SelectItem value="license">רישיון נהיגה</SelectItem>
-                <SelectItem value="passport">דרכון</SelectItem>
-              </SelectContent>
-            </Select>
-            {data.personOwner?.additionalIdType && (
-              <>
-                <Input placeholder="מספר אמצעי זיהוי" value={data.personOwner?.additionalIdNumber || ""} onChange={(e) => updatePerson({ additionalIdNumber: e.target.value })} />
-                <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ additionalIdFile: e.target.files?.[0] })} /></div>
-              </>
-            )}
+            <Label className="text-sm font-semibold">מי בעל המניות?</Label>
+            <PillGroup
+              value={personOwnerType}
+              onChange={(v) => update({ personOwnerType: v as any })}
+              options={[
+                { value: "self", label: effectiveSelfName },
+                ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
+                { value: "other", label: "אחר" },
+              ]}
+            />
           </div>
+
+          {(personOwnerType === "self" || personOwnerType === "spouse") && (
+            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="text-sm">
+                {personOwnerType === "self" ? effectiveSelfName : spouseName} {owner} המניות {sole} של {displayName}.
+              </p>
+            </div>
+          )}
+
+          {personOwnerType === "other" && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
+                <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
+                <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ idFile: e.target.files?.[0] })} /></div>
+                <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
+                <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
+              </div>
+              <div className="space-y-2">
+                <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
+                <Select value={data.personOwner?.additionalIdType || ""} onValueChange={(v: any) => updatePerson({ additionalIdType: v })}>
+                  <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                    <SelectItem value="license">רישיון נהיגה</SelectItem>
+                    <SelectItem value="passport">דרכון</SelectItem>
+                  </SelectContent>
+                </Select>
+                {data.personOwner?.additionalIdType && (
+                  <>
+                    <Input placeholder="מספר אמצעי זיהוי" value={data.personOwner?.additionalIdNumber || ""} onChange={(e) => updatePerson({ additionalIdNumber: e.target.value })} />
+                    <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ additionalIdFile: e.target.files?.[0] })} /></div>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -306,6 +331,9 @@ const CompanyChainBlock = ({
           fillerName={fillerName}
           gender={gender}
           chainAllowsNewCompany={chainAllowsNewCompany && !isExistingCompany}
+          selfName={selfName}
+          spouseName={spouseName}
+          showSpouseOption={showSpouseOption}
         />
       )}
     </div>
