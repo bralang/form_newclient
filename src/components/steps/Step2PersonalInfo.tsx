@@ -136,15 +136,17 @@ export const Step2PersonalInfo = () => {
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="space-y-2">
-            <Label htmlFor="idNumber">ת.ז. *</Label>
-            <Input
-              id="idNumber"
-              value={detailedInfo.idNumber}
-              onChange={(e) => setDetailedInfo({ idNumber: e.target.value })}
-              maxLength={9}
-            />
-          </div>
+          {!userOnlyNewNonprofit && (
+            <div className="space-y-2">
+              <Label htmlFor="idNumber">ת.ז. *</Label>
+              <Input
+                id="idNumber"
+                value={detailedInfo.idNumber}
+                onChange={(e) => setDetailedInfo({ idNumber: e.target.value })}
+                maxLength={9}
+              />
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="homePhone">טלפון בבית</Label>
             <Input
@@ -155,6 +157,7 @@ export const Step2PersonalInfo = () => {
             />
           </div>
         </div>
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div className="space-y-2">
