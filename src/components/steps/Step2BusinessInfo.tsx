@@ -1010,22 +1010,46 @@ export const Step2BusinessInfo = () => {
                           />
                         </div>
                       )}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
-                        {(sh.isExistingCompany ?? true) && (
+                      {(sh.isExistingCompany ?? true) ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
                           <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
-                        )}
-                        {isNewCompany && (
-                          <div className="space-y-1">
-                            <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
-                            <PercentageInput
-                              value={sh.percentage || ""}
-                              onChange={(value) => updateShareholder(idx, "percentage", value)}
-                              max={maxPct}
-                            />
+                          {isNewCompany && (
+                            <div className="space-y-1">
+                              <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
+                              <PercentageInput
+                                value={sh.percentage || ""}
+                                onChange={(value) => updateShareholder(idx, "percentage", value)}
+                                max={maxPct}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="space-y-2">
+                            <Label className="font-semibold">3 שמות רצויים לחברה המחזיקה החדשה (לפי סדר עדיפות)</Label>
+                            {[1, 2, 3].map((n) => (
+                              <Input
+                                key={n}
+                                placeholder={`שם רצוי ${n}`}
+                                value={(sh as any)[`requestedName${n}`] || ""}
+                                onChange={(e) => updateShareholder(idx, `requestedName${n}` as any, e.target.value)}
+                              />
+                            ))}
                           </div>
-                        )}
-                      </div>
+                          {isNewCompany && (
+                            <div className="space-y-1">
+                              <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
+                              <PercentageInput
+                                value={sh.percentage || ""}
+                                onChange={(value) => updateShareholder(idx, "percentage", value)}
+                                max={maxPct}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
 
 
                       <div className="space-y-2">
