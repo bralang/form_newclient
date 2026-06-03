@@ -234,6 +234,7 @@ const CompanyChainBlock = ({
           <SelectContent>
             <SelectItem value="person">אדם פרטי</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
+            <SelectItem value="self">{`${fillerName} ישירות`}</SelectItem>
             <SelectItem value="self_via_company">{`${fillerName} באמצעות חברה`}</SelectItem>
           </SelectContent>
         </Select>
@@ -266,6 +267,12 @@ const CompanyChainBlock = ({
               </>
             )}
           </div>
+        </div>
+      )}
+
+      {subOwnerType === "self" && (
+        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+          <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {data.companyName || "החברה המחזיקה"}.</p>
         </div>
       )}
 
