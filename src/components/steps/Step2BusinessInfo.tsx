@@ -662,18 +662,7 @@ export const Step2BusinessInfo = () => {
           );
         })()}
 
-        {/* Partnership agreement upload */}
-        {!isWarComp && partners.length > 0 && (
-          <div className="space-y-2">
-            <Label htmlFor={`${prefix}partnershipAgreement`}>צרף הסכם שותפות</Label>
-            <p className="text-sm text-muted-foreground">מומלץ לצרף הסכם שותפות</p>
-            <Input
-              id={`${prefix}partnershipAgreement`}
-              type="file"
-              onChange={(e) => setInfo({ [fileKey]: e.target.files?.[0] })}
-            />
-          </div>
-        )}
+        {/* Partnership agreement upload moved to Step3 (Documents) */}
       </div>
     );
   };
