@@ -347,15 +347,17 @@ export const Step2PersonalInfo = () => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <Label htmlFor="spouseId">ת.ז. *</Label>
-              <Input
-                id="spouseId"
-                value={spouseInfo.idNumber}
-                onChange={(e) => setSpouseInfo({ idNumber: e.target.value })}
-                maxLength={9}
-              />
-            </div>
+            {!spouseOnlyNonprofit && (
+              <div className="space-y-2">
+                <Label htmlFor="spouseId">ת.ז. *</Label>
+                <Input
+                  id="spouseId"
+                  value={spouseInfo.idNumber}
+                  onChange={(e) => setSpouseInfo({ idNumber: e.target.value })}
+                  maxLength={9}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="spouseEmail">מייל</Label>
               <Input
