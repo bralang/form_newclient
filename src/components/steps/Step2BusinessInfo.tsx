@@ -214,18 +214,30 @@ const CompanyChainBlock = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label>שם החברה המחזיקה את {heldName} *</Label>
-          <Input value={data.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
-        </div>
-        {isExistingCompany && (
+      {isExistingCompany ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label>שם החברה המחזיקה את {heldName} *</Label>
+            <Input value={data.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
+          </div>
           <div className="space-y-1">
             <Label>ח.פ. *</Label>
             <Input value={data.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Label className="font-semibold">3 שמות רצויים לחברה המחזיקה את {heldName} החדשה (לפי סדר עדיפות)</Label>
+          {[1, 2, 3].map((n) => (
+            <Input
+              key={n}
+              placeholder={`שם רצוי ${n}`}
+              value={(data as any)[`requestedName${n}`] || ""}
+              onChange={(e) => update({ [`requestedName${n}`]: e.target.value } as any)}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label className="text-sm font-semibold">סוג בעל המניות של {data.companyName || "החברה המחזיקה"}</Label>
