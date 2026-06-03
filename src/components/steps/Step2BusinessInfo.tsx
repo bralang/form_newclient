@@ -1525,13 +1525,13 @@ export const Step2BusinessInfo = () => {
               חברה חדשה #{idx + 1}{company.requestedName1 ? ` – ${company.requestedName1}` : ""}
             </h4>
 
-            {/* 3 requested names */}
+            {/* 2 additional requested names (name1 already collected above) */}
             <div className="space-y-3">
-              <Label className="font-semibold">3 שמות רצויים לחברה (לפי סדר עדיפות)</Label>
-              {[1, 2, 3].map((n) => (
+              <Label className="font-semibold">2 שמות נוספים לחברה (לפי סדר עדיפות)</Label>
+              {[2, 3].map((n) => (
                 <Input
                   key={n}
-                  placeholder={`שם רצוי ${n}`}
+                  placeholder={`שם רצוי נוסף #${n - 1}`}
                   value={company[`requestedName${n}`] || ""}
                   onChange={(e) => {
                     const updated = [...(info.newCompanies || [])];
