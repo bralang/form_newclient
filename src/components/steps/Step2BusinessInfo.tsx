@@ -252,11 +252,11 @@ const CompanyChainBlock = ({
       )}
 
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">סוג בעל המניות של {displayName}</Label>
+        <Label className="text-sm font-semibold">אחד מבעלי המניות של {displayName}</Label>
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="person">אדם פרטי</SelectItem>
+            <SelectItem value="person">{restrictToPersonOrCompany ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
             {!restrictToPersonOrCompany && (
               <>
