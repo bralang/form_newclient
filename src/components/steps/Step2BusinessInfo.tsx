@@ -114,6 +114,40 @@ const OptionCardGroup = ({
   </div>
 );
 
+// Pill-style choice group (like Step1) for compact 2-3 option selections
+const PillGroup = ({
+  options,
+  value,
+  onChange,
+  className = "",
+}: {
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+  className?: string;
+}) => (
+  <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
+    {options.map((opt) => {
+      const active = value === opt.value;
+      return (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => onChange(opt.value)}
+          className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-150 border ${
+            active
+              ? "bg-primary text-primary-foreground border-primary shadow-sm"
+              : "bg-transparent text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+          }`}
+        >
+          {opt.label}
+        </button>
+      );
+    })}
+  </div>
+);
+
+
 // Recursive block representing a holding company (and who owns it)
 type CompanyNode = {
   companyName?: string;
