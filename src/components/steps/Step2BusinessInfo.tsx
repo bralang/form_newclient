@@ -670,7 +670,7 @@ export const Step2BusinessInfo = () => {
             <Input
               id={`${prefix}partnershipAgreement`}
               type="file"
-              onChange={(e) => setInfo({ partnershipAgreementFile: e.target.files?.[0] })}
+              onChange={(e) => setInfo({ [fileKey]: e.target.files?.[0] })}
             />
           </div>
         )}
