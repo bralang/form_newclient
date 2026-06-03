@@ -164,35 +164,39 @@ const colorFor = (kind: NodeKind) => {
   }
 };
 
-const TreeNodeView = ({ node, level = 0 }: { node: TreeNode; level?: number }) => {
+const TreeNodeView = ({ node, level = 0, compact = false }: { node: TreeNode; level?: number; compact?: boolean }) => {
   const isLeaf = !node.children || node.children.length === 0;
+  const sizes = compact
+    ? { pad: "px-2 py-1", text: "text-[11px]", icon: "w-3.5 h-3.5", pct: "text-[10px]", tag: "text-[9px]", indent: "mr-3 pr-2 space-y-1.5", border: "border-r-2" }
+    : { pad: "px-3 py-2", text: "text-sm", icon: "w-4 h-4", pct: "text-xs", tag: "text-[11px]", indent: "mr-5 pr-3 space-y-2.5", border: "border-r-[3px]" };
   return (
     <div className="relative">
       <div
-        className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[11px] font-semibold leading-tight max-w-full ${colorFor(node.kind)}`}
+        className={`inline-flex items-center gap-2 ${sizes.pad} rounded-lg border ${sizes.text} font-semibold leading-tight max-w-full ${colorFor(node.kind)}`}
       >
-        <span className="shrink-0">{iconFor(node.kind)}</span>
+        <span className={`shrink-0 [&_svg]:${sizes.icon}`}>{iconFor(node.kind)}</span>
         <span className="truncate" title={node.label}>{node.label}</span>
         {node.percentage && (
-          <span className="shrink-0 text-[10px] opacity-80">({node.percentage}%)</span>
+          <span className={`shrink-0 ${sizes.pct} opacity-80`}>({node.percentage}%)</span>
         )}
         {node.kind === "company-new" && (
-          <span className="shrink-0 text-[9px] bg-amber-200/60 dark:bg-amber-800/60 rounded px-1">חדשה</span>
+          <span className={`shrink-0 ${sizes.tag} bg-amber-200/60 dark:bg-amber-800/60 rounded px-1.5 py-0.5`}>חדשה</span>
         )}
         {node.kind === "target-new" && (
-          <span className="shrink-0 text-[9px] bg-primary-foreground/20 rounded px-1">חדשה</span>
+          <span className={`shrink-0 ${sizes.tag} bg-primary-foreground/20 rounded px-1.5 py-0.5`}>חדשה</span>
         )}
       </div>
       {!isLeaf && (
-        <div className="mt-1.5 mr-3 border-r-2 border-primary/30 pr-2 space-y-1.5">
+        <div className={`mt-2 ${sizes.indent} ${sizes.border} border-primary/30`}>
           {node.children!.map((c, i) => (
-            <TreeNodeView key={i} node={c} level={level + 1} />
+            <TreeNodeView key={i} node={c} level={level + 1} compact={compact} />
           ))}
         </div>
       )}
     </div>
   );
 };
+
 
 // ─── Main component ───
 export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
@@ -223,8 +227,8 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
   return (
     <div
-      className={`bg-card/95 backdrop-blur border border-border rounded-xl shadow-sm ${
-        compact ? "p-2" : "p-3"
+      className={`bg-card/95 backdrop-blur border-2 border-primary/20 rounded-2xl shadow-lg ${
+        compact ? "p-3" : "p-5"
       }`}
       dir="rtl"
     >
@@ -233,36 +237,37 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
         onClick={() => setCollapsed((v) => !v)}
         className="w-full flex items-center justify-between gap-2 text-primary"
       >
-        <span className="inline-flex items-center gap-1.5 text-xs font-bold">
-          <Network className="w-3.5 h-3.5" />
+        <span className={`inline-flex items-center gap-2 font-bold ${compact ? "text-sm" : "text-base"}`}>
+          <Network className={compact ? "w-4 h-4" : "w-5 h-5"} />
           מפת השליטה בחברה
         </span>
-        {collapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+        {collapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
       </button>
 
       {!collapsed && (
-        <div className="mt-2 space-y-3 max-h-[55vh] overflow-y-auto pr-1">
+        <div className={`mt-3 space-y-4 ${compact ? "max-h-[40vh]" : "max-h-[70vh]"} overflow-y-auto pr-1`}>
           {myTrees.map((t) => (
-            <TreeNodeView key={`me-${t.key}`} node={t.tree} />
+            <TreeNodeView key={`me-${t.key}`} node={t.tree} compact={compact} />
           ))}
           {spouseTrees.length > 0 && (
             <>
-              <div className="text-[10px] font-bold text-muted-foreground border-t border-border pt-2">
+              <div className={`font-bold text-muted-foreground border-t border-border pt-2 ${compact ? "text-[11px]" : "text-xs"}`}>
                 חברות של {spouseName}
               </div>
               {spouseTrees.map((t) => (
-                <TreeNodeView key={`sp-${t.key}`} node={t.tree} />
+                <TreeNodeView key={`sp-${t.key}`} node={t.tree} compact={compact} />
               ))}
             </>
           )}
-          <div className="border-t border-border pt-1.5 grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded bg-primary inline-block" /> חברת היעד</span>
-            <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded bg-secondary inline-block" /> אני / ממלא/ת</span>
-            <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded bg-amber-300 inline-block" /> חברה חדשה</span>
-            <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded bg-card border border-primary/40 inline-block" /> חברה קיימת</span>
+          <div className={`border-t border-border pt-2 grid grid-cols-2 gap-x-3 gap-y-1.5 text-muted-foreground ${compact ? "text-[10px]" : "text-[11px]"}`}>
+            <span className="inline-flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-primary inline-block" /> חברת היעד</span>
+            <span className="inline-flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-secondary inline-block" /> אני / ממלא/ת</span>
+            <span className="inline-flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-300 inline-block" /> חברה חדשה</span>
+            <span className="inline-flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-card border border-primary/40 inline-block" /> חברה קיימת</span>
           </div>
         </div>
       )}
     </div>
   );
 };
+

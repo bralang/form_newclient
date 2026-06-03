@@ -133,7 +133,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
           <div className="hidden lg:flex lg:flex-row min-h-screen">
             {/* Form Content - closer to sidebar */}
             <div className="flex-1 pr-4 pl-0 py-10">
-              <div className="max-w-3xl mr-0 ml-auto">
+              <div className="max-w-2xl mr-0 ml-auto">
                 <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
                   {children}
                 </div>
@@ -141,18 +141,18 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
             </div>
 
             {/* Left Panel - Ownership Tree (step 2 only) + Mascot + Contact + Attention */}
-            <div className="w-64 xl:w-72 shrink-0 sticky top-0 h-screen flex flex-col p-6 pb-10 gap-4">
-              {/* Ownership tree (auto-hidden when not on Step 2) */}
-              <div className="overflow-y-auto">
+            <div className="w-[26rem] xl:w-[32rem] shrink-0 sticky top-0 h-screen flex flex-col p-6 pb-10 gap-4">
+              {/* Ownership tree (auto-hidden when not on Step 2) — takes most of the height */}
+              <div className="flex-1 min-h-0 overflow-y-auto">
                 <OwnershipTree />
               </div>
 
-              <div className="mt-auto flex flex-col gap-5">
+              <div className="flex flex-col gap-3">
                 {/* Attention Button - hidden on step 1 */}
               {currentStep !== 1 && (
                 <button
                   onClick={() => setShowAttention(true)}
-                  className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3.5 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98]"
+                  className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98]"
                 >
                   <div className="relative">
                     <Info className="w-5 h-5 animate-bounce" style={{ animationDuration: '2s' }} />
@@ -167,7 +167,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               <img
                 src={mascot}
                 alt="דמותג ליבי חסידה"
-                className="h-56 w-auto mx-auto"
+                className="h-40 w-auto mx-auto"
               />
 
               {/* Contact Info */}
@@ -179,6 +179,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               </div>
             </div>
           </div>
+
 
           {/* Attention Modal Overlay */}
           {showAttention && (
