@@ -1150,7 +1150,7 @@ export const Step2BusinessInfo = () => {
 
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold">סוג בעל המניות של {sh.companyName || "החברה המחזיקה"}</Label>
+                        <Label className="text-sm font-semibold">אחד מבעלי המניות של {sh.companyName || "החברה המחזיקה"}</Label>
                         <Select value={sh.subOwnerType || ""} onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}>
                           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                           <SelectContent>
