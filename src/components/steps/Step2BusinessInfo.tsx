@@ -1639,6 +1639,9 @@ export const Step2BusinessInfo = () => {
                 isNewCompany={false}
                 fillerName={name}
                 gender={gender}
+                selfName={name}
+                spouseName={spouseDisplayName}
+                showSpouseOption={showSpouseOption}
               />
             )}
           </div>
