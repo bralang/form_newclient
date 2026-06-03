@@ -600,6 +600,7 @@ export const Step2PersonalInfo = () => {
         onPrev={() => setCurrentStep(2)}
         nextLabel="למעבר להעלאת המסמכים"
         loading={loading}
+        disabled={!isPartnershipValid(businessInfo) || !isPartnershipValid(spouseBusinessInfo)}
       />
     </div>
   );
