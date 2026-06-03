@@ -941,6 +941,8 @@ export const Step2BusinessInfo = () => {
             0
           );
           const maxPct = Math.max(0, 100 - othersTotal);
+          const othersAllFilled = shareholders.length > 1 && shareholders.every((p: any, i: number) => i === idx || (parseFloat(p?.percentage) || 0) > 0);
+          const pctAutoFill = othersAllFilled ? maxPct : undefined;
           return (
             <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
               <h4 className="font-bold text-primary">
