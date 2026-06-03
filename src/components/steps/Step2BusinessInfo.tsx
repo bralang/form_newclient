@@ -45,9 +45,9 @@ const PercentageInput = ({
 );
 
 // Helper: validate partnership percentages sum to exactly 100
-export const isPartnershipValid = (info: any): boolean => {
+export const isPartnershipValid = (info: any, partnersKey: string = "partners"): boolean => {
   if (!info || info.ownershipType !== "partnership") return true;
-  const partners = info.partners || [];
+  const partners = info[partnersKey] || [];
   if (partners.length === 0) return true;
   const total = partners.reduce(
     (s: number, p: any) => s + (parseFloat(p?.percentage) || 0),
@@ -55,6 +55,7 @@ export const isPartnershipValid = (info: any): boolean => {
   );
   return Math.abs(total - 100) < 0.01;
 };
+
 
 // Checkbox-style option card (replaces radio/Select for shareholder type)
 const OptionCard = ({
