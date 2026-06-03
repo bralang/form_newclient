@@ -33,12 +33,13 @@ export const Step2PersonalInfo = () => {
   const hasAnyPurpose =
     serviceType.userPurposes.length > 0 || serviceType.spousePurposes.length > 0;
 
-  // If the only purpose the user has is opening a NEW nonprofit, skip personal ID/marital fields
+  // If the only purpose the user has is a nonprofit (new or existing), skip personal ID
   const userOnlyNewNonprofit =
     serviceType.userPurposes.length === 1 &&
-    serviceType.userPurposes[0] === "nonprofit" &&
-    (serviceType.userPurposeStatus?.nonprofit || []).length === 1 &&
-    (serviceType.userPurposeStatus?.nonprofit || [])[0] === "new";
+    serviceType.userPurposes[0] === "nonprofit";
+  const spouseOnlyNonprofit =
+    serviceType.spousePurposes.length === 1 &&
+    serviceType.spousePurposes[0] === "nonprofit";
 
   // Gov portal identification is relevant only for company purposes (nonprofit handled per board member)
   const userNeedsGovPortal =
@@ -346,15 +347,17 @@ export const Step2PersonalInfo = () => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <Label htmlFor="spouseId">ת.ז. *</Label>
-              <Input
-                id="spouseId"
-                value={spouseInfo.idNumber}
-                onChange={(e) => setSpouseInfo({ idNumber: e.target.value })}
-                maxLength={9}
-              />
-            </div>
+            {!spouseOnlyNonprofit && (
+              <div className="space-y-2">
+                <Label htmlFor="spouseId">ת.ז. *</Label>
+                <Input
+                  id="spouseId"
+                  value={spouseInfo.idNumber}
+                  onChange={(e) => setSpouseInfo({ idNumber: e.target.value })}
+                  maxLength={9}
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="spouseEmail">מייל</Label>
               <Input
