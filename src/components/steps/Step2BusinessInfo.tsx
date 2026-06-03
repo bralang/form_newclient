@@ -576,6 +576,7 @@ export const Step2BusinessInfo = () => {
                    <PercentageInput
                      value={partner.percentage || ""}
                      onChange={(value) => updatePartner(idx, "percentage", value)}
+                     max={100 - partners.reduce((s: number, p: any, i: number) => i === idx ? s : s + (parseFloat(p?.percentage) || 0), 0)}
                    />
                 </div>
                 {!isSelf && (
