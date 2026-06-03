@@ -1139,6 +1139,9 @@ export const Step2BusinessInfo = () => {
                           heldName={sh.companyName || (sh as any).requestedName1 || "החברה הקודמת"}
                           depth={1}
                           chainAllowsNewCompany={isNewCompany && sh.isExistingCompany === false}
+                          selfName={selfName}
+                          spouseName={spouseDisplayName}
+                          showSpouseOption={showSpouseOption}
                         />
                       )}
                     </div>
