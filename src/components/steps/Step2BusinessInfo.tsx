@@ -58,7 +58,7 @@ const AutoPercentageInput = ({
   placeholder?: string;
   max?: number;
 }) => {
-  React.useEffect(() => {
+  useEffect(() => {
     if (autoFillTo !== undefined && autoFillTo > 0 && !value) {
       onChange(String(Math.round(autoFillTo * 100) / 100));
     }
