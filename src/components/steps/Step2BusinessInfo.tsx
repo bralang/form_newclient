@@ -454,40 +454,18 @@ const SelfViaCompanyBlock = ({
 
       {subOwnerType === "person" && (
         <div className="space-y-3 p-3 bg-card rounded-lg border border-border/50">
-          <Label className="text-sm font-semibold">מי בעל המניות?</Label>
-          <PillGroup
-            value={personOwnerType}
-            onChange={(v) => update({ personOwnerType: v })}
-            options={[
-              { value: "self", label: effectiveSelfName },
-              ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
-            ]}
-          />
-
-          {(personOwnerType === "self" || personOwnerType === "spouse") && (
-            <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-              <p className="text-sm">
-                {personOwnerType === "self" ? effectiveSelfName : spouseName} {owner} המניות {sole} של {holdingDisplayName}.
-              </p>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <Checkbox
-                  checked={personOwnerWithOther}
-                  onCheckedChange={(v) => update({ personOwnerWithOther: !!v })}
-                />
-                <span>יחד עם אחר</span>
-              </label>
-            </div>
-          )}
-
-          {personOwnerType === "other" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1"><Label>שם מלא *</Label><Input value={data?.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
-              <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data?.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
-              <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ idFile: e.target.files?.[0] })} /></div>
-              <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data?.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
-              <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data?.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
-            </div>
-          )}
+          <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+            <p className="text-sm">
+              {effectiveSelfName} {owner} המניות {sole} של {holdingDisplayName}.
+            </p>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <Checkbox
+                checked={personOwnerWithOther}
+                onCheckedChange={(v) => update({ personOwnerWithOther: !!v })}
+              />
+              <span>יחד עם אחר</span>
+            </label>
+          </div>
         </div>
       )}
 
