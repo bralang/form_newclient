@@ -203,12 +203,12 @@ const CompanyChainBlock = ({
       {chainAllowsNewCompany && (
         <div className="space-y-2">
           <Label className="text-sm font-semibold">האם החברה המחזיקה כבר קיימת או טרם הוקמה?</Label>
-          <OptionCardGroup
+          <PillGroup
             value={isExistingCompany ? "existing" : "new"}
             onChange={(v) => update({ isExistingCompany: v === "existing" })}
             options={[
-              { value: "existing", label: "חברה קיימת (רשומה ברשם החברות)" },
-              { value: "new", label: "חברה חדשה (טרם הוקמה)" },
+              { value: "existing", label: "חברה קיימת" },
+              { value: "new", label: "חברה חדשה" },
             ]}
           />
         </div>
@@ -326,12 +326,12 @@ const SelfViaCompanyBlock = ({
       {isNewCompany && (
         <div className="space-y-2">
           <Label className="text-sm font-semibold">האם חברת האחזקות כבר קיימת או טרם הוקמה?</Label>
-          <OptionCardGroup
+          <PillGroup
             value={isExistingHolding ? "existing" : "new"}
             onChange={(v) => update({ isExistingCompany: v === "existing" })}
             options={[
-              { value: "existing", label: "חברה קיימת (רשומה ברשם החברות)" },
-              { value: "new", label: "חברה חדשה (טרם הוקמה)" },
+              { value: "existing", label: "חברה קיימת" },
+              { value: "new", label: "חברה חדשה" },
             ]}
           />
         </div>
