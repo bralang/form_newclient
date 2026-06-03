@@ -439,12 +439,12 @@ const SelfViaCompanyBlock = ({
 
       <div className="space-y-2">
         <Label className="text-sm font-semibold">
-          סוג בעל המניות של {holdingDisplayName}
+          אחד מבעלי המניות של {holdingDisplayName}
         </Label>
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="person">אדם פרטי</SelectItem>
+            <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
           </SelectContent>
         </Select>
