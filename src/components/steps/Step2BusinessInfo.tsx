@@ -487,7 +487,7 @@ export const Step2BusinessInfo = () => {
           isVatRepresentative: false,
         };
       });
-      setInfo({ partners: adjusted });
+      setInfo({ [partnersKey]: adjusted });
     };
 
     return (
