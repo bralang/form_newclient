@@ -177,9 +177,10 @@ const CompanyChainBlock = ({
   selfName,
   spouseName,
   showSpouseOption = false,
+  restrictToPersonOrCompany = false,
 }: {
-  data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | "" };
-  onChange: (next: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | "" }) => void;
+  data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean };
+  onChange: (next: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }) => void;
   heldName: string;
   depth?: number;
   fillerName?: string;
@@ -188,8 +189,9 @@ const CompanyChainBlock = ({
   selfName?: string;
   spouseName?: string;
   showSpouseOption?: boolean;
+  restrictToPersonOrCompany?: boolean;
 }) => {
-  const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | "" }>) =>
+  const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }>) =>
     onChange({ ...data, ...patch });
   const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
   const subOwnerType = data.subOwnerType || "";
@@ -200,6 +202,7 @@ const CompanyChainBlock = ({
   const displayName = data.companyName || (data as any).requestedName1 || "החברה המחזיקה";
   const personOwnerType = data.personOwnerType || "";
   const effectiveSelfName = selfName || (fillerName !== "אני" ? fillerName : "ממלא/ת השאלון");
+  const personOwnerWithOther = !!data.personOwnerWithOther;
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
