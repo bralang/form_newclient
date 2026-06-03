@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useFormContext, NonprofitBoardMember, NonprofitAuditMember, NonprofitInfo, GovPortalIdMethod } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +44,29 @@ const PercentageInput = ({
     </span>
   </div>
 );
+
+// Wrapper that auto-fills the remaining percentage when all other slots are filled
+const AutoPercentageInput = ({
+  value,
+  onChange,
+  autoFillTo,
+  ...rest
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  autoFillTo?: number;
+  placeholder?: string;
+  max?: number;
+}) => {
+  useEffect(() => {
+    if (autoFillTo !== undefined && autoFillTo > 0 && !value) {
+      onChange(String(Math.round(autoFillTo * 100) / 100));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoFillTo, value]);
+  return <PercentageInput value={value} onChange={onChange} {...rest} />;
+};
+
 
 // Helper: validate partnership percentages sum to exactly 100
 export const isPartnershipValid = (info: any, partnersKey: string = "partners"): boolean => {
@@ -675,11 +699,19 @@ export const Step2BusinessInfo = () => {
                 )}
                 <div className="space-y-1">
                   <Label>אחוז בשותפות</Label>
-                   <PercentageInput
-                     value={partner.percentage || ""}
-                     onChange={(value) => updatePartner(idx, "percentage", value)}
-                     max={100 - partners.reduce((s: number, p: any, i: number) => i === idx ? s : s + (parseFloat(p?.percentage) || 0), 0)}
-                   />
+                  {(() => {
+                    const othersSum = partners.reduce((s: number, p: any, i: number) => i === idx ? s : s + (parseFloat(p?.percentage) || 0), 0);
+                    const othersAllFilled = partners.length > 1 && partners.every((p: any, i: number) => i === idx || (parseFloat(p?.percentage) || 0) > 0);
+                    const remainder = Math.max(0, 100 - othersSum);
+                    return (
+                      <AutoPercentageInput
+                        value={partner.percentage || ""}
+                        onChange={(value) => updatePartner(idx, "percentage", value)}
+                        max={remainder}
+                        autoFillTo={othersAllFilled ? remainder : undefined}
+                      />
+                    );
+                  })()}
                 </div>
                 {!isSelf && (
                   <>
@@ -909,6 +941,8 @@ export const Step2BusinessInfo = () => {
             0
           );
           const maxPct = Math.max(0, 100 - othersTotal);
+          const othersAllFilled = shareholders.length > 1 && shareholders.every((p: any, i: number) => i === idx || (parseFloat(p?.percentage) || 0) > 0);
+          const pctAutoFill = othersAllFilled ? maxPct : undefined;
           return (
             <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
               <h4 className="font-bold text-primary">
@@ -929,10 +963,11 @@ export const Step2BusinessInfo = () => {
                 isNewCompany ? (
                   <div className="space-y-1 max-w-xs">
                     <Label>אחוזי אחזקה *</Label>
-                    <PercentageInput
+                    <AutoPercentageInput
                       value={sh.percentage || ""}
                       onChange={(value) => updateShareholder(idx, "percentage", value)}
                       max={maxPct}
+                      autoFillTo={pctAutoFill}
                     />
                   </div>
                 ) : (
@@ -964,10 +999,11 @@ export const Step2BusinessInfo = () => {
                         {isNewCompany && (
                           <div className="space-y-1">
                             <Label>אחוזי אחזקה *</Label>
-                            <PercentageInput
+                            <AutoPercentageInput
                               value={sh.percentage || ""}
                               onChange={(value) => updateShareholder(idx, "percentage", value)}
                               max={maxPct}
+                              autoFillTo={pctAutoFill}
                             />
                           </div>
                         )}
@@ -1001,10 +1037,11 @@ export const Step2BusinessInfo = () => {
                         {isNewCompany && (
                           <div className="space-y-1">
                             <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
-                            <PercentageInput
+                            <AutoPercentageInput
                               value={sh.percentage || ""}
                               onChange={(value) => updateShareholder(idx, "percentage", value)}
                               max={maxPct}
+                              autoFillTo={pctAutoFill}
                             />
                           </div>
                         )}
@@ -1079,10 +1116,11 @@ export const Step2BusinessInfo = () => {
                           {isNewCompany && (
                             <div className="space-y-1">
                               <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
-                              <PercentageInput
+                              <AutoPercentageInput
                                 value={sh.percentage || ""}
                                 onChange={(value) => updateShareholder(idx, "percentage", value)}
                                 max={maxPct}
+                                autoFillTo={pctAutoFill}
                               />
                             </div>
                           )}
@@ -1103,10 +1141,11 @@ export const Step2BusinessInfo = () => {
                           {isNewCompany && (
                             <div className="space-y-1">
                               <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
-                              <PercentageInput
+                              <AutoPercentageInput
                                 value={sh.percentage || ""}
                                 onChange={(value) => updateShareholder(idx, "percentage", value)}
                                 max={maxPct}
+                                autoFillTo={pctAutoFill}
                               />
                             </div>
                           )}
