@@ -963,10 +963,11 @@ export const Step2BusinessInfo = () => {
                 isNewCompany ? (
                   <div className="space-y-1 max-w-xs">
                     <Label>אחוזי אחזקה *</Label>
-                    <PercentageInput
+                    <AutoPercentageInput
                       value={sh.percentage || ""}
                       onChange={(value) => updateShareholder(idx, "percentage", value)}
                       max={maxPct}
+                      autoFillTo={pctAutoFill}
                     />
                   </div>
                 ) : (
@@ -998,10 +999,11 @@ export const Step2BusinessInfo = () => {
                         {isNewCompany && (
                           <div className="space-y-1">
                             <Label>אחוזי אחזקה *</Label>
-                            <PercentageInput
+                            <AutoPercentageInput
                               value={sh.percentage || ""}
                               onChange={(value) => updateShareholder(idx, "percentage", value)}
                               max={maxPct}
+                              autoFillTo={pctAutoFill}
                             />
                           </div>
                         )}
@@ -1035,10 +1037,11 @@ export const Step2BusinessInfo = () => {
                         {isNewCompany && (
                           <div className="space-y-1">
                             <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
-                            <PercentageInput
+                            <AutoPercentageInput
                               value={sh.percentage || ""}
                               onChange={(value) => updateShareholder(idx, "percentage", value)}
                               max={maxPct}
+                              autoFillTo={pctAutoFill}
                             />
                           </div>
                         )}
@@ -1113,10 +1116,11 @@ export const Step2BusinessInfo = () => {
                           {isNewCompany && (
                             <div className="space-y-1">
                               <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
-                              <PercentageInput
+                              <AutoPercentageInput
                                 value={sh.percentage || ""}
                                 onChange={(value) => updateShareholder(idx, "percentage", value)}
                                 max={maxPct}
+                                autoFillTo={pctAutoFill}
                               />
                             </div>
                           )}
@@ -1137,10 +1141,11 @@ export const Step2BusinessInfo = () => {
                           {isNewCompany && (
                             <div className="space-y-1">
                               <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
-                              <PercentageInput
+                              <AutoPercentageInput
                                 value={sh.percentage || ""}
                                 onChange={(value) => updateShareholder(idx, "percentage", value)}
                                 max={maxPct}
+                                autoFillTo={pctAutoFill}
                               />
                             </div>
                           )}
