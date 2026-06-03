@@ -285,10 +285,17 @@ const CompanyChainBlock = ({
           </div>
 
           {(personOwnerType === "self" || personOwnerType === "spouse") && (
-            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+            <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
               <p className="text-sm">
                 {personOwnerType === "self" ? effectiveSelfName : spouseName} {owner} המניות {sole} של {displayName}.
               </p>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <Checkbox
+                  checked={personOwnerWithOther}
+                  onCheckedChange={(v) => update({ personOwnerWithOther: !!v })}
+                />
+                <span>יחד עם אחר</span>
+              </label>
             </div>
           )}
 
