@@ -297,215 +297,106 @@ const CompanyChainBlock = ({
         </div>
       )}
 
-      {restrictToPersonOrCompany ? (
-        <>
+      <div className="space-y-2">
+        <Label className="text-sm font-semibold">אחד מבעלי המניות של {displayName}</Label>
+        <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="person">{restrictToPersonOrCompany ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
+            <SelectItem value="company">חברה</SelectItem>
+            {!restrictToPersonOrCompany && (
+              <>
+                <SelectItem value="self">{`${fillerName} ישירות`}</SelectItem>
+                <SelectItem value="self_via_company">{`${fillerName} באמצעות חברה`}</SelectItem>
+              </>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {subOwnerType === "person" && !restrictToPersonOrCompany && (
+        <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+          <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
           <div className="space-y-2">
-            <Label className="text-sm font-semibold">אחד מבעלי המניות של {displayName}</Label>
-            <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
-              <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="person">{`אדם פרטי - ${effectiveSelfName}`}</SelectItem>
-                <SelectItem value="company">חברה</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {subOwnerType === "company" && (
-            <CompanyChainBlock
-              data={data.childCompany || {}}
-              onChange={(c) => update({ childCompany: c })}
-              heldName={displayName}
-              depth={depth + 1}
-              fillerName={fillerName}
-              gender={gender}
-              chainAllowsNewCompany={chainAllowsNewCompany && !isExistingCompany}
-              selfName={selfName}
-              spouseName={spouseName}
-              showSpouseOption={showSpouseOption}
-              restrictToPersonOrCompany={restrictToPersonOrCompany}
-            />
-          )}
-        </>
-      ) : isExistingCompany ? (
-        <>
-          <div className="space-y-2">
-            <Label className="text-base font-semibold">פרטי אחד מבעלי המניות של {displayName}</Label>
+            <Label className="text-sm font-semibold">מי בעל המניות?</Label>
             <PillGroup
-              value={subOwnerType === "self_via_company" ? "self_via_company" : subOwnerType === "self" ? "self" : ""}
-              onChange={(v) => update({ subOwnerType: v as any })}
+              value={personOwnerType}
+              onChange={(v) => update({ personOwnerType: v as any })}
               options={[
-                { value: "self", label: `${fillerName} ישירות` },
-                { value: "self_via_company", label: `${fillerName} באמצעות חברה` },
+                { value: "self", label: effectiveSelfName },
+                ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
+                { value: "other", label: "אחר" },
               ]}
             />
           </div>
-          {subOwnerType === "self" && (
-            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-              <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {displayName}.</p>
+
+          {(personOwnerType === "self" || personOwnerType === "spouse") && (
+            <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="text-sm">
+                {personOwnerType === "self" ? effectiveSelfName : spouseName} {owner} המניות {sole} של {displayName}.
+              </p>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <Checkbox
+                  checked={personOwnerWithOther}
+                  onCheckedChange={(v) => update({ personOwnerWithOther: !!v })}
+                />
+                <span>יחד עם אחר</span>
+              </label>
             </div>
           )}
-          {subOwnerType === "self_via_company" && (
-            <CompanyChainBlock
-              data={data.childCompany || {}}
-              onChange={(c) => update({ childCompany: c })}
-              heldName={displayName}
-              depth={depth + 1}
-              fillerName={fillerName}
-              gender={gender}
-              chainAllowsNewCompany={false}
-              selfName={selfName}
-              spouseName={spouseName}
-              showSpouseOption={showSpouseOption}
-              restrictToPersonOrCompany={restrictToPersonOrCompany}
-            />
+
+          {personOwnerType === "other" && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
+                <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
+                <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ idFile: e.target.files?.[0] })} /></div>
+                <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
+                <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
+              </div>
+              <div className="space-y-2">
+                <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
+                <Select value={data.personOwner?.additionalIdType || ""} onValueChange={(v: any) => updatePerson({ additionalIdType: v })}>
+                  <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                    <SelectItem value="license">רישיון נהיגה</SelectItem>
+                    <SelectItem value="passport">דרכון</SelectItem>
+                  </SelectContent>
+                </Select>
+                {data.personOwner?.additionalIdType && (
+                  <>
+                    <Input placeholder="מספר אמצעי זיהוי" value={data.personOwner?.additionalIdNumber || ""} onChange={(e) => updatePerson({ additionalIdNumber: e.target.value })} />
+                    <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ additionalIdFile: e.target.files?.[0] })} /></div>
+                  </>
+                )}
+              </div>
+            </>
           )}
-        </>
-      ) : (
-        <ChainNewCompanyShareholders
-          data={data}
-          update={update}
-          displayName={displayName}
+        </div>
+      )}
+
+      {subOwnerType === "self" && (
+        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+          <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {displayName}.</p>
+        </div>
+      )}
+
+      {(subOwnerType === "company" || subOwnerType === "self_via_company") && (
+        <CompanyChainBlock
+          data={data.childCompany || {}}
+          onChange={(c) => update({ childCompany: c })}
+          heldName={displayName}
+          depth={depth + 1}
           fillerName={fillerName}
           gender={gender}
-          effectiveSelfName={effectiveSelfName}
+          chainAllowsNewCompany={chainAllowsNewCompany && !isExistingCompany}
+          selfName={selfName}
           spouseName={spouseName}
           showSpouseOption={showSpouseOption}
-          depth={depth}
-          chainAllowsNewCompany={chainAllowsNewCompany}
+          restrictToPersonOrCompany={restrictToPersonOrCompany}
         />
       )}
-    </div>
-  );
-};
-
-// Multi-shareholder section for a NEW company inside the ownership chain.
-// Mirrors outer "new company" UX: count + list of shareholders, each can be
-// the filler directly, another person, or another company (recursive).
-const ChainNewCompanyShareholders = ({
-  data,
-  update,
-  displayName,
-  fillerName,
-  gender,
-  effectiveSelfName,
-  spouseName,
-  showSpouseOption,
-  depth,
-  chainAllowsNewCompany,
-}: {
-  data: any;
-  update: (patch: any) => void;
-  displayName: string;
-  fillerName: string;
-  gender: "male" | "female" | "";
-  effectiveSelfName: string;
-  spouseName?: string;
-  showSpouseOption: boolean;
-  depth: number;
-  chainAllowsNewCompany: boolean;
-}) => {
-  const list: any[] = Array.isArray(data.shareholdersList) ? data.shareholdersList : [];
-  const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
-  const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
-
-  const setCount = (count: number) => {
-    if (count < 1) count = 1;
-    const adjusted = Array.from({ length: count }, (_, i) => list[i] || { ownerType: "" });
-    update({ shareholdersList: adjusted });
-  };
-  const updateAt = (idx: number, patch: any) => {
-    const next = [...list];
-    next[idx] = { ...(next[idx] || {}), ...patch };
-    update({ shareholdersList: next });
-  };
-  const updatePerson = (idx: number, patch: any) => {
-    const cur = list[idx] || {};
-    updateAt(idx, { personOwner: { ...(cur.personOwner || {}), ...patch } });
-  };
-
-  return (
-    <div className="space-y-3">
-      <div className="space-y-1">
-        <Label className="text-sm font-semibold">כמה בעלי מניות יהיו ב{displayName}?</Label>
-        <Input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={list.length || ""}
-          onChange={(e) => setCount(parseInt(e.target.value) || 0)}
-        />
-      </div>
-
-      {list.map((sh: any, idx: number) => {
-        const ownerType = sh.ownerType || "";
-        const personType = sh.personType || "";
-        return (
-          <div key={idx} className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-            <p className="text-xs text-muted-foreground">בעל מניות #{idx + 1} של {displayName}</p>
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">סוג בעל המניות</Label>
-              <Select value={ownerType} onValueChange={(v: any) => updateAt(idx, { ownerType: v })}>
-                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="person">אדם פרטי</SelectItem>
-                  <SelectItem value="company">חברה</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {ownerType === "person" && (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-sm font-semibold">מי בעל המניות?</Label>
-                  <PillGroup
-                    value={personType}
-                    onChange={(v) => updateAt(idx, { personType: v as any })}
-                    options={[
-                      { value: "self", label: effectiveSelfName },
-                      ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
-                      { value: "other", label: "אחר" },
-                    ]}
-                  />
-                </div>
-                {(personType === "self" || personType === "spouse") && (
-                  <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-                    <p className="text-sm">
-                      {personType === "self" ? effectiveSelfName : spouseName} {heShe} {owner} מניות ב{displayName}.
-                    </p>
-                  </div>
-                )}
-                {personType === "other" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updatePerson(idx, { name: e.target.value })} /></div>
-                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updatePerson(idx, { idNumber: e.target.value })} /></div>
-                    <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson(idx, { idFile: e.target.files?.[0] })} /></div>
-                    <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.personOwner?.phone || ""} onChange={(e) => updatePerson(idx, { phone: e.target.value })} /></div>
-                    <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.personOwner?.email || ""} onChange={(e) => updatePerson(idx, { email: e.target.value })} /></div>
-                  </div>
-                )}
-                <div className="space-y-1">
-                  <Label>אחוז אחזקה ב{displayName} *</Label>
-                  <PercentageInput value={sh.percentage || ""} onChange={(v) => updateAt(idx, { percentage: v })} />
-                </div>
-              </>
-            )}
-
-            {ownerType === "company" && (
-              <CompanyChainBlock
-                data={sh.childCompany || {}}
-                onChange={(c) => updateAt(idx, { childCompany: c })}
-                heldName={displayName}
-                depth={depth + 1}
-                fillerName={fillerName}
-                gender={gender}
-                chainAllowsNewCompany={chainAllowsNewCompany}
-                selfName={effectiveSelfName}
-                spouseName={spouseName}
-                showSpouseOption={showSpouseOption}
-              />
-            )}
-          </div>
-        );
-      })}
     </div>
   );
 };
