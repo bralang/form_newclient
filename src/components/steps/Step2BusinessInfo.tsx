@@ -191,6 +191,7 @@ const CompanyChainBlock = ({
   const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
   const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
   const isExistingCompany = chainAllowsNewCompany ? (data.isExistingCompany ?? true) : true;
+  const displayName = data.companyName || (data as any).requestedName1 || "החברה המחזיקה";
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
@@ -214,21 +215,33 @@ const CompanyChainBlock = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label>שם החברה המחזיקה את {heldName} *</Label>
-          <Input value={data.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
-        </div>
-        {isExistingCompany && (
+      {isExistingCompany ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label>שם החברה המחזיקה את {heldName} *</Label>
+            <Input value={data.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
+          </div>
           <div className="space-y-1">
             <Label>ח.פ. *</Label>
             <Input value={data.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Label className="font-semibold">3 שמות רצויים לחברה המחזיקה את {heldName} החדשה (לפי סדר עדיפות)</Label>
+          {[1, 2, 3].map((n) => (
+            <Input
+              key={n}
+              placeholder={`שם רצוי ${n}`}
+              value={(data as any)[`requestedName${n}`] || ""}
+              onChange={(e) => update({ [`requestedName${n}`]: e.target.value } as any)}
+            />
+          ))}
+        </div>
+      )}
 
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">סוג בעל המניות של {data.companyName || "החברה המחזיקה"}</Label>
+        <Label className="text-sm font-semibold">סוג בעל המניות של {displayName}</Label>
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
@@ -242,7 +255,7 @@ const CompanyChainBlock = ({
 
       {subOwnerType === "person" && (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-          <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {data.companyName || "החברה המחזיקה"}</p>
+          <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
             <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
@@ -272,7 +285,7 @@ const CompanyChainBlock = ({
 
       {subOwnerType === "self" && (
         <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {data.companyName || "החברה המחזיקה"}.</p>
+          <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {displayName}.</p>
         </div>
       )}
 
@@ -280,7 +293,7 @@ const CompanyChainBlock = ({
         <CompanyChainBlock
           data={data.childCompany || {}}
           onChange={(c) => update({ childCompany: c })}
-          heldName={data.companyName || "החברה הקודמת"}
+          heldName={displayName}
           depth={depth + 1}
           fillerName={fillerName}
           gender={gender}
@@ -1087,7 +1100,7 @@ export const Step2BusinessInfo = () => {
                         <CompanyChainBlock
                           data={sh.childCompany || {}}
                           onChange={(c) => updateShareholder(idx, "childCompany", c)}
-                          heldName={sh.companyName || "החברה הקודמת"}
+                          heldName={sh.companyName || (sh as any).requestedName1 || "החברה הקודמת"}
                           depth={1}
                           chainAllowsNewCompany={isNewCompany && sh.isExistingCompany === false}
                         />
