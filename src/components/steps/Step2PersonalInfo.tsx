@@ -33,13 +33,15 @@ export const Step2PersonalInfo = () => {
   const hasAnyPurpose =
     serviceType.userPurposes.length > 0 || serviceType.spousePurposes.length > 0;
 
-  // If the only purpose the user has is a nonprofit (new or existing), skip personal ID
-  const userOnlyNewNonprofit =
-    serviceType.userPurposes.length === 1 &&
-    serviceType.userPurposes[0] === "nonprofit";
-  const spouseOnlyNonprofit =
-    serviceType.spousePurposes.length === 1 &&
-    serviceType.spousePurposes[0] === "nonprofit";
+  // If the only purpose in the household is a nonprofit (new or existing), skip personal ID for both
+  const allPurposes = [
+    ...serviceType.userPurposes,
+    ...serviceType.spousePurposes,
+  ];
+  const householdOnlyNonprofit =
+    allPurposes.length > 0 && allPurposes.every((p) => p === "nonprofit");
+  const userOnlyNewNonprofit = householdOnlyNonprofit;
+  const spouseOnlyNonprofit = householdOnlyNonprofit;
 
   // Gov portal identification is relevant only for company purposes (nonprofit handled per board member)
   const userNeedsGovPortal =
