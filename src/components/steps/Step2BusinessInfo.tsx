@@ -174,16 +174,22 @@ const CompanyChainBlock = ({
   fillerName = "אני",
   gender = "",
   chainAllowsNewCompany = false,
+  selfName,
+  spouseName,
+  showSpouseOption = false,
 }: {
-  data: CompanyNode & { isExistingCompany?: boolean };
-  onChange: (next: CompanyNode & { isExistingCompany?: boolean }) => void;
+  data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | "" };
+  onChange: (next: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | "" }) => void;
   heldName: string;
   depth?: number;
   fillerName?: string;
   gender?: "male" | "female" | "";
   chainAllowsNewCompany?: boolean;
+  selfName?: string;
+  spouseName?: string;
+  showSpouseOption?: boolean;
 }) => {
-  const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean }>) =>
+  const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | "" }>) =>
     onChange({ ...data, ...patch });
   const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
   const subOwnerType = data.subOwnerType || "";
@@ -192,6 +198,8 @@ const CompanyChainBlock = ({
   const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
   const isExistingCompany = chainAllowsNewCompany ? (data.isExistingCompany ?? true) : true;
   const displayName = data.companyName || (data as any).requestedName1 || "החברה המחזיקה";
+  const personOwnerType = data.personOwnerType || "";
+  const effectiveSelfName = selfName || (fillerName !== "אני" ? fillerName : "ממלא/ת השאלון");
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
