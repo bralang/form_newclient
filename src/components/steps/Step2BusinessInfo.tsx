@@ -1241,7 +1241,7 @@ export const Step2BusinessInfo = () => {
         </div>
       )}
 
-      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix, isWarComp)}
+      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix, isWarComp, "existingPartners", "existingPartnershipAgreementFile")}
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים?</Label>
