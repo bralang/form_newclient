@@ -12,10 +12,12 @@ const PercentageInput = ({
   value,
   onChange,
   placeholder = "לדוגמה: 50",
+  max,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  max?: number;
 }) => (
   <div className="relative w-full min-w-0">
     <Input
@@ -24,7 +26,13 @@ const PercentageInput = ({
       pattern="[0-9]*\.?[0-9]*"
       value={value}
       onChange={(e) => {
-        const v = e.target.value.replace(/[^0-9.]/g, "");
+        let v = e.target.value.replace(/[^0-9.]/g, "");
+        if (typeof max === "number" && v !== "") {
+          const num = parseFloat(v);
+          if (!isNaN(num) && num > max) {
+            v = String(Math.max(0, Math.round(max * 100) / 100));
+          }
+        }
         onChange(v);
       }}
       placeholder={placeholder}
@@ -35,6 +43,18 @@ const PercentageInput = ({
     </span>
   </div>
 );
+
+// Helper: validate partnership percentages sum to exactly 100
+export const isPartnershipValid = (info: any): boolean => {
+  if (!info || info.ownershipType !== "partnership") return true;
+  const partners = info.partners || [];
+  if (partners.length === 0) return true;
+  const total = partners.reduce(
+    (s: number, p: any) => s + (parseFloat(p?.percentage) || 0),
+    0
+  );
+  return Math.abs(total - 100) < 0.01;
+};
 
 // Checkbox-style option card (replaces radio/Select for shareholder type)
 const OptionCard = ({
