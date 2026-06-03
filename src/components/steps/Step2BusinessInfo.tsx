@@ -1042,13 +1042,28 @@ export const Step2BusinessInfo = () => {
         </Select>
       </div>
 
-      {/* Bank details for authorized - MANDATORY */}
+      {/* Separate bank account question for authorized */}
       {info.businessType === "authorized" && (
+        <div className="space-y-2">
+          <Label>האם יש חשבון בנק נפרד לעסק?</Label>
+          <YesNoSelect
+            value={info.hasSeparateBankAccount}
+            onChange={(v) => setInfo({ hasSeparateBankAccount: v })}
+          />
+          {info.hasSeparateBankAccount === false && (
+            <div className="flex items-start gap-2 p-3 bg-muted/40 border border-border rounded-lg mt-2">
+              <p className="text-sm text-muted-foreground">
+                לתשומת ליבך — ניתן לעדכן כל חשבון בנק של בעל העסק ואין חובה לפתוח חשבון נפרד לעסק, אם כי מומלץ.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bank details for authorized - shown when separate account exists */}
+      {info.businessType === "authorized" && info.hasSeparateBankAccount === true && (
         <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
           <Label className="text-base font-semibold">פרטי חשבון בנק של העסק *</Label>
-          <p className="text-sm text-muted-foreground">
-            לתשומת ליבך — ניתן לעדכן כל חשבון בנק של בעל העסק ואין חובה לפתוח חשבון נפרד לעסק, אם כי מומלץ.
-          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1"><Label>בנק *</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} /></div>
             <div className="space-y-1"><Label>סניף *</Label><Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} /></div>
@@ -1057,6 +1072,7 @@ export const Step2BusinessInfo = () => {
           </div>
         </div>
       )}
+
 
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה רוצה להיות עוסק זעיר?", "האם את רוצה להיות עוסקת זעירה?")}</Label>
