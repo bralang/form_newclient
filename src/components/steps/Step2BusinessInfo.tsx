@@ -271,23 +271,25 @@ const CompanyChainBlock = ({
       {subOwnerType === "person" && (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
           <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold">מי בעל המניות?</Label>
-            <PillGroup
-              value={personOwnerType}
-              onChange={(v) => update({ personOwnerType: v as any })}
-              options={[
-                { value: "self", label: effectiveSelfName },
-                ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
-                ...(restrictToPersonOrCompany ? [] : [{ value: "other", label: "אחר" }]),
-              ]}
-            />
-          </div>
+          {!restrictToPersonOrCompany && (
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">מי בעל המניות?</Label>
+              <PillGroup
+                value={personOwnerType}
+                onChange={(v) => update({ personOwnerType: v as any })}
+                options={[
+                  { value: "self", label: effectiveSelfName },
+                  ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
+                  { value: "other", label: "אחר" },
+                ]}
+              />
+            </div>
+          )}
 
-          {(personOwnerType === "self" || personOwnerType === "spouse") && (
+          {(restrictToPersonOrCompany || personOwnerType === "self" || personOwnerType === "spouse") && (
             <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
               <p className="text-sm">
-                {personOwnerType === "self" ? effectiveSelfName : spouseName} {owner} המניות {sole} של {displayName}.
+                {restrictToPersonOrCompany || personOwnerType === "self" ? effectiveSelfName : spouseName} {owner} המניות {sole} של {displayName}.
               </p>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <Checkbox
