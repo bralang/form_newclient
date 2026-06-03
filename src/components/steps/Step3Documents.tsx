@@ -11,7 +11,9 @@ export const Step3Documents = () => {
     spouseInfo,
     serviceType,
     businessInfo,
+    setBusinessInfo,
     spouseBusinessInfo,
+    setSpouseBusinessInfo,
     nonprofitInfo,
     setNonprofitInfo,
     spouseNonprofitInfo,
@@ -42,6 +44,14 @@ export const Step3Documents = () => {
   const hasExistingCompanies = (businessInfo.existingCompanyCount || 0) > 0 || (spouseBusinessInfo.existingCompanyCount || 0) > 0;
   const hasNewCompaniesInRegistrar = businessInfo.newCompanies?.some((c) => c.existsInRegistrar) || spouseBusinessInfo.newCompanies?.some((c) => c.existsInRegistrar);
   const hasNewCompaniesNotInRegistrarButInRegistrar = businessInfo.newCompanies?.some((c) => c.existsInRegistrar === true) || spouseBusinessInfo.newCompanies?.some((c) => c.existsInRegistrar === true);
+
+  const userHasExistingBusiness = userPurposes.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing");
+  const spouseHasExistingBusiness = spousePurposes.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing");
+
+  const userNewPartnership = userHasNewBusiness && businessInfo.ownershipType === "partnership" && (businessInfo.partners?.length || 0) > 0;
+  const userExistingPartnership = userHasExistingBusiness && businessInfo.ownershipType === "partnership" && (businessInfo.existingPartners?.length || 0) > 0;
+  const spouseNewPartnership = spouseHasNewBusiness && spouseBusinessInfo.ownershipType === "partnership" && (spouseBusinessInfo.partners?.length || 0) > 0;
+  const spouseExistingPartnership = spouseHasExistingBusiness && spouseBusinessInfo.ownershipType === "partnership" && (spouseBusinessInfo.existingPartners?.length || 0) > 0;
 
   const handleNext = async () => {
     setLoading(true);
@@ -189,6 +199,47 @@ export const Step3Documents = () => {
             />
           </div>
         )}
+
+        {/* Partnership agreement uploads */}
+        {(userNewPartnership || userExistingPartnership) && (
+          <div className="space-y-4 p-5 bg-muted/40 rounded-xl">
+            <h3 className="font-bold text-lg">מומלץ לצרף הסכם שותפות – {personalInfo.firstName}</h3>
+            {userNewPartnership && (
+              <FileUpload
+                id="partnershipAgreementNew"
+                label={userExistingPartnership ? "הסכם שותפות – עסק חדש" : "הסכם שותפות"}
+                onChange={(files) => setBusinessInfo({ partnershipAgreementFile: files?.[0] || undefined })}
+              />
+            )}
+            {userExistingPartnership && (
+              <FileUpload
+                id="partnershipAgreementExisting"
+                label={userNewPartnership ? "הסכם שותפות – עסק קיים" : "הסכם שותפות"}
+                onChange={(files) => setBusinessInfo({ existingPartnershipAgreementFile: files?.[0] || undefined })}
+              />
+            )}
+          </div>
+        )}
+        {(spouseNewPartnership || spouseExistingPartnership) && (
+          <div className="space-y-4 p-5 bg-muted/40 rounded-xl">
+            <h3 className="font-bold text-lg">מומלץ לצרף הסכם שותפות – {personalInfo.spouseName}</h3>
+            {spouseNewPartnership && (
+              <FileUpload
+                id="spousePartnershipAgreementNew"
+                label={spouseExistingPartnership ? "הסכם שותפות – עסק חדש" : "הסכם שותפות"}
+                onChange={(files) => setSpouseBusinessInfo({ partnershipAgreementFile: files?.[0] || undefined })}
+              />
+            )}
+            {spouseExistingPartnership && (
+              <FileUpload
+                id="spousePartnershipAgreementExisting"
+                label={spouseNewPartnership ? "הסכם שותפות – עסק קיים" : "הסכם שותפות"}
+                onChange={(files) => setSpouseBusinessInfo({ existingPartnershipAgreementFile: files?.[0] || undefined })}
+              />
+            )}
+          </div>
+        )}
+
 
         {/* Company documents */}
         {(userHasCompany || spouseHasCompany) && (
