@@ -252,11 +252,11 @@ const CompanyChainBlock = ({
       )}
 
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">סוג בעל המניות של {displayName}</Label>
+        <Label className="text-sm font-semibold">אחד מבעלי המניות של {displayName}</Label>
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="person">אדם פרטי</SelectItem>
+            <SelectItem value="person">{restrictToPersonOrCompany ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
             {!restrictToPersonOrCompany && (
               <>
@@ -439,12 +439,12 @@ const SelfViaCompanyBlock = ({
 
       <div className="space-y-2">
         <Label className="text-sm font-semibold">
-          סוג בעל המניות של {holdingDisplayName}
+          אחד מבעלי המניות של {holdingDisplayName}
         </Label>
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="person">אדם פרטי</SelectItem>
+            <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
           </SelectContent>
         </Select>
@@ -1150,7 +1150,7 @@ export const Step2BusinessInfo = () => {
 
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-semibold">סוג בעל המניות של {sh.companyName || "החברה המחזיקה"}</Label>
+                        <Label className="text-sm font-semibold">אחד מבעלי המניות של {sh.companyName || "החברה המחזיקה"}</Label>
                         <Select value={sh.subOwnerType || ""} onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}>
                           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                           <SelectContent>
