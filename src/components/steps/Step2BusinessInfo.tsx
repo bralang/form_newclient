@@ -284,7 +284,7 @@ const CompanyChainBlock = ({
           depth={depth + 1}
           fillerName={fillerName}
           gender={gender}
-          chainAllowsNewCompany={chainAllowsNewCompany}
+          chainAllowsNewCompany={chainAllowsNewCompany && !isExistingCompany}
         />
       )}
     </div>
