@@ -448,9 +448,12 @@ export const Step2BusinessInfo = () => {
     selfName: string,
     selfIdNumber: string,
     prefix = "",
-    isWarComp = false
+    isWarComp = false,
+    partnersKey: string = "partners",
+    fileKey: string = "partnershipAgreementFile"
   ) => {
-    const partners = info.partners || [];
+    const partners = info[partnersKey] || [];
+
 
     const updatePartner = (idx: number, field: string, value: any) => {
       const updated = [...partners];
