@@ -1463,14 +1463,15 @@ export const Step2BusinessInfo = () => {
             {/* Shareholders - simplified for existing companies: only filler details needed */}
             <div className="space-y-2">
               <Label className="text-base font-semibold">פרטי אחד מבעלי המניות</Label>
-              <OptionCardGroup
+              <PillGroup
                 value={company.shareholderType || ""}
                 onChange={(v) => updateExistingCompany(idx, "shareholderType", v)}
                 options={[
-                  { value: "alone", label: `${name} ישירות – לבד או יחד עם אחר` },
+                  { value: "alone", label: `${name} ישירות` },
                   { value: "self_via_company", label: `${name} באמצעות חברה` },
                 ]}
               />
+
             </div>
 
             {company.shareholderType === "self_via_company" && (
