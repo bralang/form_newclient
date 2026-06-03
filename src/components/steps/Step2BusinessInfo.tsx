@@ -45,7 +45,10 @@ const PercentageInput = ({
   </div>
 );
 
-// Wrapper that auto-fills the remaining percentage when all other slots are filled
+// Wrapper that auto-fills the remaining percentage when all other slots are filled.
+// The auto-filled value is "soft" — it updates when siblings change, and stops auto-updating
+// once the user manually edits it. No max constraint, so users can type freely; the sibling
+// will re-auto-adjust to keep totals at 100%.
 const AutoPercentageInput = ({
   value,
   onChange,
@@ -58,13 +61,32 @@ const AutoPercentageInput = ({
   placeholder?: string;
   max?: number;
 }) => {
+  const isAutoFilled = useRef(false);
+  const lastEmitted = useRef<string>("");
+
   useEffect(() => {
-    if (autoFillTo !== undefined && autoFillTo > 0 && !value) {
-      onChange(String(Math.round(autoFillTo * 100) / 100));
+    if (autoFillTo === undefined || autoFillTo < 0) return;
+    // Auto-fill if empty, or refresh if value was previously auto-filled by us
+    if (!value || (isAutoFilled.current && value === lastEmitted.current)) {
+      const v = String(Math.round(autoFillTo * 100) / 100);
+      if (v !== value) {
+        isAutoFilled.current = true;
+        lastEmitted.current = v;
+        onChange(v);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoFillTo, value]);
-  return <PercentageInput value={value} onChange={onChange} {...rest} />;
+  }, [autoFillTo]);
+
+  const handleChange = (v: string) => {
+    // User typed — clear auto flag so subsequent sibling changes don't overwrite
+    if (v !== lastEmitted.current) {
+      isAutoFilled.current = false;
+    }
+    onChange(v);
+  };
+
+  return <PercentageInput value={value} onChange={handleChange} {...rest} max={undefined} />;
 };
 
 
