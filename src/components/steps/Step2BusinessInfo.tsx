@@ -45,9 +45,9 @@ const PercentageInput = ({
 );
 
 // Helper: validate partnership percentages sum to exactly 100
-export const isPartnershipValid = (info: any): boolean => {
+export const isPartnershipValid = (info: any, partnersKey: string = "partners"): boolean => {
   if (!info || info.ownershipType !== "partnership") return true;
-  const partners = info.partners || [];
+  const partners = info[partnersKey] || [];
   if (partners.length === 0) return true;
   const total = partners.reduce(
     (s: number, p: any) => s + (parseFloat(p?.percentage) || 0),
@@ -55,6 +55,7 @@ export const isPartnershipValid = (info: any): boolean => {
   );
   return Math.abs(total - 100) < 0.01;
 };
+
 
 // Checkbox-style option card (replaces radio/Select for shareholder type)
 const OptionCard = ({
@@ -447,9 +448,12 @@ export const Step2BusinessInfo = () => {
     selfName: string,
     selfIdNumber: string,
     prefix = "",
-    isWarComp = false
+    isWarComp = false,
+    partnersKey: string = "partners",
+    fileKey: string = "partnershipAgreementFile"
   ) => {
-    const partners = info.partners || [];
+    const partners = info[partnersKey] || [];
+
 
     const updatePartner = (idx: number, field: string, value: any) => {
       const updated = [...partners];
@@ -459,7 +463,7 @@ export const Step2BusinessInfo = () => {
           if (i !== idx) updated[i] = { ...updated[i], isVatRepresentative: false };
         });
       }
-      setInfo({ partners: updated });
+      setInfo({ [partnersKey]: updated });
     };
 
     const handlePartnerCountChange = (count: number) => {
@@ -483,7 +487,7 @@ export const Step2BusinessInfo = () => {
           isVatRepresentative: false,
         };
       });
-      setInfo({ partners: adjusted });
+      setInfo({ [partnersKey]: adjusted });
     };
 
     return (
@@ -666,7 +670,7 @@ export const Step2BusinessInfo = () => {
             <Input
               id={`${prefix}partnershipAgreement`}
               type="file"
-              onChange={(e) => setInfo({ partnershipAgreementFile: e.target.files?.[0] })}
+              onChange={(e) => setInfo({ [fileKey]: e.target.files?.[0] })}
             />
           </div>
         )}
@@ -1237,7 +1241,7 @@ export const Step2BusinessInfo = () => {
         </div>
       )}
 
-      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix, isWarComp)}
+      {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix, isWarComp, "existingPartners", "existingPartnershipAgreementFile")}
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים?</Label>

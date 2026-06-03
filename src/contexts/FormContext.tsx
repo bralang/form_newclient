@@ -78,6 +78,17 @@ export interface BusinessInfo {
     isVatRepresentative: boolean;
   }>;
   partnershipAgreementFile?: File;
+  existingPartners?: Array<{
+    name: string;
+    idNumber: string;
+    percentage: string;
+    phone: string;
+    email: string;
+    address: string;
+    isVatRepresentative: boolean;
+  }>;
+  existingPartnershipAgreementFile?: File;
+
 
   // New business
   businessName?: string;
