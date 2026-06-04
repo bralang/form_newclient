@@ -301,13 +301,15 @@ const CompanyChainBlock = ({
       )}
 
       <div className="space-y-2">
-        <Label className="text-sm font-semibold">אחד מבעלי המניות של {displayName}</Label>
+        <Label className="text-sm font-semibold">
+          {isExistingCompany ? `אחד מבעלי המניות של ${displayName}` : `סוג בעל המניות של ${displayName}`}
+        </Label>
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="person">{restrictToPersonOrCompany ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
+            <SelectItem value="person">{restrictSelect ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
-            {!restrictToPersonOrCompany && (
+            {!restrictSelect && (
               <>
                 <SelectItem value="self">{`${fillerName} ישירות`}</SelectItem>
                 <SelectItem value="self_via_company">{`${fillerName} באמצעות חברה`}</SelectItem>
@@ -317,7 +319,14 @@ const CompanyChainBlock = ({
         </Select>
       </div>
 
-      {subOwnerType === "person" && !restrictToPersonOrCompany && (
+      {subOwnerType === "person" && restrictSelect && (
+        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+          <p className="text-sm">{effectiveSelfName} {owner} המניות {sole} של {displayName}.</p>
+        </div>
+      )}
+
+      {subOwnerType === "person" && !restrictSelect && (
+
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
           <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
           <div className="space-y-2">
