@@ -249,6 +249,9 @@ const CompanyChainBlock = ({
   const personOwnerType = data.personOwnerType || "";
   const effectiveSelfName = selfName || (fillerName !== "אני" ? fillerName : "ממלא/ת השאלון");
   const personOwnerWithOther = !!data.personOwnerWithOther;
+  // Restrict shareholder options when explicitly required, OR when this is an existing company in the chain
+  const restrictSelect = restrictToPersonOrCompany || isExistingCompany;
+
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
