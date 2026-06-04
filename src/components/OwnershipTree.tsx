@@ -248,14 +248,16 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       </button>
 
       {!collapsed && (
-        <div className={`mt-3 space-y-4 ${compact ? "max-h-[40vh]" : "max-h-[70vh]"} overflow-y-auto pr-1`}>
-          {my.root.children.length > 0 && <TreeNodeView node={my.root} compact={compact} />}
+        <div className={`mt-3 space-y-4 ${compact ? "max-h-[40vh]" : "max-h-[70vh]"} overflow-auto pr-1`}>
+          {my.root.children.length > 0 && (
+            <div className="flex justify-center min-w-max pb-2"><TreeNodeView node={my.root} compact={compact} /></div>
+          )}
           {sp && sp.root.children.length > 0 && (
             <>
               <div className={`font-bold text-muted-foreground border-t border-border pt-2 ${compact ? "text-[11px]" : "text-xs"}`}>
                 חברות של {spouseName}
               </div>
-              <TreeNodeView node={sp.root} compact={compact} />
+              <div className="flex justify-center min-w-max pb-2"><TreeNodeView node={sp.root} compact={compact} /></div>
             </>
           )}
           {(() => {
