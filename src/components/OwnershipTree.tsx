@@ -180,15 +180,15 @@ const classesFor = (n: TreeNode) => {
 };
 
 const TreeNodeView = ({ node, compact = false }: { node: TreeNode; compact?: boolean }) => {
-  const isLeaf = !node.children || node.children.length === 0;
+  const hasChildren = node.children && node.children.length > 0;
   const sizes = compact
-    ? { pad: "px-2 py-1", text: "text-[11px]", pct: "text-[10px]", tag: "text-[9px]", indent: "mr-3 pr-2 space-y-1.5", border: "border-r-2" }
-    : { pad: "px-3 py-2", text: "text-sm", pct: "text-xs", tag: "text-[11px]", indent: "mr-5 pr-3 space-y-2.5", border: "border-r-[3px]" };
+    ? { pad: "px-2 py-1", text: "text-[11px]", pct: "text-[10px]", tag: "text-[9px]", gap: "gap-3", drop: "h-3" }
+    : { pad: "px-3 py-2", text: "text-sm", pct: "text-xs", tag: "text-[11px]", gap: "gap-5", drop: "h-4" };
   return (
-    <div className="relative">
-      <div className={`inline-flex items-center gap-2 ${sizes.pad} rounded-lg border-2 ${sizes.text} font-semibold leading-tight max-w-full ${classesFor(node)}`}>
+    <div className="flex flex-col items-center shrink-0">
+      <div className={`inline-flex items-center gap-2 ${sizes.pad} rounded-lg border-2 ${sizes.text} font-semibold leading-tight whitespace-nowrap ${classesFor(node)}`}>
         <span className="shrink-0">{iconFor(node.kind)}</span>
-        <span className="truncate" title={node.label}>{node.label}</span>
+        <span title={node.label}>{node.label}</span>
         {node.percentage && (
           <span className={`shrink-0 ${sizes.pct} opacity-80`}>({node.percentage}%)</span>
         )}
@@ -196,12 +196,21 @@ const TreeNodeView = ({ node, compact = false }: { node: TreeNode; compact?: boo
           <span className={`shrink-0 ${sizes.tag} bg-amber-200/60 dark:bg-amber-800/60 rounded px-1.5 py-0.5`}>חדשה</span>
         )}
       </div>
-      {!isLeaf && (
-        <div className={`mt-2 ${sizes.indent} ${sizes.border} border-primary/30`}>
-          {node.children.map((c, i) => (
-            <TreeNodeView key={i} node={c} compact={compact} />
-          ))}
-        </div>
+      {hasChildren && (
+        <>
+          <div className={`w-px ${sizes.drop} bg-primary/40`} />
+          <div className={`relative flex items-start ${sizes.gap}`}>
+            {node.children.length > 1 && (
+              <div className="absolute top-0 left-0 right-0 h-px bg-primary/40" />
+            )}
+            {node.children.map((c, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className={`w-px ${sizes.drop} bg-primary/40`} />
+                <TreeNodeView node={c} compact={compact} />
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
