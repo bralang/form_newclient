@@ -114,14 +114,11 @@
   }
 
   /* Enlarge form fields and labels globally - improved readability */
-  .form-group label,
-  [data-slot="label"],
-  label {
-    @apply text-6xl md:text-7xl tracking-tight text-foreground;
+  [data-slot="label"] {
+    @apply text-lg md:text-xl tracking-tight text-foreground;
     font-weight: 700;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-shadow: 0 0 0.6px currentColor, 0 0 0.6px currentColor;
   }
 
   input:not([type="checkbox"]):not([type="radio"]),
