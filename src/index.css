@@ -117,7 +117,7 @@
   .form-group label,
   [data-slot="label"],
   label {
-    @apply text-base md:text-lg font-extrabold text-foreground tracking-tight;
+    @apply text-lg md:text-xl font-black text-foreground tracking-tight;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
