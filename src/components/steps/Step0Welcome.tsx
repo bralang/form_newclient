@@ -56,24 +56,24 @@ export const Step0Welcome = () => {
   const { setCurrentStep } = useFormContext();
 
   return (
-    <div className="relative space-y-10">
-      {/* Mascot - bottom-left of the entire card, takes ~1/3 width on desktop */}
+    <div className="relative space-y-8">
+      {/* Mascot - bottom-left of the entire card */}
       <img
         src={mascot}
         alt="דמותג ליבי חסידה"
-        className="hidden md:block absolute bottom-0 left-0 h-64 lg:h-80 w-auto pointer-events-none select-none z-0"
+        className="hidden md:block absolute bottom-0 left-0 h-56 lg:h-64 w-auto pointer-events-none select-none z-0"
       />
 
       {/* Title */}
-      <div className="text-center md:pl-[33%]">
-        <h2 className="text-3xl md:text-5xl font-bold text-primary mb-3">
+      <div className="text-center">
+        <h2 className="text-2xl md:text-4xl font-bold text-primary mb-3">
           ככה מתחילים לנגן…
         </h2>
-        <div className="h-1.5 w-28 bg-primary rounded-full mx-auto" />
+        <div className="h-1 w-24 bg-primary rounded-full mx-auto" />
       </div>
 
-      {/* Welcome Text */}
-      <div className="space-y-5 text-lg md:text-xl leading-relaxed text-foreground font-semibold md:pl-[33%] relative z-10">
+      {/* Welcome Text - keep right 2/3 on desktop so mascot stays visible */}
+      <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground font-normal md:pl-[33%] relative z-10">
         <p>
           שלום וברוכים הבאים למתעניינים בהצטרפות ל
           <strong>חסידה ייעוץ מס אכפתי לעסקים</strong>.
@@ -88,14 +88,14 @@ export const Step0Welcome = () => {
           לבצע העברה למשרדנו.
         </p>
 
-        <div className="p-6 md:p-8 bg-muted/50 rounded-2xl border border-border space-y-5">
-          <p className="font-bold text-xl md:text-2xl text-foreground">לתשומת ליבכם:</p>
+        <div className="p-5 md:p-6 bg-muted/50 rounded-2xl border border-border space-y-4">
+          <p className="font-bold text-lg md:text-xl text-foreground">לתשומת ליבכם:</p>
           {ATTENTION_ITEMS.map((item, index) => (
             <div key={index} className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0 mt-1">
-                <Music className="w-4 h-4 text-primary" />
+              <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0 mt-0.5">
+                <Music className="w-3.5 h-3.5 text-primary" />
               </div>
-              <p className="leading-relaxed text-base md:text-lg text-foreground font-semibold">{item}</p>
+              <p className="leading-relaxed text-sm md:text-base text-foreground font-normal">{item}</p>
             </div>
           ))}
         </div>
