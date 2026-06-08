@@ -73,7 +73,7 @@ export const Step0Welcome = () => {
       </div>
 
       {/* Welcome Text - keep right 2/3 on desktop so mascot stays visible */}
-      <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground font-normal md:pl-[33%] relative z-10">
+      <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground font-normal relative z-10">
         <p>
           שלום וברוכים הבאים למתעניינים בהצטרפות ל
           <strong>חסידה ייעוץ מס אכפתי לעסקים</strong>.
