@@ -128,8 +128,8 @@
     @apply text-base md:text-lg min-h-[3rem] font-medium;
   }
 
-  /* Strengthen body text inside the form */
-  p, span:not([class*="text-xs"]), li, div[class*="text-sm"], div[class*="text-base"], div[class*="text-lg"] {
-    @apply font-semibold;
+  /* Slightly strengthen body text inside the form for readability (not full bold) */
+  p, li {
+    @apply font-normal;
   }
 }
