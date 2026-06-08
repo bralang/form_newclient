@@ -362,7 +362,6 @@ const CompanyChainBlock = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
                 <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
-                <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ idFile: e.target.files?.[0] })} /></div>
                 <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
                 <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
               </div>
@@ -379,7 +378,6 @@ const CompanyChainBlock = ({
                 {data.personOwner?.additionalIdType && (
                   <>
                     <Input placeholder="מספר אמצעי זיהוי" value={data.personOwner?.additionalIdNumber || ""} onChange={(e) => updatePerson({ additionalIdNumber: e.target.value })} />
-                    <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updatePerson({ additionalIdFile: e.target.files?.[0] })} /></div>
                   </>
                 )}
               </div>
@@ -1027,7 +1025,6 @@ export const Step2BusinessInfo = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
                         <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
-                        <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "idFile", e.target.files?.[0])} /></div>
                         {isNewCompany && (
                           <div className="space-y-1">
                             <Label>אחוזי אחזקה *</Label>
@@ -1055,7 +1052,6 @@ export const Step2BusinessInfo = () => {
                         {sh.additionalIdType && (
                           <>
                             <Input placeholder="מספר אמצעי זיהוי" value={sh.additionalIdNumber || ""} onChange={(e) => updateShareholder(idx, "additionalIdNumber", e.target.value)} />
-                            <div className="space-y-1"><Label>צילום אמצעי זיהוי</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "additionalIdFile", e.target.files?.[0])} /></div>
                           </>
                         )}
                       </div>
@@ -1107,7 +1103,6 @@ export const Step2BusinessInfo = () => {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), name: e.target.value })} /></div>
                             <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idNumber: e.target.value })} /></div>
-                            <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idFile: e.target.files?.[0] })} /></div>
                             <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.personOwner?.phone || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), phone: e.target.value })} /></div>
                             <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.personOwner?.email || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), email: e.target.value })} /></div>
                           </div>
@@ -1219,7 +1214,6 @@ export const Step2BusinessInfo = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                   <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), name: e.target.value })} /></div>
                                   <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idNumber: e.target.value })} /></div>
-                                  <div className="space-y-1"><Label>צילום ת.ז.</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idFile: e.target.files?.[0] })} /></div>
                                   <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.personOwner?.phone || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), phone: e.target.value })} /></div>
                                   <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.personOwner?.email || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), email: e.target.value })} /></div>
                                 </div>
