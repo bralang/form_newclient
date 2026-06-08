@@ -109,27 +109,31 @@ export const Step0Welcome = () => {
 
         <div className="flex flex-col items-start">
           <div className="w-full relative">
-            {TIMELINE_STEPS.map((step, index) => (
-              <div key={step.note} className="flex items-start gap-5 relative">
-                {index < TIMELINE_STEPS.length - 1 && (
-                  <div
-                    className="absolute right-[1.4rem] top-12 w-0.5 bg-secondary"
-                    style={{ height: "calc(100% - 0.5rem)" }}
-                  />
-                )}
-                <div className="w-14 h-14 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-base shrink-0 z-10 shadow-sm">
-                  {step.note}
+            {TIMELINE_STEPS.map((step, index) => {
+              // Last 3 items overlap the mascot area on desktop — push their text right
+              const needsMascotClearance = index >= TIMELINE_STEPS.length - 3;
+              return (
+                <div key={step.note} className="flex items-start gap-5 relative">
+                  {index < TIMELINE_STEPS.length - 1 && (
+                    <div
+                      className="absolute right-[1.4rem] top-12 w-0.5 bg-secondary"
+                      style={{ height: "calc(100% - 0.5rem)" }}
+                    />
+                  )}
+                  <div className="w-14 h-14 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-base shrink-0 z-10 shadow-sm">
+                    {step.note}
+                  </div>
+                  <div className={`pb-7 pt-1 flex-1 min-w-0 ${needsMascotClearance ? "md:pl-[33%]" : ""}`}>
+                    <p className="font-bold text-lg md:text-xl text-foreground">
+                      {step.title}
+                    </p>
+                    <p className="text-base md:text-lg text-foreground/85 mt-1 leading-relaxed font-semibold">
+                      {step.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="pb-7 pt-1 flex-1 min-w-0">
-                  <p className="font-bold text-lg md:text-xl text-foreground">
-                    {step.title}
-                  </p>
-                  <p className="text-base md:text-lg text-foreground/85 mt-1 leading-relaxed font-semibold">
-                    {step.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
