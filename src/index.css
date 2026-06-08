@@ -39,7 +39,7 @@
     --secondary-foreground: 252 75% 20%;
 
     --muted: 270 50% 94%;
-    --muted-foreground: 252 30% 45%;
+    --muted-foreground: 252 50% 25%;
 
     --accent: 250 88% 59%;
     --accent-foreground: 0 0% 100%;
@@ -129,7 +129,7 @@
   }
 
   /* Strengthen body text inside the form */
-  p, span:not([class*="text-xs"]) {
-    @apply font-medium;
+  p, span:not([class*="text-xs"]), li, div[class*="text-sm"], div[class*="text-base"], div[class*="text-lg"] {
+    @apply font-semibold;
   }
 }
