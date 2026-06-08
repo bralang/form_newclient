@@ -117,7 +117,7 @@
   .form-group label,
   [data-slot="label"],
   label {
-    @apply text-3xl md:text-4xl tracking-tight text-foreground;
+    @apply text-4xl md:text-5xl tracking-tight text-foreground;
     font-weight: 700;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
