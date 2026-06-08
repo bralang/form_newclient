@@ -1,6 +1,7 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { FormNavigation } from "@/components/FormNavigation";
 import { Music } from "lucide-react";
+import mascot from "@/assets/mascot.png";
 
 const TIMELINE_STEPS = [
   {
@@ -55,17 +56,17 @@ export const Step0Welcome = () => {
   const { setCurrentStep } = useFormContext();
 
   return (
-    <div className="space-y-8" style={{ fontWeight: 300, letterSpacing: 'normal' }}>
+    <div className="space-y-10">
       {/* Title */}
       <div className="text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
+        <h2 className="text-3xl md:text-5xl font-bold text-primary mb-3">
           ככה מתחילים לנגן…
         </h2>
-        <div className="h-1 w-20 bg-primary rounded-full mx-auto" />
+        <div className="h-1.5 w-28 bg-primary rounded-full mx-auto" />
       </div>
 
       {/* Welcome Text */}
-      <div className="space-y-4 text-sm leading-relaxed text-foreground/90">
+      <div className="space-y-5 text-lg md:text-xl leading-relaxed text-foreground font-semibold">
         <p>
           שלום וברוכים הבאים למתעניינים בהצטרפות ל
           <strong>חסידה ייעוץ מס אכפתי לעסקים</strong>.
@@ -80,43 +81,50 @@ export const Step0Welcome = () => {
           לבצע העברה למשרדנו.
         </p>
 
-        <div className="p-4 bg-muted/50 rounded-xl border border-border/50 space-y-4">
-          <p className="font-semibold text-foreground">לתשומת ליבכם:</p>
+        <div className="relative p-6 md:p-8 pb-32 bg-muted/50 rounded-2xl border border-border space-y-5">
+          <p className="font-bold text-xl md:text-2xl text-foreground">לתשומת ליבכם:</p>
           {ATTENTION_ITEMS.map((item, index) => (
             <div key={index} className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Music className="w-3.5 h-3.5 text-primary" />
+              <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0 mt-1">
+                <Music className="w-4 h-4 text-primary" />
               </div>
-              <p className="leading-relaxed">{item}</p>
+              <p className="leading-relaxed text-base md:text-lg text-foreground font-semibold">{item}</p>
             </div>
           ))}
+
+          {/* Mascot inside the box - bottom-left */}
+          <img
+            src={mascot}
+            alt="דמותג ליבי חסידה"
+            className="absolute bottom-4 left-4 h-28 md:h-36 w-auto pointer-events-none select-none"
+          />
         </div>
       </div>
 
       {/* Timeline - Musical Notes */}
       <div>
-        <h3 className="text-lg font-bold text-foreground mb-6 text-center">
+        <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
           אז מה עליכם לעשות?
         </h3>
 
         <div className="flex flex-col items-start">
           <div className="w-full relative">
             {TIMELINE_STEPS.map((step, index) => (
-              <div key={step.note} className="flex items-start gap-4 relative">
+              <div key={step.note} className="flex items-start gap-5 relative">
                 {index < TIMELINE_STEPS.length - 1 && (
                   <div
-                    className="absolute right-[1.15rem] top-10 w-0.5 bg-secondary"
+                    className="absolute right-[1.4rem] top-12 w-0.5 bg-secondary"
                     style={{ height: "calc(100% - 0.5rem)" }}
                   />
                 )}
-                <div className="w-12 h-12 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-sm shrink-0 z-10 shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-base shrink-0 z-10 shadow-sm">
                   {step.note}
                 </div>
-                <div className="pb-6 pt-1 flex-1 min-w-0">
-                  <p className="font-bold text-base text-foreground">
+                <div className="pb-7 pt-1 flex-1 min-w-0">
+                  <p className="font-bold text-lg md:text-xl text-foreground">
                     {step.title}
                   </p>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                  <p className="text-base md:text-lg text-foreground/85 mt-1 leading-relaxed font-semibold">
                     {step.description}
                   </p>
                 </div>

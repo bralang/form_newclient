@@ -131,25 +131,25 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
 
           {/* Desktop: Form + Left Panel */}
           <div className="hidden lg:flex lg:flex-row min-h-screen">
-            {/* Form Content - closer to sidebar */}
-            <div className="flex-1 pr-4 pl-0 py-10">
-              <div className="max-w-2xl mr-0 ml-auto">
+            {/* Form Content - full width on step 1, constrained on others */}
+            <div className="flex-1 pr-4 pl-4 py-10">
+              <div className={currentStep === 1 ? "w-full" : "max-w-2xl mr-0 ml-auto"}>
                 <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
                   {children}
                 </div>
               </div>
             </div>
 
-            {/* Left Panel - Ownership Tree (step 2 only) + Mascot + Contact + Attention */}
-            <div className="w-[26rem] xl:w-[32rem] shrink-0 sticky top-0 h-screen flex flex-col p-6 pb-10 gap-4">
-              {/* Ownership tree (auto-hidden when not on Step 2) — takes most of the height */}
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                <OwnershipTree />
-              </div>
+            {/* Left Panel - hidden on step 1 to give max reading width */}
+            {currentStep !== 1 && (
+              <div className="w-[26rem] xl:w-[32rem] shrink-0 sticky top-0 h-screen flex flex-col p-6 pb-10 gap-4">
+                {/* Ownership tree (auto-hidden when not on Step 2) — takes most of the height */}
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                  <OwnershipTree />
+                </div>
 
-              <div className="flex flex-col gap-3">
-                {/* Attention Button - hidden on step 1 */}
-              {currentStep !== 1 && (
+                <div className="flex flex-col gap-3">
+                  {/* Attention Button - hidden on step 1 */}
                 <button
                   onClick={() => setShowAttention(true)}
                   className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98]"
@@ -161,23 +161,23 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                   <span>לתשומת ליבכם</span>
                   <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
-              )}
 
-              {/* Mascot */}
-              <img
-                src={mascot}
-                alt="דמותג ליבי חסידה"
-                className="h-40 w-auto mx-auto"
-              />
+                {/* Mascot */}
+                <img
+                  src={mascot}
+                  alt="דמותג ליבי חסידה"
+                  className="h-40 w-auto mx-auto"
+                />
 
-              {/* Contact Info */}
-              <div className="text-center space-y-1">
-                <p className="text-sm font-semibold text-foreground/80">אנחנו כאן לסיוע במילוי השאלון</p>
-                <a href="tel:0533160990" className="block text-base font-bold text-primary hover:underline">טל׳ 0533160990</a>
-                <a href="mailto:teder@chasida.biz" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
+                {/* Contact Info */}
+                <div className="text-center space-y-1">
+                  <p className="text-sm font-semibold text-foreground/80">אנחנו כאן לסיוע במילוי השאלון</p>
+                  <a href="tel:0533160990" className="block text-base font-bold text-primary hover:underline">טל׳ 0533160990</a>
+                  <a href="mailto:teder@chasida.biz" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
+                </div>
+                </div>
               </div>
-              </div>
-            </div>
+            )}
           </div>
 
 
@@ -204,7 +204,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                         <Music className="w-4 h-4 text-primary" />
                       </div>
-                      <p className="text-base text-foreground/80 leading-relaxed">{item}</p>
+                      <p className="text-base text-foreground leading-relaxed font-semibold">{item}</p>
                     </div>
                   ))}
                 </div>

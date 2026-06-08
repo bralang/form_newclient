@@ -274,7 +274,160 @@ export const Step3Documents = () => {
           </div>
         )}
 
-        {/* Nonprofit board members ID photos */}
+        {/* Company shareholders ID uploads (person shareholders + nested personOwners) */}
+        {(["user", "spouse"] as const).map((who) => {
+          const info = who === "user" ? businessInfo : spouseBusinessInfo;
+          const setInfo = who === "user" ? setBusinessInfo : setSpouseBusinessInfo;
+          const purposes = who === "user" ? userPurposes : spousePurposes;
+          if (!purposes.includes("company")) return null;
+          const ownerName = who === "user" ? personalInfo.firstName : personalInfo.spouseName;
+
+          type Row = { label: string; file?: File; update: (f?: File) => void };
+          const rows: Row[] = [];
+
+          const walkPersonOwner = (po: any, path: (po: any) => void, context: string) => {
+            if (!po || !po.name) return;
+            rows.push({
+              label: `צילום ת.ז. + ספח של ${po.name}${context ? ` (${context})` : ""}`,
+              file: po.idFile,
+              update: (f) => path({ ...po, idFile: f }),
+            });
+            if (po.additionalIdType) {
+              const t = po.additionalIdType === "license" ? "רישיון נהיגה" : po.additionalIdType === "passport" ? "דרכון" : "ת.ז. הורה";
+              rows.push({
+                label: `צילום ${t} של ${po.name}${context ? ` (${context})` : ""}`,
+                file: po.additionalIdFile,
+                update: (f) => path({ ...po, additionalIdFile: f }),
+              });
+            }
+          };
+
+          const walkChild = (childCompany: any, setChild: (c: any) => void, context: string) => {
+            if (!childCompany) return;
+            const ctx = childCompany.companyName || childCompany.requestedName1 || context;
+            walkPersonOwner(childCompany.personOwner, (po) => setChild({ ...childCompany, personOwner: po }), ctx);
+            if (childCompany.childCompany) {
+              walkChild(childCompany.childCompany, (c) => setChild({ ...childCompany, childCompany: c }), ctx);
+            }
+          };
+
+          const walkShareholder = (companyList: any[], setList: (l: any[]) => void, companyKey: "existingCompanies" | "newCompanies") => {
+            companyList?.forEach((company: any, cIdx: number) => {
+              const compName = company.name || company.requestedName1 || `חברה #${cIdx + 1}`;
+              (company.shareholders || []).forEach((sh: any, sIdx: number) => {
+                if ((sh.holderType || "person") === "person" && sh.name) {
+                  rows.push({
+                    label: `צילום ת.ז. + ספח של ${sh.name} (${compName})`,
+                    file: sh.idFile,
+                    update: (f) => {
+                      const updatedList = [...companyList];
+                      const updatedShs = [...(updatedList[cIdx].shareholders || [])];
+                      updatedShs[sIdx] = { ...updatedShs[sIdx], idFile: f };
+                      updatedList[cIdx] = { ...updatedList[cIdx], shareholders: updatedShs };
+                      setInfo({ [companyKey]: updatedList } as any);
+                    },
+                  });
+                  if (sh.additionalIdType) {
+                    const t = sh.additionalIdType === "license" ? "רישיון נהיגה" : sh.additionalIdType === "passport" ? "דרכון" : "ת.ז. הורה";
+                    rows.push({
+                      label: `צילום ${t} של ${sh.name} (${compName})`,
+                      file: sh.additionalIdFile,
+                      update: (f) => {
+                        const updatedList = [...companyList];
+                        const updatedShs = [...(updatedList[cIdx].shareholders || [])];
+                        updatedShs[sIdx] = { ...updatedShs[sIdx], additionalIdFile: f };
+                        updatedList[cIdx] = { ...updatedList[cIdx], shareholders: updatedShs };
+                        setInfo({ [companyKey]: updatedList } as any);
+                      },
+                    });
+                  }
+                } else if (sh.holderType === "company") {
+                  const setPersonOwner = (po: any) => {
+                    const updatedList = [...companyList];
+                    const updatedShs = [...(updatedList[cIdx].shareholders || [])];
+                    updatedShs[sIdx] = { ...updatedShs[sIdx], personOwner: po };
+                    updatedList[cIdx] = { ...updatedList[cIdx], shareholders: updatedShs };
+                    setInfo({ [companyKey]: updatedList } as any);
+                  };
+                  walkPersonOwner(sh.personOwner, setPersonOwner, sh.companyName || compName);
+                  if (sh.childCompany) {
+                    const setChildCo = (c: any) => {
+                      const updatedList = [...companyList];
+                      const updatedShs = [...(updatedList[cIdx].shareholders || [])];
+                      updatedShs[sIdx] = { ...updatedShs[sIdx], childCompany: c };
+                      updatedList[cIdx] = { ...updatedList[cIdx], shareholders: updatedShs };
+                      setInfo({ [companyKey]: updatedList } as any);
+                    };
+                    walkChild(sh.childCompany, setChildCo, sh.companyName || compName);
+                  }
+                }
+              });
+            });
+          };
+
+          walkShareholder(info.existingCompanies || [], (l) => setInfo({ existingCompanies: l } as any), "existingCompanies");
+          walkShareholder(info.newCompanies || [], (l) => setInfo({ newCompanies: l } as any), "newCompanies");
+
+          if (rows.length === 0) return null;
+
+          return (
+            <div key={`shareholders-${who}`} className="space-y-4 p-5 bg-muted/40 rounded-xl">
+              <h3 className="font-bold text-lg text-foreground">
+                צילומי ת.ז. – בעלי מניות{ownerName ? ` (${ownerName})` : ""}
+              </h3>
+              {rows.map((row, i) => (
+                <FileUpload
+                  key={i}
+                  id={`shareholder-${who}-${i}`}
+                  label={row.label}
+                  onChange={(files) => row.update(files?.[0])}
+                />
+              ))}
+            </div>
+          );
+        })}
+
+        {/* Nonprofit representative additional ID files */}
+        {(["user", "spouse"] as const).map((who) => {
+          const info = who === "user" ? nonprofitInfo : spouseNonprofitInfo;
+          const setInfo = who === "user" ? setNonprofitInfo : setSpouseNonprofitInfo;
+          const purposes = who === "user" ? userPurposes : spousePurposes;
+          if (!purposes.includes("nonprofit")) return null;
+          const rep = info.representativeMember;
+          if (!rep || info.hasTaxFile !== true) return null;
+          const types = (rep as any).additionalIdTypes as string[] | undefined;
+          if (!types || types.length === 0) return null;
+          const ownerName = who === "user" ? personalInfo.firstName : personalInfo.spouseName;
+          return (
+            <div key={`np-rep-${who}`} className="space-y-4 p-5 bg-muted/40 rounded-xl">
+              <h3 className="font-bold text-lg text-foreground">
+                אמצעי זיהוי נוספים – {rep.name || "חבר הועד"}{ownerName ? ` (${ownerName})` : ""}
+              </h3>
+              {types.includes("passport") && (
+                <FileUpload
+                  id={`${who}-rep-passport`}
+                  label="צילום דרכון"
+                  onChange={(files) => setInfo({ representativeMember: { ...(rep as any), additionalPassportFile: files?.[0] } })}
+                />
+              )}
+              {types.includes("license") && (
+                <FileUpload
+                  id={`${who}-rep-license`}
+                  label="צילום רישיון נהיגה"
+                  onChange={(files) => setInfo({ representativeMember: { ...(rep as any), additionalLicenseFile: files?.[0] } })}
+                />
+              )}
+              {types.includes("parentId") && (
+                <FileUpload
+                  id={`${who}-rep-parentid`}
+                  label="צילום ת.ז. הורה"
+                  onChange={(files) => setInfo({ representativeMember: { ...(rep as any), additionalIdFile: files?.[0] } })}
+                />
+              )}
+            </div>
+          );
+        })}
+
         {(["user", "spouse"] as const).map((who) => {
           const info = who === "user" ? nonprofitInfo : spouseNonprofitInfo;
           const setInfo = who === "user" ? setNonprofitInfo : setSpouseNonprofitInfo;
