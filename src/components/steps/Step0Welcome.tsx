@@ -97,10 +97,17 @@ export const Step0Welcome = () => {
       </div>
 
       {/* Timeline - Musical Notes */}
-      <div>
+      <div className="relative">
         <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">
           אז מה עליכם לעשות?
         </h3>
+
+        {/* Mascot - bottom-left of timeline area only (won't overlap nav) */}
+        <img
+          src={mascot}
+          alt="דמותג ליבי חסידה"
+          className="hidden md:block absolute bottom-0 left-0 h-56 lg:h-64 w-auto pointer-events-none select-none z-0"
+        />
 
         <div className="flex flex-col items-start">
           <div className="w-full relative">
@@ -118,7 +125,7 @@ export const Step0Welcome = () => {
                   <div className="w-14 h-14 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center font-bold text-base shrink-0 z-10 shadow-sm">
                     {step.note}
                   </div>
-                  <div className={`pb-7 pt-1 flex-1 min-w-0 ${needsMascotClearance ? "md:pl-[33%]" : ""}`}>
+                  <div className={`pb-7 pt-1 flex-1 min-w-0 relative z-10 ${needsMascotClearance ? "md:pl-[33%]" : ""}`}>
                     <p className="font-bold text-lg md:text-xl text-foreground">
                       {step.title}
                     </p>
