@@ -2202,19 +2202,16 @@ export const Step2BusinessInfo = () => {
                   {additionalIdTypes.includes("passport") && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
                       <div className="space-y-1"><Label>מספר דרכון</Label><Input value={rep.additionalPassportNumber || ""} onChange={(e) => updateRep("additionalPassportNumber", e.target.value)} /></div>
-                      <div className="space-y-1"><Label>צילום דרכון</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateRep("additionalPassportFile", e.target.files?.[0])} /></div>
                     </div>
                   )}
                   {additionalIdTypes.includes("license") && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
                       <div className="space-y-1"><Label>מספר רישיון נהיגה</Label><Input value={rep.additionalLicenseNumber || ""} onChange={(e) => updateRep("additionalLicenseNumber", e.target.value)} /></div>
-                      <div className="space-y-1"><Label>צילום רישיון נהיגה</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateRep("additionalLicenseFile", e.target.files?.[0])} /></div>
                     </div>
                   )}
                   {additionalIdTypes.includes("parentId") && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
                       <div className="space-y-1"><Label>מס׳ זהות של הורה</Label><Input value={rep.additionalIdNumber || ""} onChange={(e) => updateRep("additionalIdNumber", e.target.value)} /></div>
-                      <div className="space-y-1"><Label>צילום ת.ז. הורה</Label><Input type="file" accept="image/*,.pdf" onChange={(e) => updateRep("additionalIdFile", e.target.files?.[0])} /></div>
                     </div>
                   )}
                 </div>
