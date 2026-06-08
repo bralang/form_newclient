@@ -117,9 +117,12 @@
   .form-group label,
   [data-slot="label"],
   label {
-    @apply text-lg md:text-xl font-black text-foreground tracking-tight;
+    @apply text-xl md:text-2xl font-bold tracking-tight;
+    color: hsl(var(--primary));
+    font-weight: 700;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-shadow: 0 0 0.5px currentColor;
   }
 
   input:not([type="checkbox"]):not([type="radio"]),
