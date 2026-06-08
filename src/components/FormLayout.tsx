@@ -140,16 +140,15 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               </div>
             </div>
 
-            {/* Left Panel - hidden on step 1 to give max reading width */}
-            {currentStep !== 1 && (
-              <div className="w-[26rem] xl:w-[32rem] shrink-0 sticky top-0 h-screen flex flex-col p-6 pb-10 gap-4">
-                {/* Ownership tree (auto-hidden when not on Step 2) — takes most of the height */}
-                <div className="flex-1 min-h-0 overflow-y-auto">
-                  <OwnershipTree />
-                </div>
+            {/* Left Panel */}
+            <div className="w-[26rem] xl:w-[32rem] shrink-0 sticky top-0 h-screen flex flex-col p-6 pb-10 gap-4">
+              {/* Ownership tree (auto-hidden when not on Step 2) — takes most of the height */}
+              <div className="flex-1 min-h-0 overflow-y-auto">
+                <OwnershipTree />
+              </div>
 
-                <div className="flex flex-col gap-3">
-                  {/* Attention Button - hidden on step 1 */}
+              <div className="flex flex-col gap-3">
+                {/* Attention Button */}
                 <button
                   onClick={() => setShowAttention(true)}
                   className="group relative flex items-center justify-center gap-2.5 bg-gradient-to-r from-primary/15 to-secondary/30 hover:from-primary/25 hover:to-secondary/40 text-primary font-bold px-5 py-3 rounded-2xl transition-all duration-300 border-2 border-primary/20 hover:border-primary/40 shadow-md hover:shadow-lg hover:scale-[1.03] active:scale-[0.98]"
@@ -175,9 +174,8 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                   <a href="tel:0533160990" className="block text-base font-bold text-primary hover:underline">טל׳ 0533160990</a>
                   <a href="mailto:teder@chasida.biz" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
                 </div>
-                </div>
               </div>
-            )}
+            </div>
           </div>
 
 
