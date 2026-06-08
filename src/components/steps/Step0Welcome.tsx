@@ -56,13 +56,8 @@ export const Step0Welcome = () => {
   const { setCurrentStep } = useFormContext();
 
   return (
-    <div className="relative space-y-8">
-      {/* Mascot - bottom-left of the entire card */}
-      <img
-        src={mascot}
-        alt="דמותג ליבי חסידה"
-        className="hidden md:block absolute bottom-0 left-0 h-56 lg:h-64 w-auto pointer-events-none select-none z-0"
-      />
+    <div className="space-y-8">
+
 
       {/* Title */}
       <div className="text-center">
