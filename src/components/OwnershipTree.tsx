@@ -272,7 +272,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
               ))}
             </div>
           )}
-          {sp && (sp.root.children.length > 0 || (sp.spouseRoot && sp.spouseRoot.children.length > 0)) && (
+          {sp && (sp.root.children.length > 0 || (sp.spouseRoot && sp.spouseRoot.children.length > 0) || sp.extraRoots.length > 0) && (
             <>
               <div className={`font-bold text-muted-foreground border-t border-border pt-2 ${compact ? "text-[11px]" : "text-xs"}`}>
                 חברות של {spouseName}
@@ -282,6 +282,9 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
                 {sp.spouseRoot && sp.spouseRoot.children.length > 0 && (
                   <TreeNodeView node={sp.spouseRoot} compact={compact} />
                 )}
+                {sp.extraRoots.map((r, i) => (
+                  <TreeNodeView key={`sp-er-${i}`} node={r} compact={compact} />
+                ))}
               </div>
             </>
           )}
