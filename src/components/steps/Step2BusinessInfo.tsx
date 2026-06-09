@@ -588,6 +588,7 @@ const SelfViaCompanyBlock = ({
               spouseName={spouseName}
               showSpouseOption={showSpouseOption}
               restrictToPersonOrCompany={true}
+              personIsSelfOnly={true}
               renderNewCompanyShareholders={renderNewCompanyShareholders}
             />
           )}
