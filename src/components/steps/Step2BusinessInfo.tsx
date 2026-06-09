@@ -326,10 +326,10 @@ const CompanyChainBlock = ({
             <Label className="text-sm font-semibold">
               {isExistingCompany ? `אחד מבעלי המניות של ${displayName}` : `סוג בעל המניות של ${displayName}`}
             </Label>
-            <Select value={normalizedSubOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+            <Select value={normalizedSubOwnerType} onValueChange={(v: any) => update({ subOwnerType: v, ...(personIsSelfOnly && v === "person" ? { personOwnerType: "self" as const } : {}) })}>
               <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="person">אדם פרטי</SelectItem>
+                <SelectItem value="person">{personIsSelfOnly ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
                 <SelectItem value="company">חברה</SelectItem>
               </SelectContent>
             </Select>
