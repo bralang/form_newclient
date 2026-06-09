@@ -1262,9 +1262,17 @@ export const Step2BusinessInfo = () => {
                             )}
 
                             {sh.subOwnerType === "self_via_company" && !shIsExisting && (
-                              <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-                                <p className="text-sm">אני (ממלא/ת השאלון) הוא בעל המניות הסופי של {sh.companyName || (sh as any).requestedName1 || "החברה המחזיקה"}.</p>
-                              </div>
+                              <CompanyChainBlock
+                                data={sh.childCompany || {}}
+                                onChange={(c) => updateShareholder(idx, "childCompany", c)}
+                                heldName={sh.companyName || (sh as any).requestedName1 || "החברה הקודמת"}
+                                depth={1}
+                                chainAllowsNewCompany={true}
+                                selfName={selfName}
+                                spouseName={spouseDisplayName}
+                                showSpouseOption={showSpouseOption}
+                                offerSelfInPersonOption={true}
+                              />
                             )}
                           </>
                         );
