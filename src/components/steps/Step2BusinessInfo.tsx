@@ -467,6 +467,7 @@ const SelfViaCompanyBlock = ({
   selfName,
   spouseName,
   showSpouseOption = false,
+  renderNewCompanyShareholders,
 }: {
   data: any;
   onChange: (next: any) => void;
@@ -477,6 +478,12 @@ const SelfViaCompanyBlock = ({
   selfName?: string;
   spouseName?: string;
   showSpouseOption?: boolean;
+  renderNewCompanyShareholders?: (
+    node: any,
+    onNodeChange: (next: any) => void,
+    displayName: string,
+    keyPrefix: string,
+  ) => React.ReactNode;
 }) => {
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
   const updatePerson = (patch: any) =>
@@ -491,6 +498,7 @@ const SelfViaCompanyBlock = ({
   const effectiveSelfName = selfName || (fillerName !== "אני" ? fillerName : "ממלא/ת השאלון");
   const personOwnerWithOther = !!data?.personOwnerWithOther;
   const holdingDisplayName = data?.companyName || "החברה המחזיקה";
+  const showNewHoldingShareholders = !isExistingHolding && !!renderNewCompanyShareholders;
 
   return (
     <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
@@ -534,35 +542,47 @@ const SelfViaCompanyBlock = ({
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm font-semibold">
-          אחד מבעלי המניות של {holdingDisplayName}
-        </Label>
-        <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
-          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
-            <SelectItem value="company">חברה</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {showNewHoldingShareholders ? (
+        renderNewCompanyShareholders!(
+          data,
+          (next) => onChange(next),
+          holdingDisplayName || data?.requestedName1 || "חברת האחזקות",
+          `selfvia_`,
+        )
+      ) : (
+        <>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">
+              אחד מבעלי המניות של {holdingDisplayName}
+            </Label>
+            <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+              <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
+                <SelectItem value="company">חברה</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      {subOwnerType === "person" && null}
+          {subOwnerType === "person" && null}
 
-      {subOwnerType === "company" && (
-        <CompanyChainBlock
-          data={data?.childCompany || {}}
-          onChange={(c) => update({ childCompany: c })}
-          heldName={holdingDisplayName}
-          depth={1}
-          fillerName={fillerName}
-          gender={gender}
-          chainAllowsNewCompany={isNewCompany}
-          selfName={selfName}
-          spouseName={spouseName}
-          showSpouseOption={showSpouseOption}
-          restrictToPersonOrCompany={true}
-        />
+          {subOwnerType === "company" && (
+            <CompanyChainBlock
+              data={data?.childCompany || {}}
+              onChange={(c) => update({ childCompany: c })}
+              heldName={holdingDisplayName}
+              depth={1}
+              fillerName={fillerName}
+              gender={gender}
+              chainAllowsNewCompany={isNewCompany}
+              selfName={selfName}
+              spouseName={spouseName}
+              showSpouseOption={showSpouseOption}
+              restrictToPersonOrCompany={true}
+              renderNewCompanyShareholders={renderNewCompanyShareholders}
+            />
+          )}
+        </>
       )}
     </div>
   );
