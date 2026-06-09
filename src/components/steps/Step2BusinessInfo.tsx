@@ -1830,7 +1830,10 @@ export const Step2BusinessInfo = () => {
                   setInfo({ newCompanyCount: count, newCompanies: adjusted });
                 }}
               />
+            </div>
+          )}
         </div>
+
 
         {/* Upfront names list for existing companies */}
         {hasExistingPurpose && existingCount > 0 && (
