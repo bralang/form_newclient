@@ -84,20 +84,31 @@ const resolveShareholderOwner = (
   companyMap: Map<string, TreeNode>,
   fillerName: string,
   spouseName: string,
+  extraRoots: TreeNode[],
 ): TreeNode | null => {
   if (sh?.isSelf) return userRoot;
   if (sh?.isSpouse) return spouseRoot || userRoot;
   const ht = sh?.holderType || "person";
   if (ht === "person") {
+    // third-party person — render as its own root branch (not owned by the user)
     const p = personNode(sh?.name?.trim() || "אדם פרטי");
-    userRoot.children.push(p);
+    extraRoots.push(p);
     return p;
   }
   if (ht === "self_via_company") {
     return resolveOwnerNode(sh, userRoot, spouseRoot, companyMap, fillerName, spouseName);
   }
-  // company (third-party)
-  return resolveOwnerNode(sh, userRoot, spouseRoot, companyMap, fillerName, spouseName);
+  // company (third-party) — render as its own root branch
+  const cname = sh?.companyName?.trim() || sh?.name?.trim() || "חברה מחזיקה";
+  let node = companyMap.get(cname);
+  if (!node) {
+    const isNew = sh?.isExistingCompany === false;
+    node = companyNode(cname, isNew);
+    companyMap.set(cname, node);
+    extraRoots.push(node);
+  }
+  node.isAlsoShareholder = true;
+  return node;
 };
 
 const buildForOwner = (
@@ -105,10 +116,11 @@ const buildForOwner = (
   ownerName: string,
   spouseName: string,
   hasSpouse: boolean,
-): { root: TreeNode; spouseRoot: TreeNode | null } => {
+): { root: TreeNode; spouseRoot: TreeNode | null; extraRoots: TreeNode[] } => {
   const root = personNode(ownerName);
   const spouseRoot = hasSpouse ? personNode(spouseName) : null;
   const map = new Map<string, TreeNode>();
+  const extraRoots: TreeNode[] = [];
 
   const targets = [
     ...(bi?.existingCompanies || []).map((c: any) => ({ ...c, _isNew: false })),
@@ -142,7 +154,7 @@ const buildForOwner = (
       const shs = t.shareholders || [];
       let attached = false;
       for (const sh of shs) {
-        const owner = resolveShareholderOwner(sh, root, spouseRoot, map, ownerName, spouseName);
+        const owner = resolveShareholderOwner(sh, root, spouseRoot, map, ownerName, spouseName, extraRoots);
         if (!owner) continue;
         if (!attached) {
           node.percentage = sh.percentage;
@@ -160,7 +172,7 @@ const buildForOwner = (
     }
   }
 
-  return { root, spouseRoot };
+  return { root, spouseRoot, extraRoots };
 };
 
 // ─── Rendering ───
@@ -249,15 +261,18 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
       {!collapsed && (
         <div className={`mt-3 space-y-4 ${compact ? "max-h-[40vh]" : "max-h-[70vh]"} overflow-auto pr-1`}>
-          {(my.root.children.length > 0 || (my.spouseRoot && my.spouseRoot.children.length > 0)) && (
+          {(my.root.children.length > 0 || (my.spouseRoot && my.spouseRoot.children.length > 0) || my.extraRoots.length > 0) && (
             <div className={`flex justify-center items-start ${compact ? "gap-4" : "gap-8"} min-w-max pb-2`}>
               {my.root.children.length > 0 && <TreeNodeView node={my.root} compact={compact} />}
               {my.spouseRoot && my.spouseRoot.children.length > 0 && (
                 <TreeNodeView node={my.spouseRoot} compact={compact} />
               )}
+              {my.extraRoots.map((r, i) => (
+                <TreeNodeView key={`er-${i}`} node={r} compact={compact} />
+              ))}
             </div>
           )}
-          {sp && (sp.root.children.length > 0 || (sp.spouseRoot && sp.spouseRoot.children.length > 0)) && (
+          {sp && (sp.root.children.length > 0 || (sp.spouseRoot && sp.spouseRoot.children.length > 0) || sp.extraRoots.length > 0) && (
             <>
               <div className={`font-bold text-muted-foreground border-t border-border pt-2 ${compact ? "text-[11px]" : "text-xs"}`}>
                 חברות של {spouseName}
@@ -267,6 +282,9 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
                 {sp.spouseRoot && sp.spouseRoot.children.length > 0 && (
                   <TreeNodeView node={sp.spouseRoot} compact={compact} />
                 )}
+                {sp.extraRoots.map((r, i) => (
+                  <TreeNodeView key={`sp-er-${i}`} node={r} compact={compact} />
+                ))}
               </div>
             </>
           )}
