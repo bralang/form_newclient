@@ -279,8 +279,8 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
               <div className={`border-t-2 border-border pt-3 mt-2 grid grid-cols-1 gap-2 text-foreground font-medium ${compact ? "text-xs" : "text-sm"}`}>
                 <div className={`font-bold text-primary ${compact ? "text-sm" : "text-base"}`}>מקרא</div>
                 <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-primary/30 border-2 border-primary inline-block shrink-0" /> {firstNewName}</span>
-                <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-amber-200 border-2 border-amber-400 inline-block shrink-0" /> בעל מניות</span>
-                <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-primary/20 border-2 border-amber-500 border-dashed inline-block shrink-0" /> חברה שגם בעלת מניות</span>
+                <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-amber-200 border-2 border-amber-400 inline-block shrink-0" /> אדם פרטי</span>
+                <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-primary/20 border-2 border-amber-500 border-dashed inline-block shrink-0" /> חברה</span>
               </div>
             );
           })()}
