@@ -1140,7 +1140,7 @@ export const Step2BusinessInfo = () => {
                         />
                       )}
                     </div>
-                  ) : (
+                  ) : sh.holderType === "company" ? (
                     <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
                       {isNewCompany && (
                         <div className="space-y-2">
