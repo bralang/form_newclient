@@ -1234,12 +1234,18 @@ export const Step2BusinessInfo = () => {
                                   onChange={(v) => updateShareholder(idx, "personOwnerType", v)}
                                   options={[
                                     { value: "self", label: selfName },
+                                    ...(showSpouseOption && spouseDisplayName ? [{ value: "spouse", label: spouseDisplayName }] : []),
                                     { value: "other", label: "אחר" },
                                   ]}
                                 />
                                 {sh.personOwnerType === "self" && (
                                   <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
                                     <p className="text-sm">{selfName} הוא/היא בעל/ת המניות של {sh.companyName || "החברה המחזיקה"}.</p>
+                                  </div>
+                                )}
+                                {sh.personOwnerType === "spouse" && (
+                                  <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                                    <p className="text-sm">{spouseDisplayName} (בן/בת הזוג) הוא/היא בעל/ת המניות של {sh.companyName || "החברה המחזיקה"}.</p>
                                   </div>
                                 )}
                                 {sh.personOwnerType === "other" && (
