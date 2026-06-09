@@ -904,10 +904,16 @@ export const Step2BusinessInfo = () => {
     showSpouseOption: boolean,
     prefix = "",
     isNewCompany = false,
-    parentCompanyName = ""
+    parentCompanyName = "",
+    includeSelfAsFirstShareholder = true,
   ) => {
-    const shareholders = company.shareholders || [];
-    const spouseIsShareholder = !!company.spouseIsShareholder;
+    const rawShareholders = company.shareholders || [];
+    const shareholders = includeSelfAsFirstShareholder
+      ? rawShareholders
+      : rawShareholders
+          .filter((s: any) => !s?.isSelf && !s?.isSpouse)
+          .map((s: any) => ({ ...s, isSelf: false, isSpouse: false }));
+    const spouseIsShareholder = includeSelfAsFirstShareholder && !!company.spouseIsShareholder;
 
     const updateShareholder = (idx: number, field: string, value: any) => {
       const updated = [...shareholders];
@@ -917,6 +923,26 @@ export const Step2BusinessInfo = () => {
 
     // Build the list with auto-filled self (#1) and optional spouse (#2)
     const buildShareholders = (totalCount: number, spouseFlag: boolean) => {
+      if (!includeSelfAsFirstShareholder) {
+        const result: any[] = [];
+        for (let i = 0; i < totalCount; i++) {
+          result.push(
+            shareholders[i] || {
+              isSelf: false,
+              isSpouse: false,
+              name: "",
+              idNumber: "",
+              phone: "",
+              email: "",
+              percentage: "",
+              additionalIdType: "",
+              additionalIdNumber: "",
+            }
+          );
+        }
+        return result;
+      }
+
       const result: any[] = [];
       // #1 — always self (auto-filled from personal info)
       result.push({
@@ -969,10 +995,15 @@ export const Step2BusinessInfo = () => {
     const handleShareholderCountChange = (count: number) => {
       if (count < 1) count = 1;
       const adjusted = buildShareholders(count, spouseIsShareholder);
-      updateCompanyMulti({ shareholders: adjusted, shareholderCount: count });
+      updateCompanyMulti({
+        shareholders: adjusted,
+        shareholderCount: count,
+        ...(includeSelfAsFirstShareholder ? {} : { spouseIsShareholder: false }),
+      });
     };
 
     const toggleSpouseHolder = (checked: boolean) => {
+      if (!includeSelfAsFirstShareholder) return;
       const currentCount = company.shareholderCount || shareholders.length || (checked ? 2 : 1);
       // Ensure count includes spouse slot
       let newCount = currentCount;
@@ -1014,18 +1045,24 @@ export const Step2BusinessInfo = () => {
     return (
       <div className="space-y-4 mr-4">
         <div className="space-y-2">
-          <Label>כמה בעלי מניות יש בחברה? (כולל אותך)</Label>
+          <Label>
+            {includeSelfAsFirstShareholder
+              ? "כמה בעלי מניות יש בחברה? (כולל אותך)"
+              : "כמה בעלי מניות יש בחברה?"}
+          </Label>
           <Input
             type="text" inputMode="numeric" pattern="[0-9]*"
             value={company.shareholderCount || ""}
             onChange={(e) => handleShareholderCountChange(parseInt(e.target.value) || 0)}
           />
-          <p className="text-xs text-muted-foreground">
-            בעל מניות #1 הוא ממלא השאלון – הפרטים מולאו אוטומטית.
-          </p>
+          {includeSelfAsFirstShareholder && (
+            <p className="text-xs text-muted-foreground">
+              בעל מניות #1 הוא ממלא השאלון – הפרטים מולאו אוטומטית.
+            </p>
+          )}
         </div>
 
-        {showSpouseOption && (
+        {includeSelfAsFirstShareholder && showSpouseOption && (
           <label
             htmlFor={`${prefix}spouseHolder`}
             className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
@@ -1046,7 +1083,7 @@ export const Step2BusinessInfo = () => {
         )}
 
         {shareholders.map((sh: any, idx: number) => {
-          const isAuto = sh?.isSelf || sh?.isSpouse;
+          const isAuto = includeSelfAsFirstShareholder && (sh?.isSelf || sh?.isSpouse);
           const displayName = sh?.isSelf
             ? selfName
             : sh?.isSpouse
