@@ -329,12 +329,18 @@ const CompanyChainBlock = ({
             onChange={(v) => update({ personOwnerType: v as any })}
             options={[
               { value: "self", label: effectiveSelfName },
+              ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
               { value: "other", label: "אחר" },
             ]}
           />
           {personOwnerType === "self" && (
             <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
               <p className="text-sm">{effectiveSelfName} {heShe} {owner} המניות {sole} של {displayName}.</p>
+            </div>
+          )}
+          {personOwnerType === "spouse" && (
+            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="text-sm">{spouseName} (בן/בת הזוג) {owner} המניות של {displayName}.</p>
             </div>
           )}
           {personOwnerType === "other" && (
