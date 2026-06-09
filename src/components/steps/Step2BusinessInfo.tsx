@@ -223,7 +223,7 @@ const CompanyChainBlock = ({
   selfName,
   spouseName,
   showSpouseOption = false,
-  restrictToPersonOrCompany = false,
+  restrictToPersonOrCompany: _restrictToPersonOrCompany = false,
   offerSelfInPersonOption = false,
 }: {
   data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean };
@@ -1200,6 +1200,7 @@ export const Step2BusinessInfo = () => {
 
                       {(() => {
                         const shIsExisting = isNewCompany ? (sh.isExistingCompany ?? true) : true;
+                        const shNormalizedSubOwnerType = sh.subOwnerType === "self_via_company" ? "company" : sh.subOwnerType;
                         return (
                           <>
                             <div className="space-y-2">
@@ -1220,7 +1221,7 @@ export const Step2BusinessInfo = () => {
                               </Select>
                             </div>
 
-                            {sh.subOwnerType === "person" && shIsExisting && (
+                            {shNormalizedSubOwnerType === "person" && shIsExisting && (
                               <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
                                 <Label className="text-sm font-semibold">מי בעל המניות?</Label>
                                 <PillGroup
@@ -1255,7 +1256,7 @@ export const Step2BusinessInfo = () => {
                               </div>
                             )}
 
-                            {sh.subOwnerType === "person" && !shIsExisting && (
+                            {shNormalizedSubOwnerType === "person" && !shIsExisting && (
                               <div className="space-y-3 p-3 bg-card rounded-lg border border-border/50">
                                 <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {sh.companyName || (sh as any).requestedName1 || "החברה המחזיקה"}</p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1272,7 +1273,7 @@ export const Step2BusinessInfo = () => {
                       })()}
 
 
-                      {sh.subOwnerType === "company" && (
+                      {(sh.subOwnerType === "company" || sh.subOwnerType === "self_via_company") && (
                         <CompanyChainBlock
                           data={sh.childCompany || {}}
                           onChange={(c) => updateShareholder(idx, "childCompany", c)}
