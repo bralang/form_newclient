@@ -1035,7 +1035,6 @@ export const Step2BusinessInfo = () => {
                       <SelectContent>
                         <SelectItem value="person">אדם פרטי</SelectItem>
                         <SelectItem value="company">חברה</SelectItem>
-                        <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
