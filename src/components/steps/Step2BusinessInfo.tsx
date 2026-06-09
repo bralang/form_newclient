@@ -1812,7 +1812,13 @@ export const Step2BusinessInfo = () => {
           )}
           {hasNewPurpose && (
             <div className="space-y-2">
-              <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium">
+                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                  שאינן חברות אם
+                </span>
+              </div>
               <Input
                 id={`${prefix}newCount`}
                 type="text" inputMode="numeric" pattern="[0-9]*"
@@ -1824,11 +1830,6 @@ export const Step2BusinessInfo = () => {
                   setInfo({ newCompanyCount: count, newCompanies: adjusted });
                 }}
               />
-              <div className="mt-2 p-2.5 rounded-md border border-red-500 bg-red-50 text-red-700 text-sm leading-relaxed">
-                שיהיה רשום שאינן חברות אם
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Upfront names list for existing companies */}
