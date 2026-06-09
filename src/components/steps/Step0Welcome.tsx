@@ -68,7 +68,7 @@ export const Step0Welcome = () => {
       </div>
 
       {/* Welcome Text - keep right 2/3 on desktop so mascot stays visible */}
-      <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground font-normal relative z-10">
+      <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground font-bold relative z-10">
         <p>
           שלום וברוכים הבאים למתעניינים בהצטרפות ל
           <strong>חסידה ייעוץ מס אכפתי לעסקים</strong>.
@@ -90,7 +90,7 @@ export const Step0Welcome = () => {
               <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0 mt-0.5">
                 <Music className="w-3.5 h-3.5 text-primary" />
               </div>
-              <p className="leading-relaxed text-sm md:text-base text-foreground font-normal">{item}</p>
+              <p className="leading-relaxed text-sm md:text-base text-foreground font-bold">{item}</p>
             </div>
           ))}
         </div>
