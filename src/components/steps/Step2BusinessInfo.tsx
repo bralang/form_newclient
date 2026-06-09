@@ -1028,7 +1028,7 @@ export const Step2BusinessInfo = () => {
                   <div className="space-y-2">
                     <Label>סוג בעל המניות</Label>
                     <Select
-                      value={sh.holderType || "person"}
+                      value={sh.holderType || ""}
                       onValueChange={(v) => updateShareholder(idx, "holderType", v)}
                     >
                       <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
@@ -1039,7 +1039,7 @@ export const Step2BusinessInfo = () => {
                     </Select>
                   </div>
 
-                  {(sh.holderType || "person") === "person" ? (
+                  {sh.holderType === "person" ? (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
