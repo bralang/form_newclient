@@ -84,20 +84,31 @@ const resolveShareholderOwner = (
   companyMap: Map<string, TreeNode>,
   fillerName: string,
   spouseName: string,
+  extraRoots: TreeNode[],
 ): TreeNode | null => {
   if (sh?.isSelf) return userRoot;
   if (sh?.isSpouse) return spouseRoot || userRoot;
   const ht = sh?.holderType || "person";
   if (ht === "person") {
+    // third-party person — render as its own root branch (not owned by the user)
     const p = personNode(sh?.name?.trim() || "אדם פרטי");
-    userRoot.children.push(p);
+    extraRoots.push(p);
     return p;
   }
   if (ht === "self_via_company") {
     return resolveOwnerNode(sh, userRoot, spouseRoot, companyMap, fillerName, spouseName);
   }
-  // company (third-party)
-  return resolveOwnerNode(sh, userRoot, spouseRoot, companyMap, fillerName, spouseName);
+  // company (third-party) — render as its own root branch
+  const cname = sh?.companyName?.trim() || sh?.name?.trim() || "חברה מחזיקה";
+  let node = companyMap.get(cname);
+  if (!node) {
+    const isNew = sh?.isExistingCompany === false;
+    node = companyNode(cname, isNew);
+    companyMap.set(cname, node);
+    extraRoots.push(node);
+  }
+  node.isAlsoShareholder = true;
+  return node;
 };
 
 const buildForOwner = (
