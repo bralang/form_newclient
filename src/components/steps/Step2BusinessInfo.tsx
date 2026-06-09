@@ -225,6 +225,7 @@ const CompanyChainBlock = ({
   showSpouseOption = false,
   restrictToPersonOrCompany: _restrictToPersonOrCompany = false,
   offerSelfInPersonOption = false,
+  renderNewCompanyShareholders,
 }: {
   data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean };
   onChange: (next: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }) => void;
@@ -238,6 +239,12 @@ const CompanyChainBlock = ({
   showSpouseOption?: boolean;
   restrictToPersonOrCompany?: boolean;
   offerSelfInPersonOption?: boolean;
+  renderNewCompanyShareholders?: (
+    node: any,
+    onNodeChange: (next: any) => void,
+    displayName: string,
+    keyPrefix: string,
+  ) => React.ReactNode;
 }) => {
   const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }>) =>
     onChange({ ...data, ...patch });
@@ -254,6 +261,8 @@ const CompanyChainBlock = ({
   const normalizedSubOwnerType = subOwnerType === "self" ? "person" : subOwnerType === "self_via_company" ? "company" : subOwnerType;
   const effectivePersonOwnerType = personOwnerType || (subOwnerType === "self" ? "self" : "");
 
+  // When a NEW company is selected inside the chain, show the full shareholders flow
+  const showNewCompanyShareholders = !isExistingCompany && !!renderNewCompanyShareholders;
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "p-3 bg-card rounded-lg border border-border/50 mr-4" : ""}`}>
@@ -302,43 +311,80 @@ const CompanyChainBlock = ({
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label className="text-sm font-semibold">
-          {isExistingCompany ? `אחד מבעלי המניות של ${displayName}` : `סוג בעל המניות של ${displayName}`}
-        </Label>
-        <Select value={normalizedSubOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
-          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="person">אדם פרטי</SelectItem>
-            <SelectItem value="company">חברה</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {showNewCompanyShareholders ? (
+        renderNewCompanyShareholders!(
+          data,
+          (next) => onChange(next),
+          displayName,
+          `chain_d${depth}_`,
+        )
+      ) : (
+        <>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">
+              {isExistingCompany ? `אחד מבעלי המניות של ${displayName}` : `סוג בעל המניות של ${displayName}`}
+            </Label>
+            <Select value={normalizedSubOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+              <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="person">אדם פרטי</SelectItem>
+                <SelectItem value="company">חברה</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      {normalizedSubOwnerType === "person" && offerSelfInPersonOption && (
-        <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-          <Label className="text-sm font-semibold">מי בעל המניות?</Label>
-          <PillGroup
-            value={effectivePersonOwnerType}
-            onChange={(v) => update({ personOwnerType: v as any })}
-            options={[
-              { value: "self", label: effectiveSelfName },
-              ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
-              { value: "other", label: "אחר" },
-            ]}
-          />
-          {effectivePersonOwnerType === "self" && (
-            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-              <p className="text-sm">{effectiveSelfName} {heShe} {owner} המניות {sole} של {displayName}.</p>
+          {normalizedSubOwnerType === "person" && offerSelfInPersonOption && (
+            <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+              <Label className="text-sm font-semibold">מי בעל המניות?</Label>
+              <PillGroup
+                value={effectivePersonOwnerType}
+                onChange={(v) => update({ personOwnerType: v as any })}
+                options={[
+                  { value: "self", label: effectiveSelfName },
+                  ...(showSpouseOption && spouseName ? [{ value: "spouse", label: spouseName }] : []),
+                  { value: "other", label: "אחר" },
+                ]}
+              />
+              {effectivePersonOwnerType === "self" && (
+                <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <p className="text-sm">{effectiveSelfName} {heShe} {owner} המניות {sole} של {displayName}.</p>
+                </div>
+              )}
+              {effectivePersonOwnerType === "spouse" && (
+                <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <p className="text-sm">{spouseName} (בן/בת הזוג) {owner} המניות של {displayName}.</p>
+                </div>
+              )}
+              {effectivePersonOwnerType === "other" && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
+                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
+                    <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
+                    <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
+                    <Select value={data.personOwner?.additionalIdType || ""} onValueChange={(v: any) => updatePerson({ additionalIdType: v })}>
+                      <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                        <SelectItem value="license">רישיון נהיגה</SelectItem>
+                        <SelectItem value="passport">דרכון</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {data.personOwner?.additionalIdType && (
+                      <Input placeholder="מספר אמצעי זיהוי" value={data.personOwner?.additionalIdNumber || ""} onChange={(e) => updatePerson({ additionalIdNumber: e.target.value })} />
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
-          {effectivePersonOwnerType === "spouse" && (
-            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-              <p className="text-sm">{spouseName} (בן/בת הזוג) {owner} המניות של {displayName}.</p>
-            </div>
-          )}
-          {effectivePersonOwnerType === "other" && (
-            <>
+
+          {normalizedSubOwnerType === "person" && !offerSelfInPersonOption && subOwnerType !== "self" && (
+            <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+              <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
                 <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
@@ -359,73 +405,48 @@ const CompanyChainBlock = ({
                   <Input placeholder="מספר אמצעי זיהוי" value={data.personOwner?.additionalIdNumber || ""} onChange={(e) => updatePerson({ additionalIdNumber: e.target.value })} />
                 )}
               </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {normalizedSubOwnerType === "person" && !offerSelfInPersonOption && subOwnerType !== "self" && (
-        <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-          <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
-            <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
-            <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
-            <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
-          </div>
-          <div className="space-y-2">
-            <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
-            <Select value={data.personOwner?.additionalIdType || ""} onValueChange={(v: any) => updatePerson({ additionalIdType: v })}>
-              <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
-                <SelectItem value="license">רישיון נהיגה</SelectItem>
-                <SelectItem value="passport">דרכון</SelectItem>
-              </SelectContent>
-            </Select>
-            {data.personOwner?.additionalIdType && (
-              <Input placeholder="מספר אמצעי זיהוי" value={data.personOwner?.additionalIdNumber || ""} onChange={(e) => updatePerson({ additionalIdNumber: e.target.value })} />
-            )}
-          </div>
-        </div>
-      )}
-
-      {subOwnerType === "self" && (
-        <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {displayName}.</p>
-          <label className="flex items-center gap-2 text-sm cursor-pointer">
-            <Checkbox
-              checked={personOwnerWithOther}
-              onCheckedChange={(v) => update({ personOwnerWithOther: !!v })}
-            />
-            <span>יחד עם אחר</span>
-          </label>
-          {personOwnerWithOther && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-              <div className="space-y-1"><Label>שם מלא של השותף *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
-              <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
-              <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
-              <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
             </div>
           )}
-        </div>
-      )}
 
-      {normalizedSubOwnerType === "company" && (
-        <CompanyChainBlock
-          data={data.childCompany || {}}
-          onChange={(c) => update({ childCompany: c })}
-          heldName={displayName}
-          depth={depth + 1}
-          fillerName={fillerName}
-          gender={gender}
-          chainAllowsNewCompany={chainAllowsNewCompany && !isExistingCompany}
-          selfName={selfName}
-          spouseName={spouseName}
-          showSpouseOption={showSpouseOption}
-          restrictToPersonOrCompany={_restrictToPersonOrCompany}
-          offerSelfInPersonOption={offerSelfInPersonOption}
-        />
+          {subOwnerType === "self" && (
+            <div className="space-y-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="text-sm">{fillerName} {heShe} {owner} המניות {sole} של {displayName}.</p>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <Checkbox
+                  checked={personOwnerWithOther}
+                  onCheckedChange={(v) => update({ personOwnerWithOther: !!v })}
+                />
+                <span>יחד עם אחר</span>
+              </label>
+              {personOwnerWithOther && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                  <div className="space-y-1"><Label>שם מלא של השותף *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
+                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
+                  <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
+                  <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {normalizedSubOwnerType === "company" && (
+            <CompanyChainBlock
+              data={data.childCompany || {}}
+              onChange={(c) => update({ childCompany: c })}
+              heldName={displayName}
+              depth={depth + 1}
+              fillerName={fillerName}
+              gender={gender}
+              chainAllowsNewCompany={chainAllowsNewCompany && !isExistingCompany}
+              selfName={selfName}
+              spouseName={spouseName}
+              showSpouseOption={showSpouseOption}
+              restrictToPersonOrCompany={_restrictToPersonOrCompany}
+              offerSelfInPersonOption={offerSelfInPersonOption}
+              renderNewCompanyShareholders={renderNewCompanyShareholders}
+            />
+          )}
+        </>
       )}
     </div>
   );
@@ -446,6 +467,7 @@ const SelfViaCompanyBlock = ({
   selfName,
   spouseName,
   showSpouseOption = false,
+  renderNewCompanyShareholders,
 }: {
   data: any;
   onChange: (next: any) => void;
@@ -456,6 +478,12 @@ const SelfViaCompanyBlock = ({
   selfName?: string;
   spouseName?: string;
   showSpouseOption?: boolean;
+  renderNewCompanyShareholders?: (
+    node: any,
+    onNodeChange: (next: any) => void,
+    displayName: string,
+    keyPrefix: string,
+  ) => React.ReactNode;
 }) => {
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
   const updatePerson = (patch: any) =>
@@ -470,6 +498,7 @@ const SelfViaCompanyBlock = ({
   const effectiveSelfName = selfName || (fillerName !== "אני" ? fillerName : "ממלא/ת השאלון");
   const personOwnerWithOther = !!data?.personOwnerWithOther;
   const holdingDisplayName = data?.companyName || "החברה המחזיקה";
+  const showNewHoldingShareholders = !isExistingHolding && !!renderNewCompanyShareholders;
 
   return (
     <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
@@ -513,35 +542,47 @@ const SelfViaCompanyBlock = ({
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-sm font-semibold">
-          אחד מבעלי המניות של {holdingDisplayName}
-        </Label>
-        <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
-          <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
-            <SelectItem value="company">חברה</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {showNewHoldingShareholders ? (
+        renderNewCompanyShareholders!(
+          data,
+          (next) => onChange(next),
+          holdingDisplayName || data?.requestedName1 || "חברת האחזקות",
+          `selfvia_`,
+        )
+      ) : (
+        <>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">
+              אחד מבעלי המניות של {holdingDisplayName}
+            </Label>
+            <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+              <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
+                <SelectItem value="company">חברה</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      {subOwnerType === "person" && null}
+          {subOwnerType === "person" && null}
 
-      {subOwnerType === "company" && (
-        <CompanyChainBlock
-          data={data?.childCompany || {}}
-          onChange={(c) => update({ childCompany: c })}
-          heldName={holdingDisplayName}
-          depth={1}
-          fillerName={fillerName}
-          gender={gender}
-          chainAllowsNewCompany={isNewCompany}
-          selfName={selfName}
-          spouseName={spouseName}
-          showSpouseOption={showSpouseOption}
-          restrictToPersonOrCompany={true}
-        />
+          {subOwnerType === "company" && (
+            <CompanyChainBlock
+              data={data?.childCompany || {}}
+              onChange={(c) => update({ childCompany: c })}
+              heldName={holdingDisplayName}
+              depth={1}
+              fillerName={fillerName}
+              gender={gender}
+              chainAllowsNewCompany={isNewCompany}
+              selfName={selfName}
+              spouseName={spouseName}
+              showSpouseOption={showSpouseOption}
+              restrictToPersonOrCompany={true}
+              renderNewCompanyShareholders={renderNewCompanyShareholders}
+            />
+          )}
+        </>
       )}
     </div>
   );
@@ -944,6 +985,32 @@ export const Step2BusinessInfo = () => {
       });
     };
 
+    // Renderer used by nested chain blocks: when the user picks "חברה חדשה"
+    // inside the ownership chain, render the full shareholders flow (same as outermost)
+    const renderNewCompanyShareholders = (
+      node: any,
+      onNodeChange: (next: any) => void,
+      displayName: string,
+      keyPrefix: string,
+    ) =>
+      renderShareholdersSection(
+        node,
+        (field: string, value: any) => onNodeChange({ ...node, [field]: value }),
+        (updates: Record<string, any>) => onNodeChange({ ...node, ...updates }),
+        selfName,
+        selfIdNumber,
+        selfPhone,
+        selfEmail,
+        spouseDisplayName,
+        spouseIdNumber,
+        spousePhone,
+        spouseEmail,
+        showSpouseOption,
+        `${prefix}${keyPrefix}`,
+        true,
+        displayName,
+      );
+
     return (
       <div className="space-y-4 mr-4">
         <div className="space-y-2">
@@ -1155,6 +1222,7 @@ export const Step2BusinessInfo = () => {
                           selfName={selfName}
                           spouseName={spouseDisplayName}
                           showSpouseOption={showSpouseOption}
+                          renderNewCompanyShareholders={renderNewCompanyShareholders}
                         />
                       )}
                           </>
@@ -1306,6 +1374,7 @@ export const Step2BusinessInfo = () => {
                           spouseName={spouseDisplayName}
                           showSpouseOption={showSpouseOption}
                           offerSelfInPersonOption={true}
+                          renderNewCompanyShareholders={renderNewCompanyShareholders}
                         />
                       )}
                     </div>
@@ -1574,6 +1643,33 @@ export const Step2BusinessInfo = () => {
       setInfo({ existingCompanies: updated });
     };
 
+    // Renderer for "new company" branches inside SelfViaCompanyBlock chain
+    const renderNewCompanyShareholdersTop = (
+      node: any,
+      onNodeChange: (next: any) => void,
+      displayName: string,
+      keyPrefix: string,
+    ) =>
+      renderShareholdersSection(
+        node,
+        (field: string, value: any) => onNodeChange({ ...node, [field]: value }),
+        (updates: Record<string, any>) => onNodeChange({ ...node, ...updates }),
+        name,
+        selfIdNumber,
+        selfPhone,
+        selfEmail,
+        spouseDisplayName,
+        spouseIdNumber,
+        spousePhone,
+        spouseEmail,
+        showSpouseOption,
+        `${prefix}svc_${keyPrefix}`,
+        true,
+        displayName,
+      );
+
+
+
     return (
       <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
         <h3 className="text-xl font-bold text-primary">
@@ -1757,6 +1853,7 @@ export const Step2BusinessInfo = () => {
                 selfName={name}
                 spouseName={spouseDisplayName}
                 showSpouseOption={showSpouseOption}
+                renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
               />
             )}
           </div>
@@ -1845,6 +1942,7 @@ export const Step2BusinessInfo = () => {
                 selfName={name}
                 spouseName={spouseDisplayName}
                 showSpouseOption={showSpouseOption}
+                renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
               />
             )}
 
