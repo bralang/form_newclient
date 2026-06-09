@@ -1208,14 +1208,14 @@ export const Step2BusinessInfo = () => {
                                   ? `אחד מבעלי המניות של ${sh.companyName || "החברה המחזיקה"}`
                                   : `סוג בעל המניות של ${sh.companyName || (sh as any).requestedName1 || "החברה המחזיקה"}`}
                               </Label>
-                              <Select value={sh.subOwnerType || ""} onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}>
+                              <Select
+                                value={sh.subOwnerType === "self_via_company" ? "company" : sh.subOwnerType || ""}
+                                onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}
+                              >
                                 <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="person">אדם פרטי</SelectItem>
                                   <SelectItem value="company">חברה</SelectItem>
-                                  {!shIsExisting && !shareholders.some((s: any) => s?.isSelf) && (
-                                    <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
-                                  )}
                                 </SelectContent>
                               </Select>
                             </div>
@@ -1267,20 +1267,6 @@ export const Step2BusinessInfo = () => {
                               </div>
                             )}
 
-                            {sh.subOwnerType === "self_via_company" && !shIsExisting && (
-                              <CompanyChainBlock
-                                data={sh.childCompany || {}}
-                                onChange={(c) => updateShareholder(idx, "childCompany", c)}
-                                heldName={sh.companyName || (sh as any).requestedName1 || "החברה הקודמת"}
-                                depth={1}
-                                chainAllowsNewCompany={true}
-                                selfName={selfName}
-                                spouseName={spouseDisplayName}
-                                showSpouseOption={showSpouseOption}
-                                offerSelfInPersonOption={true}
-                                restrictToPersonOrCompany={shareholders.some((s: any) => s?.isSelf)}
-                              />
-                            )}
                           </>
                         );
                       })()}
