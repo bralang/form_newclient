@@ -529,27 +529,48 @@ const SelfViaCompanyBlock = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label>שם החברה דרכה אני {holds} *</Label>
-          <Input value={data?.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
-        </div>
-        {isExistingHolding && (
+      {isExistingHolding ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label>שם החברה דרכה אני {holds} *</Label>
+            <Input value={data?.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
+          </div>
           <div className="space-y-1">
             <Label>ח.פ. *</Label>
             <Input value={data?.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
           </div>
-        )}
-        {isNewCompany && (
-          <div className="space-y-1">
-            <Label>אחוזי אחזקה {withBet(parentCompanyName)} *</Label>
-            <PercentageInput
-              value={data?.percentage || ""}
-              onChange={(value) => update({ percentage: value })}
+          {isNewCompany && (
+            <div className="space-y-1">
+              <Label>אחוזי אחזקה {withBet(parentCompanyName)} *</Label>
+              <PercentageInput
+                value={data?.percentage || ""}
+                onChange={(value) => update({ percentage: value })}
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Label className="font-semibold">3 שמות רצויים לחברה דרכה אני {holds} (לפי סדר עדיפות)</Label>
+          {[1, 2, 3].map((n) => (
+            <Input
+              key={n}
+              placeholder={`שם רצוי ${n}`}
+              value={(data as any)?.[`requestedName${n}`] || ""}
+              onChange={(e) => update({ [`requestedName${n}`]: e.target.value } as any)}
             />
-          </div>
-        )}
-      </div>
+          ))}
+          {isNewCompany && (
+            <div className="space-y-1">
+              <Label>אחוזי אחזקה {withBet(parentCompanyName)} *</Label>
+              <PercentageInput
+                value={data?.percentage || ""}
+                onChange={(value) => update({ percentage: value })}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {showNewHoldingShareholders ? (
         renderNewCompanyShareholders!(
