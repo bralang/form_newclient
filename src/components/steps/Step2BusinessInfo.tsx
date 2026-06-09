@@ -1286,7 +1286,7 @@ export const Step2BusinessInfo = () => {
                         />
                       )}
                     </div>
-                  )}
+                  ) : null}
                 </>
               )}
             </div>
