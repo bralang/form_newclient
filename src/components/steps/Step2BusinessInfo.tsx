@@ -1028,7 +1028,7 @@ export const Step2BusinessInfo = () => {
                   <div className="space-y-2">
                     <Label>סוג בעל המניות</Label>
                     <Select
-                      value={sh.holderType || "person"}
+                      value={sh.holderType || ""}
                       onValueChange={(v) => updateShareholder(idx, "holderType", v)}
                     >
                       <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
@@ -1039,7 +1039,7 @@ export const Step2BusinessInfo = () => {
                     </Select>
                   </div>
 
-                  {(sh.holderType || "person") === "person" ? (
+                  {sh.holderType === "person" ? (
                     <>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
@@ -1097,7 +1097,7 @@ export const Step2BusinessInfo = () => {
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold">סוג בעל המניות של {sh.companyName || "החברה דרכה אני מחזיק/ה"}</Label>
                         <Select
-                          value={sh.subOwnerType || "self_via_company"}
+                          value={sh.subOwnerType || ""}
                           onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}
                         >
                           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
@@ -1107,10 +1107,9 @@ export const Step2BusinessInfo = () => {
                             <SelectItem value="company">חברה</SelectItem>
                           </SelectContent>
                         </Select>
-                        <p className="text-xs text-muted-foreground">ברירת מחדל: אני לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
                       </div>
 
-                      {(sh.subOwnerType || "self_via_company") === "self_via_company" && (
+                      {sh.subOwnerType === "self_via_company" && (
                         <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
                           <p className="text-sm">אני (ממלא/ת השאלון) הוא בעל המניות היחיד של {sh.companyName || "החברה המחזיקה"}.</p>
                         </div>
@@ -1140,7 +1139,7 @@ export const Step2BusinessInfo = () => {
                         />
                       )}
                     </div>
-                  ) : (
+                  ) : sh.holderType === "company" ? (
                     <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
                       {isNewCompany && (
                         <div className="space-y-2">
@@ -1286,7 +1285,7 @@ export const Step2BusinessInfo = () => {
                         />
                       )}
                     </div>
-                  )}
+                  ) : null}
                 </>
               )}
             </div>
