@@ -1942,6 +1942,7 @@ export const Step2BusinessInfo = () => {
                 selfName={name}
                 spouseName={spouseDisplayName}
                 showSpouseOption={showSpouseOption}
+                renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
               />
             )}
 
