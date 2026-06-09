@@ -224,6 +224,7 @@ const CompanyChainBlock = ({
   spouseName,
   showSpouseOption = false,
   restrictToPersonOrCompany = false,
+  offerSelfInPersonOption = false,
 }: {
   data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean };
   onChange: (next: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }) => void;
@@ -236,6 +237,7 @@ const CompanyChainBlock = ({
   spouseName?: string;
   showSpouseOption?: boolean;
   restrictToPersonOrCompany?: boolean;
+  offerSelfInPersonOption?: boolean;
 }) => {
   const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }>) =>
     onChange({ ...data, ...patch });
