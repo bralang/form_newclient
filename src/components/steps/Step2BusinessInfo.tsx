@@ -1040,6 +1040,7 @@ export const Step2BusinessInfo = () => {
         `${prefix}${keyPrefix}`,
         true,
         displayName,
+        false,
       );
 
     return (
@@ -1702,6 +1703,7 @@ export const Step2BusinessInfo = () => {
         `${prefix}svc_${keyPrefix}`,
         true,
         displayName,
+        false,
       );
 
 
