@@ -460,8 +460,8 @@ const SelfViaCompanyBlock = ({
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
   const updatePerson = (patch: any) =>
     onChange({ ...(data || {}), personOwner: { ...((data || {}).personOwner || {}), ...patch } });
-  // Default to "person" now that the select only offers person/company
-  const subOwnerType = data?.subOwnerType || "person";
+  // No default — user must explicitly choose
+  const subOwnerType = data?.subOwnerType || "";
   const holds = gender ? g(gender, "מחזיק", "מחזיקה") : "מחזיק/ה";
   const owner = gender ? g(gender, "בעל", "בעלת") : "בעל/ת";
   const sole = gender ? g(gender, "היחיד", "היחידה") : "היחיד/ה";
