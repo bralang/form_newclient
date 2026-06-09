@@ -985,6 +985,32 @@ export const Step2BusinessInfo = () => {
       });
     };
 
+    // Renderer used by nested chain blocks: when the user picks "חברה חדשה"
+    // inside the ownership chain, render the full shareholders flow (same as outermost)
+    const renderNewCompanyShareholders = (
+      node: any,
+      onNodeChange: (next: any) => void,
+      displayName: string,
+      keyPrefix: string,
+    ) =>
+      renderShareholdersSection(
+        node,
+        (field: string, value: any) => onNodeChange({ ...node, [field]: value }),
+        (updates: Record<string, any>) => onNodeChange({ ...node, ...updates }),
+        selfName,
+        selfIdNumber,
+        selfPhone,
+        selfEmail,
+        spouseDisplayName,
+        spouseIdNumber,
+        spousePhone,
+        spouseEmail,
+        showSpouseOption,
+        `${prefix}${keyPrefix}`,
+        true,
+        displayName,
+      );
+
     return (
       <div className="space-y-4 mr-4">
         <div className="space-y-2">
