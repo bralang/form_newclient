@@ -1181,44 +1181,51 @@ export const Step2BusinessInfo = () => {
                           />
                         </div>
                       )}
-                      {(includeSelfAsFirstShareholder || sh.personOwnerType === "other" || (sh.personOwnerType !== "self" && sh.personOwnerType !== "spouse" && !!sh.personOwnerType === false ? false : true)) && (
+                      {(includeSelfAsFirstShareholder || sh.personOwnerType === "other") && (
                         <>
-                          {(includeSelfAsFirstShareholder || sh.personOwnerType === "other" || sh.personOwnerType === "self" || sh.personOwnerType === "spouse") && (
-                            <>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} readOnly={!includeSelfAsFirstShareholder && (sh.personOwnerType === "self" || sh.personOwnerType === "spouse")} /></div>
-                                <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} readOnly={!includeSelfAsFirstShareholder && (sh.personOwnerType === "self" || sh.personOwnerType === "spouse")} /></div>
-                                {isNewCompany && (
-                                  <div className="space-y-1">
-                                    <Label>אחוזי אחזקה *</Label>
-                                    <AutoPercentageInput
-                                      value={sh.percentage || ""}
-                                      onChange={(value) => updateShareholder(idx, "percentage", value)}
-                                      max={maxPct}
-                                      autoFillTo={pctAutoFill}
-                                    />
-                                  </div>
-                                )}
-                                <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} /></div>
-                                <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} /></div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
+                            <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
+                            {isNewCompany && (
+                              <div className="space-y-1">
+                                <Label>אחוזי אחזקה *</Label>
+                                <AutoPercentageInput
+                                  value={sh.percentage || ""}
+                                  onChange={(value) => updateShareholder(idx, "percentage", value)}
+                                  max={maxPct}
+                                  autoFillTo={pctAutoFill}
+                                />
                               </div>
-                              <div className="space-y-2">
-                                <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
-                                <Select value={sh.additionalIdType || ""} onValueChange={(v) => updateShareholder(idx, "additionalIdType", v)}>
-                                  <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
-                                    <SelectItem value="license">רישיון נהיגה</SelectItem>
-                                    <SelectItem value="passport">דרכון</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                {sh.additionalIdType && (
-                                  <Input placeholder="מספר אמצעי זיהוי" value={sh.additionalIdNumber || ""} onChange={(e) => updateShareholder(idx, "additionalIdNumber", e.target.value)} />
-                                )}
-                              </div>
-                            </>
-                          )}
+                            )}
+                            <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} /></div>
+                            <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.email || ""} onChange={(e) => updateShareholder(idx, "email", e.target.value)} /></div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>אמצעי זיהוי נוסף (מומלץ)</Label>
+                            <Select value={sh.additionalIdType || ""} onValueChange={(v) => updateShareholder(idx, "additionalIdType", v)}>
+                              <SelectTrigger><SelectValue placeholder="בחר אמצעי זיהוי" /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="parentId">מס׳ זהות של הורה</SelectItem>
+                                <SelectItem value="license">רישיון נהיגה</SelectItem>
+                                <SelectItem value="passport">דרכון</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {sh.additionalIdType && (
+                              <Input placeholder="מספר אמצעי זיהוי" value={sh.additionalIdNumber || ""} onChange={(e) => updateShareholder(idx, "additionalIdNumber", e.target.value)} />
+                            )}
+                          </div>
                         </>
+                      )}
+                      {!includeSelfAsFirstShareholder && (sh.personOwnerType === "self" || sh.personOwnerType === "spouse") && isNewCompany && (
+                        <div className="space-y-1">
+                          <Label>אחוזי אחזקה *</Label>
+                          <AutoPercentageInput
+                            value={sh.percentage || ""}
+                            onChange={(value) => updateShareholder(idx, "percentage", value)}
+                            max={maxPct}
+                            autoFillTo={pctAutoFill}
+                          />
+                        </div>
                       )}
                     </>
                   ) : (sh.holderType === "self_via_company") ? (
