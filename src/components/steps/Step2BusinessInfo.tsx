@@ -451,6 +451,7 @@ const CompanyChainBlock = ({
               showSpouseOption={showSpouseOption}
               restrictToPersonOrCompany={_restrictToPersonOrCompany}
               offerSelfInPersonOption={offerSelfInPersonOption}
+              personIsSelfOnly={personIsSelfOnly}
               renderNewCompanyShareholders={renderNewCompanyShareholders}
             />
           )}
