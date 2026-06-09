@@ -1824,6 +1824,9 @@ export const Step2BusinessInfo = () => {
                   setInfo({ newCompanyCount: count, newCompanies: adjusted });
                 }}
               />
+              <div className="mt-2 p-2.5 rounded-md border border-red-500 bg-red-50 text-red-700 text-sm leading-relaxed">
+                שיהיה רשום שאינן חברות אם
+              </div>
             </div>
           )}
         </div>
