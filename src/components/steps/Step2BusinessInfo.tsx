@@ -1374,6 +1374,7 @@ export const Step2BusinessInfo = () => {
                           spouseName={spouseDisplayName}
                           showSpouseOption={showSpouseOption}
                           offerSelfInPersonOption={true}
+                          renderNewCompanyShareholders={renderNewCompanyShareholders}
                         />
                       )}
                     </div>
