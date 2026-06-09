@@ -1212,7 +1212,7 @@ export const Step2BusinessInfo = () => {
                               <Select value={sh.subOwnerType || ""} onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}>
                                 <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="person">{shIsExisting ? `אדם פרטי - ${selfName}` : "אדם פרטי"}</SelectItem>
+                                  <SelectItem value="person">אדם פרטי</SelectItem>
                                   <SelectItem value="company">חברה</SelectItem>
                                   {!shIsExisting && (
                                     <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
