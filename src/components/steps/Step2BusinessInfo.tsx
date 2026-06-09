@@ -1272,6 +1272,7 @@ export const Step2BusinessInfo = () => {
                                 spouseName={spouseDisplayName}
                                 showSpouseOption={showSpouseOption}
                                 offerSelfInPersonOption={true}
+                                restrictToPersonOrCompany={shareholders.some((s: any) => s?.isSelf)}
                               />
                             )}
                           </>
