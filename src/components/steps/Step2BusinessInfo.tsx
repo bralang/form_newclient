@@ -1213,7 +1213,7 @@ export const Step2BusinessInfo = () => {
                                 <SelectContent>
                                   <SelectItem value="person">אדם פרטי</SelectItem>
                                   <SelectItem value="company">חברה</SelectItem>
-                                  {!shIsExisting && (
+                                  {!shIsExisting && !shareholders.some((s: any) => s?.isSelf) && (
                                     <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
                                   )}
                                 </SelectContent>
