@@ -1223,7 +1223,7 @@ export const Step2BusinessInfo = () => {
 
                             {sh.subOwnerType === "person" && shIsExisting && (
                               <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-                                <Label className="text-sm font-semibold">מי בעל המניות הסופי של {sh.companyName || "החברה המחזיקה"}?</Label>
+                                <Label className="text-sm font-semibold">מי בעל המניות?</Label>
                                 <PillGroup
                                   value={sh.personOwnerType || ""}
                                   onChange={(v) => updateShareholder(idx, "personOwnerType", v)}
