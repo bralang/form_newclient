@@ -323,7 +323,7 @@ const CompanyChainBlock = ({
 
       {subOwnerType === "person" && offerSelfInPersonOption && (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-          <Label className="text-sm font-semibold">מי בעל המניות הסופי של {displayName}?</Label>
+          <Label className="text-sm font-semibold">מי בעל המניות?</Label>
           <PillGroup
             value={personOwnerType}
             onChange={(v) => update({ personOwnerType: v as any })}
