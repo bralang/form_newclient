@@ -1283,6 +1283,7 @@ export const Step2BusinessInfo = () => {
                           selfName={selfName}
                           spouseName={spouseDisplayName}
                           showSpouseOption={showSpouseOption}
+                          offerSelfInPersonOption={true}
                         />
                       )}
                     </div>
