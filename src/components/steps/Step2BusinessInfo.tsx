@@ -319,14 +319,7 @@ const CompanyChainBlock = ({
         </Select>
       </div>
 
-      {subOwnerType === "person" && restrictSelect && (
-        <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-          <p className="text-sm">{effectiveSelfName} {owner} המניות {sole} של {displayName}.</p>
-        </div>
-      )}
-
-      {subOwnerType === "person" && !restrictSelect && (
-
+      {subOwnerType === "person" && (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
           <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
           <div className="space-y-2">
