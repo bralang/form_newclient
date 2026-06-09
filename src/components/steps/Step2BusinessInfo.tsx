@@ -1097,7 +1097,7 @@ export const Step2BusinessInfo = () => {
                       <div className="space-y-2">
                         <Label className="text-sm font-semibold">סוג בעל המניות של {sh.companyName || "החברה דרכה אני מחזיק/ה"}</Label>
                         <Select
-                          value={sh.subOwnerType || "self_via_company"}
+                          value={sh.subOwnerType || ""}
                           onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}
                         >
                           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
@@ -1107,10 +1107,9 @@ export const Step2BusinessInfo = () => {
                             <SelectItem value="company">חברה</SelectItem>
                           </SelectContent>
                         </Select>
-                        <p className="text-xs text-muted-foreground">ברירת מחדל: אני לבד בחברה זו. ניתן לשנות אם יש שותפים נוספים.</p>
                       </div>
 
-                      {(sh.subOwnerType || "self_via_company") === "self_via_company" && (
+                      {sh.subOwnerType === "self_via_company" && (
                         <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
                           <p className="text-sm">אני (ממלא/ת השאלון) הוא בעל המניות היחיד של {sh.companyName || "החברה המחזיקה"}.</p>
                         </div>
