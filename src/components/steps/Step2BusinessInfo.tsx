@@ -225,6 +225,7 @@ const CompanyChainBlock = ({
   showSpouseOption = false,
   restrictToPersonOrCompany: _restrictToPersonOrCompany = false,
   offerSelfInPersonOption = false,
+  personIsSelfOnly = false,
   renderNewCompanyShareholders,
 }: {
   data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean };
@@ -239,6 +240,7 @@ const CompanyChainBlock = ({
   showSpouseOption?: boolean;
   restrictToPersonOrCompany?: boolean;
   offerSelfInPersonOption?: boolean;
+  personIsSelfOnly?: boolean;
   renderNewCompanyShareholders?: (
     node: any,
     onNodeChange: (next: any) => void,
@@ -324,10 +326,10 @@ const CompanyChainBlock = ({
             <Label className="text-sm font-semibold">
               {isExistingCompany ? `אחד מבעלי המניות של ${displayName}` : `סוג בעל המניות של ${displayName}`}
             </Label>
-            <Select value={normalizedSubOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+            <Select value={normalizedSubOwnerType} onValueChange={(v: any) => update({ subOwnerType: v, ...(personIsSelfOnly && v === "person" ? { personOwnerType: "self" as const } : {}) })}>
               <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="person">אדם פרטי</SelectItem>
+                <SelectItem value="person">{personIsSelfOnly ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
                 <SelectItem value="company">חברה</SelectItem>
               </SelectContent>
             </Select>
@@ -382,7 +384,13 @@ const CompanyChainBlock = ({
             </div>
           )}
 
-          {normalizedSubOwnerType === "person" && !offerSelfInPersonOption && subOwnerType !== "self" && (
+          {normalizedSubOwnerType === "person" && personIsSelfOnly && (
+            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="text-sm">{effectiveSelfName} {heShe} {owner} המניות {sole} של {displayName}.</p>
+            </div>
+          )}
+
+          {normalizedSubOwnerType === "person" && !offerSelfInPersonOption && !personIsSelfOnly && subOwnerType !== "self" && (
             <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
               <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -443,6 +451,7 @@ const CompanyChainBlock = ({
               showSpouseOption={showSpouseOption}
               restrictToPersonOrCompany={_restrictToPersonOrCompany}
               offerSelfInPersonOption={offerSelfInPersonOption}
+              personIsSelfOnly={personIsSelfOnly}
               renderNewCompanyShareholders={renderNewCompanyShareholders}
             />
           )}
@@ -579,6 +588,7 @@ const SelfViaCompanyBlock = ({
               spouseName={spouseName}
               showSpouseOption={showSpouseOption}
               restrictToPersonOrCompany={true}
+              personIsSelfOnly={true}
               renderNewCompanyShareholders={renderNewCompanyShareholders}
             />
           )}
