@@ -323,7 +323,7 @@ const CompanyChainBlock = ({
 
       {subOwnerType === "person" && offerSelfInPersonOption && (
         <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-          <Label className="text-sm font-semibold">מי בעל המניות הסופי של {displayName}?</Label>
+          <Label className="text-sm font-semibold">מי בעל המניות?</Label>
           <PillGroup
             value={personOwnerType}
             onChange={(v) => update({ personOwnerType: v as any })}
@@ -1212,7 +1212,7 @@ export const Step2BusinessInfo = () => {
                               <Select value={sh.subOwnerType || ""} onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}>
                                 <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="person">{shIsExisting ? `אדם פרטי - ${selfName}` : "אדם פרטי"}</SelectItem>
+                                  <SelectItem value="person">אדם פרטי</SelectItem>
                                   <SelectItem value="company">חברה</SelectItem>
                                   {!shIsExisting && (
                                     <SelectItem value="self_via_company">אני באמצעות חברה</SelectItem>
@@ -1223,7 +1223,7 @@ export const Step2BusinessInfo = () => {
 
                             {sh.subOwnerType === "person" && shIsExisting && (
                               <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
-                                <Label className="text-sm font-semibold">מי בעל המניות הסופי של {sh.companyName || "החברה המחזיקה"}?</Label>
+                                <Label className="text-sm font-semibold">מי בעל המניות?</Label>
                                 <PillGroup
                                   value={sh.personOwnerType || ""}
                                   onChange={(v) => updateShareholder(idx, "personOwnerType", v)}
