@@ -261,12 +261,15 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
       {!collapsed && (
         <div className={`mt-3 space-y-4 ${compact ? "max-h-[40vh]" : "max-h-[70vh]"} overflow-auto pr-1`}>
-          {(my.root.children.length > 0 || (my.spouseRoot && my.spouseRoot.children.length > 0)) && (
+          {(my.root.children.length > 0 || (my.spouseRoot && my.spouseRoot.children.length > 0) || my.extraRoots.length > 0) && (
             <div className={`flex justify-center items-start ${compact ? "gap-4" : "gap-8"} min-w-max pb-2`}>
               {my.root.children.length > 0 && <TreeNodeView node={my.root} compact={compact} />}
               {my.spouseRoot && my.spouseRoot.children.length > 0 && (
                 <TreeNodeView node={my.spouseRoot} compact={compact} />
               )}
+              {my.extraRoots.map((r, i) => (
+                <TreeNodeView key={`er-${i}`} node={r} compact={compact} />
+              ))}
             </div>
           )}
           {sp && (sp.root.children.length > 0 || (sp.spouseRoot && sp.spouseRoot.children.length > 0)) && (
