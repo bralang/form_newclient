@@ -384,7 +384,13 @@ const CompanyChainBlock = ({
             </div>
           )}
 
-          {normalizedSubOwnerType === "person" && !offerSelfInPersonOption && subOwnerType !== "self" && (
+          {normalizedSubOwnerType === "person" && personIsSelfOnly && (
+            <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
+              <p className="text-sm">{effectiveSelfName} {heShe} {owner} המניות {sole} של {displayName}.</p>
+            </div>
+          )}
+
+          {normalizedSubOwnerType === "person" && !offerSelfInPersonOption && !personIsSelfOnly && subOwnerType !== "self" && (
             <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
               <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
