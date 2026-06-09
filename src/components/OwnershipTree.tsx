@@ -116,10 +116,11 @@ const buildForOwner = (
   ownerName: string,
   spouseName: string,
   hasSpouse: boolean,
-): { root: TreeNode; spouseRoot: TreeNode | null } => {
+): { root: TreeNode; spouseRoot: TreeNode | null; extraRoots: TreeNode[] } => {
   const root = personNode(ownerName);
   const spouseRoot = hasSpouse ? personNode(spouseName) : null;
   const map = new Map<string, TreeNode>();
+  const extraRoots: TreeNode[] = [];
 
   const targets = [
     ...(bi?.existingCompanies || []).map((c: any) => ({ ...c, _isNew: false })),
@@ -153,7 +154,7 @@ const buildForOwner = (
       const shs = t.shareholders || [];
       let attached = false;
       for (const sh of shs) {
-        const owner = resolveShareholderOwner(sh, root, spouseRoot, map, ownerName, spouseName);
+        const owner = resolveShareholderOwner(sh, root, spouseRoot, map, ownerName, spouseName, extraRoots);
         if (!owner) continue;
         if (!attached) {
           node.percentage = sh.percentage;
@@ -171,7 +172,7 @@ const buildForOwner = (
     }
   }
 
-  return { root, spouseRoot };
+  return { root, spouseRoot, extraRoots };
 };
 
 // ─── Rendering ───
