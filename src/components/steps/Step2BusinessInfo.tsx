@@ -1643,6 +1643,33 @@ export const Step2BusinessInfo = () => {
       setInfo({ existingCompanies: updated });
     };
 
+    // Renderer for "new company" branches inside SelfViaCompanyBlock chain
+    const renderNewCompanyShareholdersTop = (
+      node: any,
+      onNodeChange: (next: any) => void,
+      displayName: string,
+      keyPrefix: string,
+    ) =>
+      renderShareholdersSection(
+        node,
+        (field: string, value: any) => onNodeChange({ ...node, [field]: value }),
+        (updates: Record<string, any>) => onNodeChange({ ...node, ...updates }),
+        name,
+        selfIdNumber,
+        selfPhone,
+        selfEmail,
+        spouseDisplayName,
+        spouseIdNumber,
+        spousePhone,
+        spouseEmail,
+        showSpouseOption,
+        `${prefix}svc_${keyPrefix}`,
+        true,
+        displayName,
+      );
+
+
+
     return (
       <div className="space-y-5 p-5 bg-muted/30 rounded-xl border border-border/50">
         <h3 className="text-xl font-bold text-primary">
