@@ -307,7 +307,7 @@ const CompanyChainBlock = ({
         <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
           <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="person">{restrictSelect ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
+            <SelectItem value="person">אדם פרטי</SelectItem>
             <SelectItem value="company">חברה</SelectItem>
             {!restrictSelect && (
               <>
