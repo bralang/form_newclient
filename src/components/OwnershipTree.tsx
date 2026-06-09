@@ -43,10 +43,11 @@ const resolveOwnerNode = (
     companyMap.set(cname, node);
 
     const sub = chain?.subOwnerType;
-    if (sub === "self_via_company" || sub === "self" || !sub) {
+    if (sub === "self" || !sub) {
       // user owns this holding directly
       userRoot.children.push(node);
-    } else if (sub === "company") {
+    } else if (sub === "company" || sub === "self_via_company") {
+      // this holding is owned by ANOTHER holding company → recurse upward
       const parent = resolveOwnerNode(
         chain.childCompany || {},
         userRoot, spouseRoot, companyMap, fillerName, spouseName,
@@ -60,7 +61,6 @@ const resolveOwnerNode = (
       else if (pType === "spouse") pLabel = spouseName;
       else pLabel = chain?.personOwner?.name?.trim() || "אדם פרטי";
       const root = pType === "spouse" && spouseRoot ? spouseRoot : userRoot;
-      // if this is a third-party person (not self/spouse), nest under user as a separate branch
       if (pType === "self" || pType === "spouse") {
         root.children.push(node);
       } else {
