@@ -230,8 +230,9 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   if (currentStep !== 3) return null;
 
   const fillerName = fillerLabel(personalInfo?.firstName || "");
-  const spouseName = fillerLabel(personalInfo?.spouseFirstName || "בן/בת זוג");
-  const hasSpouse = !!personalInfo?.spouseFirstName;
+  const spouseRaw = personalInfo?.spouseName || personalInfo?.spouseFirstName || "";
+  const spouseName = spouseRaw.trim() || "בן/בת זוג";
+  const hasSpouse = !!spouseRaw.trim();
 
   const my = buildForOwner(businessInfo, fillerName, spouseName);
   const sp = hasSpouse && spouseBusinessInfo
