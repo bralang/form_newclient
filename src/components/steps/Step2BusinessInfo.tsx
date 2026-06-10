@@ -1116,11 +1116,20 @@ export const Step2BusinessInfo = () => {
 
         {shareholders.map((sh: any, idx: number) => {
           const isAuto = includeSelfAsFirstShareholder && (sh?.isSelf || sh?.isSpouse);
+          const ht = sh?.holderType;
+          const isCompanyHolder = ht === "company" || ht === "self_via_company";
+          const companyHolderName = isCompanyHolder
+            ? (sh?.isExistingCompany === false
+                ? (sh?.requestedName1?.trim() || "")
+                : (sh?.companyName?.trim() || sh?.name?.trim() || ""))
+            : "";
           const displayName = sh?.isSelf
             ? selfName
             : sh?.isSpouse
             ? spouseDisplayName
-            : sh.name || `בעל מניות ${idx + 1}`;
+            : isCompanyHolder
+            ? (companyHolderName || `בעל מניות ${idx + 1}`)
+            : (sh?.name?.trim() || `בעל מניות ${idx + 1}`);
           const othersTotal = shareholders.reduce(
             (s: number, p: any, i: number) =>
               i === idx ? s : s + (parseFloat(p?.percentage) || 0),
