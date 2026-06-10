@@ -68,19 +68,23 @@ export const Step0Welcome = () => {
       </div>
 
       {/* Welcome Text - keep right 2/3 on desktop so mascot stays visible */}
-      <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground font-bold relative z-10 [&_strong]:font-bold">
-        <p>
-          שלום וברוכים הבאים למתעניינים בהצטרפות ל
+      <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground font-bold relative z-10 [&_strong]:font-bold [&_p]:font-bold">
+        <p className="font-bold">
+          <strong>שלום וברוכים הבאים למתעניינים בהצטרפות ל</strong>
           <strong>חסידה ייעוץ מס אכפתי לעסקים</strong>.
         </p>
-        <p>
-          אנחנו בעיצומו של תהליך כתיבת התווים לעסק שלכם: תו &lsquo;מי&rsquo;
-          מתוך שלבי קבלת לקוח למשרדנו.
+        <p className="font-bold">
+          <strong>
+            אנחנו בעיצומו של תהליך כתיבת התווים לעסק שלכם: תו &lsquo;מי&rsquo;
+            מתוך שלבי קבלת לקוח למשרדנו.
+          </strong>
         </p>
-        <p>
-          השאלון שלפניכם הוא קצר, ממוקד, ומילויו באופן מלא וזריז יאפשר לנו
-          להוציא בעבורכם מסמכי ייצוג מהרשויות, על מנת שנוכל לפתוח לכם תיק ו/או
-          לבצע העברה למשרדנו.
+        <p className="font-bold">
+          <strong>
+            השאלון שלפניכם הוא קצר, ממוקד, ומילויו באופן מלא וזריז יאפשר לנו
+            להוציא בעבורכם מסמכי ייצוג מהרשויות, על מנת שנוכל לפתוח לכם תיק ו/או
+            לבצע העברה למשרדנו.
+          </strong>
         </p>
 
         <div className="p-5 md:p-6 bg-muted/50 rounded-2xl border border-border space-y-4">
