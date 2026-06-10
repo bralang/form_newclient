@@ -61,9 +61,7 @@ const buildChainNode = (
     node.children.push(personNode(pLabel));
   } else if (sub === "self") {
     node.children.push(personNode(fillerName));
-  }
-
-  if (Array.isArray(chain?.shareholders) && chain.shareholders.length > 0) {
+  } else if (Array.isArray(chain?.shareholders) && chain.shareholders.length > 0) {
     for (const sh of chain.shareholders) {
       const child = buildShareholderNode(sh, fillerName, spouseName, depth + 1);
       if (child) node.children.push(child);
