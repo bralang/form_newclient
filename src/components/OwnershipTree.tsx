@@ -235,12 +235,12 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const spouseName = fillerLabel(personalInfo?.spouseFirstName || "בן/בת זוג");
   const hasSpouse = !!personalInfo?.spouseFirstName;
 
-  const my = buildForOwner(businessInfo, fillerName, spouseName, hasSpouse);
+  const my = buildForOwner(businessInfo, fillerName, spouseName);
   const sp = hasSpouse && spouseBusinessInfo
-    ? buildForOwner(spouseBusinessInfo, spouseName, fillerName, true)
-    : null;
+    ? buildForOwner(spouseBusinessInfo, spouseName, fillerName)
+    : [];
 
-  const unifiedTree = buildUnifiedTree(my, sp);
+  const unifiedTree = buildUnifiedTree([...my, ...sp]);
   if (!unifiedTree) return null;
 
   return (
