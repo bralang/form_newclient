@@ -142,7 +142,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
 
             {/* Left Panel - hidden on step 1 to give max reading width */}
             {currentStep !== 1 && (
-              <div className="w-[17rem] xl:w-[19rem] shrink-0 sticky top-0 h-screen flex flex-col p-4 pb-10 gap-3">
+              <div className="w-[26rem] xl:w-[32rem] 2xl:w-[36rem] shrink-0 sticky top-0 h-screen flex flex-col p-4 pb-10 gap-3">
                 {/* Ownership tree (auto-hidden when not on Step 2) — takes most of the height */}
                 <div className="flex-1 min-h-0 overflow-y-auto">
                   <OwnershipTree />
