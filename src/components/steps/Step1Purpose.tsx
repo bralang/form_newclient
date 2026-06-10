@@ -258,7 +258,7 @@ export const Step1Purpose = () => {
                   isHighlighted ? "bg-primary/5" : "hover:bg-muted/20"
                 } ${index < PURPOSES.length - 1 ? "border-b border-border/20" : ""}`}
               >
-                <td className="py-3 px-4 font-medium text-right">{purpose.label}</td>
+                <td className="py-3 px-4 font-bold text-base text-right">{purpose.label}</td>
                 {/* User column */}
                 <td className="py-3 px-4">
                   <div className="flex flex-col items-center gap-2">
