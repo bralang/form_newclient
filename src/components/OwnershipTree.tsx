@@ -132,7 +132,7 @@ const resolveShareholderOwner = (
     return p;
   }
 
-  if (ht === "self_via_company") {
+  if (ht === "self_via_company" || ht === "company") {
     return resolveOwnerNode(sh, userRoot, spouseRoot, companyMap, fillerName, spouseName);
   }
 
