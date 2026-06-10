@@ -129,6 +129,13 @@
     @apply text-base md:text-lg min-h-[3rem] font-medium;
   }
 
+  /* Make placeholder text visually lighter so it's clearly a hint, not a value */
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-muted-foreground font-normal;
+    opacity: 0.45;
+  }
+
   /* Slightly strengthen body text inside the form for readability (not full bold) */
   p, li {
     @apply font-normal;
