@@ -1141,7 +1141,7 @@ export const Step2BusinessInfo = () => {
           return (
             <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
               <h4 className="font-bold text-primary">
-                בעל מניות #{idx + 1} – {displayName}
+                בעל מניות #{idx + 1}{parentCompanyName ? <> של <span className="text-foreground">{parentCompanyName}</span></> : null} – {displayName}
                 {sh?.isSelf && (
                   <span className="text-xs mr-2 text-muted-foreground font-normal">
                     (אני – ממלא/ת השאלון, הפרטים מולאו אוטומטית)
