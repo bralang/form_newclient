@@ -206,10 +206,10 @@ const TreeNodeView = ({ node, compact = false }: { node: TreeNode; compact?: boo
                   style={{ paddingTop: sizes.drop, paddingInline: sizes.gapX / 2 }}
                 >
                   {hasSiblings && !isFirst && (
-                    <div className="absolute top-0 right-1/2 left-0 h-px bg-primary/40" />
+                    <div className="absolute top-0 left-1/2 right-0 h-px bg-primary/40" />
                   )}
                   {hasSiblings && !isLast && (
-                    <div className="absolute top-0 left-1/2 right-0 h-px bg-primary/40" />
+                    <div className="absolute top-0 right-1/2 left-0 h-px bg-primary/40" />
                   )}
                   <div
                     className="absolute top-0 left-1/2 w-px -translate-x-1/2 bg-primary/40"
