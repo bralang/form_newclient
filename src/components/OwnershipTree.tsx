@@ -29,122 +29,91 @@ const companyNode = (label: string, isNew = false, pct?: string): TreeNode => ({
   children: [],
 });
 
-const cloneTree = (node: TreeNode): TreeNode => ({
-  ...node,
-  children: node.children.map(cloneTree),
-});
-
-const mergeTopLevelBranches = (branches: TreeNode[]) => {
-  const merged = new Map<string, TreeNode>();
-
-  for (const branch of branches) {
-    const key = `${branch.kind}:${branch.label}:${branch.isNew ? "1" : "0"}`;
-    const copy = cloneTree(branch);
-    const existing = merged.get(key);
-
-    if (existing) {
-      existing.children.push(...copy.children);
-      existing.isAlsoShareholder = existing.isAlsoShareholder || copy.isAlsoShareholder;
-      existing.percentage = existing.percentage || copy.percentage;
-    } else {
-      merged.set(key, copy);
-    }
-  }
-
-  return Array.from(merged.values());
-};
-
-const resolveOwnerNode = (
+const buildChainNode = (
   chain: any,
-  userRoot: TreeNode,
-  spouseRoot: TreeNode | null,
-  companyMap: Map<string, TreeNode>,
   fillerName: string,
   spouseName: string,
+  pct: string | undefined,
+  depth: number,
 ): TreeNode => {
-  const cname =
+  const isNew = chain?.isExistingCompany === false;
+  const label =
     chain?.companyName?.trim() ||
     chain?.requestedName1?.trim() ||
-    "חברה מחזיקה";
+    (isNew ? "חברה חדשה" : "חברה מחזיקה");
+  const node = companyNode(label, isNew, pct);
+  node.isAlsoShareholder = true;
+  if (depth > 20) return node;
 
-  let node = companyMap.get(cname);
-  const isNew = chain?.isExistingCompany === false;
-
-  if (!node) {
-    node = companyNode(cname, isNew);
-    companyMap.set(cname, node);
-
-    const sub = chain?.subOwnerType;
-    if (sub === "self" || !sub) {
-      userRoot.children.push(node);
-    } else if (sub === "company" || sub === "self_via_company") {
-      const parent = resolveOwnerNode(
-        chain.childCompany || {},
-        userRoot,
-        spouseRoot,
-        companyMap,
-        fillerName,
-        spouseName,
+  const sub = chain?.subOwnerType;
+  if (sub === "company" || sub === "self_via_company") {
+    if (chain?.childCompany) {
+      node.children.push(
+        buildChainNode(chain.childCompany, fillerName, spouseName, undefined, depth + 1),
       );
-      parent.isAlsoShareholder = true;
-      parent.children.push(node);
-    } else if (sub === "person") {
-      const pType = chain?.personOwnerType;
-      let pLabel: string;
+    }
+  } else if (sub === "person") {
+    const pType = chain?.personOwnerType;
+    let pLabel: string;
+    if (pType === "self") pLabel = fillerName;
+    else if (pType === "spouse") pLabel = spouseName;
+    else pLabel = chain?.personOwner?.name?.trim() || "אדם פרטי";
+    node.children.push(personNode(pLabel));
+  } else if (sub === "self") {
+    node.children.push(personNode(fillerName));
+  }
 
-      if (pType === "self") pLabel = fillerName;
-      else if (pType === "spouse") pLabel = spouseName;
-      else pLabel = chain?.personOwner?.name?.trim() || "אדם פרטי";
-
-      const root = pType === "spouse" && spouseRoot ? spouseRoot : userRoot;
-      if (pType === "self" || pType === "spouse") {
-        root.children.push(node);
-      } else {
-        const p = personNode(pLabel);
-        p.children.push(node);
-        userRoot.children.push(p);
-      }
-    } else {
-      userRoot.children.push(node);
+  if (Array.isArray(chain?.shareholders) && chain.shareholders.length > 0) {
+    for (const sh of chain.shareholders) {
+      const child = buildShareholderNode(sh, fillerName, spouseName, depth + 1);
+      if (child) node.children.push(child);
     }
   }
 
-  node.isAlsoShareholder = true;
   return node;
 };
 
-const resolveShareholderOwner = (
+const buildShareholderNode = (
   sh: any,
-  userRoot: TreeNode,
-  spouseRoot: TreeNode | null,
-  companyMap: Map<string, TreeNode>,
   fillerName: string,
   spouseName: string,
-  extraRoots: TreeNode[],
+  depth: number,
 ): TreeNode | null => {
-  if (sh?.isSelf) return userRoot;
-  if (sh?.isSpouse) return spouseRoot || userRoot;
+  if (!sh) return null;
+  if (sh.isSelf) return personNode(fillerName, sh.percentage);
+  if (sh.isSpouse) return personNode(spouseName, sh.percentage);
 
-  const ht = sh?.holderType || "person";
+  const ht = sh.holderType || "person";
   if (ht === "person") {
-    const p = personNode(sh?.name?.trim() || "אדם פרטי");
-    extraRoots.push(p);
-    return p;
+    return personNode(sh?.name?.trim() || "אדם פרטי", sh.percentage);
   }
+  return buildChainNode(sh, fillerName, spouseName, sh.percentage, depth);
+};
 
-  if (ht === "self_via_company" || ht === "company") {
-    return resolveOwnerNode(sh, userRoot, spouseRoot, companyMap, fillerName, spouseName);
-  }
+const buildTargetNode = (
+  t: any,
+  isNew: boolean,
+  fillerName: string,
+  spouseName: string,
+  ownerName: string,
+): TreeNode => {
+  const label = isNew
+    ? (t.requestedName1?.trim() || "חברה חדשה")
+    : (t.name?.trim() || "חברה קיימת");
+  const node = companyNode(label, isNew);
+  const st = t.shareholderType;
 
-  const cname = sh?.companyName?.trim() || sh?.name?.trim() || "חברה מחזיקה";
-  let node = companyMap.get(cname);
-  if (!node) {
-    const isNew = sh?.isExistingCompany === false;
-    node = companyNode(cname, isNew);
-    companyMap.set(cname, node);
-    extraRoots.push(node);
+  if (st === "alone") {
+    node.children.push(personNode(ownerName, "100"));
+  } else if (st === "self_via_company") {
+    const svc = t.selfViaCompany || {};
+    node.children.push(buildChainNode(svc, fillerName, spouseName, svc.percentage, 0));
+  } else if (st === "other") {
+    for (const sh of (t.shareholders || [])) {
+      const child = buildShareholderNode(sh, fillerName, spouseName, 0);
+      if (child) node.children.push(child);
+    }
   }
-  node.isAlsoShareholder = true;
   return node;
 };
 
@@ -152,99 +121,20 @@ const buildForOwner = (
   bi: any,
   ownerName: string,
   spouseName: string,
-  hasSpouse: boolean,
-): { root: TreeNode; spouseRoot: TreeNode | null; extraRoots: TreeNode[] } => {
-  const root = personNode(ownerName);
-  const spouseRoot = hasSpouse ? personNode(spouseName) : null;
-  const map = new Map<string, TreeNode>();
-  const extraRoots: TreeNode[] = [];
-
-  const targets = [
-    ...(bi?.existingCompanies || []).map((c: any) => ({ ...c, _isNew: false })),
-    ...(bi?.newCompanies || []).map((c: any) => ({ ...c, _isNew: true })),
+): TreeNode[] => {
+  return [
+    ...(bi?.existingCompanies || []).map((c: any) => buildTargetNode(c, false, ownerName, spouseName, ownerName)),
+    ...(bi?.newCompanies || []).map((c: any) => buildTargetNode(c, true, ownerName, spouseName, ownerName)),
   ];
-
-  for (const t of targets) {
-    const label = t._isNew
-      ? (t.requestedName1?.trim() || "חברה חדשה")
-      : (t.name?.trim() || "חברה קיימת");
-    if (!map.has(label)) map.set(label, companyNode(label, t._isNew));
-  }
-
-  for (const t of targets) {
-    const label = t._isNew
-      ? (t.requestedName1?.trim() || "חברה חדשה")
-      : (t.name?.trim() || "חברה קיימת");
-    const node = map.get(label)!;
-    const st = t.shareholderType;
-
-    if (st === "alone") {
-      node.percentage = "100";
-      root.children.push(node);
-    } else if (st === "self_via_company") {
-      const svc = t.selfViaCompany || {};
-      node.percentage = svc.percentage;
-      const owner = resolveOwnerNode(svc, root, spouseRoot, map, ownerName, spouseName);
-      owner.children.push(node);
-    } else if (st === "other") {
-      const shs = t.shareholders || [];
-      let attached = false;
-
-      for (const sh of shs) {
-        const owner = resolveShareholderOwner(
-          sh,
-          root,
-          spouseRoot,
-          map,
-          ownerName,
-          spouseName,
-          extraRoots,
-        );
-        if (!owner) continue;
-
-        if (!attached) {
-          node.percentage = sh.percentage;
-          owner.children.push(node);
-          attached = true;
-        } else {
-          const clone = companyNode(label, t._isNew, sh.percentage);
-          owner.children.push(clone);
-        }
-      }
-
-      if (!attached) root.children.push(node);
-    } else {
-      root.children.push(node);
-    }
-  }
-
-  return { root, spouseRoot, extraRoots };
 };
 
-const buildUnifiedTree = (
-  my: { root: TreeNode; spouseRoot: TreeNode | null; extraRoots: TreeNode[] },
-  sp: { root: TreeNode; spouseRoot: TreeNode | null; extraRoots: TreeNode[] } | null,
-) => {
-  const branches: TreeNode[] = [];
-
-  if (my.root.children.length > 0) branches.push(my.root);
-  if (my.spouseRoot && my.spouseRoot.children.length > 0) branches.push(my.spouseRoot);
-  branches.push(...my.extraRoots.filter((node) => node.children.length > 0));
-
-  if (sp) {
-    if (sp.root.children.length > 0) branches.push(sp.root);
-    if (sp.spouseRoot && sp.spouseRoot.children.length > 0) branches.push(sp.spouseRoot);
-    branches.push(...sp.extraRoots.filter((node) => node.children.length > 0));
-  }
-
-  const mergedBranches = mergeTopLevelBranches(branches);
-  if (mergedBranches.length === 0) return null;
-  if (mergedBranches.length === 1) return mergedBranches[0];
-
+const buildUnifiedTree = (branches: TreeNode[]) => {
+  if (branches.length === 0) return null;
+  if (branches.length === 1) return branches[0];
   return {
     kind: "company" as const,
     label: "מפת שליטה",
-    children: mergedBranches,
+    children: branches,
   };
 };
 
