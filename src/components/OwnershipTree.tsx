@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { useFormContext } from "@/contexts/FormContext";
-import { Building2, User, ChevronDown, ChevronUp, Network } from "lucide-react";
+import { Building2, Network, User } from "lucide-react";
 
 type NodeKind = "person" | "company";
 
@@ -8,7 +7,7 @@ type TreeNode = {
   kind: NodeKind;
   label: string;
   isNew?: boolean;
-  isAlsoShareholder?: boolean; // company that also holds shares in another company
+  isAlsoShareholder?: boolean;
   percentage?: string;
   children: TreeNode[];
 };
@@ -16,14 +15,45 @@ type TreeNode = {
 const fillerLabel = (name: string) => name?.trim() || "אני";
 
 const personNode = (label: string, pct?: string): TreeNode => ({
-  kind: "person", label, percentage: pct, children: [],
-});
-const companyNode = (label: string, isNew = false, pct?: string): TreeNode => ({
-  kind: "company", label, isNew, percentage: pct, children: [],
+  kind: "person",
+  label,
+  percentage: pct,
+  children: [],
 });
 
-// Resolve the owner-node for a chain object (the holding company directly above the target).
-// Walks upward, linking by company name where possible, and attaches the topmost owner under userRoot.
+const companyNode = (label: string, isNew = false, pct?: string): TreeNode => ({
+  kind: "company",
+  label,
+  isNew,
+  percentage: pct,
+  children: [],
+});
+
+const cloneTree = (node: TreeNode): TreeNode => ({
+  ...node,
+  children: node.children.map(cloneTree),
+});
+
+const mergeTopLevelBranches = (branches: TreeNode[]) => {
+  const merged = new Map<string, TreeNode>();
+
+  for (const branch of branches) {
+    const key = `${branch.kind}:${branch.label}:${branch.isNew ? "1" : "0"}`;
+    const copy = cloneTree(branch);
+    const existing = merged.get(key);
+
+    if (existing) {
+      existing.children.push(...copy.children);
+      existing.isAlsoShareholder = existing.isAlsoShareholder || copy.isAlsoShareholder;
+      existing.percentage = existing.percentage || copy.percentage;
+    } else {
+      merged.set(key, copy);
+    }
+  }
+
+  return Array.from(merged.values());
+};
+
 const resolveOwnerNode = (
   chain: any,
   userRoot: TreeNode,
@@ -36,30 +66,36 @@ const resolveOwnerNode = (
     chain?.companyName?.trim() ||
     chain?.requestedName1?.trim() ||
     "חברה מחזיקה";
+
   let node = companyMap.get(cname);
   const isNew = chain?.isExistingCompany === false;
+
   if (!node) {
     node = companyNode(cname, isNew);
     companyMap.set(cname, node);
 
     const sub = chain?.subOwnerType;
     if (sub === "self" || !sub) {
-      // user owns this holding directly
       userRoot.children.push(node);
     } else if (sub === "company" || sub === "self_via_company") {
-      // this holding is owned by ANOTHER holding company → recurse upward
       const parent = resolveOwnerNode(
         chain.childCompany || {},
-        userRoot, spouseRoot, companyMap, fillerName, spouseName,
+        userRoot,
+        spouseRoot,
+        companyMap,
+        fillerName,
+        spouseName,
       );
       parent.isAlsoShareholder = true;
       parent.children.push(node);
     } else if (sub === "person") {
       const pType = chain?.personOwnerType;
       let pLabel: string;
+
       if (pType === "self") pLabel = fillerName;
       else if (pType === "spouse") pLabel = spouseName;
       else pLabel = chain?.personOwner?.name?.trim() || "אדם פרטי";
+
       const root = pType === "spouse" && spouseRoot ? spouseRoot : userRoot;
       if (pType === "self" || pType === "spouse") {
         root.children.push(node);
@@ -72,7 +108,7 @@ const resolveOwnerNode = (
       userRoot.children.push(node);
     }
   }
-  // mark as also-shareholder because something is being attached below it
+
   node.isAlsoShareholder = true;
   return node;
 };
@@ -88,17 +124,18 @@ const resolveShareholderOwner = (
 ): TreeNode | null => {
   if (sh?.isSelf) return userRoot;
   if (sh?.isSpouse) return spouseRoot || userRoot;
+
   const ht = sh?.holderType || "person";
   if (ht === "person") {
-    // third-party person — render as its own root branch (not owned by the user)
     const p = personNode(sh?.name?.trim() || "אדם פרטי");
     extraRoots.push(p);
     return p;
   }
+
   if (ht === "self_via_company") {
     return resolveOwnerNode(sh, userRoot, spouseRoot, companyMap, fillerName, spouseName);
   }
-  // company (third-party) — render as its own root branch
+
   const cname = sh?.companyName?.trim() || sh?.name?.trim() || "חברה מחזיקה";
   let node = companyMap.get(cname);
   if (!node) {
@@ -127,7 +164,6 @@ const buildForOwner = (
     ...(bi?.newCompanies || []).map((c: any) => ({ ...c, _isNew: true })),
   ];
 
-  // Pre-create target nodes so chains can reference them by name
   for (const t of targets) {
     const label = t._isNew
       ? (t.requestedName1?.trim() || "חברה חדשה")
@@ -153,19 +189,29 @@ const buildForOwner = (
     } else if (st === "other") {
       const shs = t.shareholders || [];
       let attached = false;
+
       for (const sh of shs) {
-        const owner = resolveShareholderOwner(sh, root, spouseRoot, map, ownerName, spouseName, extraRoots);
+        const owner = resolveShareholderOwner(
+          sh,
+          root,
+          spouseRoot,
+          map,
+          ownerName,
+          spouseName,
+          extraRoots,
+        );
         if (!owner) continue;
+
         if (!attached) {
           node.percentage = sh.percentage;
           owner.children.push(node);
           attached = true;
         } else {
-          // additional shareholder: render a small clone under that owner
           const clone = companyNode(label, t._isNew, sh.percentage);
           owner.children.push(clone);
         }
       }
+
       if (!attached) root.children.push(node);
     } else {
       root.children.push(node);
@@ -175,65 +221,116 @@ const buildForOwner = (
   return { root, spouseRoot, extraRoots };
 };
 
-// ─── Rendering ───
+const buildUnifiedTree = (
+  my: { root: TreeNode; spouseRoot: TreeNode | null; extraRoots: TreeNode[] },
+  sp: { root: TreeNode; spouseRoot: TreeNode | null; extraRoots: TreeNode[] } | null,
+) => {
+  const branches: TreeNode[] = [];
+
+  if (my.root.children.length > 0) branches.push(my.root);
+  if (my.spouseRoot && my.spouseRoot.children.length > 0) branches.push(my.spouseRoot);
+  branches.push(...my.extraRoots.filter((node) => node.children.length > 0));
+
+  if (sp) {
+    if (sp.root.children.length > 0) branches.push(sp.root);
+    if (sp.spouseRoot && sp.spouseRoot.children.length > 0) branches.push(sp.spouseRoot);
+    branches.push(...sp.extraRoots.filter((node) => node.children.length > 0));
+  }
+
+  const mergedBranches = mergeTopLevelBranches(branches);
+  if (mergedBranches.length === 0) return null;
+  if (mergedBranches.length === 1) return mergedBranches[0];
+
+  return {
+    kind: "company" as const,
+    label: "מפת שליטה",
+    children: mergedBranches,
+  };
+};
+
 const iconFor = (kind: NodeKind) =>
   kind === "person" ? <User className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />;
 
-// Purple = company, Yellow = shareholder (person), Yellow dashed = company that also holds shares
 const classesFor = (n: TreeNode) => {
   if (n.kind === "person") {
     return "bg-amber-100 text-amber-900 border-amber-400 dark:bg-amber-900/40 dark:text-amber-100";
   }
-  // company
+
   if (n.isAlsoShareholder) {
     return "bg-primary/10 text-primary border-amber-500 border-dashed";
   }
+
   return "bg-primary/10 text-primary border-primary";
 };
 
 const TreeNodeView = ({ node, compact = false }: { node: TreeNode; compact?: boolean }) => {
-  const hasChildren = node.children && node.children.length > 0;
-  const [open, setOpen] = useState(true);
+  const hasChildren = node.children.length > 0;
   const sizes = compact
-    ? { pad: "px-2 py-1", text: "text-[11px]", pct: "text-[10px]", tag: "text-[9px]", gapX: "gap-6", drop: "h-5" }
-    : { pad: "px-3 py-2", text: "text-sm", pct: "text-xs", tag: "text-[11px]", gapX: "gap-10", drop: "h-7" };
+    ? {
+        pad: "px-2 py-1",
+        text: "text-[11px]",
+        pct: "text-[10px]",
+        tag: "text-[9px]",
+        gapX: 24,
+        drop: 18,
+      }
+    : {
+        pad: "px-3 py-2",
+        text: "text-sm",
+        pct: "text-xs",
+        tag: "text-[11px]",
+        gapX: 36,
+        drop: 24,
+      };
+
   return (
-    <div className="flex flex-col items-center shrink-0">
-      <div className={`inline-flex items-center gap-2 ${sizes.pad} rounded-lg border-2 ${sizes.text} font-semibold leading-tight whitespace-nowrap ${classesFor(node)}`}>
+    <div className="inline-flex flex-col items-center align-top shrink-0">
+      <div
+        className={`inline-flex max-w-[280px] items-center gap-2 ${sizes.pad} rounded-lg border-2 ${sizes.text} font-semibold leading-tight whitespace-nowrap ${classesFor(node)}`}
+      >
         <span className="shrink-0">{iconFor(node.kind)}</span>
-        <span title={node.label}>{node.label}</span>
+        <span className="truncate" title={node.label}>{node.label}</span>
         {node.percentage && (
           <span className={`shrink-0 ${sizes.pct} opacity-80`}>({node.percentage}%)</span>
         )}
         {node.isNew && (
-          <span className={`shrink-0 ${sizes.tag} bg-amber-200/60 dark:bg-amber-800/60 rounded px-1.5 py-0.5`}>חדשה</span>
-        )}
-        {hasChildren && (
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="shrink-0 ms-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-background/80 border border-current/40 hover:bg-background"
-            aria-label={open ? "כווץ" : "הרחב"}
-          >
-            {open ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          </button>
+          <span className={`shrink-0 ${sizes.tag} bg-amber-200/60 dark:bg-amber-800/60 rounded px-1.5 py-0.5`}>
+            חדשה
+          </span>
         )}
       </div>
-      {hasChildren && open && (
-        <>
-          <div className={`w-px ${sizes.drop} bg-primary/40`} />
-          <div className={`relative flex items-start ${sizes.gapX}`}>
-            {node.children.length > 1 && (
-              <div className="absolute top-0 left-0 right-0 h-px bg-primary/40" />
-            )}
-            {node.children.map((c, i) => (
-              <div key={i} className="flex flex-col items-center">
-                <div className={`w-px ${sizes.drop} bg-primary/40`} />
-                <TreeNodeView node={c} compact={compact} />
-              </div>
-            ))}
+
+      {hasChildren && (
+        <div className="flex flex-col items-center">
+          <div className="w-px bg-primary/40" style={{ height: sizes.drop }} />
+          <div className="flex items-start justify-center min-w-max">
+            {node.children.map((child, index) => {
+              const isFirst = index === 0;
+              const isLast = index === node.children.length - 1;
+              const hasSiblings = node.children.length > 1;
+
+              return (
+                <div
+                  key={`${child.kind}-${child.label}-${index}`}
+                  className="relative flex flex-col items-center"
+                  style={{ paddingTop: sizes.drop, paddingInline: sizes.gapX / 2 }}
+                >
+                  {hasSiblings && !isFirst && (
+                    <div className="absolute top-0 right-1/2 left-0 h-px bg-primary/40" />
+                  )}
+                  {hasSiblings && !isLast && (
+                    <div className="absolute top-0 left-1/2 right-0 h-px bg-primary/40" />
+                  )}
+                  <div
+                    className="absolute top-0 left-1/2 w-px -translate-x-1/2 bg-primary/40"
+                    style={{ height: sizes.drop }}
+                  />
+                  <TreeNodeView node={child} compact={compact} />
+                </div>
+              );
+            })}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -241,7 +338,6 @@ const TreeNodeView = ({ node, compact = false }: { node: TreeNode; compact?: boo
 
 export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const { currentStep, businessInfo, spouseBusinessInfo, personalInfo } = useFormContext() as any;
-  const [collapsed, setCollapsed] = useState(false);
 
   if (currentStep !== 3) return null;
 
@@ -254,64 +350,28 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     ? buildForOwner(spouseBusinessInfo, spouseName, fillerName, true)
     : null;
 
-  if (my.root.children.length === 0 && (!sp || sp.root.children.length === 0)) return null;
+  const unifiedTree = buildUnifiedTree(my, sp);
+  if (!unifiedTree) return null;
 
   return (
     <div className={`bg-card/95 backdrop-blur border-2 border-primary/20 rounded-2xl shadow-lg ${compact ? "p-3" : "p-5"}`} dir="rtl">
-      <button
-        type="button"
-        onClick={() => setCollapsed((v) => !v)}
-        className="w-full flex items-center justify-between gap-2 text-primary"
-      >
-        <span className={`inline-flex items-center gap-2 font-bold ${compact ? "text-sm" : "text-base"}`}>
-          <Network className={compact ? "w-4 h-4" : "w-5 h-5"} />
-          מפת השליטה בחברה
-        </span>
-        {collapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
-      </button>
+      <div className={`flex items-center gap-2 text-primary font-bold ${compact ? "text-sm" : "text-base"}`}>
+        <Network className={compact ? "w-4 h-4" : "w-5 h-5"} />
+        מפת השליטה בחברה
+      </div>
 
-      {!collapsed && (
-        <div className={`mt-3 space-y-4 ${compact ? "max-h-[40vh]" : "max-h-[70vh]"} overflow-auto pr-1`}>
-          {(my.root.children.length > 0 || (my.spouseRoot && my.spouseRoot.children.length > 0) || my.extraRoots.length > 0) && (
-            <div className={`flex justify-center items-start ${compact ? "gap-4" : "gap-8"} min-w-max pb-2`}>
-              {my.root.children.length > 0 && <TreeNodeView node={my.root} compact={compact} />}
-              {my.spouseRoot && my.spouseRoot.children.length > 0 && (
-                <TreeNodeView node={my.spouseRoot} compact={compact} />
-              )}
-              {my.extraRoots.map((r, i) => (
-                <TreeNodeView key={`er-${i}`} node={r} compact={compact} />
-              ))}
-            </div>
-          )}
-          {sp && (sp.root.children.length > 0 || (sp.spouseRoot && sp.spouseRoot.children.length > 0) || sp.extraRoots.length > 0) && (
-            <>
-              <div className={`font-bold text-muted-foreground border-t border-border pt-2 ${compact ? "text-[11px]" : "text-xs"}`}>
-                חברות של {spouseName}
-              </div>
-              <div className={`flex justify-center items-start ${compact ? "gap-4" : "gap-8"} min-w-max pb-2`}>
-                {sp.root.children.length > 0 && <TreeNodeView node={sp.root} compact={compact} />}
-                {sp.spouseRoot && sp.spouseRoot.children.length > 0 && (
-                  <TreeNodeView node={sp.spouseRoot} compact={compact} />
-                )}
-                {sp.extraRoots.map((r, i) => (
-                  <TreeNodeView key={`sp-er-${i}`} node={r} compact={compact} />
-                ))}
-              </div>
-            </>
-          )}
-          {(() => {
-            return (
-              <div className={`border-t-2 border-border pt-3 mt-2 grid grid-cols-1 gap-2 text-foreground font-medium ${compact ? "text-xs" : "text-sm"}`}>
-                <div className={`font-bold text-primary ${compact ? "text-sm" : "text-base"}`}>מקרא</div>
-                <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-amber-200 border-2 border-amber-400 inline-block shrink-0" /> אדם פרטי</span>
-                <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-primary/20 border-2 border-amber-500 border-dashed inline-block shrink-0" /> חברה אם</span>
-                <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-primary/30 border-2 border-primary inline-block shrink-0" /> חברה</span>
-              </div>
-            );
-          })()}
-
+      <div className={`mt-3 space-y-4 ${compact ? "max-h-[40vh]" : "max-h-[70vh]"} overflow-x-auto overflow-y-auto pr-1`}>
+        <div className="flex justify-center items-start min-w-max pb-2">
+          <TreeNodeView node={unifiedTree} compact={compact} />
         </div>
-      )}
+
+        <div className={`border-t-2 border-border pt-3 mt-2 grid grid-cols-1 gap-2 text-foreground font-medium ${compact ? "text-xs" : "text-sm"}`}>
+          <div className={`font-bold text-primary ${compact ? "text-sm" : "text-base"}`}>מקרא</div>
+          <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-amber-200 border-2 border-amber-400 inline-block shrink-0" /> אדם פרטי</span>
+          <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-primary/20 border-2 border-amber-500 border-dashed inline-block shrink-0" /> חברה אם</span>
+          <span className="inline-flex items-center gap-2"><span className="w-5 h-5 rounded bg-primary/30 border-2 border-primary inline-block shrink-0" /> חברה</span>
+        </div>
+      </div>
     </div>
   );
 };
