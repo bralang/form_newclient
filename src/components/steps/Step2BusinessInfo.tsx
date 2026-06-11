@@ -1114,6 +1114,60 @@ export const Step2BusinessInfo = () => {
           </label>
         )}
 
+        {/* 100% total summary - placed near the company so it's obvious which company this refers to */}
+        {isNewCompany && shareholders.length > 0 && (() => {
+          const total = shareholders.reduce((s: number, sh: any) => s + (parseFloat(sh?.percentage) || 0), 0);
+          const ok = Math.abs(total - 100) < 0.01;
+          const over = total > 100.01;
+          const remaining = Math.max(0, 100 - total);
+          const companyLabel = parentCompanyName || "החברה";
+          const breakdown = shareholders.map((sh: any, i: number) => {
+            const ht = sh?.holderType;
+            const isCompanyHolder = ht === "company" || ht === "self_via_company";
+            const companyHolderName = isCompanyHolder
+              ? (sh?.isExistingCompany === false
+                  ? (sh?.requestedName1?.trim() || "")
+                  : (sh?.companyName?.trim() || sh?.name?.trim() || ""))
+              : "";
+            const name = sh?.isSelf
+              ? selfName
+              : sh?.isSpouse
+              ? spouseDisplayName
+              : isCompanyHolder
+              ? (companyHolderName || `בעל מניות #${i + 1}`)
+              : (sh?.name?.trim() || `בעל מניות #${i + 1}`);
+            const pct = parseFloat(sh?.percentage) || 0;
+            return { name, pct };
+          });
+          return (
+            <div className={`p-3 rounded-lg border ${
+              over ? "bg-destructive/10 border-destructive/30 text-destructive"
+              : ok ? "bg-primary/5 border-primary/30 text-primary"
+              : "bg-muted/40 border-border text-foreground"
+            }`}>
+              <div className="flex items-start gap-2">
+                {(over || !ok) && <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />}
+                <p className="text-sm font-semibold">
+                  {over
+                    ? `חריגה: סה"כ שיעורי האחזקה ב${companyLabel} ${total}% (מעל 100%)`
+                    : ok
+                      ? `סה"כ שיעורי האחזקה ב${companyLabel}: 100% ✓`
+                      : `סה"כ עד כה ב${companyLabel}: ${total}% — חסרים ${remaining}% להגיע ל-100%`}
+                </p>
+              </div>
+              {breakdown.some(b => b.pct > 0) && (
+                <ul className="mt-2 mr-6 text-xs space-y-0.5 opacity-90 list-disc">
+                  {breakdown.map((b, i) => (
+                    <li key={i}>{b.name}: {b.pct}%</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })()}
+
+
+
         {shareholders.map((sh: any, idx: number) => {
           const isAuto = includeSelfAsFirstShareholder && (sh?.isSelf || sh?.isSpouse);
           const ht = sh?.holderType;
@@ -1510,21 +1564,8 @@ export const Step2BusinessInfo = () => {
           );
         })}
 
-        {/* 100% total validation - only for new companies (existing don't ask percentages) */}
-        {isNewCompany && shareholders.length > 0 && (() => {
-          const total = shareholders.reduce((s: number, sh: any) => s + (parseFloat(sh.percentage) || 0), 0);
-          const ok = Math.abs(total - 100) < 0.01;
-          return (
-            <div className={`flex items-start gap-2 p-3 rounded-lg border ${
-              ok ? "bg-primary/5 border-primary/30 text-primary" : "bg-destructive/10 border-destructive/30 text-destructive"
-            }`}>
-              {!ok && <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />}
-              <p className="text-sm font-semibold">
-                סה"כ שיעורי האחזקה בחברה: {total}% {ok ? "✓" : "(נדרש להגיע ל-100%)"}
-              </p>
-            </div>
-          );
-        })()}
+
+
       </div>
     );
   };
