@@ -1443,7 +1443,7 @@ export const Step2BusinessInfo = () => {
                       ) : (
                         <div className="space-y-3">
                           <div className="space-y-2">
-                            <Label className="font-semibold">3 שמות רצויים לחברה המחזיקה החדשה (לפי סדר עדיפות)</Label>
+                            <Label className="font-semibold">3 שמות רצויים לחברה המחזיקה ב{parentCompanyName || "חברה החדשה"} (לפי סדר עדיפות)</Label>
                             {[1, 2, 3].map((n) => (
                               <Input
                                 key={n}
