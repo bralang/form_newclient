@@ -1564,21 +1564,8 @@ export const Step2BusinessInfo = () => {
           );
         })}
 
-        {/* 100% total validation - only for new companies (existing don't ask percentages) */}
-        {isNewCompany && shareholders.length > 0 && (() => {
-          const total = shareholders.reduce((s: number, sh: any) => s + (parseFloat(sh.percentage) || 0), 0);
-          const ok = Math.abs(total - 100) < 0.01;
-          return (
-            <div className={`flex items-start gap-2 p-3 rounded-lg border ${
-              ok ? "bg-primary/5 border-primary/30 text-primary" : "bg-destructive/10 border-destructive/30 text-destructive"
-            }`}>
-              {!ok && <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />}
-              <p className="text-sm font-semibold">
-                סה"כ שיעורי האחזקה בחברה: {total}% {ok ? "✓" : "(נדרש להגיע ל-100%)"}
-              </p>
-            </div>
-          );
-        })()}
+
+
       </div>
     );
   };
