@@ -1,5 +1,6 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { Building2, Network, User } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 type NodeKind = "person" | "company";
 
@@ -227,19 +228,35 @@ const TreeNodeView = ({ node, compact = false }: { node: TreeNode; compact?: boo
 export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const { currentStep, businessInfo, spouseBusinessInfo, personalInfo } = useFormContext() as any;
 
-  if (currentStep !== 3) return null;
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (currentStep !== 3) return;
+    const bump = () => setTick((t) => t + 1);
+    document.addEventListener("input", bump, true);
+    document.addEventListener("change", bump, true);
+    document.addEventListener("blur", bump, true);
+    return () => {
+      document.removeEventListener("input", bump, true);
+      document.removeEventListener("change", bump, true);
+      document.removeEventListener("blur", bump, true);
+    };
+  }, [currentStep]);
 
   const fillerName = fillerLabel(personalInfo?.firstName || "");
   const spouseRaw = personalInfo?.spouseName || personalInfo?.spouseFirstName || "";
   const spouseName = spouseRaw.trim() || "בן/בת זוג";
   const hasSpouse = !!spouseRaw.trim();
 
-  const my = buildForOwner(businessInfo, fillerName, spouseName);
-  const sp = hasSpouse && spouseBusinessInfo
-    ? buildForOwner(spouseBusinessInfo, spouseName, fillerName)
-    : [];
+  const unifiedTree = useMemo(() => {
+    const my = buildForOwner(businessInfo, fillerName, spouseName);
+    const sp = hasSpouse && spouseBusinessInfo
+      ? buildForOwner(spouseBusinessInfo, spouseName, fillerName)
+      : [];
+    return buildUnifiedTree([...my, ...sp]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(businessInfo), JSON.stringify(spouseBusinessInfo), fillerName, spouseName, hasSpouse, tick]);
 
-  const unifiedTree = buildUnifiedTree([...my, ...sp]);
+  if (currentStep !== 3) return null;
   if (!unifiedTree) return null;
 
   return (
