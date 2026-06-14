@@ -271,11 +271,14 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const hasSpouse = !!spouseRaw.trim();
 
   const unifiedTree = useMemo(() => {
+    const branches: TreeNode[] = [];
     const my = buildForOwner(businessInfo, fillerName, spouseName);
-    const sp = hasSpouse && spouseBusinessInfo
-      ? buildForOwner(spouseBusinessInfo, spouseName, fillerName)
-      : [];
-    return buildUnifiedTree([...my, ...sp]);
+    if (my) branches.push(my);
+    if (hasSpouse && spouseBusinessInfo) {
+      const sp = buildForOwner(spouseBusinessInfo, spouseName, fillerName);
+      if (sp) branches.push(sp);
+    }
+    return buildUnifiedTree(branches);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(businessInfo), JSON.stringify(spouseBusinessInfo), fillerName, spouseName, hasSpouse, tick]);
 
