@@ -33,59 +33,83 @@ const companyNode = (label: string, isNew = false, pct?: string): TreeNode => ({
 const isSelfShareholder = (sh: any, fillerName: string) => {
   if (!sh) return false;
   if (sh.isSelf) return true;
+  if (sh.personOwnerType === "self") return true;
   if (sh.holderType === "person" && sh?.name?.trim() && sh.name.trim() === fillerName?.trim()) return true;
   return false;
 };
 
-// Build a holding-company chain rendered DOWNWARDS from a target company.
-// Stops before the owner so we don't duplicate the root person.
-const buildHoldingChainBelowTarget = (
-  chain: any,
+const isSpouseShareholder = (sh: any) => {
+  if (!sh) return false;
+  if (sh.isSpouse) return true;
+  if (sh.personOwnerType === "spouse") return true;
+  return false;
+};
+
+// Holder node (company that holds the parent), rendered DOWNWARDS.
+// Handles BOTH paths: (a) explicit `shareholders[]` (new-company flow) and
+// (b) `subOwnerType`/`childCompany` chain (existing-company simple chain).
+const buildCompanyHolderNode = (
+  node: any,
   fillerName: string,
   spouseName: string,
   depth: number,
+  topPercentage?: string,
 ): TreeNode | null => {
-  if (!chain || depth > 20) return null;
-  const isNew = chain?.isExistingCompany === false;
-  const label =
-    chain?.companyName?.trim() ||
-    chain?.requestedName1?.trim() ||
-    (isNew ? "חברה חדשה" : "חברה מחזיקה");
-  const node = companyNode(label, isNew);
-  node.isAlsoShareholder = true;
+  if (!node || depth > 20) return null;
+  const isNew = node?.isExistingCompany === false;
+  const label = isNew
+    ? (node?.requestedName1?.trim() || node?.companyName?.trim() || "חברה חדשה")
+    : (node?.companyName?.trim() || node?.requestedName1?.trim() || "חברה מחזיקה");
+  const out = companyNode(label, isNew, topPercentage);
+  out.isAlsoShareholder = true;
 
-  const sub = chain?.subOwnerType;
+  // Path A: explicit shareholders[] (full flow for a NEW holding company)
+  const shList: any[] = Array.isArray(node?.shareholders) ? node.shareholders : [];
+  if (shList.length > 0) {
+    for (const sh of shList) {
+      if (isSelfShareholder(sh, fillerName)) continue; // owner already shown at root
+      const child = buildOtherShareholderNode(sh, fillerName, spouseName, depth + 1);
+      if (child) out.children.push(child);
+    }
+    return out;
+  }
+
+  // Path B: subOwnerType chain
+  const sub = node?.subOwnerType;
   if (sub === "company" || sub === "self_via_company") {
-    const child = buildHoldingChainBelowTarget(chain.childCompany, fillerName, spouseName, depth + 1);
-    if (child) node.children.push(child);
+    const child = buildCompanyHolderNode(node.childCompany, fillerName, spouseName, depth + 1);
+    if (child) out.children.push(child);
   } else if (sub === "person") {
-    const pType = chain?.personOwnerType;
+    const pType = node?.personOwnerType;
     if (pType === "self") {
       // ends at owner — skip to avoid duplication
     } else if (pType === "spouse") {
-      node.children.push(personNode(spouseName));
-    } else {
-      node.children.push(personNode(chain?.personOwner?.name?.trim() || "אדם פרטי"));
+      out.children.push(personNode(spouseName));
+    } else if (pType === "other") {
+      out.children.push(personNode(node?.personOwner?.name?.trim() || "אדם פרטי"));
     }
   }
-  // sub === "self" → ends at owner, render nothing further
-  return node;
+  // sub === "self" → ends at owner; render nothing further
+  return out;
 };
 
 const buildOtherShareholderNode = (
   sh: any,
   fillerName: string,
   spouseName: string,
+  depth = 0,
 ): TreeNode | null => {
   if (!sh) return null;
-  if (sh.isSpouse) return personNode(spouseName, sh.percentage);
+  if (isSpouseShareholder(sh)) return personNode(spouseName, sh.percentage);
   const ht = sh.holderType || "person";
   if (ht === "person") {
-    return personNode(sh?.name?.trim() || "אדם פרטי", sh.percentage);
+    if (sh.personOwnerType === "other") {
+      return personNode(sh?.personOwner?.name?.trim() || sh?.name?.trim() || "אדם פרטי", sh.percentage);
+    }
+    return personNode(sh?.name?.trim() || sh?.personOwner?.name?.trim() || "אדם פרטי", sh.percentage);
   }
-  const inner = buildHoldingChainBelowTarget(sh, fillerName, spouseName, 0);
-  if (inner) inner.percentage = sh.percentage;
-  return inner;
+  // company / self_via_company
+  return buildCompanyHolderNode(sh, fillerName, spouseName, depth, sh.percentage);
 };
 
 const buildTargetNode = (
@@ -107,8 +131,11 @@ const buildTargetNode = (
   } else if (st === "self_via_company") {
     const svc = t.selfViaCompany || {};
     ownerPct = svc.percentage;
-    const chainNode = buildHoldingChainBelowTarget(svc, fillerName, spouseName, 0);
-    if (chainNode) extraChildren.push(chainNode);
+    const chainNode = buildCompanyHolderNode(svc, fillerName, spouseName, 0);
+    if (chainNode) {
+      chainNode.percentage = undefined; // percentage belongs to target edge, not the chain top
+      extraChildren.push(chainNode);
+    }
   } else if (st === "other") {
     const shList = t.shareholders || [];
     const selfEntry = shList.find((s: any) => isSelfShareholder(s, fillerName));
