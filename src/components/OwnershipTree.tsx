@@ -30,63 +30,62 @@ const companyNode = (label: string, isNew = false, pct?: string): TreeNode => ({
   children: [],
 });
 
-const buildChainNode = (
+const isSelfShareholder = (sh: any, fillerName: string) => {
+  if (!sh) return false;
+  if (sh.isSelf) return true;
+  if (sh.holderType === "person" && sh?.name?.trim() && sh.name.trim() === fillerName?.trim()) return true;
+  return false;
+};
+
+// Build a holding-company chain rendered DOWNWARDS from a target company.
+// Stops before the owner so we don't duplicate the root person.
+const buildHoldingChainBelowTarget = (
   chain: any,
   fillerName: string,
   spouseName: string,
-  pct: string | undefined,
   depth: number,
-): TreeNode => {
+): TreeNode | null => {
+  if (!chain || depth > 20) return null;
   const isNew = chain?.isExistingCompany === false;
   const label =
     chain?.companyName?.trim() ||
     chain?.requestedName1?.trim() ||
     (isNew ? "חברה חדשה" : "חברה מחזיקה");
-  const node = companyNode(label, isNew, pct);
+  const node = companyNode(label, isNew);
   node.isAlsoShareholder = true;
-  if (depth > 20) return node;
 
   const sub = chain?.subOwnerType;
   if (sub === "company" || sub === "self_via_company") {
-    if (chain?.childCompany) {
-      node.children.push(
-        buildChainNode(chain.childCompany, fillerName, spouseName, undefined, depth + 1),
-      );
-    }
+    const child = buildHoldingChainBelowTarget(chain.childCompany, fillerName, spouseName, depth + 1);
+    if (child) node.children.push(child);
   } else if (sub === "person") {
     const pType = chain?.personOwnerType;
-    let pLabel: string;
-    if (pType === "self") pLabel = fillerName;
-    else if (pType === "spouse") pLabel = spouseName;
-    else pLabel = chain?.personOwner?.name?.trim() || "אדם פרטי";
-    node.children.push(personNode(pLabel));
-  } else if (sub === "self") {
-    node.children.push(personNode(fillerName));
-  } else if (Array.isArray(chain?.shareholders) && chain.shareholders.length > 0) {
-    for (const sh of chain.shareholders) {
-      const child = buildShareholderNode(sh, fillerName, spouseName, depth + 1);
-      if (child) node.children.push(child);
+    if (pType === "self") {
+      // ends at owner — skip to avoid duplication
+    } else if (pType === "spouse") {
+      node.children.push(personNode(spouseName));
+    } else {
+      node.children.push(personNode(chain?.personOwner?.name?.trim() || "אדם פרטי"));
     }
   }
-
+  // sub === "self" → ends at owner, render nothing further
   return node;
 };
 
-const buildShareholderNode = (
+const buildOtherShareholderNode = (
   sh: any,
   fillerName: string,
   spouseName: string,
-  depth: number,
 ): TreeNode | null => {
   if (!sh) return null;
-  if (sh.isSelf) return personNode(fillerName, sh.percentage);
   if (sh.isSpouse) return personNode(spouseName, sh.percentage);
-
   const ht = sh.holderType || "person";
   if (ht === "person") {
     return personNode(sh?.name?.trim() || "אדם פרטי", sh.percentage);
   }
-  return buildChainNode(sh, fillerName, spouseName, sh.percentage, depth);
+  const inner = buildHoldingChainBelowTarget(sh, fillerName, spouseName, 0);
+  if (inner) inner.percentage = sh.percentage;
+  return inner;
 };
 
 const buildTargetNode = (
@@ -94,25 +93,45 @@ const buildTargetNode = (
   isNew: boolean,
   fillerName: string,
   spouseName: string,
-  ownerName: string,
 ): TreeNode => {
   const label = isNew
     ? (t.requestedName1?.trim() || "חברה חדשה")
     : (t.name?.trim() || "חברה קיימת");
-  const node = companyNode(label, isNew);
   const st = t.shareholderType;
 
+  let ownerPct: string | undefined;
+  const extraChildren: TreeNode[] = [];
+
   if (st === "alone") {
-    node.children.push(personNode(ownerName, "100"));
+    ownerPct = "100";
   } else if (st === "self_via_company") {
     const svc = t.selfViaCompany || {};
-    node.children.push(buildChainNode(svc, fillerName, spouseName, svc.percentage, 0));
+    ownerPct = svc.percentage;
+    const chainNode = buildHoldingChainBelowTarget(svc, fillerName, spouseName, 0);
+    if (chainNode) extraChildren.push(chainNode);
   } else if (st === "other") {
-    for (const sh of (t.shareholders || [])) {
-      const child = buildShareholderNode(sh, fillerName, spouseName, 0);
-      if (child) node.children.push(child);
+    const shList = t.shareholders || [];
+    const selfEntry = shList.find((s: any) => isSelfShareholder(s, fillerName));
+    if (selfEntry?.percentage) {
+      ownerPct = selfEntry.percentage;
+    } else {
+      const sum = shList
+        .filter((s: any) => !isSelfShareholder(s, fillerName))
+        .reduce((acc: number, s: any) => {
+          const n = parseFloat(s?.percentage);
+          return acc + (isNaN(n) ? 0 : n);
+        }, 0);
+      ownerPct = sum > 0 && sum <= 100 ? String(100 - sum) : "?";
+    }
+    for (const sh of shList) {
+      if (isSelfShareholder(sh, fillerName)) continue;
+      const child = buildOtherShareholderNode(sh, fillerName, spouseName);
+      if (child) extraChildren.push(child);
     }
   }
+
+  const node = companyNode(label, isNew, ownerPct);
+  node.children = extraChildren;
   return node;
 };
 
@@ -120,11 +139,15 @@ const buildForOwner = (
   bi: any,
   ownerName: string,
   spouseName: string,
-): TreeNode[] => {
-  return [
-    ...(bi?.existingCompanies || []).map((c: any) => buildTargetNode(c, false, ownerName, spouseName, ownerName)),
-    ...(bi?.newCompanies || []).map((c: any) => buildTargetNode(c, true, ownerName, spouseName, ownerName)),
+): TreeNode | null => {
+  const targets: TreeNode[] = [
+    ...(bi?.existingCompanies || []).map((c: any) => buildTargetNode(c, false, ownerName, spouseName)),
+    ...(bi?.newCompanies || []).map((c: any) => buildTargetNode(c, true, ownerName, spouseName)),
   ];
+  if (targets.length === 0) return null;
+  const root = personNode(ownerName);
+  root.children = targets;
+  return root;
 };
 
 const buildUnifiedTree = (branches: TreeNode[]) => {
@@ -248,11 +271,14 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const hasSpouse = !!spouseRaw.trim();
 
   const unifiedTree = useMemo(() => {
+    const branches: TreeNode[] = [];
     const my = buildForOwner(businessInfo, fillerName, spouseName);
-    const sp = hasSpouse && spouseBusinessInfo
-      ? buildForOwner(spouseBusinessInfo, spouseName, fillerName)
-      : [];
-    return buildUnifiedTree([...my, ...sp]);
+    if (my) branches.push(my);
+    if (hasSpouse && spouseBusinessInfo) {
+      const sp = buildForOwner(spouseBusinessInfo, spouseName, fillerName);
+      if (sp) branches.push(sp);
+    }
+    return buildUnifiedTree(branches);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(businessInfo), JSON.stringify(spouseBusinessInfo), fillerName, spouseName, hasSpouse, tick]);
 
