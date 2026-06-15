@@ -256,72 +256,104 @@ const LINE = "rgba(100,116,139,0.5)";
 
 const TreeNodeView = ({ node, compact = false }: { node: TreeNode; compact?: boolean }) => {
   const hasChildren = node.children.length > 0;
-  const hasCoOwners = (node.coOwners?.length ?? 0) > 0;
+  const coOwners = node.coOwners ?? [];
+  const hasCoOwners = coOwners.length > 0;
   const drop = compact ? 20 : 28;
   const gapX = compact ? 12 : 20;
   const coGap = compact ? 8 : 12;
-  // גובה מרכז הקופסה — משמש ליישור הקו האופקי ל-coOwners
-  const boxMid = compact ? 20 : 28;
 
   return (
     <div className="inline-flex flex-col items-center shrink-0">
 
-      {/* שורה: הצומת הראשי + coOwners (עם כל ההשתרשרות שלהם) */}
-      <div className="flex items-start">
-
-        {/* הצומת הראשי + ילדיו */}
-        <div className="inline-flex flex-col items-center shrink-0">
-          <NodeBox node={node} compact={compact} />
-          {hasChildren && (
-            <div className="flex flex-col items-center">
-              <div className="w-px" style={{ height: drop, backgroundColor: LINE }} />
-              <div className="flex items-start justify-center">
-                {node.children.map((child, index) => {
-                  const isFirst = index === 0;
-                  const isLast = index === node.children.length - 1;
-                  const hasSiblings = node.children.length > 1;
-                  return (
-                    <div
-                      key={`${child.kind}-${child.label}-${index}`}
-                      className="relative flex flex-col items-center"
-                      style={{ paddingTop: drop, paddingInline: gapX / 2 }}
-                    >
-                      {hasSiblings && !isFirst && (
-                        <div className="absolute top-0 left-1/2 right-0 h-px" style={{ backgroundColor: LINE }} />
-                      )}
-                      {hasSiblings && !isLast && (
-                        <div className="absolute top-0 right-1/2 left-0 h-px" style={{ backgroundColor: LINE }} />
-                      )}
-                      <div
-                        className="absolute left-1/2 w-px -translate-x-1/2"
-                        style={{ top: 0, height: drop, backgroundColor: LINE }}
-                      />
-                      <TreeNodeView node={child} compact={compact} />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* coOwners — עם כל ההשתרשרות המלאה שלהם */}
-        {hasCoOwners && node.coOwners!.map((co, i) => (
-          <div key={`co-${co.label}-${i}`} className="flex items-start shrink-0">
-            {/* קו אופקי מיושר לאמצע הקופסה */}
-            <div
-              style={{
-                width: i === 0 ? gapX : coGap,
-                height: 1.5,
-                backgroundColor: LINE,
-                marginTop: boxMid,
-                flexShrink: 0,
-              }}
-            />
-            <TreeNodeView node={co} compact={compact} />
+      {/* שורת קופסאות: הצומת הראשי + coOwners — ממורכזות אנכית */}
+      <div className="flex items-center">
+        <NodeBox node={node} compact={compact} />
+        {hasCoOwners && coOwners.map((co, i) => (
+          <div key={`co-${co.label}-${i}`} className="flex items-center shrink-0">
+            <div style={{ width: i === 0 ? gapX : coGap, height: 1.5, backgroundColor: LINE, flexShrink: 0 }} />
+            <NodeBox node={co} compact={compact} />
           </div>
         ))}
       </div>
+
+      {/* ילדי הצומת הראשי */}
+      {hasChildren && (
+        <div className="flex flex-col items-center">
+          <div className="w-px" style={{ height: drop, backgroundColor: LINE }} />
+          <div className="flex items-start justify-center">
+            {node.children.map((child, index) => {
+              const isFirst = index === 0;
+              const isLast = index === node.children.length - 1;
+              const hasSiblings = node.children.length > 1;
+              return (
+                <div
+                  key={`${child.kind}-${child.label}-${index}`}
+                  className="relative flex flex-col items-center"
+                  style={{ paddingTop: drop, paddingInline: gapX / 2 }}
+                >
+                  {hasSiblings && !isFirst && (
+                    <div className="absolute top-0 left-1/2 right-0 h-px" style={{ backgroundColor: LINE }} />
+                  )}
+                  {hasSiblings && !isLast && (
+                    <div className="absolute top-0 right-1/2 left-0 h-px" style={{ backgroundColor: LINE }} />
+                  )}
+                  <div
+                    className="absolute left-1/2 w-px -translate-x-1/2"
+                    style={{ top: 0, height: drop, backgroundColor: LINE }}
+                  />
+                  <TreeNodeView node={child} compact={compact} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ילדי coOwners — מוצגים מתחת לשורת הקופסאות */}
+      {hasCoOwners && coOwners.some(co => co.children.length > 0) && (
+        <div className="flex items-start justify-center">
+          {/* spacer לרוחב הצומת הראשי */}
+          <div style={{ width: compact ? 96 : 128 }} />
+          {coOwners.map((co, i) => (
+            <div key={`co-children-${co.label}-${i}`} className="flex items-start shrink-0">
+              <div style={{ width: i === 0 ? gapX : coGap }} />
+              {co.children.length > 0 ? (
+                <div className="flex flex-col items-center">
+                  <div className="w-px" style={{ height: drop, backgroundColor: LINE }} />
+                  <div className="flex items-start justify-center">
+                    {co.children.map((child, index) => {
+                      const isFirst = index === 0;
+                      const isLast = index === co.children.length - 1;
+                      const hasSiblings = co.children.length > 1;
+                      return (
+                        <div
+                          key={`${child.kind}-${child.label}-${index}`}
+                          className="relative flex flex-col items-center"
+                          style={{ paddingTop: drop, paddingInline: gapX / 2 }}
+                        >
+                          {hasSiblings && !isFirst && (
+                            <div className="absolute top-0 left-1/2 right-0 h-px" style={{ backgroundColor: LINE }} />
+                          )}
+                          {hasSiblings && !isLast && (
+                            <div className="absolute top-0 right-1/2 left-0 h-px" style={{ backgroundColor: LINE }} />
+                          )}
+                          <div
+                            className="absolute left-1/2 w-px -translate-x-1/2"
+                            style={{ top: 0, height: drop, backgroundColor: LINE }}
+                          />
+                          <TreeNodeView node={child} compact={compact} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ width: compact ? 96 : 128 }} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
