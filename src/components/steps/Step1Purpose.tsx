@@ -23,6 +23,7 @@ export const Step1Purpose = () => {
     setServiceType,
     setCurrentStep,
     sendToWebhook,
+    saveFormData,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const isMarried = personalInfo.maritalStatus === "married";
@@ -80,11 +81,14 @@ export const Step1Purpose = () => {
   const handleNext = async () => {
     setPersonalInfo({ step1CompletedAt: new Date().toISOString() });
     setLoading(true);
-    await sendToWebhook(
-      "https://n8n.chasida.biz/webhook/client-intake-step1",
-      { personalInfo, serviceType },
-      { silent: true }
-    );
+    await Promise.all([
+      sendToWebhook(
+        "https://n8n.chasida.biz/webhook/client-intake-step1",
+        { personalInfo, serviceType },
+        { silent: true }
+      ),
+      saveFormData(),
+    ]);
     setLoading(false);
     setCurrentStep(3);
   };

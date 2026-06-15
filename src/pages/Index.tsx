@@ -5,9 +5,21 @@ import { Step1Purpose } from "@/components/steps/Step1Purpose";
 import { Step2PersonalInfo } from "@/components/steps/Step2PersonalInfo";
 import { Step3Documents } from "@/components/steps/Step3Documents";
 import { Step4Completion } from "@/components/steps/Step4Completion";
+import { useSearchParams } from "react-router-dom";
 
 const FormContent = () => {
-  const { currentStep } = useFormContext();
+  const { currentStep, isLoading } = useFormContext();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
+        <div className="text-center space-y-4">
+          <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+          <p className="text-lg font-bold text-primary">טוען שאלון...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderStep = () => {
     switch (currentStep) {
@@ -30,8 +42,12 @@ const FormContent = () => {
 };
 
 const Index = () => {
+  const [searchParams] = useSearchParams();
+  const idParam = searchParams.get("id");
+  const questionnaireId = idParam ? Number(idParam) : null;
+
   return (
-    <FormProvider>
+    <FormProvider questionnaireId={questionnaireId}>
       <FormContent />
     </FormProvider>
   );

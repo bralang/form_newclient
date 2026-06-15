@@ -22,6 +22,7 @@ export const Step3Documents = () => {
     setDocumentsInfo,
     setCurrentStep,
     sendToWebhook,
+    saveFormData,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
 
@@ -55,11 +56,14 @@ export const Step3Documents = () => {
 
   const handleNext = async () => {
     setLoading(true);
-    await sendToWebhook(
-      "https://n8n.chasida.biz/webhook/client-intake-step3",
-      { documentsInfo, personalInfo },
-      { silent: true }
-    );
+    await Promise.all([
+      sendToWebhook(
+        "https://n8n.chasida.biz/webhook/client-intake-step3",
+        { documentsInfo, personalInfo },
+        { silent: true }
+      ),
+      saveFormData(),
+    ]);
     setLoading(false);
     setCurrentStep(5);
   };

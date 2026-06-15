@@ -308,6 +308,11 @@ interface FormContextType {
     data: any,
     options?: { silent?: boolean }
   ) => Promise<boolean>;
+
+  saveFormData: (overrideStatus?: string) => Promise<void>;
+
+  isLoading: boolean;
+  questionnaireId: number | null;
 }
 
 // ─── Context ────────────────────────────────────────
@@ -320,11 +325,31 @@ export const useFormContext = () => {
   return context;
 };
 
+// ─── Helpers ────────────────────────────────────────
+
+const mapMaritalStatus = (v: string | null): "single" | "married" | "" => {
+  if (!v) return "";
+  const s = v.toLowerCase();
+  if (s === "married" || s === "נשוי" || s === "נשואה") return "married";
+  if (s === "single" || s === "רווק" || s === "רווקה") return "single";
+  return "";
+};
+
+const mapGender = (v: string | null): "male" | "female" | "" => {
+  if (!v) return "";
+  const g = v.toLowerCase();
+  if (g === "male" || g === "זכר" || g === "ז") return "male";
+  if (g === "female" || g === "נקבה" || g === "נ") return "female";
+  return "";
+};
+
 // ─── Provider ───────────────────────────────────────
 
-export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const FormProvider: React.FC<{
+  children: React.ReactNode;
+  questionnaireId?: number | null;
+}> = ({ children, questionnaireId = null }) => {
+  const [isLoading, setIsLoading] = useState(!!questionnaireId);
   const [currentStep, setCurrentStepRaw] = useState(1);
   const setCurrentStep = (step: number) => {
     setCurrentStepRaw(step);
@@ -534,8 +559,100 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
     sessionStorage.setItem("feedbackInfo", JSON.stringify(feedbackInfo));
   }, [feedbackInfo]);
 
+  // ─── Load from Supabase ───────────────
+  useEffect(() => {
+    if (!questionnaireId) return;
+
+    const load = async () => {
+      try {
+        console.log("[load] fetching questionnaire id=", questionnaireId);
+        const { data: questionnaire, error } = await (supabase as any)
+          .from("client_questionnaire")
+          .select("*")
+          .eq("id", questionnaireId)
+          .single();
+
+        console.log("[load] questionnaire=", questionnaire, "error=", error);
+
+        if (error || !questionnaire) {
+          toast.error("שאלון לא נמצא");
+          return;
+        }
+
+        // Fetch lead → person
+        if (questionnaire.lead_id) {
+          const { data: lead, error: leadError } = await (supabase as any)
+            .from("leads")
+            .select("*")
+            .eq("lead_id", questionnaire.lead_id)
+            .single();
+
+          console.log("[load] lead=", lead, "leadError=", leadError);
+
+          if (lead?.person_id) {
+            const { data: person, error: personError } = await (supabase as any)
+              .from("persons")
+              .select("*")
+              .eq("person_id", lead.person_id)
+              .single();
+
+            console.log("[load] person=", person, "personError=", personError);
+
+            if (person) {
+              setPI((prev) => ({
+                ...prev,
+                firstName: person.first_name || "",
+                lastName: person.last_name || "",
+                phone: person.mobile || "",
+                email: person.email || "",
+                maritalStatus: mapMaritalStatus(person.marital_status),
+                ref: person.ref || "",
+                agreeToMessages: person.Receiving_messages ?? false,
+              }));
+
+              setDI((prev) => ({
+                ...prev,
+                idNumber: person.id_number || "",
+                homePhone: person.phone || "",
+                gender: mapGender(person.gender),
+                birthDate: person.birth_date || "",
+              }));
+            }
+          }
+        }
+
+        // Apply form_data on top (overrides persons data with latest saved state)
+        const fd = questionnaire.form_data;
+        if (fd && typeof fd === "object" && Object.keys(fd).length > 0) {
+          if (fd.personalInfo) setPI((prev) => ({ ...prev, ...fd.personalInfo }));
+          if (fd.serviceType) setST(fd.serviceType);
+          if (fd.detailedInfo) setDI((prev) => ({ ...prev, ...fd.detailedInfo }));
+          if (fd.spouseInfo) setSI((prev) => ({ ...prev, ...fd.spouseInfo }));
+          if (fd.businessInfo) setBI((prev) => ({ ...prev, ...fd.businessInfo }));
+          if (fd.spouseBusinessInfo) setSBI((prev) => ({ ...prev, ...fd.spouseBusinessInfo }));
+          if (fd.nonprofitInfo) setNI((prev) => ({ ...prev, ...fd.nonprofitInfo }));
+          if (fd.spouseNonprofitInfo) setSNI((prev) => ({ ...prev, ...fd.spouseNonprofitInfo }));
+          if (fd.documentsInfo) setDocsI((prev) => ({ ...prev, ...fd.documentsInfo }));
+          if (fd.feedbackInfo) setFI((prev) => ({ ...prev, ...fd.feedbackInfo }));
+          if (fd.currentStep && fd.currentStep >= 1 && fd.currentStep <= 5) {
+            setCurrentStepRaw(fd.currentStep);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load questionnaire:", e);
+        toast.error("שגיאה בטעינת השאלון");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    load();
+  }, [questionnaireId]);
+
   // ─── Session Storage: Load ────────────
   useEffect(() => {
+    if (questionnaireId) return; // skip when loading from DB
+
     const parse = <T,>(key: string): T | null => {
       const raw = sessionStorage.getItem(key);
       if (!raw) return null;
@@ -593,6 +710,55 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
       setCurrentStep(1);
     }
   }, []);
+
+  // ─── Save to Supabase ─────────────────
+  const saveFormData = async (overrideStatus?: string): Promise<void> => {
+    if (!questionnaireId) return;
+
+    const deepStrip = (obj: any): any => {
+      if (obj instanceof File) return undefined;
+      if (Array.isArray(obj)) {
+        const arr = obj.map(deepStrip).filter((v) => v !== undefined);
+        return arr;
+      }
+      if (obj && typeof obj === "object") {
+        const result: Record<string, any> = {};
+        for (const [k, v] of Object.entries(obj)) {
+          const stripped = deepStrip(v);
+          if (stripped !== undefined) result[k] = stripped;
+        }
+        return result;
+      }
+      return obj;
+    };
+
+    const snapshot = deepStrip({
+      personalInfo,
+      serviceType,
+      detailedInfo,
+      spouseInfo,
+      businessInfo,
+      spouseBusinessInfo,
+      nonprofitInfo,
+      spouseNonprofitInfo,
+      documentsInfo,
+      feedbackInfo,
+      currentStep,
+    });
+
+    const update: Record<string, any> = {
+      form_data: snapshot,
+      updated_at: new Date().toISOString(),
+    };
+    if (overrideStatus) update.status = overrideStatus;
+
+    const { error } = await (supabase as any)
+      .from("client_questionnaire")
+      .update(update)
+      .eq("id", questionnaireId);
+
+    if (error) console.error("Failed to save form data:", error);
+  };
 
   // ─── Webhook ──────────────────────────
   const sendToWebhook = async (
@@ -699,6 +865,9 @@ export const FormProvider: React.FC<{ children: React.ReactNode }> = ({
         feedbackInfo,
         setFeedbackInfo,
         sendToWebhook,
+        saveFormData,
+        isLoading,
+        questionnaireId,
       }}
     >
       {children}

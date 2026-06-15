@@ -20,6 +20,7 @@ export const Step4Completion = () => {
     setFeedbackInfo,
     setCurrentStep,
     sendToWebhook,
+    saveFormData,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -53,11 +54,14 @@ export const Step4Completion = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
-    const finalSuccess = await sendToWebhook(
-      "https://n8n.chasida.biz/webhook/client-intake-final",
-      { feedbackInfo, personalInfo, serviceType },
-      { silent: true }
-    );
+    const [finalSuccess] = await Promise.all([
+      sendToWebhook(
+        "https://n8n.chasida.biz/webhook/client-intake-final",
+        { feedbackInfo, personalInfo, serviceType },
+        { silent: true }
+      ),
+      saveFormData("הוגש"),
+    ]);
     const gmailData = buildGmailData();
 
     try {

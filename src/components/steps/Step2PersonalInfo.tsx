@@ -22,6 +22,7 @@ export const Step2PersonalInfo = () => {
     spouseBusinessInfo,
     setCurrentStep,
     sendToWebhook,
+    saveFormData,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const [reminderDate, setReminderDate] = useState("");
@@ -88,11 +89,14 @@ export const Step2PersonalInfo = () => {
 
   const handleNext = async () => {
     setLoading(true);
-    await sendToWebhook(
-      "https://n8n.chasida.biz/webhook/client-intake-step2",
-      { personalInfo, detailedInfo, spouseInfo, serviceType },
-      { silent: true }
-    );
+    await Promise.all([
+      sendToWebhook(
+        "https://n8n.chasida.biz/webhook/client-intake-step2",
+        { personalInfo, detailedInfo, spouseInfo, serviceType },
+        { silent: true }
+      ),
+      saveFormData(),
+    ]);
     setLoading(false);
     setCurrentStep(4);
   };

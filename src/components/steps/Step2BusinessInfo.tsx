@@ -1797,8 +1797,13 @@ export const Step2BusinessInfo = () => {
     prefix = "",
     isWarComp: boolean = false
   ) => {
-    const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || serviceType.spousePurposeStatus?.company?.includes("existing") || userWarEntities.includes("company") || spouseWarEntities.includes("company");
-    const hasNewPurpose = serviceType.userPurposeStatus?.company?.includes("new") || serviceType.spousePurposeStatus?.company?.includes("new");
+    const isSpouseSection = prefix.startsWith("sp");
+    const hasExistingPurpose = isSpouseSection
+      ? (serviceType.spousePurposeStatus?.company?.includes("existing") || spouseWarEntities.includes("company"))
+      : (serviceType.userPurposeStatus?.company?.includes("existing") || userWarEntities.includes("company"));
+    const hasNewPurpose = isSpouseSection
+      ? serviceType.spousePurposeStatus?.company?.includes("new")
+      : serviceType.userPurposeStatus?.company?.includes("new");
 
     const existingCount = info.existingCompanyCount || 0;
     const newCount = info.newCompanyCount || 0;
