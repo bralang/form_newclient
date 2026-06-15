@@ -565,63 +565,18 @@ export const FormProvider: React.FC<{
 
     const load = async () => {
       try {
-        console.log("[load] fetching questionnaire id=", questionnaireId);
         const { data: questionnaire, error } = await (supabase as any)
           .from("client_questionnaire")
           .select("*")
           .eq("id", questionnaireId)
           .single();
 
-        console.log("[load] questionnaire=", questionnaire, "error=", error);
-
         if (error || !questionnaire) {
           toast.error("שאלון לא נמצא");
           return;
         }
 
-        // Fetch lead → person
-        if (questionnaire.lead_id) {
-          const { data: lead, error: leadError } = await (supabase as any)
-            .from("leads")
-            .select("*")
-            .eq("lead_id", questionnaire.lead_id)
-            .single();
-
-          console.log("[load] lead=", lead, "leadError=", leadError);
-
-          if (lead?.person_id) {
-            const { data: person, error: personError } = await (supabase as any)
-              .from("persons")
-              .select("*")
-              .eq("person_id", lead.person_id)
-              .single();
-
-            console.log("[load] person=", person, "personError=", personError);
-
-            if (person) {
-              setPI((prev) => ({
-                ...prev,
-                firstName: person.first_name || "",
-                lastName: person.last_name || "",
-                phone: person.mobile || "",
-                email: person.email || "",
-                maritalStatus: mapMaritalStatus(person.marital_status),
-                ref: person.ref || "",
-                agreeToMessages: person.Receiving_messages ?? false,
-              }));
-
-              setDI((prev) => ({
-                ...prev,
-                idNumber: person.id_number || "",
-                homePhone: person.phone || "",
-                gender: mapGender(person.gender),
-                birthDate: person.birth_date || "",
-              }));
-            }
-          }
-        }
-
-        // Apply form_data on top (overrides persons data with latest saved state)
+        // 1. קודם מחילים form_data (המצב האחרון שנשמר)
         const fd = questionnaire.form_data;
         if (fd && typeof fd === "object" && Object.keys(fd).length > 0) {
           if (fd.personalInfo) setPI((prev) => ({ ...prev, ...fd.personalInfo }));
@@ -636,6 +591,44 @@ export const FormProvider: React.FC<{
           if (fd.feedbackInfo) setFI((prev) => ({ ...prev, ...fd.feedbackInfo }));
           if (fd.currentStep && fd.currentStep >= 1 && fd.currentStep <= 5) {
             setCurrentStepRaw(fd.currentStep);
+          }
+        }
+
+        // 2. אחר כך persons ממלא רק שדות ריקים (טבלת persons היא המקור הסמכותי לפרטי הבסיס)
+        if (questionnaire.lead_id) {
+          const { data: lead } = await (supabase as any)
+            .from("leads")
+            .select("*")
+            .eq("lead_id", questionnaire.lead_id)
+            .single();
+
+          if (lead?.person_id) {
+            const { data: person } = await (supabase as any)
+              .from("persons")
+              .select("*")
+              .eq("person_id", lead.person_id)
+              .single();
+
+            if (person) {
+              setPI((prev) => ({
+                ...prev,
+                firstName: prev.firstName || person.first_name || "",
+                lastName: prev.lastName || person.last_name || "",
+                phone: prev.phone || person.mobile || "",
+                email: prev.email || person.email || "",
+                maritalStatus: prev.maritalStatus || mapMaritalStatus(person.marital_status),
+                ref: prev.ref || person.ref || "",
+                agreeToMessages: prev.agreeToMessages || person.Receiving_messages || false,
+              }));
+
+              setDI((prev) => ({
+                ...prev,
+                idNumber: prev.idNumber || person.id_number || "",
+                homePhone: prev.homePhone || person.phone || "",
+                gender: prev.gender || mapGender(person.gender),
+                birthDate: prev.birthDate || person.birth_date || "",
+              }));
+            }
           }
         }
       } catch (e) {
