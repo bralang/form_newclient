@@ -118,7 +118,8 @@ const buildHoldingChain = (svc: any, ctx: Ctx, bottomNode: TreeNode, depth = 0):
     ? collectOwners(shList, ctx)
     : [{ name: ctx.selfName }];
 
-  const holding = mkCompany(label, { isNew, isHolding: true, owners });
+  const holdingActive = !!ctx.activeLabel && ctx.activeLabel === label;
+  const holding = mkCompany(label, { isNew, isHolding: true, owners, active: holdingActive });
   holding.children.push(bottomNode);
 
   const sub = svc?.subOwnerType;
@@ -154,12 +155,17 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
   // ── Self via holding company (explicit shareholderType) ────────────────────
   if (st === "self_via_company") {
     const svc = t.selfViaCompany || {};
+    const holdingLabel = svc?.companyName?.trim() || svc?.requestedName1?.trim() || null;
     const otherDirect = (t.shareholders || []).filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s));
-    const targetOwners: OwnerLabel[] = otherDirect.map((sh: any) => ({
-      name: holderName(sh, ctx),
-      pct: sh.percentage,
-      isSpouseLink: ctx.spouseHasOwnTree && holderName(sh, ctx) === ctx.spouseName,
-    }));
+    const targetOwners: OwnerLabel[] = [
+      // Show holding company stake in new target companies
+      ...(isNew && holdingLabel ? [{ name: holdingLabel, pct: svc?.percentage }] : []),
+      ...otherDirect.map((sh: any) => ({
+        name: holderName(sh, ctx),
+        pct: sh.percentage,
+        isSpouseLink: ctx.spouseHasOwnTree && holderName(sh, ctx) === ctx.spouseName,
+      })),
+    ];
     const target = mkCompany(label, { isNew, active, owners: targetOwners.length ? targetOwners : undefined });
     return buildHoldingChain(svc, ctx, target, depth + 1);
   }
@@ -175,14 +181,17 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
     );
 
     if (selfViaEntry) {
-      // Show other direct (person) shareholders in the TARGET company footer
-      const otherPersonOwners: OwnerLabel[] = shList
-        .filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s))
-        .map((sh: any) => ({
-          name: holderName(sh, ctx),
-          pct: sh.percentage,
-          isSpouseLink: ctx.spouseHasOwnTree && holderName(sh, ctx) === ctx.spouseName,
-        }));
+      const holdingLabel = selfViaEntry?.companyName?.trim() || selfViaEntry?.requestedName1?.trim() || null;
+      const otherPersonOwners: OwnerLabel[] = [
+        ...(isNew && holdingLabel ? [{ name: holdingLabel, pct: selfViaEntry?.percentage }] : []),
+        ...shList
+          .filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s))
+          .map((sh: any) => ({
+            name: holderName(sh, ctx),
+            pct: sh.percentage,
+            isSpouseLink: ctx.spouseHasOwnTree && holderName(sh, ctx) === ctx.spouseName,
+          })),
+      ];
       const target = mkCompany(label, {
         isNew,
         active,
@@ -272,12 +281,12 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
                 i > 0 ? `border-t ${dividerCls}` : "",
               ].join(" ")}
             >
-              {o.name}{o.pct ? ` ${o.pct}%` : ""}
+              {o.name}{(node.isNew && o.pct) ? ` ${o.pct}%` : ""}
             </div>
           ))}
           {(() => {
             const total = node.owners.reduce((s, o) => s + (parseFloat(o.pct || "0") || 0), 0);
-            if (total > 0 && Math.abs(total - 100) < 0.01) {
+            if (node.isNew && total > 0 && Math.abs(total - 100) < 0.01) {
               return (
                 <div className={`${ownerSz} text-center py-0.5 font-bold text-green-700 border-t ${dividerCls} bg-green-50`}>
                   ✓ 100%
@@ -365,7 +374,25 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     };
   }, [currentStep]);
 
-  // Track last modified company → active highlight
+  // Resolve the holding company name that changed within a company entry
+  const holdingNameFromEntry = (curr: any, prev: any): string | null => {
+    const currSVC = curr?.selfViaCompany;
+    const prevSVC = prev?.selfViaCompany;
+    if (currSVC && JSON.stringify(currSVC) !== JSON.stringify(prevSVC || {})) {
+      return currSVC?.companyName?.trim() || currSVC?.requestedName1?.trim() || null;
+    }
+    const currSh = curr?.shareholders || [];
+    const prevSh = prev?.shareholders || [];
+    for (let j = 0; j < currSh.length; j++) {
+      const s = currSh[j];
+      if (s?.holderType === "self_via_company" && JSON.stringify(s) !== JSON.stringify(prevSh[j] || {})) {
+        return s?.companyName?.trim() || s?.requestedName1?.trim() || null;
+      }
+    }
+    return null;
+  };
+
+  // Track last modified company/holding → active highlight
   useEffect(() => {
     const curr = JSON.stringify(businessInfo || {});
     if (curr === prevBIRef.current) return;
@@ -376,7 +403,9 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       const currList = ((businessInfo || {})[key] || []) as any[];
       const prevList = ((prev)[key] || []) as any[];
       for (let i = 0; i < currList.length; i++) {
-        if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i])) {
+        if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i] || {})) {
+          const holdingName = holdingNameFromEntry(currList[i], prevList[i] || {});
+          if (holdingName) { setActiveLabel(holdingName); return; }
           setActiveLabel(currList[i]?.[suffix]?.trim() || null);
           return;
         }
@@ -394,13 +423,39 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       const currList = ((spouseBusinessInfo || {})[key] || []) as any[];
       const prevList = ((prev)[key] || []) as any[];
       for (let i = 0; i < currList.length; i++) {
-        if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i])) {
+        if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i] || {})) {
+          const holdingName = holdingNameFromEntry(currList[i], prevList[i] || {});
+          if (holdingName) { setActiveLabel(holdingName); return; }
           setActiveLabel(currList[i]?.[suffix]?.trim() || null);
           return;
         }
       }
     }
   }, [spouseBusinessInfo]);
+
+  // Set active company on focus (click on any field in a company section)
+  useEffect(() => {
+    if (currentStep !== 3) return;
+    const onFocusIn = (e: FocusEvent) => {
+      const el = e.target as Element | null;
+      if (!el) return;
+      let node: Element | null = el.parentElement;
+      while (node && node !== document.body) {
+        for (const child of Array.from(node.children)) {
+          if (child.tagName === "H4") {
+            const text = child.textContent || "";
+            if (text.includes("חברה קיימת") || text.includes("חברה חדשה")) {
+              const match = text.match(/[–—]\s*(.+)$/);
+              if (match) { setActiveLabel(match[1].trim()); return; }
+            }
+          }
+        }
+        node = node.parentElement;
+      }
+    };
+    document.addEventListener("focusin", onFocusIn, true);
+    return () => document.removeEventListener("focusin", onFocusIn, true);
+  }, [currentStep]);
 
   const selfName = (personalInfo?.firstName || "").trim() || "אני";
   const spouseRaw = (personalInfo?.spouseName || personalInfo?.spouseFirstName || "").trim();
