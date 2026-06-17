@@ -173,7 +173,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
                 <div className="text-center space-y-1">
                   <p className="text-sm font-semibold text-foreground/80">אנחנו כאן לסיוע במילוי השאלון</p>
                   <a href="tel:0533160990" className="block text-base font-bold text-primary hover:underline">טל׳ 0533160990</a>
-                  <a href="mailto:teder@chasida.biz" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
+                  <a href="https://mail.google.com/mail/u/0/?fs=1&to=teder@chasida.biz&su=%D7%90%D7%A0%D7%99+%D7%A6%D7%A8%D7%99%D7%9A+%D7%A2%D7%96%D7%A8%D7%94+%D7%91%D7%9E%D7%99%D7%9C%D7%95%D7%99+%D7%94%D7%A9%D7%90%D7%9C%D7%95%D7%9F&body=%D7%A9%D7%9C%D7%95%D7%9D+%D7%90%D7%A9%D7%9E%D7%97+%D7%9C%D7%A2%D7%96%D7%A8%D7%94+%D7%91%D7%9E%D7%99%D7%9C%D7%95%D7%99+%D7%94%D7%A9%D7%90%D7%9C%D7%95%D7%9F+%D7%90%D7%A0%D7%99+%D7%96%D7%9E%D7%99%D7%9F+%D7%91%D7%98%D7%9C%D7%A4%D7%95%D7%9F+%D7%9E%D7%A1%D7%A4%D7%A8+______________&tf=cm" target="_blank" rel="noopener noreferrer" className="block text-base font-bold text-primary hover:underline">teder@chasida.biz</a>
                 </div>
                 </div>
               </div>
@@ -246,7 +246,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
               <div className="flex items-center justify-center gap-4 flex-wrap">
                 <a href="tel:0533160990" className="text-lg font-bold text-primary hover:underline">טל׳ 0533160990</a>
                 <span className="text-muted-foreground">|</span>
-                <a href="mailto:teder@chasida.biz" className="text-lg font-bold text-primary hover:underline">teder@chasida.biz</a>
+                <a href="https://mail.google.com/mail/u/0/?fs=1&to=teder@chasida.biz&su=%D7%90%D7%A0%D7%99+%D7%A6%D7%A8%D7%99%D7%9A+%D7%A2%D7%96%D7%A8%D7%94+%D7%91%D7%9E%D7%99%D7%9C%D7%95%D7%99+%D7%94%D7%A9%D7%90%D7%9C%D7%95%D7%9F&body=%D7%A9%D7%9C%D7%95%D7%9D+%D7%90%D7%A9%D7%9E%D7%97+%D7%9C%D7%A2%D7%96%D7%A8%D7%94+%D7%91%D7%9E%D7%99%D7%9C%D7%95%D7%99+%D7%94%D7%A9%D7%90%D7%9C%D7%95%D7%9F+%D7%90%D7%A0%D7%99+%D7%96%D7%9E%D7%99%D7%9F+%D7%91%D7%98%D7%9C%D7%A4%D7%95%D7%9F+%D7%9E%D7%A1%D7%A4%D7%A8+______________&tf=cm" target="_blank" rel="noopener noreferrer" className="text-lg font-bold text-primary hover:underline">teder@chasida.biz</a>
               </div>
             </div>
           </div>

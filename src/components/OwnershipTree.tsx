@@ -1,6 +1,6 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { Building2, Network, User } from "lucide-react";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -243,11 +243,8 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
   const lblSz = compact ? "text-[9px]" : "text-[10px]";
   const ownerSz = compact ? "text-[8px]" : "text-[9px]";
 
-  const personAttr = isPerson ? { "data-person-root": node.label } : {};
-
   return (
     <div
-      {...personAttr}
       className={`${w} rounded-lg border-2 ${boxCls}${activeRing} overflow-hidden shadow-sm shrink-0`}
     >
       <div className={`${pad} flex flex-col items-center gap-0.5`}>
@@ -265,7 +262,6 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
           {node.owners.map((o, i) => (
             <div
               key={i}
-              data-owner-ref={o.isSpouseLink ? o.name : undefined}
               className={[
                 ownerSz,
                 "font-semibold text-center py-0.5 px-1 leading-tight",
@@ -325,30 +321,6 @@ const TreeNodeView = ({ node, compact }: { node: TreeNode; compact: boolean }) =
   );
 };
 
-// ─── Orthogonal SVG connector (spouse root ↔ spouse owner labels) ─────────────
-// Uses the same color and style as tree connector lines — no dashes, straight segments
-
-type LineSpec = { x1: number; y1: number; x2: number; y2: number };
-
-const ConnectorSVG = ({ lines }: { lines: LineSpec[] }) => (
-  <>
-    {lines.map((l, i) => {
-      // Orthogonal path: go down from source, across horizontally, then to target
-      const midY = (l.y1 + l.y2) / 2;
-      const d = `M ${l.x1} ${l.y1} V ${midY} H ${l.x2} V ${l.y2}`;
-      return (
-        <path
-          key={i}
-          d={d}
-          stroke={LINE}
-          strokeWidth={1}
-          fill="none"
-        />
-      );
-    })}
-  </>
-);
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
@@ -361,7 +333,6 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
   const [tick, setTick] = useState(0);
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
-  const [connLines, setConnLines] = useState<LineSpec[]>([]);
   const overflowRef = useRef<HTMLDivElement>(null);
   const prevBIRef = useRef<string>("");
   const prevSpouseBIRef = useRef<string>("");
@@ -443,40 +414,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     selfName, spouseName, spouseHasOwnTree, activeLabel, tick,
   ]);
 
-  // Calculate connecting lines between spouse root box and spouse owner labels
-  useLayoutEffect(() => {
-    const container = overflowRef.current;
-    if (!container || !spouseHasOwnTree) { setConnLines([]); return; }
-
-    const cRect = container.getBoundingClientRect();
-    const sl = container.scrollLeft;
-    const st2 = container.scrollTop;
-
-    const toRel = (el: Element) => {
-      const r = el.getBoundingClientRect();
-      return {
-        cx: r.left + r.width / 2 - cRect.left + sl,
-        cy: r.top + r.height / 2 - cRect.top + st2,
-      };
-    };
-
-    const spouseRoot = container.querySelector(`[data-person-root="${CSS.escape(spouseName)}"]`);
-    const refs = container.querySelectorAll(`[data-owner-ref="${CSS.escape(spouseName)}"]`);
-    if (!spouseRoot || refs.length === 0) { setConnLines([]); return; }
-
-    const { cx: x1, cy: y1 } = toRel(spouseRoot);
-    const lines: LineSpec[] = [];
-    for (const ref of refs) {
-      const { cx: x2, cy: y2 } = toRel(ref);
-      lines.push({ x1, y1, x2, y2 });
-    }
-    setConnLines(lines);
-  }, [trees, tick, spouseHasOwnTree, spouseName]);
-
   if (currentStep !== 3 || trees.length === 0) return null;
-
-  const svgW = overflowRef.current?.scrollWidth ?? 0;
-  const svgH = overflowRef.current?.scrollHeight ?? 0;
 
   return (
     <div
@@ -488,22 +426,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
         מפת השליטה בחברה
       </div>
 
-      <div ref={overflowRef} className="overflow-auto relative">
-        {connLines.length > 0 && svgW > 0 && (
-          <svg
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: svgW,
-              height: svgH,
-              pointerEvents: "none",
-              zIndex: 10,
-            }}
-          >
-            <ConnectorSVG lines={connLines} />
-          </svg>
-        )}
+      <div ref={overflowRef} className="overflow-auto">
         <div className="flex items-start justify-center gap-10 min-w-max pb-2 pt-1">
           {trees.map((tree, i) => (
             <TreeNodeView key={i} node={tree} compact={compact} />
