@@ -101,10 +101,9 @@ const collectOwners = (shList: any[], ctx: Ctx, overrideSelfPct?: string): Owner
 
 // ─── Holding chain (top-down) ─────────────────────────────────────────────────
 
-const buildHoldingChain = (svc: any, ctx: Ctx, bottomNode: TreeNode, depth = 0, parentActive = false): TreeNode => {
+const buildHoldingChain = (svc: any, ctx: Ctx, bottomNode: TreeNode, depth = 0): TreeNode => {
   if (!svc || depth > 10) return bottomNode;
 
-  // Match the form's own display logic exactly
   const label =
     svc?.companyName?.trim() ||
     svc?.requestedName1?.trim() ||
@@ -113,19 +112,18 @@ const buildHoldingChain = (svc: any, ctx: Ctx, bottomNode: TreeNode, depth = 0, 
 
   const isNew = svc?.isExistingCompany === false;
 
-  // Shareholders of the HOLDING company itself
+  // Shareholders of the holding company — don't use target % as override
   const shList = svc?.shareholders || [];
   const owners = shList.length > 0
-    ? collectOwners(shList, ctx, svc?.percentage)
-    : [{ name: ctx.selfName, pct: svc?.selfPercentage }];
+    ? collectOwners(shList, ctx)
+    : [{ name: ctx.selfName }];
 
-  const holding = mkCompany(label, { isNew, isHolding: true, owners, active: parentActive });
+  const holding = mkCompany(label, { isNew, isHolding: true, owners });
   holding.children.push(bottomNode);
 
-  // Recurse up the chain if holding is itself owned via another company
   const sub = svc?.subOwnerType;
   if ((sub === "company" || sub === "self_via_company") && svc.childCompany) {
-    return buildHoldingChain(svc.childCompany, ctx, holding, depth + 1, parentActive);
+    return buildHoldingChain(svc.childCompany, ctx, holding, depth + 1);
   }
 
   return holding;
@@ -143,8 +141,13 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
 
   const st = t.shareholderType;
 
+  // ── Not yet chosen ─────────────────────────────────────────────────────────
+  if (!st) {
+    return mkCompany(label, { isNew, active });
+  }
+
   // ── Alone ──────────────────────────────────────────────────────────────────
-  if (!st || st === "alone") {
+  if (st === "alone") {
     return mkCompany(label, { isNew, active, owners: [{ name: ctx.selfName, pct: "100" }] });
   }
 
@@ -158,7 +161,7 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
       isSpouseLink: ctx.spouseHasOwnTree && holderName(sh, ctx) === ctx.spouseName,
     }));
     const target = mkCompany(label, { isNew, active, owners: targetOwners.length ? targetOwners : undefined });
-    return buildHoldingChain(svc, ctx, target, depth + 1, active);
+    return buildHoldingChain(svc, ctx, target, depth + 1);
   }
 
   // ── Other (co-owners; possibly one is a company holding vehicle) ───────────
@@ -185,7 +188,7 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
         active,
         owners: otherPersonOwners.length ? otherPersonOwners : undefined,
       });
-      return buildHoldingChain(selfViaEntry, ctx, target, depth + 1, active);
+      return buildHoldingChain(selfViaEntry, ctx, target, depth + 1);
     }
 
     // All shareholders are persons — collect into footer
@@ -272,6 +275,17 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
               {o.name}{o.pct ? ` ${o.pct}%` : ""}
             </div>
           ))}
+          {(() => {
+            const total = node.owners.reduce((s, o) => s + (parseFloat(o.pct || "0") || 0), 0);
+            if (total > 0 && Math.abs(total - 100) < 0.01) {
+              return (
+                <div className={`${ownerSz} text-center py-0.5 font-bold text-green-700 border-t ${dividerCls} bg-green-50`}>
+                  ✓ 100%
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
       )}
     </div>
