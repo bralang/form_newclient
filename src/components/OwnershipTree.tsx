@@ -513,17 +513,17 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
       {/* מקרא */}
       <div className="border-t border-border mt-3 pt-2 flex flex-wrap gap-x-4 gap-y-1">
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-foreground/70">
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-foreground">
           <span className="w-3.5 h-3.5 rounded border-2 border-amber-400 bg-amber-100 shrink-0" /> אדם פרטי
         </span>
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-foreground/70">
-          <span className="w-3.5 h-3.5 rounded border-2 border-primary bg-primary/10 shrink-0" /> חברה
-        </span>
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-foreground/70">
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-foreground">
           <span className="w-3.5 h-3.5 rounded border-2 border-dashed border-amber-500 bg-primary/10 shrink-0" /> חברת אחזקות
         </span>
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-foreground/70">
-          <span className="w-3.5 h-3.5 rounded border-2 border-red-500 ring-2 ring-red-500 shrink-0" /> נמלא כעת
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-foreground">
+          <span className="w-3.5 h-3.5 rounded border-2 border-primary bg-primary/10 shrink-0" /> חברה
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-red-600">
+          <span className="w-3.5 h-3.5 rounded border-2 border-red-500 ring-2 ring-red-500 shrink-0" /> אתה כאן
         </span>
       </div>
     </div>
