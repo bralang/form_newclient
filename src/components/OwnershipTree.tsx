@@ -9,73 +9,149 @@ type NodeKind = "person" | "company";
 type TreeNode = {
   kind: NodeKind;
   label: string;
-  sublabel?: string;    // ח.פ. / סוג
   percentage?: string;
   isNew?: boolean;
-  isHolding?: boolean;  // חברת אחזקות ביניים
+  isHolding?: boolean;
+  isReference?: boolean; // second occurrence of same person — dashed reference box
+  nodeId?: string;       // ת.ז. or unique key for dedup tracking
   children: TreeNode[];
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+type BuildCtx = {
+  selfName: string;
+  selfId: string;
+  spouseName: string;
+  spouseId: string;
+  spouseBI: any;                  // spouse's businessInfo (for injection)
+  spouseInjected: { v: boolean }; // mutated when spouse is expanded in tree
+  seenIds: Set<string>;           // person IDs already rendered (for dedup)
+};
 
-const person = (label: string, pct?: string): TreeNode =>
-  ({ kind: "person", label, percentage: pct, children: [] });
+// ─── Node factories ───────────────────────────────────────────────────────────
 
-const company = (label: string, opts: { isNew?: boolean; isHolding?: boolean; pct?: string } = {}): TreeNode =>
+const mkPerson = (label: string, pct?: string, nodeId?: string): TreeNode =>
+  ({ kind: "person", label, percentage: pct, nodeId, children: [] });
+
+const mkRef = (label: string, pct?: string, nodeId?: string): TreeNode =>
+  ({ kind: "person", label, percentage: pct, nodeId, isReference: true, children: [] });
+
+const mkCompany = (label: string, opts: { isNew?: boolean; isHolding?: boolean; pct?: string } = {}): TreeNode =>
   ({ kind: "company", label, isNew: opts.isNew, isHolding: opts.isHolding, percentage: opts.pct, children: [] });
 
-const isSelf = (sh: any, name: string) =>
-  sh?.isSelf || sh?.personOwnerType === "self" ||
-  (sh?.holderType === "person" && sh?.name?.trim() === name?.trim());
+// ─── Identity helpers ─────────────────────────────────────────────────────────
 
-const isSpouse = (sh: any) =>
+const isSelf = (sh: any, selfName: string) =>
+  sh?.isSelf ||
+  sh?.personOwnerType === "self" ||
+  (sh?.holderType === "person" && sh?.name?.trim() === selfName?.trim());
+
+const isSpouseHolder = (sh: any) =>
   sh?.isSpouse || sh?.personOwnerType === "spouse";
 
-// ─── Build shareholder node ───────────────────────────────────────────────────
+const personKey = (sh: any): string =>
+  sh?.idNumber?.trim() ||
+  sh?.personOwner?.idNumber?.trim() ||
+  sh?.name?.trim() ||
+  sh?.personOwner?.name?.trim() ||
+  "";
 
-const buildShareholder = (sh: any, selfName: string, spouseName: string, depth = 0): TreeNode | null => {
+// ─── Shareholder builder ──────────────────────────────────────────────────────
+
+const buildShareholder = (sh: any, ctx: BuildCtx, depth = 0): TreeNode | null => {
   if (!sh || depth > 10) return null;
-  if (isSpouse(sh)) return person(spouseName, sh.percentage);
 
+  // ── Spouse ──────────────────────────────────────────────────────────────────
+  if (isSpouseHolder(sh)) {
+    const spouseCompanyCount =
+      (ctx.spouseBI?.existingCompanies?.length || 0) +
+      (ctx.spouseBI?.newCompanies?.length || 0);
+
+    if (spouseCompanyCount > 0 && !ctx.spouseInjected.v) {
+      // First time we see the spouse AND they have own companies → expand sub-tree
+      ctx.spouseInjected.v = true;
+      if (ctx.spouseId) ctx.seenIds.add(ctx.spouseId);
+      const spouseNode = mkPerson(ctx.spouseName, sh.percentage, ctx.spouseId || ctx.spouseName);
+      // Build spouse's companies (swap self/spouse roles to avoid double-skip)
+      const spouseCtx: BuildCtx = {
+        selfName: ctx.spouseName,
+        selfId: ctx.spouseId,
+        spouseName: ctx.selfName,
+        spouseId: ctx.selfId,
+        spouseBI: null, // prevent recursive injection
+        spouseInjected: { v: false },
+        seenIds: ctx.seenIds, // share registry
+      };
+      const spouseCompanies = [
+        ...(ctx.spouseBI?.existingCompanies || []).map((c: any) =>
+          buildTarget(c, false, spouseCtx, depth + 1)
+        ),
+        ...(ctx.spouseBI?.newCompanies || []).map((c: any) =>
+          buildTarget(c, true, spouseCtx, depth + 1)
+        ),
+      ];
+      spouseNode.children = spouseCompanies;
+      return spouseNode;
+    }
+
+    if (spouseCompanyCount > 0 && ctx.spouseInjected.v) {
+      // Spouse already rendered elsewhere — show reference
+      return mkRef(ctx.spouseName, sh.percentage, ctx.spouseId || ctx.spouseName);
+    }
+
+    // Spouse has no own companies — plain leaf
+    return mkPerson(ctx.spouseName, sh.percentage, ctx.spouseId || ctx.spouseName);
+  }
+
+  // ── Person ───────────────────────────────────────────────────────────────────
   const ht = sh.holderType || "person";
 
   if (ht === "person") {
-    const name = sh.personOwnerType === "other"
-      ? sh?.personOwner?.name?.trim() || "אדם פרטי"
-      : sh?.name?.trim() || "אדם פרטי";
-    return person(name, sh.percentage);
+    const nameStr =
+      sh.personOwnerType === "other"
+        ? sh?.personOwner?.name?.trim() || "אדם פרטי"
+        : sh?.name?.trim() || "אדם פרטי";
+    const id = sh?.idNumber?.trim() || sh?.personOwner?.idNumber?.trim() || nameStr;
+
+    if (id && ctx.seenIds.has(id)) {
+      return mkRef(nameStr, sh.percentage, id);
+    }
+    if (id) ctx.seenIds.add(id);
+    return mkPerson(nameStr, sh.percentage, id);
   }
 
-  // חברה בתור בעל מניות
+  // ── Company as shareholder (holding) ─────────────────────────────────────────
   const isNew = sh?.isExistingCompany === false;
   const label = isNew
     ? sh?.requestedName1?.trim() || "חברה חדשה"
     : sh?.companyName?.trim() || sh?.name?.trim() || "חברה";
-  const node = company(label, { isNew, isHolding: true, pct: sh.percentage });
+  const node = mkCompany(label, { isNew, isHolding: true, pct: sh.percentage });
 
-  // בעלי מניות של החברה הזו
   for (const inner of (sh?.shareholders || [])) {
-    if (isSelf(inner, selfName)) continue;
-    const child = buildShareholder(inner, selfName, spouseName, depth + 1);
+    if (isSelf(inner, ctx.selfName)) continue;
+    const child = buildShareholder(inner, ctx, depth + 1);
     if (child) node.children.push(child);
   }
   const sub = sh?.subOwnerType;
   if ((sub === "company" || sub === "self_via_company") && sh.childCompany) {
-    const child = buildShareholder(sh.childCompany, selfName, spouseName, depth + 1);
+    const child = buildShareholder(sh.childCompany, ctx, depth + 1);
     if (child) node.children.push(child);
   } else if (sub === "person") {
-    if (sh.personOwnerType === "spouse") node.children.push(person(spouseName));
-    else if (sh.personOwnerType === "other")
-      node.children.push(person(sh?.personOwner?.name?.trim() || "אדם פרטי"));
+    if (sh.personOwnerType === "spouse") {
+      const c = buildShareholder({ isSpouse: true }, ctx, depth + 1);
+      if (c) node.children.push(c);
+    } else if (sh.personOwnerType === "other") {
+      node.children.push(mkPerson(sh?.personOwner?.name?.trim() || "אדם פרטי"));
+    }
   }
 
   return node;
 };
 
-// ─── Build holding chain (top-down) ──────────────────────────────────────────
-// מחזיר את הצומת העליון בשרשרת, כשה-bottomNode נמצא בתחתית
+// ─── Holding chain (top-down) ─────────────────────────────────────────────────
 
-const buildHoldingChain = (svc: any, selfName: string, spouseName: string, bottomNode: TreeNode, depth = 0): TreeNode => {
+const buildHoldingChain = (
+  svc: any, ctx: BuildCtx, bottomNode: TreeNode, depth = 0
+): TreeNode => {
   if (!svc || depth > 10) return bottomNode;
 
   const isNew = svc?.isExistingCompany === false;
@@ -83,77 +159,75 @@ const buildHoldingChain = (svc: any, selfName: string, spouseName: string, botto
     ? svc?.requestedName1?.trim() || "חברה חדשה"
     : svc?.companyName?.trim() || "חברה מחזיקה";
 
-  const holding = company(label, { isNew, isHolding: true });
+  const holding = mkCompany(label, { isNew, isHolding: true });
   holding.children.push(bottomNode);
 
-  // בעלי מניות נוספים של חברת ההחזקה
   for (const sh of (svc?.shareholders || [])) {
-    if (isSelf(sh, selfName)) continue;
-    const child = buildShareholder(sh, selfName, spouseName, depth + 1);
+    if (isSelf(sh, ctx.selfName)) continue;
+    const child = buildShareholder(sh, ctx, depth + 1);
     if (child) holding.children.push(child);
   }
 
-  // מי מחזיק בחברת ההחזקה (שרשרת למעלה)
   const sub = svc?.subOwnerType;
   if ((sub === "company" || sub === "self_via_company") && svc.childCompany) {
-    return buildHoldingChain(svc.childCompany, selfName, spouseName, holding, depth + 1);
+    return buildHoldingChain(svc.childCompany, ctx, holding, depth + 1);
   }
 
   return holding;
 };
 
-// ─── Build target company node ────────────────────────────────────────────────
+// ─── Target company ───────────────────────────────────────────────────────────
 
-const buildTarget = (t: any, isNew: boolean, selfName: string, spouseName: string): TreeNode => {
+const buildTarget = (t: any, isNew: boolean, ctx: BuildCtx, depth = 0): TreeNode => {
   const label = isNew
     ? t.requestedName1?.trim() || "חברה חדשה"
     : t.name?.trim() || "חברה קיימת";
   const st = t.shareholderType;
 
-  if (st === "alone") return company(label, { isNew, pct: "100" });
+  if (st === "alone") return mkCompany(label, { isNew, pct: "100" });
 
   if (st === "self_via_company") {
     const svc = t.selfViaCompany || {};
-    const target = company(label, { isNew, pct: svc.percentage });
+    const target = mkCompany(label, { isNew, pct: svc.percentage });
     for (const sh of (t.shareholders || [])) {
-      if (isSelf(sh, selfName)) continue;
-      const child = buildShareholder(sh, selfName, spouseName);
+      if (isSelf(sh, ctx.selfName)) continue;
+      const child = buildShareholder(sh, ctx, depth + 1);
       if (child) target.children.push(child);
     }
-    return buildHoldingChain(svc, selfName, spouseName, target);
+    return buildHoldingChain(svc, ctx, target, depth + 1);
   }
 
   if (st === "other") {
     const shList: any[] = t.shareholders || [];
-    const selfEntry = shList.find((s: any) => isSelf(s, selfName));
-    let myPct: string | undefined = selfEntry?.percentage;
+    const selfEntry = shList.find((s: any) => isSelf(s, ctx.selfName));
+    let myPct = selfEntry?.percentage;
     if (!myPct) {
       const othersSum = shList
-        .filter((s: any) => !isSelf(s, selfName))
+        .filter((s: any) => !isSelf(s, ctx.selfName))
         .reduce((acc: number, s: any) => acc + (parseFloat(s?.percentage) || 0), 0);
       myPct = othersSum > 0 && othersSum <= 100 ? String(100 - othersSum) : undefined;
     }
-    const node = company(label, { isNew, pct: myPct });
+    const node = mkCompany(label, { isNew, pct: myPct });
     for (const sh of shList) {
-      if (isSelf(sh, selfName)) continue;
-      const child = buildShareholder(sh, selfName, spouseName);
+      if (isSelf(sh, ctx.selfName)) continue;
+      const child = buildShareholder(sh, ctx, depth + 1);
       if (child) node.children.push(child);
     }
     return node;
   }
 
-  return company(label, { isNew });
+  return mkCompany(label, { isNew });
 };
 
-// ─── Build owner tree ─────────────────────────────────────────────────────────
+// ─── Owner tree ───────────────────────────────────────────────────────────────
 
-const buildOwnerTree = (bi: any, ownerName: string, spouseName: string): TreeNode | null => {
+const buildOwnerTree = (bi: any, ctx: BuildCtx): TreeNode | null => {
   const companies: TreeNode[] = [
-    ...(bi?.existingCompanies || []).map((c: any) => buildTarget(c, false, ownerName, spouseName)),
-    ...(bi?.newCompanies || []).map((c: any) => buildTarget(c, true, ownerName, spouseName)),
+    ...(bi?.existingCompanies || []).map((c: any) => buildTarget(c, false, ctx)),
+    ...(bi?.newCompanies || []).map((c: any) => buildTarget(c, true, ctx)),
   ];
   if (companies.length === 0) return null;
-  const root = person(ownerName);
+  const root = mkPerson(ctx.selfName, undefined, ctx.selfId || ctx.selfName);
   root.children = companies;
   return root;
 };
@@ -165,6 +239,7 @@ const LINE = "rgba(100,116,139,0.45)";
 const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
   const isPerson = node.kind === "person";
   const isHolding = node.isHolding;
+  const isRef = node.isReference;
   const w = compact ? "w-[88px]" : "w-[112px]";
 
   let boxCls = "";
@@ -172,7 +247,9 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
   let pctCls = "";
 
   if (isPerson) {
-    boxCls = "bg-amber-100 border-amber-400";
+    boxCls = isRef
+      ? "bg-amber-50 border-amber-300 border-dashed opacity-70"
+      : "bg-amber-100 border-amber-400";
     textCls = "text-amber-900";
     pctCls = "bg-amber-50 border-amber-300 text-amber-800";
   } else if (isHolding) {
@@ -204,6 +281,9 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
         )}
         {node.isHolding && !node.isNew && (
           <span className={`text-[8px] ${textCls} opacity-60`}>אחזקות</span>
+        )}
+        {isRef && (
+          <span className={`text-[8px] ${textCls} opacity-50`}>↑ מוצג לעיל</span>
         )}
       </div>
       {node.percentage && (
@@ -261,7 +341,15 @@ const TreeNodeView = ({ node, compact }: { node: TreeNode; compact: boolean }) =
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
-  const { currentStep, businessInfo, spouseBusinessInfo, personalInfo } = useFormContext() as any;
+  const {
+    currentStep,
+    businessInfo,
+    spouseBusinessInfo,
+    personalInfo,
+    detailedInfo,
+    spouseInfo,
+  } = useFormContext() as any;
+
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -278,25 +366,66 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   }, [currentStep]);
 
   const selfName = (personalInfo?.firstName || "").trim() || "אני";
+  const selfId = (detailedInfo?.idNumber || "").trim();
   const spouseRaw = (personalInfo?.spouseName || personalInfo?.spouseFirstName || "").trim();
   const spouseName = spouseRaw || "בן/בת זוג";
+  const spouseId = (spouseInfo?.idNumber || "").trim();
 
   const trees = useMemo(() => {
+    const spouseInjected = { v: false };
+    const seenIds = new Set<string>();
+
+    // Mark the self person as seen so they never appear as a duplicate node
+    if (selfId) seenIds.add(selfId);
+    else seenIds.add(selfName);
+
+    // Build user's tree (spouse injection happens here if spouse is co-owner)
+    const userCtx: BuildCtx = {
+      selfName,
+      selfId,
+      spouseName,
+      spouseId,
+      spouseBI: spouseBusinessInfo,
+      spouseInjected,
+      seenIds,
+    };
+    const my = buildOwnerTree(businessInfo, userCtx);
+
+    // Spouse gets a separate tree only if they were NOT injected into user's tree
     const result: TreeNode[] = [];
-    const my = buildOwnerTree(businessInfo, selfName, spouseName);
     if (my) result.push(my);
-    if (spouseRaw) {
-      const sp = buildOwnerTree(spouseBusinessInfo, spouseName, selfName);
+
+    if (spouseRaw && !spouseInjected.v) {
+      const spouseCtx: BuildCtx = {
+        selfName: spouseName,
+        selfId: spouseId,
+        spouseName: selfName,
+        spouseId: selfId,
+        spouseBI: null,
+        spouseInjected: { v: false },
+        seenIds, // share registry so cross-tree dedup works
+      };
+      const sp = buildOwnerTree(spouseBusinessInfo, spouseCtx);
       if (sp) result.push(sp);
     }
+
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(businessInfo), JSON.stringify(spouseBusinessInfo), selfName, spouseName, tick]);
+  }, [
+    JSON.stringify(businessInfo),
+    JSON.stringify(spouseBusinessInfo),
+    selfName, selfId,
+    spouseName, spouseId,
+    tick,
+  ]);
 
   if (currentStep !== 3 || trees.length === 0) return null;
 
   return (
-    <div className={`bg-card/95 backdrop-blur border-2 border-primary/20 rounded-2xl shadow-lg ${compact ? "p-3" : "p-4"}`} dir="rtl">
+    <div
+      className={`bg-card/95 backdrop-blur border-2 border-primary/20 rounded-2xl shadow-lg ${compact ? "p-3" : "p-4"}`}
+      dir="rtl"
+    >
       <div className={`flex items-center gap-2 text-primary font-bold mb-3 ${compact ? "text-sm" : "text-sm"}`}>
         <Network className="w-4 h-4" />
         מפת השליטה בחברה
@@ -320,6 +449,9 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
         </span>
         <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-foreground/70">
           <span className="w-3.5 h-3.5 rounded border-2 border-dashed border-amber-500 bg-primary/10 shrink-0" /> חברת אחזקות
+        </span>
+        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-foreground/70">
+          <span className="w-3.5 h-3.5 rounded border-2 border-dashed border-amber-300 bg-amber-50 shrink-0" /> מוצג לעיל
         </span>
       </div>
     </div>
