@@ -9,7 +9,7 @@ type NodeKind = "person" | "company";
 type OwnerLabel = {
   name: string;
   pct?: string;
-  isSpouseLink?: boolean; // spouse is also a root node in another tree
+  isSpouseLink?: boolean;
 };
 
 type TreeNode = {
@@ -18,22 +18,22 @@ type TreeNode = {
   owners?: OwnerLabel[];
   isNew?: boolean;
   isHolding?: boolean;
-  isActive?: boolean;    // currently being edited in the form
-  isSpouseRoot?: boolean; // spouse's root person box
+  isActive?: boolean;
+  isSpouseRoot?: boolean;
   children: TreeNode[];
 };
 
 type Ctx = {
   selfName: string;
   spouseName: string;
-  spouseHasOwnTree: boolean; // whether spouse has a separate tree (so we add isSpouseLink)
+  spouseHasOwnTree: boolean;
   activeLabel: string | null;
 };
 
 // ─── Factories ────────────────────────────────────────────────────────────────
 
-const mkPerson = (name: string, opts: { isSpouseRoot?: boolean } = {}): TreeNode =>
-  ({ kind: "person", label: name, isSpouseRoot: opts.isSpouseRoot, children: [] });
+const mkPerson = (name: string, isSpouseRoot = false): TreeNode =>
+  ({ kind: "person", label: name, isSpouseRoot, children: [] });
 
 const mkCompany = (
   label: string,
@@ -50,26 +50,29 @@ const mkCompany = (
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const isSelf = (sh: any, selfName: string) =>
-  sh?.isSelf ||
+const isSelf = (sh: any, selfName: string): boolean =>
+  !!sh?.isSelf ||
   sh?.personOwnerType === "self" ||
-  (sh?.holderType !== "company" && sh?.name?.trim() === selfName?.trim());
+  (!sh?.holderType && sh?.name?.trim() === selfName?.trim());
 
-// Resolve a shareholder's display name — handles persons AND company shareholders
+const isCompanyHolder = (sh: any): boolean =>
+  sh?.holderType === "company" || sh?.holderType === "self_via_company";
+
+// Resolve display name for any shareholder type
 const holderName = (sh: any, ctx: Ctx): string => {
   if (sh?.isSelf || sh?.personOwnerType === "self") return ctx.selfName;
   if (sh?.isSpouse || sh?.personOwnerType === "spouse") return ctx.spouseName;
   if (sh?.personOwnerType === "other") return sh?.personOwner?.name?.trim() || "אדם פרטי";
-  // Company-type shareholder (holderType === "company" in new-company flow)
-  if (sh?.holderType === "company") {
+  if (isCompanyHolder(sh)) {
+    // Company-type shareholder — name is in companyName (existing) or requestedName1 (new)
     return sh?.isExistingCompany === false
-      ? (sh?.requestedName1?.trim() || "חברה")
-      : (sh?.companyName?.trim() || sh?.name?.trim() || "חברה");
+      ? (sh?.requestedName1?.trim() || "חברה חדשה")
+      : (sh?.companyName?.trim() || sh?.requestedName1?.trim() || sh?.name?.trim() || "חברה");
   }
   return sh?.name?.trim() || "אדם פרטי";
 };
 
-// Collect owner labels for a company box, self first then others
+// Collect owner labels for a company footer (self first, then others)
 const collectOwners = (shList: any[], ctx: Ctx, overrideSelfPct?: string): OwnerLabel[] => {
   const list = shList || [];
   const selfEntry = list.find((s: any) => isSelf(s, ctx.selfName));
@@ -85,6 +88,7 @@ const collectOwners = (shList: any[], ctx: Ctx, overrideSelfPct?: string): Owner
   const result: OwnerLabel[] = [{ name: ctx.selfName, pct: selfPct }];
   for (const sh of list) {
     if (isSelf(sh, ctx.selfName)) continue;
+    if (isCompanyHolder(sh)) continue; // company shareholders show as nodes, not owner labels
     const name = holderName(sh, ctx);
     result.push({
       name,
@@ -95,6 +99,38 @@ const collectOwners = (shList: any[], ctx: Ctx, overrideSelfPct?: string): Owner
   return result;
 };
 
+// ─── Holding chain (top-down) ─────────────────────────────────────────────────
+
+const buildHoldingChain = (svc: any, ctx: Ctx, bottomNode: TreeNode, depth = 0, parentActive = false): TreeNode => {
+  if (!svc || depth > 10) return bottomNode;
+
+  // Match the form's own display logic exactly
+  const label =
+    svc?.companyName?.trim() ||
+    svc?.requestedName1?.trim() ||
+    svc?.name?.trim() ||
+    "חברה מחזיקה";
+
+  const isNew = svc?.isExistingCompany === false;
+
+  // Shareholders of the HOLDING company itself
+  const shList = svc?.shareholders || [];
+  const owners = shList.length > 0
+    ? collectOwners(shList, ctx, svc?.percentage)
+    : [{ name: ctx.selfName, pct: svc?.selfPercentage }];
+
+  const holding = mkCompany(label, { isNew, isHolding: true, owners, active: parentActive });
+  holding.children.push(bottomNode);
+
+  // Recurse up the chain if holding is itself owned via another company
+  const sub = svc?.subOwnerType;
+  if ((sub === "company" || sub === "self_via_company") && svc.childCompany) {
+    return buildHoldingChain(svc.childCompany, ctx, holding, depth + 1, parentActive);
+  }
+
+  return holding;
+};
+
 // ─── Build target company ─────────────────────────────────────────────────────
 
 const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
@@ -102,25 +138,20 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
     ? (t.requestedName1?.trim() || "חברה חדשה")
     : (t.name?.trim() || "חברה קיימת");
 
-  const active = !!ctx.activeLabel && ctx.activeLabel === (isNew ? t.requestedName1?.trim() : t.name?.trim());
+  const active = !!ctx.activeLabel &&
+    ctx.activeLabel === (isNew ? t.requestedName1?.trim() : t.name?.trim());
+
   const st = t.shareholderType;
 
+  // ── Alone ──────────────────────────────────────────────────────────────────
   if (!st || st === "alone") {
-    return mkCompany(label, {
-      isNew,
-      active,
-      owners: [{ name: ctx.selfName, pct: "100" }],
-    });
+    return mkCompany(label, { isNew, active, owners: [{ name: ctx.selfName, pct: "100" }] });
   }
 
-  if (st === "other") {
-    const owners = collectOwners(t.shareholders || [], ctx);
-    return mkCompany(label, { isNew, active, owners });
-  }
-
+  // ── Self via holding company (explicit shareholderType) ────────────────────
   if (st === "self_via_company") {
     const svc = t.selfViaCompany || {};
-    const otherDirect = (t.shareholders || []).filter((s: any) => !isSelf(s, ctx.selfName));
+    const otherDirect = (t.shareholders || []).filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s));
     const targetOwners: OwnerLabel[] = otherDirect.map((sh: any) => ({
       name: holderName(sh, ctx),
       pct: sh.percentage,
@@ -130,37 +161,39 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
     return buildHoldingChain(svc, ctx, target, depth + 1, active);
   }
 
-  return mkCompany(label, { isNew, active });
-};
+  // ── Other (co-owners; possibly one is a company holding vehicle) ───────────
+  if (st === "other") {
+    const shList: any[] = t.shareholders || [];
 
-// ─── Build holding chain ──────────────────────────────────────────────────────
+    // If self's entry is a "self_via_company" type — build holding chain
+    const selfViaEntry = shList.find((s: any) =>
+      s.holderType === "self_via_company" ||
+      (isSelf(s, ctx.selfName) && s.holderType === "company")
+    );
 
-const buildHoldingChain = (svc: any, ctx: Ctx, bottomNode: TreeNode, depth = 0, parentActive = false): TreeNode => {
-  if (!svc || depth > 10) return bottomNode;
+    if (selfViaEntry) {
+      // Show other direct (person) shareholders in the TARGET company footer
+      const otherPersonOwners: OwnerLabel[] = shList
+        .filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s))
+        .map((sh: any) => ({
+          name: holderName(sh, ctx),
+          pct: sh.percentage,
+          isSpouseLink: ctx.spouseHasOwnTree && holderName(sh, ctx) === ctx.spouseName,
+        }));
+      const target = mkCompany(label, {
+        isNew,
+        active,
+        owners: otherPersonOwners.length ? otherPersonOwners : undefined,
+      });
+      return buildHoldingChain(selfViaEntry, ctx, target, depth + 1, active);
+    }
 
-  // Match the form's own display logic: companyName first, then requestedName1
-  const label =
-    svc?.companyName?.trim() ||
-    svc?.requestedName1?.trim() ||
-    svc?.name?.trim() ||
-    "חברה מחזיקה";
-
-  const isNew = svc?.isExistingCompany === false;
-  const shList = svc?.shareholders || [];
-  const owners =
-    shList.length > 0
-      ? collectOwners(shList, ctx, svc?.selfPercentage)
-      : [{ name: ctx.selfName }];
-
-  const holding = mkCompany(label, { isNew, isHolding: true, owners, active: parentActive });
-  holding.children.push(bottomNode);
-
-  const sub = svc?.subOwnerType;
-  if ((sub === "company" || sub === "self_via_company") && svc.childCompany) {
-    return buildHoldingChain(svc.childCompany, ctx, holding, depth + 1, parentActive);
+    // All shareholders are persons — collect into footer
+    const owners = collectOwners(shList, ctx);
+    return mkCompany(label, { isNew, active, owners });
   }
 
-  return holding;
+  return mkCompany(label, { isNew, active });
 };
 
 // ─── Build owner tree ─────────────────────────────────────────────────────────
@@ -171,7 +204,7 @@ const buildOwnerTree = (bi: any, ownerName: string, isSpouseTree: boolean, ctx: 
     ...(bi?.newCompanies || []).map((c: any) => buildTarget(c, true, ctx)),
   ];
   if (companies.length === 0) return null;
-  const root = mkPerson(ownerName, { isSpouseRoot: isSpouseTree });
+  const root = mkPerson(ownerName, isSpouseTree);
   root.children = companies;
   return root;
 };
@@ -179,15 +212,8 @@ const buildOwnerTree = (bi: any, ownerName: string, isSpouseTree: boolean, ctx: 
 // ─── Visual ───────────────────────────────────────────────────────────────────
 
 const LINE = "rgba(100,116,139,0.45)";
-const SPOUSE_COLOR = "#f59e0b"; // amber-500
 
-type NodeBoxProps = {
-  node: TreeNode;
-  compact: boolean;
-  spouseName: string;
-};
-
-const NodeBox = ({ node, compact, spouseName }: NodeBoxProps) => {
+const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
   const isPerson = node.kind === "person";
   const isHolding = node.isHolding;
   const isActive = node.isActive;
@@ -197,7 +223,7 @@ const NodeBox = ({ node, compact, spouseName }: NodeBoxProps) => {
   let boxCls = "", textCls = "", dividerCls = "";
   if (isPerson) {
     boxCls = isSpouseRoot
-      ? "bg-amber-100 border-amber-500 border-2"
+      ? "bg-amber-100 border-amber-500"
       : "bg-amber-100 border-amber-400";
     textCls = "text-amber-900";
     dividerCls = "border-amber-300";
@@ -211,20 +237,17 @@ const NodeBox = ({ node, compact, spouseName }: NodeBoxProps) => {
     dividerCls = "border-primary/30";
   }
 
+  const activeRing = isActive ? " ring-4 ring-red-500 shadow-red-400 shadow-md" : "";
   const pad = compact ? "px-1.5 py-1" : "px-2 py-1.5";
   const iconSz = compact ? "w-3 h-3" : "w-3.5 h-3.5";
   const lblSz = compact ? "text-[9px]" : "text-[10px]";
   const ownerSz = compact ? "text-[8px]" : "text-[9px]";
 
-  const activeRing = isActive ? " ring-2 ring-yellow-400 shadow-yellow-300 shadow-md" : "";
-
-  const dataAttr = isPerson
-    ? { "data-person-root": node.label }
-    : {};
+  const personAttr = isPerson ? { "data-person-root": node.label } : {};
 
   return (
     <div
-      {...dataAttr}
+      {...personAttr}
       className={`${w} rounded-lg border-2 ${boxCls}${activeRing} overflow-hidden shadow-sm shrink-0`}
     >
       <div className={`${pad} flex flex-col items-center gap-0.5`}>
@@ -246,7 +269,7 @@ const NodeBox = ({ node, compact, spouseName }: NodeBoxProps) => {
               className={[
                 ownerSz,
                 "font-semibold text-center py-0.5 px-1 leading-tight",
-                o.isSpouseLink ? "text-amber-700 bg-amber-50/80" : textCls,
+                o.isSpouseLink ? "text-amber-700 bg-amber-50" : textCls,
                 i > 0 ? `border-t ${dividerCls}` : "",
               ].join(" ")}
             >
@@ -259,20 +282,14 @@ const NodeBox = ({ node, compact, spouseName }: NodeBoxProps) => {
   );
 };
 
-type TreeNodeViewProps = {
-  node: TreeNode;
-  compact: boolean;
-  spouseName: string;
-};
-
-const TreeNodeView = ({ node, compact, spouseName }: TreeNodeViewProps) => {
+const TreeNodeView = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
   const drop = compact ? 18 : 24;
   const gapX = compact ? 8 : 14;
   const hasChildren = node.children.length > 0;
 
   return (
     <div className="inline-flex flex-col items-center shrink-0">
-      <NodeBox node={node} compact={compact} spouseName={spouseName} />
+      <NodeBox node={node} compact={compact} />
       {hasChildren && (
         <>
           <div className="w-px" style={{ height: drop, backgroundColor: LINE }} />
@@ -297,7 +314,7 @@ const TreeNodeView = ({ node, compact, spouseName }: TreeNodeViewProps) => {
                     className="absolute left-1/2 -translate-x-1/2 w-px"
                     style={{ top: 0, height: drop, backgroundColor: LINE }}
                   />
-                  <TreeNodeView node={child} compact={compact} spouseName={spouseName} />
+                  <TreeNodeView node={child} compact={compact} />
                 </div>
               );
             })}
@@ -308,23 +325,23 @@ const TreeNodeView = ({ node, compact, spouseName }: TreeNodeViewProps) => {
   );
 };
 
-// ─── SVG connector lines between spouse root and spouse owner labels ──────────
+// ─── Orthogonal SVG connector (spouse root ↔ spouse owner labels) ─────────────
+// Uses the same color and style as tree connector lines — no dashes, straight segments
 
 type LineSpec = { x1: number; y1: number; x2: number; y2: number };
 
 const ConnectorSVG = ({ lines }: { lines: LineSpec[] }) => (
   <>
     {lines.map((l, i) => {
-      const mx = (l.x1 + l.x2) / 2;
-      const my = (l.y1 + l.y2) / 2;
+      // Orthogonal path: go down from source, across horizontally, then to target
+      const midY = (l.y1 + l.y2) / 2;
+      const d = `M ${l.x1} ${l.y1} V ${midY} H ${l.x2} V ${l.y2}`;
       return (
         <path
           key={i}
-          d={`M ${l.x1} ${l.y1} Q ${mx} ${l.y1} ${mx} ${my} Q ${mx} ${l.y2} ${l.x2} ${l.y2}`}
-          stroke={SPOUSE_COLOR}
-          strokeOpacity={0.55}
-          strokeWidth={1.5}
-          strokeDasharray="5 3"
+          d={d}
+          stroke={LINE}
+          strokeWidth={1}
           fill="none"
         />
       );
@@ -349,7 +366,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const prevBIRef = useRef<string>("");
   const prevSpouseBIRef = useRef<string>("");
 
-  // React to input events for tree re-render
+  // Re-render on any form input event
   useEffect(() => {
     if (currentStep !== 3) return;
     const bump = () => setTick(t => t + 1);
@@ -363,53 +380,39 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     };
   }, [currentStep]);
 
-  // Track which company was last modified → active highlight
+  // Track last modified company → active highlight
   useEffect(() => {
-    const currStr = JSON.stringify(businessInfo || {});
-    if (currStr === prevBIRef.current) return;
+    const curr = JSON.stringify(businessInfo || {});
+    if (curr === prevBIRef.current) return;
     const prev = prevBIRef.current ? JSON.parse(prevBIRef.current) : null;
-    prevBIRef.current = currStr;
+    prevBIRef.current = curr;
     if (!prev) return;
-
-    const currExisting = (businessInfo?.existingCompanies || []) as any[];
-    const prevExisting = (prev?.existingCompanies || []) as any[];
-    for (let i = 0; i < currExisting.length; i++) {
-      if (JSON.stringify(currExisting[i]) !== JSON.stringify(prevExisting[i])) {
-        setActiveLabel(currExisting[i]?.name?.trim() || null);
-        return;
-      }
-    }
-    const currNew = (businessInfo?.newCompanies || []) as any[];
-    const prevNew = (prev?.newCompanies || []) as any[];
-    for (let i = 0; i < currNew.length; i++) {
-      if (JSON.stringify(currNew[i]) !== JSON.stringify(prevNew[i])) {
-        setActiveLabel(currNew[i]?.requestedName1?.trim() || null);
-        return;
+    for (const [key, suffix] of [["existingCompanies", "name"], ["newCompanies", "requestedName1"]] as const) {
+      const currList = ((businessInfo || {})[key] || []) as any[];
+      const prevList = ((prev)[key] || []) as any[];
+      for (let i = 0; i < currList.length; i++) {
+        if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i])) {
+          setActiveLabel(currList[i]?.[suffix]?.trim() || null);
+          return;
+        }
       }
     }
   }, [businessInfo]);
 
   useEffect(() => {
-    const currStr = JSON.stringify(spouseBusinessInfo || {});
-    if (currStr === prevSpouseBIRef.current) return;
+    const curr = JSON.stringify(spouseBusinessInfo || {});
+    if (curr === prevSpouseBIRef.current) return;
     const prev = prevSpouseBIRef.current ? JSON.parse(prevSpouseBIRef.current) : null;
-    prevSpouseBIRef.current = currStr;
+    prevSpouseBIRef.current = curr;
     if (!prev) return;
-
-    const currExisting = (spouseBusinessInfo?.existingCompanies || []) as any[];
-    const prevExisting = (prev?.existingCompanies || []) as any[];
-    for (let i = 0; i < currExisting.length; i++) {
-      if (JSON.stringify(currExisting[i]) !== JSON.stringify(prevExisting[i])) {
-        setActiveLabel(currExisting[i]?.name?.trim() || null);
-        return;
-      }
-    }
-    const currNew = (spouseBusinessInfo?.newCompanies || []) as any[];
-    const prevNew = (prev?.newCompanies || []) as any[];
-    for (let i = 0; i < currNew.length; i++) {
-      if (JSON.stringify(currNew[i]) !== JSON.stringify(prevNew[i])) {
-        setActiveLabel(currNew[i]?.requestedName1?.trim() || null);
-        return;
+    for (const [key, suffix] of [["existingCompanies", "name"], ["newCompanies", "requestedName1"]] as const) {
+      const currList = ((spouseBusinessInfo || {})[key] || []) as any[];
+      const prevList = ((prev)[key] || []) as any[];
+      for (let i = 0; i < currList.length; i++) {
+        if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i])) {
+          setActiveLabel(currList[i]?.[suffix]?.trim() || null);
+          return;
+        }
       }
     }
   }, [spouseBusinessInfo]);
@@ -420,27 +423,18 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
   const spouseHasOwnTree =
     !!spouseRaw &&
-    ((spouseBusinessInfo?.existingCompanies?.length || 0) +
-      (spouseBusinessInfo?.newCompanies?.length || 0)) > 0;
+    ((spouseBusinessInfo?.existingCompanies?.length || 0) + (spouseBusinessInfo?.newCompanies?.length || 0)) > 0;
 
   const trees = useMemo(() => {
     const result: TreeNode[] = [];
-
     const userCtx: Ctx = { selfName, spouseName, spouseHasOwnTree, activeLabel };
     const my = buildOwnerTree(businessInfo, selfName, false, userCtx);
     if (my) result.push(my);
-
     if (spouseRaw) {
-      const spouseCtx: Ctx = {
-        selfName: spouseName,
-        spouseName: selfName,
-        spouseHasOwnTree: false,
-        activeLabel,
-      };
+      const spouseCtx: Ctx = { selfName: spouseName, spouseName: selfName, spouseHasOwnTree: false, activeLabel };
       const sp = buildOwnerTree(spouseBusinessInfo, spouseName, true, spouseCtx);
       if (sp) result.push(sp);
     }
-
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -449,36 +443,32 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     selfName, spouseName, spouseHasOwnTree, activeLabel, tick,
   ]);
 
-  // Draw SVG lines between spouse owner labels and spouse root box
+  // Calculate connecting lines between spouse root box and spouse owner labels
   useLayoutEffect(() => {
     const container = overflowRef.current;
-    if (!container || !spouseHasOwnTree) {
-      setConnLines([]);
-      return;
-    }
+    if (!container || !spouseHasOwnTree) { setConnLines([]); return; }
 
     const cRect = container.getBoundingClientRect();
-    const scrollLeft = container.scrollLeft;
-    const scrollTop = container.scrollTop;
+    const sl = container.scrollLeft;
+    const st2 = container.scrollTop;
+
+    const toRel = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return {
+        cx: r.left + r.width / 2 - cRect.left + sl,
+        cy: r.top + r.height / 2 - cRect.top + st2,
+      };
+    };
 
     const spouseRoot = container.querySelector(`[data-person-root="${CSS.escape(spouseName)}"]`);
-    const ownerRefs = container.querySelectorAll(`[data-owner-ref="${CSS.escape(spouseName)}"]`);
+    const refs = container.querySelectorAll(`[data-owner-ref="${CSS.escape(spouseName)}"]`);
+    if (!spouseRoot || refs.length === 0) { setConnLines([]); return; }
 
-    if (!spouseRoot || ownerRefs.length === 0) {
-      setConnLines([]);
-      return;
-    }
-
-    const sRect = spouseRoot.getBoundingClientRect();
-    const sx = sRect.left + sRect.width / 2 - cRect.left + scrollLeft;
-    const sy = sRect.top + sRect.height / 2 - cRect.top + scrollTop;
-
+    const { cx: x1, cy: y1 } = toRel(spouseRoot);
     const lines: LineSpec[] = [];
-    for (const ref of ownerRefs) {
-      const rRect = ref.getBoundingClientRect();
-      const rx = rRect.left + rRect.width / 2 - cRect.left + scrollLeft;
-      const ry = rRect.top + rRect.height / 2 - cRect.top + scrollTop;
-      lines.push({ x1: sx, y1: sy, x2: rx, y2: ry });
+    for (const ref of refs) {
+      const { cx: x2, cy: y2 } = toRel(ref);
+      lines.push({ x1, y1, x2, y2 });
     }
     setConnLines(lines);
   }, [trees, tick, spouseHasOwnTree, spouseName]);
@@ -493,13 +483,12 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       className={`bg-card/95 backdrop-blur border-2 border-primary/20 rounded-2xl shadow-lg ${compact ? "p-3" : "p-4"}`}
       dir="rtl"
     >
-      <div className={`flex items-center gap-2 text-primary font-bold mb-3 text-sm`}>
+      <div className="flex items-center gap-2 text-primary font-bold mb-3 text-sm">
         <Network className="w-4 h-4" />
         מפת השליטה בחברה
       </div>
 
       <div ref={overflowRef} className="overflow-auto relative">
-        {/* SVG connector lines overlay */}
         {connLines.length > 0 && svgW > 0 && (
           <svg
             style={{
@@ -515,10 +504,9 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
             <ConnectorSVG lines={connLines} />
           </svg>
         )}
-
         <div className="flex items-start justify-center gap-10 min-w-max pb-2 pt-1">
           {trees.map((tree, i) => (
-            <TreeNodeView key={i} node={tree} compact={compact} spouseName={spouseName} />
+            <TreeNodeView key={i} node={tree} compact={compact} />
           ))}
         </div>
       </div>
@@ -535,7 +523,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
           <span className="w-3.5 h-3.5 rounded border-2 border-dashed border-amber-500 bg-primary/10 shrink-0" /> חברת אחזקות
         </span>
         <span className="inline-flex items-center gap-1.5 text-[10px] font-medium text-foreground/70">
-          <span className="w-3.5 h-3.5 rounded border-2 border-yellow-400 ring-1 ring-yellow-400 shrink-0" /> נמלא כעת
+          <span className="w-3.5 h-3.5 rounded border-2 border-red-500 ring-2 ring-red-500 shrink-0" /> נמלא כעת
         </span>
       </div>
     </div>
