@@ -112,18 +112,21 @@ const buildHoldingChain = (svc: any, ctx: Ctx, bottomNode: TreeNode, depth = 0):
 
   const isNew = svc?.isExistingCompany === false;
 
-  // Shareholders of the holding company — don't use target % as override
   const shList = svc?.shareholders || [];
+  const sub = svc?.subOwnerType;
+  const hasChildCompany = (sub === "company" || sub === "self_via_company") && !!svc.childCompany;
   const owners = shList.length > 0
     ? collectOwners(shList, ctx)
-    : [{ name: ctx.selfName }];
+    : hasChildCompany
+      // This holding company is itself held by the child company — show that as owner
+      ? [{ name: svc.childCompany?.companyName?.trim() || svc.childCompany?.requestedName1?.trim() || "חברת אחזקות" }]
+      : [{ name: ctx.selfName }];
 
   const holdingActive = !!ctx.activeLabel && ctx.activeLabel === label;
   const holding = mkCompany(label, { isNew, isHolding: true, owners, active: holdingActive });
   holding.children.push(bottomNode);
 
-  const sub = svc?.subOwnerType;
-  if ((sub === "company" || sub === "self_via_company") && svc.childCompany) {
+  if (hasChildCompany) {
     return buildHoldingChain(svc.childCompany, ctx, holding, depth + 1);
   }
 
@@ -456,19 +459,32 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     };
   }, [currentStep]);
 
-  // Resolve the holding company name that changed within a company entry
+  // Resolve which entity to highlight when a company entry changes.
+  // Returns the holding company name if only its DIRECT fields changed,
+  // or null (→ caller uses top-level target name) when only sub-chain fields changed.
   const holdingNameFromEntry = (curr: any, prev: any): string | null => {
     const currSVC = curr?.selfViaCompany;
     const prevSVC = prev?.selfViaCompany;
     if (currSVC && JSON.stringify(currSVC) !== JSON.stringify(prevSVC || {})) {
-      return currSVC?.companyName?.trim() || currSVC?.requestedName1?.trim() || null;
+      // Only highlight the holding company when its OWN fields changed (not nested childCompany)
+      const currFlat = { ...currSVC, childCompany: undefined };
+      const prevFlat = { ...(prevSVC || {}), childCompany: undefined };
+      if (JSON.stringify(currFlat) !== JSON.stringify(prevFlat)) {
+        return currSVC?.companyName?.trim() || currSVC?.requestedName1?.trim() || null;
+      }
+      return null; // only childCompany changed → fall back to top-level target name
     }
     const currSh = curr?.shareholders || [];
     const prevSh = prev?.shareholders || [];
     for (let j = 0; j < currSh.length; j++) {
       const s = currSh[j];
       if (s?.holderType === "self_via_company" && JSON.stringify(s) !== JSON.stringify(prevSh[j] || {})) {
-        return s?.companyName?.trim() || s?.requestedName1?.trim() || null;
+        const sFlat = { ...s, childCompany: undefined };
+        const pFlat = { ...(prevSh[j] || {}), childCompany: undefined };
+        if (JSON.stringify(sFlat) !== JSON.stringify(pFlat)) {
+          return s?.companyName?.trim() || s?.requestedName1?.trim() || null;
+        }
+        return null; // only childCompany changed
       }
     }
     return null;
