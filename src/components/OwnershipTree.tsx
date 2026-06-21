@@ -295,6 +295,38 @@ const buildSpouseCoownedNodes = (
   return nodes;
 };
 
+// After all trees are built: find every holding node (by label) across ALL trees,
+// then give every instance the union of children + richest owner list.
+const syncHoldingAcrossTrees = (trees: TreeNode[]): void => {
+  const byLabel = new Map<string, TreeNode[]>();
+  const collect = (node: TreeNode) => {
+    if (node.isHolding) {
+      const list = byLabel.get(node.label) ?? [];
+      list.push(node);
+      byLabel.set(node.label, list);
+    }
+    node.children.forEach(collect);
+  };
+  trees.forEach(collect);
+
+  for (const instances of byLabel.values()) {
+    if (instances.length <= 1) continue;
+    // Union of all children (by label)
+    const childMap = new Map<string, TreeNode>();
+    for (const inst of instances)
+      for (const ch of inst.children)
+        if (!childMap.has(ch.label)) childMap.set(ch.label, ch);
+    const mergedChildren = Array.from(childMap.values());
+    // Richest owner list
+    const richest = instances.reduce((best, n) =>
+      (n.owners?.length ?? 0) > (best.owners?.length ?? 0) ? n : best, instances[0]).owners;
+    for (const inst of instances) {
+      inst.children = mergedChildren;
+      inst.owners = richest;
+    }
+  }
+};
+
 // Deduplicates holding company nodes with the same label (merge children + richer owner list)
 const deduplicateHolding = (nodes: TreeNode[]): TreeNode[] => {
   const seen = new Map<string, TreeNode>();
@@ -624,6 +656,8 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
         result.push(spouseRoot);
       }
     }
+    // Sync holding company children/owners across all trees (handles same holding company in both trees)
+    syncHoldingAcrossTrees(result);
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
