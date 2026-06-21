@@ -295,7 +295,7 @@ const buildSpouseCoownedNodes = (
   return nodes;
 };
 
-// Deduplicates holding company nodes with the same label (merge their children)
+// Deduplicates holding company nodes with the same label (merge children + richer owner list)
 const deduplicateHolding = (nodes: TreeNode[]): TreeNode[] => {
   const seen = new Map<string, TreeNode>();
   const result: TreeNode[] = [];
@@ -303,8 +303,13 @@ const deduplicateHolding = (nodes: TreeNode[]): TreeNode[] => {
     if (!node.isHolding) { result.push(node); continue; }
     const prev = seen.get(node.label);
     if (prev) {
+      // Merge children
       for (const child of node.children) {
         if (!prev.children.some(c => c.label === child.label)) prev.children.push(child);
+      }
+      // Keep the richer owner list (the one with more named owners)
+      if ((node.owners?.length ?? 0) > (prev.owners?.length ?? 0)) {
+        prev.owners = node.owners;
       }
     } else {
       seen.set(node.label, node);
