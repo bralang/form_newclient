@@ -508,6 +508,8 @@ const SelfViaCompanyBlock = ({
   const personOwnerWithOther = !!data?.personOwnerWithOther;
   const holdingDisplayName = data?.companyName?.trim() || (data as any)?.requestedName1?.trim() || "החברה המחזיקה";
   const showNewHoldingShareholders = !isExistingHolding && !!renderNewCompanyShareholders;
+  // When the chain was auto-filled from a known ח.פ., hide the shareholder question — it's already set
+  const chainIsKnown = !!(data?.companyNumber?.trim() && knownChains?.get(data.companyNumber.trim())?.subOwnerType);
 
   return (
     <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
@@ -599,22 +601,24 @@ const SelfViaCompanyBlock = ({
         )
       ) : (
         <>
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold">
-              אחד מבעלי המניות של {holdingDisplayName}
-            </Label>
-            <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
-              <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
-                <SelectItem value="company">חברה</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {!chainIsKnown && (
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold">
+                אחד מבעלי המניות של {holdingDisplayName}
+              </Label>
+              <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
+                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
+                  <SelectItem value="company">חברה</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {subOwnerType === "person" && null}
 
-          {subOwnerType === "company" && (
+          {!chainIsKnown && subOwnerType === "company" && (
             <CompanyChainBlock
               data={data?.childCompany || {}}
               onChange={(c) => update({ childCompany: c })}
