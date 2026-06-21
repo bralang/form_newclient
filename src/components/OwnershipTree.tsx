@@ -311,23 +311,35 @@ const syncHoldingAcrossTrees = (trees: TreeNode[]): void => {
 
   for (const instances of byLabel.values()) {
     if (instances.length <= 1) continue;
-    // Union of all children (by label)
-    const childMap = new Map<string, TreeNode>();
-    for (const inst of instances)
-      for (const ch of inst.children)
-        if (!childMap.has(ch.label)) childMap.set(ch.label, ch);
-    const mergedChildren = Array.from(childMap.values());
-    // Richest owner list
+    // Use the richest owner list across all instances
     const richest = instances.reduce((best, n) =>
       (n.owners?.length ?? 0) > (best.owners?.length ?? 0) ? n : best, instances[0]).owners;
+    // Recursively merge all instances into the first one, then broadcast result to all
+    const canonical = instances[0];
+    for (let i = 1; i < instances.length; i++) mergeHoldingChildren(canonical, instances[i]);
+    canonical.owners = richest;
     for (const inst of instances) {
-      inst.children = mergedChildren;
+      inst.children = canonical.children;
       inst.owners = richest;
     }
   }
 };
 
-// Deduplicates holding company nodes with the same label (merge children + richer owner list)
+// Recursively merges source's children into target holding node.
+// When both have the same sub-holding child, recurse into it instead of skipping.
+const mergeHoldingChildren = (target: TreeNode, source: TreeNode): void => {
+  for (const srcChild of source.children) {
+    const existing = target.children.find(c => c.label === srcChild.label);
+    if (existing) {
+      if (existing.isHolding) mergeHoldingChildren(existing, srcChild);
+      if ((srcChild.owners?.length ?? 0) > (existing.owners?.length ?? 0)) existing.owners = srcChild.owners;
+    } else {
+      target.children.push(srcChild);
+    }
+  }
+};
+
+// Deduplicates holding company nodes with the same label (recursive child merge + richer owner list)
 const deduplicateHolding = (nodes: TreeNode[]): TreeNode[] => {
   const seen = new Map<string, TreeNode>();
   const result: TreeNode[] = [];
@@ -335,15 +347,10 @@ const deduplicateHolding = (nodes: TreeNode[]): TreeNode[] => {
     if (!node.isHolding) { result.push(node); continue; }
     const prev = seen.get(node.label);
     if (prev) {
-      // Merge children
-      for (const child of node.children) {
-        if (!prev.children.some(c => c.label === child.label)) prev.children.push(child);
-      }
-      // Keep the richer owner list (the one with more named owners)
-      if ((node.owners?.length ?? 0) > (prev.owners?.length ?? 0)) {
-        prev.owners = node.owners;
-      }
+      mergeHoldingChildren(prev, node);
+      if ((node.owners?.length ?? 0) > (prev.owners?.length ?? 0)) prev.owners = node.owners;
     } else {
+      node.children = deduplicateHolding(node.children); // recurse into sub-chain first
       seen.set(node.label, node);
       result.push(node);
     }
