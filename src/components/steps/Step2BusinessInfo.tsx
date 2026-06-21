@@ -475,6 +475,7 @@ const SelfViaCompanyBlock = ({
   spouseName,
   showSpouseOption = false,
   renderNewCompanyShareholders,
+  knownChains,
 }: {
   data: any;
   onChange: (next: any) => void;
@@ -491,6 +492,7 @@ const SelfViaCompanyBlock = ({
     displayName: string,
     keyPrefix: string,
   ) => React.ReactNode;
+  knownChains?: Map<string, any>;
 }) => {
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
   const updatePerson = (patch: any) =>
@@ -535,7 +537,25 @@ const SelfViaCompanyBlock = ({
           </div>
           <div className="space-y-1">
             <Label>ח.פ. *</Label>
-            <Input value={data?.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
+            <Input
+              value={data?.companyNumber || ""}
+              onChange={(e) => {
+                const num = e.target.value;
+                const known = knownChains?.get(num.trim());
+                if (known && known.subOwnerType && num.trim().length >= 2) {
+                  // Auto-fill the chain structure from a previously-defined holding company
+                  update({
+                    companyNumber: num,
+                    companyName: data?.companyName || known.companyName || "",
+                    subOwnerType: known.subOwnerType,
+                    childCompany: known.childCompany,
+                    shareholders: known.shareholders,
+                  });
+                } else {
+                  update({ companyNumber: num });
+                }
+              }}
+            />
           </div>
           {isNewCompany && (
             <div className="space-y-1">
@@ -1744,6 +1764,26 @@ export const Step2BusinessInfo = () => {
     prefix = "",
     isWarComp: boolean = false
   ) => {
+    // Collect all holding-company chain structures from OTHER companies (by ח.פ.)
+    // so SelfViaCompanyBlock can auto-fill when the same holding company is reused.
+    const collectKnownChains = (): Map<string, any> => {
+      const map = new Map<string, any>();
+      const walk = (svc: any) => {
+        if (!svc) return;
+        const key = svc?.companyNumber?.trim();
+        if (key && svc.subOwnerType) map.set(key, svc);
+        if (svc.childCompany) walk(svc.childCompany);
+      };
+      for (const c of [...(info?.existingCompanies || []), ...(info?.newCompanies || [])]) {
+        if (c.selfViaCompany) walk(c.selfViaCompany);
+        for (const sh of c.shareholders || []) {
+          if (sh.childCompany) walk(sh.childCompany);
+        }
+      }
+      return map;
+    };
+    const knownChains = collectKnownChains();
+
     const isSpouseSection = prefix.startsWith("sp");
     const hasExistingPurpose = isSpouseSection
       ? (serviceType.spousePurposeStatus?.company?.includes("existing") || spouseWarEntities.includes("company"))
@@ -1980,6 +2020,7 @@ export const Step2BusinessInfo = () => {
                 spouseName={spouseDisplayName}
                 showSpouseOption={showSpouseOption}
                 renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
+                knownChains={knownChains}
               />
             )}
           </div>
@@ -2069,6 +2110,7 @@ export const Step2BusinessInfo = () => {
                 spouseName={spouseDisplayName}
                 showSpouseOption={showSpouseOption}
                 renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
+                knownChains={knownChains}
               />
             )}
 
