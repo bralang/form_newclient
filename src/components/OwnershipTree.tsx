@@ -557,21 +557,24 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const prevBIRef = useRef<string>("");
   const prevSpouseBIRef = useRef<string>("");
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     const el = printAreaRef.current;
     if (!el) return;
-    const css = Array.from(document.styleSheets)
-      .flatMap(s => { try { return Array.from(s.cssRules).map(r => r.cssText); } catch { return []; } })
-      .join("\n");
-    const win = window.open("", "_blank");
-    if (!win) return;
-    win.document.write(
-      `<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>מפת השליטה בחברה</title>` +
-      `<style>${css} body{background:#fff;padding:24px;} @page{size:landscape;margin:1cm;}</style>` +
-      `</head><body>${el.innerHTML}</body></html>`
-    );
-    win.document.close();
-    setTimeout(() => { win.print(); }, 400);
+    try {
+      const dataUrl = await toPng(el, { backgroundColor: "#ffffff", pixelRatio: 2 });
+      const win = window.open("", "_blank");
+      if (!win) return;
+      win.document.write(
+        `<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>מפת השליטה בחברה</title>` +
+        `<style>body{margin:0;padding:0;background:#fff;display:flex;justify-content:center;align-items:flex-start;}` +
+        `img{max-width:100%;height:auto;} @page{size:landscape;margin:0.5cm;}</style>` +
+        `</head><body><img src="${dataUrl}"/></body></html>`
+      );
+      win.document.close();
+      setTimeout(() => { win.print(); }, 400);
+    } catch (e) {
+      console.error("Print failed", e);
+    }
   };
 
   const handleDownload = async () => {
@@ -781,13 +784,9 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
     {isFullscreen && createPortal(
       <div
-        className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4"
+        className="fixed inset-0 z-[9999] bg-card flex flex-col"
         dir="rtl"
-        onClick={(e) => { if (e.target === e.currentTarget) setIsFullscreen(false); }}
       >
-        <div className="bg-card rounded-2xl shadow-2xl border-2 border-primary/20 relative overflow-hidden flex flex-col"
-          style={{ width: "95vw", maxHeight: "92vh" }}
-        >
           <div className="flex items-center gap-2 text-primary font-bold p-4 pb-2 text-sm border-b border-border">
             <Network className="w-4 h-4" />
             מפת השליטה בחברה
@@ -838,7 +837,6 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
               <span className="w-3.5 h-3.5 rounded border-2 border-red-500 ring-2 ring-red-500 shrink-0" /> אתה כאן
             </span>
           </div>
-        </div>
       </div>,
       document.body
     )}
