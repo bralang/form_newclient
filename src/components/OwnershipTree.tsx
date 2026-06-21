@@ -259,13 +259,9 @@ const buildSpouseCoownedNodes = (
       owners: targetOwners.length ? targetOwners : undefined,
     });
 
-    // Holding company owners — remap isSelf/isSpouse to actual names
-    const holdingOwners: OwnerLabel[] = holdingShList.map((sh: any) => ({
-      name: sh.isSelf ? selfName
-           : isSpouseEntry(sh, spouseName) ? spouseName
-           : (sh.name || "?"),
-      pct: sh.percentage,
-    }));
+    // Holding company owners — use collectOwners so the implicit self-owner is always included
+    const ownerCtx: Ctx = { selfName, spouseName, spouseHasOwnTree: false, activeLabel: null };
+    const holdingOwners: OwnerLabel[] = collectOwners(holdingShList, ownerCtx);
     const holding = mkCompany(holdingLabel, {
       isNew: holdingIsNew,
       isHolding: true,
@@ -601,9 +597,13 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const trees = useMemo(() => {
     const result: TreeNode[] = [];
     const userCtx: Ctx = { selfName, spouseName, spouseHasOwnTree, activeLabel };
+    // Also pull in spouse's companies where the user appears as a co-owner
+    const reverseCoowned = spouseRaw
+      ? buildSpouseCoownedNodes(spouseBusinessInfo, spouseName, selfName, activeLabel)
+      : [];
     const my = buildOwnerTree(businessInfo, selfName, false, userCtx);
     if (my) {
-      my.children = deduplicateHolding(my.children);
+      my.children = deduplicateHolding([...my.children, ...reverseCoowned]);
       result.push(my);
     }
     if (spouseRaw) {
