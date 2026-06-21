@@ -319,6 +319,8 @@ export const Step3Documents = () => {
             companyList?.forEach((company: any, cIdx: number) => {
               const compName = company.name || company.requestedName1 || `חברה #${cIdx + 1}`;
               (company.shareholders || []).forEach((sh: any, sIdx: number) => {
+                // Skip self/spouse — their IDs are already collected in the main identity sections
+                if (sh.isSelf || sh.isSpouse) return;
                 if ((sh.holderType || "person") === "person" && sh.name) {
                   rows.push({
                     label: `צילום ת.ז. + ספח של ${sh.name} (${compName})`,

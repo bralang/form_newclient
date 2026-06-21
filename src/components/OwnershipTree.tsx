@@ -156,7 +156,7 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
   if (st === "self_via_company") {
     const svc = t.selfViaCompany || {};
     const holdingLabel = svc?.companyName?.trim() || svc?.requestedName1?.trim() || null;
-    const otherDirect = (t.shareholders || []).filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s));
+    const otherDirect = (t.shareholders || []).filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s) && !s.isSpouse);
     const targetOwners: OwnerLabel[] = [
       // Show holding company stake in new target companies
       ...(isNew && holdingLabel ? [{ name: holdingLabel, pct: svc?.percentage }] : []),
@@ -184,8 +184,10 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
       const holdingLabel = selfViaEntry?.companyName?.trim() || selfViaEntry?.requestedName1?.trim() || null;
       const otherPersonOwners: OwnerLabel[] = [
         ...(isNew && holdingLabel ? [{ name: holdingLabel, pct: selfViaEntry?.percentage }] : []),
+        // Exclude self (via holding chain) and auto-included spouse (isSpouse:true);
+        // the spouse's indirect ownership is shown via the holding company's owner list
         ...shList
-          .filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s))
+          .filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s) && !s.isSpouse)
           .map((sh: any) => ({
             name: holderName(sh, ctx),
             pct: sh.percentage,
