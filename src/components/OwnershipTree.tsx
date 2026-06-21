@@ -697,6 +697,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   if (currentStep !== 3 || trees.length === 0) return null;
 
   return (
+    <>
     <div
       className={`bg-card/95 backdrop-blur border-2 border-primary/20 rounded-2xl shadow-lg ${compact ? "p-3" : "p-4"}`}
       dir="rtl"
@@ -783,5 +784,6 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       </div>,
       document.body
     )}
+    </>
   );
 };
