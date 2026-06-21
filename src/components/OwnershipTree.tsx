@@ -1,6 +1,7 @@
 import { useFormContext } from "@/contexts/FormContext";
-import { Building2, Network, User } from "lucide-react";
+import { Building2, Maximize2, Network, User, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -542,9 +543,29 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
   const [tick, setTick] = useState(0);
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const overflowRef = useRef<HTMLDivElement>(null);
   const prevBIRef = useRef<string>("");
   const prevSpouseBIRef = useRef<string>("");
+
+  // Auto-scroll the map to the active (red-ring) node whenever it changes
+  useEffect(() => {
+    if (!activeLabel) return;
+    const timer = setTimeout(() => {
+      const container = overflowRef.current;
+      if (!container) return;
+      const el = container.querySelector(".ring-red-500") as HTMLElement | null;
+      if (!el) return;
+      const cr = container.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      container.scrollTo({
+        left: container.scrollLeft + er.left - cr.left - cr.width / 2 + er.width / 2,
+        top: container.scrollTop + er.top - cr.top - cr.height / 2 + er.height / 2,
+        behavior: "smooth",
+      });
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [activeLabel]);
 
   // Re-render on any form input event
   useEffect(() => {
@@ -683,6 +704,13 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       <div className="flex items-center gap-2 text-primary font-bold mb-3 text-sm">
         <Network className="w-4 h-4" />
         מפת השליטה בחברה
+        <button
+          onClick={() => setIsFullscreen(true)}
+          className="mr-auto p-1 rounded-lg hover:bg-primary/10 text-primary/50 hover:text-primary transition-colors"
+          title="הצג מפה מלאה"
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
       </div>
 
       <div ref={overflowRef} className="overflow-auto">
@@ -709,5 +737,51 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
         </span>
       </div>
     </div>
+
+    {isFullscreen && createPortal(
+      <div
+        className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4"
+        dir="rtl"
+        onClick={(e) => { if (e.target === e.currentTarget) setIsFullscreen(false); }}
+      >
+        <div className="bg-card rounded-2xl shadow-2xl border-2 border-primary/20 relative overflow-hidden flex flex-col"
+          style={{ width: "95vw", maxHeight: "92vh" }}
+        >
+          <div className="flex items-center gap-2 text-primary font-bold p-4 pb-2 text-sm border-b border-border">
+            <Network className="w-4 h-4" />
+            מפת השליטה בחברה
+            <button
+              onClick={() => setIsFullscreen(false)}
+              className="mr-auto p-1.5 rounded-lg hover:bg-primary/10 text-primary/50 hover:text-primary transition-colors"
+              title="סגור"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="overflow-auto flex-1 p-4">
+            <div className="flex items-start justify-center gap-10 min-w-max pb-4 pt-2">
+              {trees.map((tree, i) => (
+                <TreeNodeView key={i} node={tree} compact={false} />
+              ))}
+            </div>
+          </div>
+          <div className="border-t border-border px-4 py-2 flex flex-wrap gap-x-4 gap-y-1">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-foreground">
+              <span className="w-3.5 h-3.5 rounded border-2 border-amber-400 bg-amber-100 shrink-0" /> אדם פרטי
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-foreground">
+              <span className="w-3.5 h-3.5 rounded border-2 border-dashed border-amber-500 bg-primary/10 shrink-0" /> חברת אחזקות
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-foreground">
+              <span className="w-3.5 h-3.5 rounded border-2 border-primary bg-primary/10 shrink-0" /> חברה
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-red-600">
+              <span className="w-3.5 h-3.5 rounded border-2 border-red-500 ring-2 ring-red-500 shrink-0" /> אתה כאן
+            </span>
+          </div>
+        </div>
+      </div>,
+      document.body
+    )}
   );
 };
