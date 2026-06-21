@@ -299,6 +299,52 @@ const buildSpouseCoownedNodes = (
   return nodes;
 };
 
+// Deduplicates holding company nodes with the same label (merge their children)
+const deduplicateHolding = (nodes: TreeNode[]): TreeNode[] => {
+  const seen = new Map<string, TreeNode>();
+  const result: TreeNode[] = [];
+  for (const node of nodes) {
+    if (!node.isHolding) { result.push(node); continue; }
+    const prev = seen.get(node.label);
+    if (prev) {
+      for (const child of node.children) {
+        if (!prev.children.some(c => c.label === child.label)) prev.children.push(child);
+      }
+    } else {
+      seen.set(node.label, node);
+      result.push(node);
+    }
+  }
+  return result;
+};
+
+// Finds the label of whichever holding chain level was actually edited
+const findEditedHoldingLabel = (curr: any, prev: any): string | null => {
+  const deepLabel = (svc: any, prevSvc: any): string | null => {
+    if (!svc) return null;
+    const name = svc?.companyName?.trim() || svc?.requestedName1?.trim() || null;
+    const flat = (x: any) => ({ ...x, childCompany: undefined, shareholders: undefined });
+    if (JSON.stringify(flat(svc)) !== JSON.stringify(flat(prevSvc || {}))) return name;
+    if (JSON.stringify(svc.shareholders || []) !== JSON.stringify((prevSvc || {}).shareholders || [])) return name;
+    if (svc?.childCompany) return deepLabel(svc.childCompany, (prevSvc || {}).childCompany);
+    return null;
+  };
+  const currSVC = curr?.selfViaCompany;
+  const prevSVC = (prev || {})?.selfViaCompany;
+  if (currSVC && JSON.stringify(currSVC) !== JSON.stringify(prevSVC || {})) {
+    return deepLabel(currSVC, prevSVC);
+  }
+  const currSh: any[] = curr?.shareholders || [];
+  const prevSh: any[] = (prev || {})?.shareholders || [];
+  for (let j = 0; j < currSh.length; j++) {
+    const s = currSh[j];
+    if (s?.holderType === "self_via_company" && JSON.stringify(s) !== JSON.stringify(prevSh[j] || {})) {
+      return deepLabel(s, prevSh[j]);
+    }
+  }
+  return null;
+};
+
 const hasSpouseCoowned = (bi: any, spouseName: string): boolean => {
   for (const c of [...(bi?.existingCompanies || []), ...(bi?.newCompanies || [])]) {
     if (c.shareholderType === "self_via_company") {
@@ -358,8 +404,16 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
         <span className={`${lblSz} font-bold text-center leading-tight break-words ${textCls}`}>
           {node.label}
         </span>
-        {node.isNew && <span className={`text-[8px] ${textCls} opacity-60`}>חדש</span>}
-        {isHolding && !node.isNew && <span className={`text-[8px] ${textCls} opacity-60`}>אחזקות</span>}
+        {node.isNew && (
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-400 leading-none">
+            חדש
+          </span>
+        )}
+        {!node.isNew && !isPerson && (
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full leading-none ${isHolding ? "bg-amber-100 text-amber-700 border border-amber-400" : "bg-slate-100 text-slate-500 border border-slate-300"}`}>
+            {isHolding ? "אחזקות" : "קיים"}
+          </span>
+        )}
       </div>
       {node.owners && node.owners.length > 0 && (
         <div className={`border-t-2 ${dividerCls}`}>
@@ -466,7 +520,9 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     };
   }, [currentStep]);
 
-  // Track last modified company → active highlight (always use the top-level target name)
+  // Track last modified company → active highlight.
+  // Highlights the holding company when its own fields are being edited,
+  // otherwise highlights the top-level target company.
   useEffect(() => {
     const curr = JSON.stringify(businessInfo || {});
     if (curr === prevBIRef.current) return;
@@ -478,6 +534,8 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       const prevList = ((prev)[key] || []) as any[];
       for (let i = 0; i < currList.length; i++) {
         if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i] || {})) {
+          const holdingLabel = findEditedHoldingLabel(currList[i], prevList[i] || {});
+          if (holdingLabel) { setActiveLabel(holdingLabel); return; }
           setActiveLabel(currList[i]?.[suffix]?.trim() || null);
           return;
         }
@@ -496,6 +554,8 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       const prevList = ((prev)[key] || []) as any[];
       for (let i = 0; i < currList.length; i++) {
         if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i] || {})) {
+          const holdingLabel = findEditedHoldingLabel(currList[i], prevList[i] || {});
+          if (holdingLabel) { setActiveLabel(holdingLabel); return; }
           setActiveLabel(currList[i]?.[suffix]?.trim() || null);
           return;
         }
@@ -542,17 +602,20 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     const result: TreeNode[] = [];
     const userCtx: Ctx = { selfName, spouseName, spouseHasOwnTree, activeLabel };
     const my = buildOwnerTree(businessInfo, selfName, false, userCtx);
-    if (my) result.push(my);
+    if (my) {
+      my.children = deduplicateHolding(my.children);
+      result.push(my);
+    }
     if (spouseRaw) {
       const spouseCtx: Ctx = { selfName: spouseName, spouseName: selfName, spouseHasOwnTree: false, activeLabel };
       const sp = buildOwnerTree(spouseBusinessInfo, spouseName, true, spouseCtx);
       const coowned = buildSpouseCoownedNodes(businessInfo, selfName, spouseName, activeLabel);
       if (sp) {
-        sp.children.push(...coowned);
+        sp.children = deduplicateHolding([...sp.children, ...coowned]);
         result.push(sp);
       } else if (coowned.length > 0) {
         const spouseRoot = mkPerson(spouseName, true);
-        spouseRoot.children = coowned;
+        spouseRoot.children = deduplicateHolding(coowned);
         result.push(spouseRoot);
       }
     }
