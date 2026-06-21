@@ -223,6 +223,86 @@ const buildOwnerTree = (bi: any, ownerName: string, isSpouseTree: boolean, ctx: 
   return root;
 };
 
+// ─── Spouse co-ownership tree ─────────────────────────────────────────────────
+
+// Returns holding-company nodes for cases where the SPOUSE appears as a co-owner
+// in the user's holding-company shareholder list (isSelf/isSpouse relative to the filler).
+const buildSpouseCoownedNodes = (
+  bi: any,
+  selfName: string,
+  spouseName: string,
+  activeLabel: string | null,
+): TreeNode[] => {
+  const nodes: TreeNode[] = [];
+
+  const processHolding = (svc: any, targetLabel: string, targetIsNew: boolean) => {
+    const holdingShList: any[] = svc?.shareholders || [];
+    if (!holdingShList.some((s: any) => s.isSpouse)) return;
+
+    const holdingLabel = svc?.companyName?.trim() || svc?.requestedName1?.trim() || "חברת אחזקות";
+    const holdingIsNew = svc?.isExistingCompany === false;
+
+    // Target node — show holding company's stake if new
+    const targetOwners: OwnerLabel[] = targetIsNew && holdingLabel
+      ? [{ name: holdingLabel, pct: svc?.percentage }] : [];
+    const target = mkCompany(targetLabel, {
+      isNew: targetIsNew,
+      active: activeLabel === targetLabel,
+      owners: targetOwners.length ? targetOwners : undefined,
+    });
+
+    // Holding company owners — remap isSelf/isSpouse to actual names
+    const holdingOwners: OwnerLabel[] = holdingShList.map((sh: any) => ({
+      name: sh.isSelf ? selfName : sh.isSpouse ? spouseName : (sh.name || "?"),
+      pct: sh.percentage,
+    }));
+    const holding = mkCompany(holdingLabel, {
+      isNew: holdingIsNew,
+      isHolding: true,
+      owners: holdingOwners.length ? holdingOwners : undefined,
+      active: activeLabel === holdingLabel,
+    });
+    holding.children.push(target);
+    nodes.push(holding);
+  };
+
+  const allCompanies = [
+    ...(bi?.existingCompanies || []).map((c: any) => ({ c, isNew: false })),
+    ...(bi?.newCompanies || []).map((c: any) => ({ c, isNew: true })),
+  ];
+
+  for (const { c, isNew } of allCompanies) {
+    const label = isNew
+      ? (c.requestedName1?.trim() || "חברה חדשה")
+      : (c.name?.trim() || "חברה קיימת");
+
+    if (c.shareholderType === "self_via_company") {
+      processHolding(c.selfViaCompany, label, isNew);
+    } else if (c.shareholderType === "other") {
+      const selfViaEntry = (c.shareholders || []).find(
+        (s: any) => s.holderType === "self_via_company" || (s.isSelf && s.holderType === "company")
+      );
+      if (selfViaEntry) processHolding(selfViaEntry, label, isNew);
+    }
+  }
+
+  return nodes;
+};
+
+const hasSpouseCoowned = (bi: any): boolean => {
+  for (const c of [...(bi?.existingCompanies || []), ...(bi?.newCompanies || [])]) {
+    if (c.shareholderType === "self_via_company") {
+      if ((c.selfViaCompany?.shareholders || []).some((s: any) => s.isSpouse)) return true;
+    } else if (c.shareholderType === "other") {
+      const sve = (c.shareholders || []).find(
+        (s: any) => s.holderType === "self_via_company" || (s.isSelf && s.holderType === "company")
+      );
+      if (sve && (sve.shareholders || []).some((s: any) => s.isSpouse)) return true;
+    }
+  }
+  return false;
+};
+
 // ─── Visual ───────────────────────────────────────────────────────────────────
 
 const LINE = "rgba(100,116,139,0.45)";
@@ -465,7 +545,10 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
 
   const spouseHasOwnTree =
     !!spouseRaw &&
-    ((spouseBusinessInfo?.existingCompanies?.length || 0) + (spouseBusinessInfo?.newCompanies?.length || 0)) > 0;
+    (
+      ((spouseBusinessInfo?.existingCompanies?.length || 0) + (spouseBusinessInfo?.newCompanies?.length || 0)) > 0 ||
+      hasSpouseCoowned(businessInfo)
+    );
 
   const trees = useMemo(() => {
     const result: TreeNode[] = [];
@@ -475,7 +558,15 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     if (spouseRaw) {
       const spouseCtx: Ctx = { selfName: spouseName, spouseName: selfName, spouseHasOwnTree: false, activeLabel };
       const sp = buildOwnerTree(spouseBusinessInfo, spouseName, true, spouseCtx);
-      if (sp) result.push(sp);
+      const coowned = buildSpouseCoownedNodes(businessInfo, selfName, spouseName, activeLabel);
+      if (sp) {
+        sp.children.push(...coowned);
+        result.push(sp);
+      } else if (coowned.length > 0) {
+        const spouseRoot = mkPerson(spouseName, true);
+        spouseRoot.children = coowned;
+        result.push(spouseRoot);
+      }
     }
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
