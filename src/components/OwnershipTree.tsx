@@ -1,5 +1,6 @@
 import { useFormContext } from "@/contexts/FormContext";
-import { Building2, Maximize2, Network, User, X } from "lucide-react";
+import { Building2, Download, Maximize2, Network, Printer, User, X } from "lucide-react";
+import { toPng } from "html-to-image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -400,6 +401,13 @@ const hasSpouseCoowned = (bi: any, spouseName: string): boolean => {
   return false;
 };
 
+// Strip active (red-ring) flag from all nodes — used in the fullscreen view
+const stripActive = (node: TreeNode): TreeNode => ({
+  ...node,
+  isActive: false,
+  children: node.children.map(stripActive),
+});
+
 // ─── Visual ───────────────────────────────────────────────────────────────────
 
 const LINE = "rgba(100,116,139,0.45)";
@@ -545,8 +553,40 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const overflowRef = useRef<HTMLDivElement>(null);
+  const printAreaRef = useRef<HTMLDivElement>(null);
   const prevBIRef = useRef<string>("");
   const prevSpouseBIRef = useRef<string>("");
+
+  const handlePrint = () => {
+    const el = printAreaRef.current;
+    if (!el) return;
+    const css = Array.from(document.styleSheets)
+      .flatMap(s => { try { return Array.from(s.cssRules).map(r => r.cssText); } catch { return []; } })
+      .join("\n");
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(
+      `<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>מפת השליטה בחברה</title>` +
+      `<style>${css} body{background:#fff;padding:24px;} @page{size:landscape;margin:1cm;}</style>` +
+      `</head><body>${el.innerHTML}</body></html>`
+    );
+    win.document.close();
+    setTimeout(() => { win.print(); }, 400);
+  };
+
+  const handleDownload = async () => {
+    const el = printAreaRef.current;
+    if (!el) return;
+    try {
+      const dataUrl = await toPng(el, { backgroundColor: "#ffffff", pixelRatio: 2 });
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = "מפת-שליטה.png";
+      a.click();
+    } catch (e) {
+      console.error("Download failed", e);
+    }
+  };
 
   // Auto-scroll the map to the active (red-ring) node whenever it changes
   useEffect(() => {
@@ -707,10 +747,10 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
         מפת השליטה בחברה
         <button
           onClick={() => setIsFullscreen(true)}
-          className="mr-auto p-1 rounded-lg hover:bg-primary/10 text-primary/50 hover:text-primary transition-colors"
-          title="הצג מפה מלאה"
+          className="mr-auto flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-semibold transition-colors"
         >
-          <Maximize2 className="w-4 h-4" />
+          <Maximize2 className="w-3.5 h-3.5" />
+          הצג מפה מלאה
         </button>
       </div>
 
@@ -751,17 +791,35 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
           <div className="flex items-center gap-2 text-primary font-bold p-4 pb-2 text-sm border-b border-border">
             <Network className="w-4 h-4" />
             מפת השליטה בחברה
-            <button
-              onClick={() => setIsFullscreen(false)}
-              className="mr-auto p-1.5 rounded-lg hover:bg-primary/10 text-primary/50 hover:text-primary transition-colors"
-              title="סגור"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="mr-auto flex items-center gap-2">
+              <button
+                onClick={handlePrint}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-semibold transition-colors"
+                title="הדפס"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                הדפס
+              </button>
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-[11px] font-semibold transition-colors"
+                title="הורד PNG"
+              >
+                <Download className="w-3.5 h-3.5" />
+                הורד
+              </button>
+              <button
+                onClick={() => setIsFullscreen(false)}
+                className="p-1.5 rounded-lg hover:bg-primary/10 text-primary/50 hover:text-primary transition-colors"
+                title="סגור"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
           <div className="overflow-auto flex-1 p-4">
-            <div className="flex items-start justify-center gap-10 min-w-max pb-4 pt-2">
-              {trees.map((tree, i) => (
+            <div ref={printAreaRef} className="flex items-start justify-center gap-10 min-w-max pb-4 pt-2 bg-white">
+              {trees.map(stripActive).map((tree, i) => (
                 <TreeNodeView key={i} node={tree} compact={false} />
               ))}
             </div>
