@@ -1246,7 +1246,7 @@ export const Step2BusinessInfo = () => {
                           />
                         </div>
                       )}
-                      {(includeSelfAsFirstShareholder || sh.personOwnerType === "other") && (
+                      {includeSelfAsFirstShareholder && (
                         <>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
@@ -1280,6 +1280,23 @@ export const Step2BusinessInfo = () => {
                             )}
                           </div>
                         </>
+                      )}
+                      {sh.personOwnerType === "other" && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
+                          <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
+                          {isNewCompany && (
+                            <div className="space-y-1">
+                              <Label>אחוזי אחזקה *</Label>
+                              <AutoPercentageInput
+                                value={sh.percentage || ""}
+                                onChange={(value) => updateShareholder(idx, "percentage", value)}
+                                max={maxPct}
+                                autoFillTo={pctAutoFill}
+                              />
+                            </div>
+                          )}
+                        </div>
                       )}
                       {!includeSelfAsFirstShareholder && (sh.personOwnerType === "self" || sh.personOwnerType === "spouse") && isNewCompany && (
                         <div className="space-y-1">

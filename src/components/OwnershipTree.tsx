@@ -64,7 +64,7 @@ const isCompanyHolder = (sh: any): boolean =>
 const holderName = (sh: any, ctx: Ctx): string => {
   if (sh?.isSelf || sh?.personOwnerType === "self") return ctx.selfName;
   if (sh?.isSpouse || sh?.personOwnerType === "spouse") return ctx.spouseName;
-  if (sh?.personOwnerType === "other") return sh?.personOwner?.name?.trim() || "אדם פרטי";
+  if (sh?.personOwnerType === "other") return sh?.personOwner?.name?.trim() || sh?.name?.trim() || "אדם פרטי";
   if (isCompanyHolder(sh)) {
     // Company-type shareholder — name is in companyName (existing) or requestedName1 (new)
     return sh?.isExistingCompany === false
@@ -90,7 +90,7 @@ const collectOwners = (shList: any[], ctx: Ctx, overrideSelfPct?: string): Owner
   const result: OwnerLabel[] = [{ name: ctx.selfName, pct: selfPct }];
   for (const sh of list) {
     if (isSelf(sh, ctx.selfName)) continue;
-    if (isCompanyHolder(sh)) continue; // company shareholders show as nodes, not owner labels
+    if (sh?.holderType === "self_via_company") continue; // self_via_company becomes the holding chain node; other company co-owners show as name labels
     const name = holderName(sh, ctx);
     result.push({
       name,
@@ -191,7 +191,7 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
         // Exclude self (via holding chain) and auto-included spouse (isSpouse:true);
         // the spouse's indirect ownership is shown via the holding company's owner list
         ...shList
-          .filter((s: any) => !isSelf(s, ctx.selfName) && !isCompanyHolder(s) && !s.isSpouse)
+          .filter((s: any) => s !== selfViaEntry && !isSelf(s, ctx.selfName) && !s.isSpouse)
           .map((sh: any) => ({
             name: holderName(sh, ctx),
             pct: sh.percentage,
