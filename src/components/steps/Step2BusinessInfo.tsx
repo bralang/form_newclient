@@ -2135,6 +2135,33 @@ export const Step2BusinessInfo = () => {
               />
             )}
 
+            {company.shareholderType === "self_via_company" && renderShareholdersSection(
+              company,
+              (field: string, value: any) => {
+                const updated = [...(info.newCompanies || [])];
+                updated[idx] = { ...updated[idx], [field]: value };
+                setInfo({ newCompanies: updated });
+              },
+              (updates: Record<string, any>) => {
+                const updated = [...(info.newCompanies || [])];
+                updated[idx] = { ...updated[idx], ...updates };
+                setInfo({ newCompanies: updated });
+              },
+              name,
+              selfIdNumber,
+              selfPhone,
+              selfEmail,
+              spouseDisplayName,
+              spouseIdNumber,
+              spousePhone,
+              spouseEmail,
+              showSpouseOption,
+              `${prefix}new_${idx}_direct_`,
+              false,
+              company.requestedName1 || `החברה החדשה #${idx + 1}`,
+              false,
+            )}
+
             {company.shareholderType === "other" && renderShareholdersSection(
               company,
               (field: string, value: any) => {
