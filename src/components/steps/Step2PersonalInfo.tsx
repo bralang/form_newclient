@@ -564,45 +564,6 @@ export const Step2PersonalInfo = () => {
               </Button>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 p-3 bg-background/60 rounded-lg border border-border/50">
-              <Label className="text-sm text-muted-foreground min-w-[140px]">תזכורת לטלפון</Label>
-              <Button variant="outline" size="sm" onClick={handleSendReminder}>
-                <Phone className="ml-2 h-4 w-4" />
-                תזכורת לטלפון
-              </Button>
-              <div className="flex items-center gap-2">
-                <Label htmlFor="reminderTime" className="text-xs text-muted-foreground whitespace-nowrap">
-                  שעה מועדפת
-                </Label>
-                <Input
-                  id="reminderTime"
-                  type="time"
-                  value={reminderTime}
-                  onChange={(e) => setReminderTime(e.target.value)}
-                  className="w-32 h-9"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 p-3 bg-background/60 rounded-lg border border-border/50">
-              <Label className="text-sm text-muted-foreground min-w-[140px]">תזכורת במייל</Label>
-              <Button variant="outline" size="sm" onClick={handleSendEmailReminder}>
-                <Mail className="ml-2 h-4 w-4" />
-                תזכורת למייל
-              </Button>
-              <div className="flex items-center gap-2">
-                <Label htmlFor="emailReminderTime" className="text-xs text-muted-foreground whitespace-nowrap">
-                  שעה מועדפת
-                </Label>
-                <Input
-                  id="emailReminderTime"
-                  type="time"
-                  value={emailReminderTime}
-                  onChange={(e) => setEmailReminderTime(e.target.value)}
-                  className="w-32 h-9"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </div>
