@@ -217,6 +217,10 @@ export interface NonprofitInfo {
   representativeBoardMemberIdx?: number;
   // Existing nonprofit (without tax file): plans to hire employees
   plansEmployees?: boolean;
+  // Existing nonprofit (without tax file): bank account
+  hasBankAccount?: boolean;
+  bankDetails?: { bank?: string; branch?: string; accountNumber?: string; accountHolder?: string };
+  bankFile?: File;
   // Existing nonprofit (with tax file): single representative member with optional additional ID
   representativeMember?: NonprofitBoardMember & {
     city?: string;

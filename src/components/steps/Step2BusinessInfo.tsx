@@ -2630,6 +2630,27 @@ export const Step2BusinessInfo = () => {
                 onChange={(v) => setInfo({ plansEmployees: v })}
               />
             </div>
+
+            {/* Bank account */}
+            <div className="space-y-2 p-4 bg-primary/5 rounded-xl border border-primary/15">
+              <Label className="text-base font-semibold">האם יש לעמותה חשבון בנק?</Label>
+              <YesNoSelect
+                value={info.hasBankAccount}
+                onChange={(v) => setInfo({ hasBankAccount: v })}
+              />
+            </div>
+
+            {info.hasBankAccount === true && (
+              <div className="space-y-3 p-4 bg-card rounded-xl border border-border mr-4">
+                <Label className="text-base font-semibold">פרטי חשבון בנק של העמותה *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1"><Label>בנק</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} /></div>
+                  <div className="space-y-1"><Label>סניף</Label><Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} /></div>
+                  <div className="space-y-1"><Label>מספר חשבון</Label><Input value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} /></div>
+                  <div className="space-y-1"><Label>שם בעל החשבון</Label><Input value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} /></div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -486,6 +486,26 @@ export const Step3Documents = () => {
             </div>
           );
         })}
+
+        {/* Bank account confirmation for nonprofits without tax file */}
+        {(["user", "spouse"] as const).map((who) => {
+          const info = who === "user" ? nonprofitInfo : spouseNonprofitInfo;
+          const setInfo = who === "user" ? setNonprofitInfo : setSpouseNonprofitInfo;
+          const purposes = who === "user" ? userPurposes : spousePurposes;
+          if (!purposes.includes("nonprofit")) return null;
+          if (info.hasTaxFile !== false || info.hasBankAccount !== true) return null;
+          const ownerName = who === "user" ? personalInfo.firstName : personalInfo.spouseName;
+          return (
+            <div key={`np-bank-${who}`} className="space-y-3 p-5 bg-muted/40 rounded-xl">
+              <h3 className="font-bold text-lg">אסמכתא חשבון בנק – עמותה{ownerName ? ` (${ownerName})` : ""}</h3>
+              <FileUpload
+                id={`${who}-np-bank-file`}
+                label="אישור ניהול חשבון או צילום שיק של העמותה"
+                onChange={(files) => setInfo({ bankFile: files?.[0] || undefined })}
+              />
+            </div>
+          );
+        })}
       </div>
 
       <FormNavigation
