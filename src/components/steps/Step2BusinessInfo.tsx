@@ -1101,8 +1101,8 @@ export const Step2BusinessInfo = () => {
         <div className="space-y-2">
           <Label>
             {includeSelfAsFirstShareholder
-              ? "כמה בעלי מניות יש בחברה? (כולל אותך)"
-              : "כמה בעלי מניות יש בחברה?"}
+              ? `כמה בעלי מניות יש ב${parentCompanyName || "חברה"}? (כולל אותך)`
+              : `כמה בעלי מניות יש ב${parentCompanyName || "חברה"}?`}
           </Label>
           <Input
             type="text" inputMode="numeric" pattern="[0-9]*"
