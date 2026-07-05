@@ -547,6 +547,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     businessInfo,
     spouseBusinessInfo,
     personalInfo,
+    serviceType,
   } = useFormContext() as any;
 
   const [tick, setTick] = useState(0);
@@ -695,11 +696,35 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   const spouseRaw = (personalInfo?.spouseName || personalInfo?.spouseFirstName || "").trim();
   const spouseName = spouseRaw || "בן/בת זוג";
 
+  // Filter company arrays to only include what serviceType currently has selected.
+  // This prevents stale data from a removed purpose (e.g. new company) from still appearing in the map.
+  const userHasNew = !!serviceType?.userPurposeStatus?.company?.includes("new");
+  const userHasExisting = !!(
+    serviceType?.userPurposeStatus?.company?.includes("existing") ||
+    serviceType?.userWarCompensationEntities?.includes("company")
+  );
+  const spouseHasNew = !!serviceType?.spousePurposeStatus?.company?.includes("new");
+  const spouseHasExisting = !!(
+    serviceType?.spousePurposeStatus?.company?.includes("existing") ||
+    serviceType?.spouseWarCompensationEntities?.includes("company")
+  );
+
+  const filteredBI = {
+    ...businessInfo,
+    newCompanies: userHasNew ? (businessInfo?.newCompanies || []) : [],
+    existingCompanies: userHasExisting ? (businessInfo?.existingCompanies || []) : [],
+  };
+  const filteredSpouseBI = {
+    ...spouseBusinessInfo,
+    newCompanies: spouseHasNew ? (spouseBusinessInfo?.newCompanies || []) : [],
+    existingCompanies: spouseHasExisting ? (spouseBusinessInfo?.existingCompanies || []) : [],
+  };
+
   const spouseHasOwnTree =
     !!spouseRaw &&
     (
-      ((spouseBusinessInfo?.existingCompanies?.length || 0) + (spouseBusinessInfo?.newCompanies?.length || 0)) > 0 ||
-      hasSpouseCoowned(businessInfo, spouseName)
+      ((filteredSpouseBI.existingCompanies.length) + (filteredSpouseBI.newCompanies.length)) > 0 ||
+      hasSpouseCoowned(filteredBI, spouseName)
     );
 
   const trees = useMemo(() => {
@@ -707,17 +732,17 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     const userCtx: Ctx = { selfName, spouseName, spouseHasOwnTree, activeLabel };
     // Also pull in spouse's companies where the user appears as a co-owner
     const reverseCoowned = spouseRaw
-      ? buildSpouseCoownedNodes(spouseBusinessInfo, spouseName, selfName, activeLabel)
+      ? buildSpouseCoownedNodes(filteredSpouseBI, spouseName, selfName, activeLabel)
       : [];
-    const my = buildOwnerTree(businessInfo, selfName, false, userCtx);
+    const my = buildOwnerTree(filteredBI, selfName, false, userCtx);
     if (my) {
       my.children = deduplicateHolding([...my.children, ...reverseCoowned]);
       result.push(my);
     }
     if (spouseRaw) {
       const spouseCtx: Ctx = { selfName: spouseName, spouseName: selfName, spouseHasOwnTree: false, activeLabel };
-      const sp = buildOwnerTree(spouseBusinessInfo, spouseName, true, spouseCtx);
-      const coowned = buildSpouseCoownedNodes(businessInfo, selfName, spouseName, activeLabel);
+      const sp = buildOwnerTree(filteredSpouseBI, spouseName, true, spouseCtx);
+      const coowned = buildSpouseCoownedNodes(filteredBI, selfName, spouseName, activeLabel);
       if (sp) {
         sp.children = deduplicateHolding([...sp.children, ...coowned]);
         result.push(sp);
@@ -732,8 +757,8 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    JSON.stringify(businessInfo),
-    JSON.stringify(spouseBusinessInfo),
+    JSON.stringify(filteredBI),
+    JSON.stringify(filteredSpouseBI),
     selfName, spouseName, spouseHasOwnTree, activeLabel, tick,
   ]);
 
