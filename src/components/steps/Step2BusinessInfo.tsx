@@ -1898,8 +1898,23 @@ export const Step2BusinessInfo = () => {
         </div>
 
 
-        {/* Upfront names list for existing companies */}
+        {/* Fill mode choice for existing companies */}
         {hasExistingPurpose && existingCount > 0 && (
+          <div className="space-y-2">
+            <Label className="font-semibold">כיצד תרצה למלא את פרטי החברות הקיימות?</Label>
+            <PillGroup
+              value={info.existingCompanyFillMode || ""}
+              onChange={(v) => setInfo({ existingCompanyFillMode: v as "self" | "office" })}
+              options={[
+                { value: "self", label: "אמלא את הפרטים עצמאית" },
+                { value: "office", label: "אשמח לעזרת המשרד במילוי השאלון" },
+              ]}
+            />
+          </div>
+        )}
+
+        {/* Upfront names list for existing companies - only in self mode */}
+        {hasExistingPurpose && existingCount > 0 && info.existingCompanyFillMode === "self" && (
           <div className="space-y-2 p-3 border border-border/60 rounded-lg bg-background/50">
             <Label className="font-semibold">שמות החברות הקיימות</Label>
             {(info.existingCompanies || []).map((company: any, idx: number) => (
@@ -1913,27 +1928,20 @@ export const Step2BusinessInfo = () => {
           </div>
         )}
 
-        {/* Upfront names list for new companies */}
+        {/* Message for new companies - office will be in touch */}
         {hasNewPurpose && newCount > 0 && (
-          <div className="space-y-2 p-3 border border-border/60 rounded-lg bg-background/50">
-            <Label className="font-semibold">שמות רצויים לחברות החדשות</Label>
-            {(info.newCompanies || []).map((company: any, idx: number) => (
-              <Input
-                key={`newname-${idx}`}
-                placeholder={`שם רצוי לחברה חדשה #${idx + 1}`}
-                value={company.requestedName1 || ""}
-                onChange={(e) => {
-                  const updated = [...(info.newCompanies || [])];
-                  updated[idx] = { ...updated[idx], requestedName1: e.target.value };
-                  setInfo({ newCompanies: updated });
-                }}
-              />
-            ))}
+          <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 text-sm text-center text-primary font-medium">
+            המשרד ייצור איתך קשר למילוי פרטי {newCount === 1 ? "החברה החדשה" : `${newCount} החברות החדשות`}
           </div>
         )}
 
-        {/* Existing companies */}
-        {hasExistingPurpose && existingCount > 0 && (info.existingCompanies || []).map((company: any, idx: number) => (
+        {/* Existing companies - self fill mode */}
+        {hasExistingPurpose && existingCount > 0 && info.existingCompanyFillMode === "office" && (
+          <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 text-sm text-center text-primary font-medium">
+            המשרד ייצור איתך קשר לסיוע במילוי פרטי {existingCount === 1 ? "החברה הקיימת" : `${existingCount} החברות הקיימות`}
+          </div>
+        )}
+        {hasExistingPurpose && existingCount > 0 && info.existingCompanyFillMode === "self" && (info.existingCompanies || []).map((company: any, idx: number) => (
           <div key={`existing-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
             <h4 className="font-bold text-primary text-base">
               חברה קיימת #{idx + 1}{company.name ? ` – ${company.name}` : ""}
@@ -2047,160 +2055,6 @@ export const Step2BusinessInfo = () => {
           </div>
         ))}
 
-        {/* New companies */}
-        {hasNewPurpose && newCount > 0 && (info.newCompanies || []).map((company: any, idx: number) => (
-          <div key={`new-${idx}`} className="space-y-4 p-4 border border-border rounded-xl bg-card">
-            <h4 className="font-bold text-primary text-base">
-              חברה חדשה #{idx + 1}{company.requestedName1 ? ` – ${company.requestedName1}` : ""}
-            </h4>
-
-            {/* 2 additional requested names (name1 already collected above) */}
-            <div className="space-y-3">
-              <Label className="font-semibold">2 שמות נוספים לחברה (לפי סדר עדיפות)</Label>
-              {[2, 3].map((n) => (
-                <Input
-                  key={n}
-                  placeholder={`שם רצוי נוסף #${n - 1}`}
-                  value={company[`requestedName${n}`] || ""}
-                  onChange={(e) => {
-                    const updated = [...(info.newCompanies || [])];
-                    updated[idx] = { ...updated[idx], [`requestedName${n}`]: e.target.value };
-                    setInfo({ newCompanies: updated });
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Shareholders */}
-            <div className="space-y-2">
-              <Label className="text-base font-semibold">מי יהיו בעלי המניות בחברה?</Label>
-              {(() => {
-                const st = company.shareholderType || "";
-                const topValue = st === "self_via_company" ? "self_via_company" : st ? "direct" : "";
-                const subValue = st === "alone" || st === "other" ? st : "";
-                const updateST = (v: string) => {
-                  const updated = [...(info.newCompanies || [])];
-                  updated[idx] = { ...updated[idx], shareholderType: v };
-                  setInfo({ newCompanies: updated });
-                };
-                return (
-                  <div className="space-y-3">
-                    <PillGroup
-                      value={topValue}
-                      onChange={(v) => {
-                        if (v === "self_via_company") updateST("self_via_company");
-                        else updateST("alone"); // default direct → alone
-                      }}
-                      options={[
-                        { value: "direct", label: `${name} ישירות` },
-                        { value: "self_via_company", label: `${name} באמצעות חברה` },
-                      ]}
-                    />
-                    {topValue === "direct" && (
-                      <div className="pr-2 border-r-2 border-primary/30 pr-3">
-                        <p className="text-xs text-muted-foreground mb-1.5">איך {name} יחזיק/תחזיק במניות?</p>
-                        <PillGroup
-                          value={subValue}
-                          onChange={(v) => updateST(v)}
-                          options={[
-                            { value: "alone", label: "לבד – 100% אחזקה" },
-                            { value: "other", label: "יחד עם אחר" },
-                          ]}
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-
-            </div>
-
-            {company.shareholderType === "self_via_company" && (
-              <SelfViaCompanyBlock
-                data={company.selfViaCompany || {}}
-                onChange={(d) => {
-                  const updated = [...(info.newCompanies || [])];
-                  updated[idx] = { ...updated[idx], selfViaCompany: d };
-                  setInfo({ newCompanies: updated });
-                }}
-                parentCompanyName={company.requestedName1 || `החברה החדשה #${idx + 1}`}
-                isNewCompany={true}
-                fillerName={name}
-                gender={gender}
-                selfName={name}
-                spouseName={spouseDisplayName}
-                showSpouseOption={showSpouseOption}
-                renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
-                knownChains={knownChains}
-              />
-            )}
-
-            {company.shareholderType === "self_via_company" && renderShareholdersSection(
-              company,
-              (field: string, value: any) => {
-                const updated = [...(info.newCompanies || [])];
-                updated[idx] = { ...updated[idx], [field]: value };
-                setInfo({ newCompanies: updated });
-              },
-              (updates: Record<string, any>) => {
-                const updated = [...(info.newCompanies || [])];
-                updated[idx] = { ...updated[idx], ...updates };
-                setInfo({ newCompanies: updated });
-              },
-              name,
-              selfIdNumber,
-              selfPhone,
-              selfEmail,
-              spouseDisplayName,
-              spouseIdNumber,
-              spousePhone,
-              spouseEmail,
-              showSpouseOption,
-              `${prefix}new_${idx}_direct_`,
-              false,
-              company.requestedName1 || `החברה החדשה #${idx + 1}`,
-              false,
-            )}
-
-            {company.shareholderType === "other" && renderShareholdersSection(
-              company,
-              (field: string, value: any) => {
-                const updated = [...(info.newCompanies || [])];
-                updated[idx] = { ...updated[idx], [field]: value };
-                setInfo({ newCompanies: updated });
-              },
-              (updates: Record<string, any>) => {
-                const updated = [...(info.newCompanies || [])];
-                updated[idx] = { ...updated[idx], ...updates };
-                setInfo({ newCompanies: updated });
-              },
-              name,
-              selfIdNumber,
-              selfPhone,
-              selfEmail,
-              spouseDisplayName,
-              spouseIdNumber,
-              spousePhone,
-              spouseEmail,
-              showSpouseOption,
-              `${prefix}new_${idx}_`,
-              true,
-              company.requestedName1 || `החברה החדשה #${idx + 1}`
-            )}
-
-            <div className="space-y-2">
-              <Label>האם החברה צפויה להעסיק עובדים?</Label>
-              <YesNoSelect
-                value={company.planningEmployees}
-                onChange={(v) => {
-                  const updated = [...(info.newCompanies || [])];
-                  updated[idx] = { ...updated[idx], planningEmployees: v };
-                  setInfo({ newCompanies: updated });
-                }}
-              />
-            </div>
-          </div>
-        ))}
       </div>
     );
   };

@@ -113,6 +113,7 @@ export interface BusinessInfo {
 
   // Company (purpose 4)
   existingCompanyCount?: number;
+  existingCompanyFillMode?: "self" | "office" | "";
   newCompanyCount?: number;
   existingCompanies?: Array<{
     name: string;
