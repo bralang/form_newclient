@@ -132,7 +132,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
           {/* Desktop: Form + Left Panel */}
           <div className="hidden lg:flex lg:flex-row min-h-screen">
             {/* Form Content - full width on step 1, constrained on others */}
-            <div className="flex-1 pr-4 pl-4 py-10 min-w-0">
+            <div className="flex-1 pr-3 pl-3 py-10 min-w-0">
               <div className={currentStep === 1 ? "w-full" : "w-full mr-0 ml-auto"}>
                 <div className="bg-card rounded-2xl shadow-xl border border-border/50 p-6 md:p-8">
                   {children}
@@ -142,7 +142,7 @@ export const FormLayout = ({ children }: FormLayoutProps) => {
 
             {/* Left Panel - hidden on step 1 to give max reading width */}
             {currentStep !== 1 && (
-              <div className="w-[26rem] xl:w-[32rem] 2xl:w-[36rem] shrink-0 sticky top-0 h-screen flex flex-col p-4 pb-10 gap-3">
+              <div className="w-[22rem] xl:w-[26rem] 2xl:w-[30rem] shrink-0 sticky top-0 h-screen flex flex-col p-3 pb-10 gap-3">
                 {/* Ownership tree (auto-hidden when not on Step 2) — takes most of the height */}
                 <div className="flex-1 min-h-0 overflow-y-auto">
                   <OwnershipTree />
