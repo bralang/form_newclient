@@ -1856,24 +1856,10 @@ export const Step2BusinessInfo = () => {
           חברות של <span className="underline decoration-primary/50">{name}</span>
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {hasExistingPurpose && (
-            <div className="space-y-2">
-              <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות מעוניין לקבל שירות?</Label>
-              <Input
-                id={`${prefix}existingCount`}
-                type="text" inputMode="numeric" pattern="[0-9]*"
-                value={existingCount}
-                onChange={(e) => {
-                  const count = parseInt(e.target.value) || 0;
-                  const companies = info.existingCompanies || [];
-                  const adjusted = Array.from({ length: count }, (_, i) => companies[i] || { name: "", companyNumber: "" });
-                  setInfo({ existingCompanyCount: count, existingCompanies: adjusted });
-                }}
-              />
-            </div>
-          )}
-          {hasNewPurpose && (
+        {/* ── חברות חדשות ── */}
+        {hasNewPurpose && (
+          <div className="space-y-3 p-4 border border-border/50 rounded-xl bg-background/40">
+            <h4 className="font-bold text-base text-primary">חברות חדשות</h4>
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
@@ -1894,26 +1880,54 @@ export const Step2BusinessInfo = () => {
                 }}
               />
             </div>
-          )}
-        </div>
-
-
-        {/* Fill mode choice for existing companies */}
-        {hasExistingPurpose && existingCount > 0 && (
-          <div className="space-y-2">
-            <Label className="font-semibold">כיצד תרצה למלא את פרטי החברות הקיימות?</Label>
-            <PillGroup
-              value={info.existingCompanyFillMode || ""}
-              onChange={(v) => setInfo({ existingCompanyFillMode: v as "self" | "office" })}
-              options={[
-                { value: "self", label: "אמלא את הפרטים עצמאית" },
-                { value: "office", label: "אשמח לעזרת המשרד במילוי השאלון" },
-              ]}
-            />
+            {newCount > 0 && (
+              <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 text-sm text-center text-primary font-medium">
+                המשרד ייצור איתך קשר למילוי פרטי {newCount === 1 ? "החברה החדשה" : `${newCount} החברות החדשות`}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Upfront names list for existing companies - only in self mode */}
+        {/* ── חברות קיימות ── */}
+        {hasExistingPurpose && (
+          <div className="space-y-3 p-4 border border-border/50 rounded-xl bg-background/40">
+            <h4 className="font-bold text-base text-primary">חברות קיימות</h4>
+            <div className="space-y-2">
+              <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות מעוניין לקבל שירות?</Label>
+              <Input
+                id={`${prefix}existingCount`}
+                type="text" inputMode="numeric" pattern="[0-9]*"
+                value={existingCount}
+                onChange={(e) => {
+                  const count = parseInt(e.target.value) || 0;
+                  const companies = info.existingCompanies || [];
+                  const adjusted = Array.from({ length: count }, (_, i) => companies[i] || { name: "", companyNumber: "" });
+                  setInfo({ existingCompanyCount: count, existingCompanies: adjusted });
+                }}
+              />
+            </div>
+            {existingCount > 0 && (
+              <div className="space-y-2">
+                <Label className="font-semibold">כיצד תרצה למלא את פרטי החברות הקיימות?</Label>
+                <PillGroup
+                  value={info.existingCompanyFillMode || ""}
+                  onChange={(v) => setInfo({ existingCompanyFillMode: v as "self" | "office" })}
+                  options={[
+                    { value: "self", label: "אמלא את הפרטים עצמאית" },
+                    { value: "office", label: "אשמח לעזרת המשרד במילוי השאלון" },
+                  ]}
+                />
+              </div>
+            )}
+            {existingCount > 0 && info.existingCompanyFillMode === "office" && (
+              <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 text-sm text-center text-primary font-medium">
+                המשרד ייצור איתך קשר לסיוע במילוי פרטי {existingCount === 1 ? "החברה הקיימת" : `${existingCount} החברות הקיימות`}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Upfront names + per-company forms — self fill mode only */}
         {hasExistingPurpose && existingCount > 0 && info.existingCompanyFillMode === "self" && (
           <div className="space-y-2 p-3 border border-border/60 rounded-lg bg-background/50">
             <Label className="font-semibold">שמות החברות הקיימות</Label>
@@ -1925,20 +1939,6 @@ export const Step2BusinessInfo = () => {
                 onChange={(e) => updateExistingCompany(idx, "name", e.target.value)}
               />
             ))}
-          </div>
-        )}
-
-        {/* Message for new companies - office will be in touch */}
-        {hasNewPurpose && newCount > 0 && (
-          <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 text-sm text-center text-primary font-medium">
-            המשרד ייצור איתך קשר למילוי פרטי {newCount === 1 ? "החברה החדשה" : `${newCount} החברות החדשות`}
-          </div>
-        )}
-
-        {/* Existing companies - self fill mode */}
-        {hasExistingPurpose && existingCount > 0 && info.existingCompanyFillMode === "office" && (
-          <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 text-sm text-center text-primary font-medium">
-            המשרד ייצור איתך קשר לסיוע במילוי פרטי {existingCount === 1 ? "החברה הקיימת" : `${existingCount} החברות הקיימות`}
           </div>
         )}
         {hasExistingPurpose && existingCount > 0 && info.existingCompanyFillMode === "self" && (info.existingCompanies || []).map((company: any, idx: number) => (
