@@ -351,11 +351,11 @@ export const Step3Documents = () => {
 
 
         {/* Company documents */}
-        {(userHasCompany || spouseHasCompany) && (
+        {hasExistingCompanies && (
           <div className="space-y-4 p-5 bg-muted/40 rounded-xl">
             <h3 className="font-bold text-lg">מסמכי חברה</h3>
 
-            {hasExistingCompanies && (
+            {(
               <>
                 <FileUpload
                   id="incorporationFiles"
