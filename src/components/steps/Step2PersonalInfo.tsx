@@ -542,31 +542,6 @@ export const Step2PersonalInfo = () => {
         </div>
       )}
 
-      {/* ─── Ending Text for Step 2 ─── */}
-      <div className="space-y-5 pt-6 border-t border-border">
-        <div className="p-5 bg-primary/5 rounded-xl border border-primary/15">
-          <h3 className="font-bold text-lg text-foreground mb-3">
-            📋 כדי להתקדם עליך להכין את עצמך לשלב 4
-          </h3>
-          <p className="text-muted-foreground text-sm mb-3">
-            ניתן להעלות כאן בשאלון טפסים במיידי, או להשאיר כך את השאלון ולהכין את המסמכים הנדרשים.
-          </p>
-          <p className="text-muted-foreground text-sm mb-5 bg-muted/60 p-3 rounded-lg border border-border/50">
-            💡 כדאי לדעת: הנתונים שהזנת עד כה נשמרים במערכת באופן אוטומטי, ויופיעו בכניסתך לשאלון בפעמים הבאות, גם אם לא סיימת למלא את השאלון או להעלות מסמכים.
-          </p>
-
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-3 p-3 bg-background/60 rounded-lg border border-border/50">
-              <Label className="text-sm text-muted-foreground min-w-[140px]">שלחו לי רשימה למייל</Label>
-              <Button variant="outline" size="sm" onClick={handleSendEmailList}>
-                <Mail className="ml-2 h-4 w-4" />
-                אני רוצה לקבל רשימה למייל
-              </Button>
-            </div>
-
-          </div>
-        </div>
-      </div>
 
       <FormNavigation
         onNext={handleNext}

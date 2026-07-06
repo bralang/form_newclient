@@ -1,8 +1,10 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { FormNavigation } from "@/components/FormNavigation";
 import { useState } from "react";
+import { Mail, Phone } from "lucide-react";
 
 export const Step3Documents = () => {
   const {
@@ -25,6 +27,26 @@ export const Step3Documents = () => {
     saveFormData,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
+  const [emailListMode, setEmailListMode] = useState<"" | "now" | "later">("");
+  const [emailReminderDate, setEmailReminderDate] = useState("");
+  const [wantsPhoneContact, setWantsPhoneContact] = useState(false);
+  const [contactPhone, setContactPhone] = useState(personalInfo.phone || "");
+
+  const handleSendEmailList = async (scheduledDate?: string) => {
+    await sendToWebhook(
+      "https://n8n.chasida.biz/webhook/send-document-list",
+      { email: personalInfo.email, reminderTime: scheduledDate || undefined, personalInfo, serviceType },
+      { silent: false }
+    );
+  };
+
+  const handleSendPhoneContact = async () => {
+    await sendToWebhook(
+      "https://n8n.chasida.biz/webhook/send-reminder",
+      { phone: contactPhone, personalInfo, serviceType },
+      { silent: false }
+    );
+  };
 
   const isMarried = personalInfo.maritalStatus === "married";
   const userPurposes = serviceType.userPurposes;
@@ -87,6 +109,89 @@ export const Step3Documents = () => {
       <div>
         <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">עדכון מסמכים</h2>
         <div className="h-1 w-20 bg-primary rounded-full" />
+      </div>
+
+      {/* ─── Document Prep Box ─── */}
+      <div className="p-5 bg-primary/5 rounded-xl border border-primary/15 space-y-4">
+        <h3 className="font-bold text-lg text-foreground">📋 כיצד תרצו להגיש את המסמכים?</h3>
+
+        {/* Option 1 — Email list */}
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setEmailListMode(emailListMode ? "" : "now")}
+            className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${emailListMode ? "border-primary/50 bg-primary/5" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
+          >
+            <Mail className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-sm font-medium">אני רוצה לקבל רשימת מסמכים למייל</span>
+          </button>
+          {emailListMode && (
+            <div className="mr-7 space-y-3">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={emailListMode === "now" ? "default" : "outline"}
+                  onClick={() => setEmailListMode("now")}
+                >כעת</Button>
+                <Button
+                  size="sm"
+                  variant={emailListMode === "later" ? "default" : "outline"}
+                  onClick={() => setEmailListMode("later")}
+                >במועד אחר</Button>
+              </div>
+              {emailListMode === "later" && (
+                <div className="space-y-1">
+                  <Label className="text-xs">בחרו מועד</Label>
+                  <Input
+                    type="datetime-local"
+                    value={emailReminderDate}
+                    onChange={(e) => setEmailReminderDate(e.target.value)}
+                    className="max-w-xs"
+                  />
+                </div>
+              )}
+              <Button
+                size="sm"
+                onClick={() => handleSendEmailList(emailListMode === "later" ? emailReminderDate : undefined)}
+                disabled={emailListMode === "later" && !emailReminderDate}
+              >
+                <Mail className="ml-2 h-4 w-4" />
+                שלחו אל {personalInfo.email || "המייל שלי"}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Option 2 — Phone contact */}
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setWantsPhoneContact(!wantsPhoneContact)}
+            className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${wantsPhoneContact ? "border-primary/50 bg-primary/5" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
+          >
+            <Phone className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-sm font-medium">אני רוצה שיצרו איתי קשר טלפוני לסיוע בהעלאת המסמכים</span>
+          </button>
+          {wantsPhoneContact && (
+            <div className="mr-7 space-y-2">
+              <Label className="text-xs">מספר טלפון ליצירת קשר</Label>
+              <div className="flex gap-2 max-w-xs">
+                <Input
+                  type="tel"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  placeholder="050-0000000"
+                />
+                <Button size="sm" onClick={handleSendPhoneContact} disabled={!contactPhone}>שלח</Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Option 3 — Upload here (implicit) */}
+        <p className="text-xs text-muted-foreground border-t border-border/30 pt-3">
+          ניתן גם להעלות את המסמכים ישירות כאן למטה
+        </p>
       </div>
 
       {/* Marketing Text */}
