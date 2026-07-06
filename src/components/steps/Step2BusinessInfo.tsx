@@ -1861,13 +1861,7 @@ export const Step2BusinessInfo = () => {
           <div className="space-y-3 p-4 border border-border/50 rounded-xl bg-background/40">
             <h4 className="font-bold text-base text-primary">חברות חדשות</h4>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium">
-                  <AlertTriangle className="w-3 h-3 shrink-0" />
-                  שאינן חברות אם
-                </span>
-              </div>
+              <Label htmlFor={`${prefix}newCount`}>כמה חברות חדשות רוצה לפתוח?</Label>
               <Input
                 id={`${prefix}newCount`}
                 type="text" inputMode="numeric" pattern="[0-9]*"
@@ -1893,7 +1887,13 @@ export const Step2BusinessInfo = () => {
           <div className="space-y-3 p-4 border border-border/50 rounded-xl bg-background/40">
             <h4 className="font-bold text-base text-primary">חברות קיימות</h4>
             <div className="space-y-2">
-              <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות מעוניין לקבל שירות?</Label>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Label htmlFor={`${prefix}existingCount`}>לכמה חברות קיימות מעוניין לקבל שירות?</Label>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border border-destructive/30 bg-destructive/10 text-destructive text-xs font-medium">
+                  <AlertTriangle className="w-3 h-3 shrink-0" />
+                  שאינן חברות אם
+                </span>
+              </div>
               <Input
                 id={`${prefix}existingCount`}
                 type="text" inputMode="numeric" pattern="[0-9]*"
