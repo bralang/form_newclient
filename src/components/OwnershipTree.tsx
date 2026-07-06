@@ -454,9 +454,14 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
           {node.label}
         </span>
         {node.isNew && (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-400 leading-none">
-            חדש
-          </span>
+          <>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-400 leading-none">
+              חדש
+            </span>
+            <span className="text-[9px] text-center text-emerald-700 leading-tight px-1 opacity-80">
+              פרטים יושלמו עם המשרד לאחר סיום השאלון
+            </span>
+          </>
         )}
         {!node.isNew && !isPerson && (
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full leading-none ${isHolding ? "bg-amber-100 text-amber-700 border border-amber-400" : "bg-slate-100 text-slate-500 border border-slate-300"}`}>
