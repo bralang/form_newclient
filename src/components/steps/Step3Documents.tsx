@@ -351,37 +351,39 @@ export const Step3Documents = () => {
 
 
         {/* Company documents */}
-        {hasExistingCompanies && (
-          <div className="space-y-4 p-5 bg-muted/40 rounded-xl">
-            <h3 className="font-bold text-lg">מסמכי חברה</h3>
-
-            {(
-              <>
-                <FileUpload
-                  id="incorporationFiles"
-                  label="תעודת התאגדות ו/או נסח רשם החברות"
-                  multiple
-                  onChange={(files) => setDocumentsInfo({ incorporationFiles: files ? Array.from(files) : undefined })}
-                />
-                <FileUpload
-                  id="companyBankConfFile"
-                  label="אישור ניהול חשבון או צילום שיק"
-                  onChange={(files) => setDocumentsInfo({ companyBankConfirmationFile: files?.[0] || undefined })}
-                />
-              </>
-            )}
-
-            {hasNewCompaniesNotInRegistrarButInRegistrar && (
-              <>
-                <FileUpload
-                  id="registrarFile"
-                  label="תעודת התאגדות ו/או נסח רשם החברות (חברה חדשה קיימת ברשם)"
-                  onChange={(files) => setDocumentsInfo({ registrarExtractFile: files?.[0] || undefined })}
-                />
-              </>
-            )}
-          </div>
-        )}
+        {(["user", "spouse"] as const).map((who) => {
+          const bi = who === "user" ? businessInfo : spouseBusinessInfo;
+          const setBi = who === "user" ? setBusinessInfo : setSpouseBusinessInfo;
+          if (bi.existingCompanyFillMode !== "self") return null;
+          const companies = (bi.existingCompanies || []) as any[];
+          if (companies.length === 0) return null;
+          return companies.map((company: any, idx: number) => (
+            <div key={`${who}-exco-${idx}`} className="space-y-4 p-5 bg-muted/40 rounded-xl">
+              <h3 className="font-bold text-lg">
+                מסמכי {company.name || `חברה קיימת #${idx + 1}`}
+              </h3>
+              <FileUpload
+                id={`incorp-${who}-${idx}`}
+                label="תעודת התאגדות ו/או נסח רשם החברות"
+                multiple
+                onChange={(files) => {
+                  const updated = [...companies];
+                  updated[idx] = { ...updated[idx], incorporationFiles: files ? Array.from(files) : undefined };
+                  setBi({ existingCompanies: updated });
+                }}
+              />
+              <FileUpload
+                id={`bank-${who}-${idx}`}
+                label="אישור ניהול חשבון או צילום שיק"
+                onChange={(files) => {
+                  const updated = [...companies];
+                  updated[idx] = { ...updated[idx], companyBankConfirmationFile: files?.[0] || undefined };
+                  setBi({ existingCompanies: updated });
+                }}
+              />
+            </div>
+          ));
+        })}
 
         {/* Company shareholders ID uploads (person shareholders + nested personOwners) */}
         {(["user", "spouse"] as const).map((who) => {

@@ -19,6 +19,7 @@ type TreeNode = {
   label: string;
   owners?: OwnerLabel[];
   isNew?: boolean;
+  isOfficeManagedExisting?: boolean;
   isHolding?: boolean;
   isActive?: boolean;
   isSpouseRoot?: boolean;
@@ -216,12 +217,22 @@ const buildTarget = (t: any, isNew: boolean, ctx: Ctx, depth = 0): TreeNode => {
 
 // ─── Build owner tree ─────────────────────────────────────────────────────────
 
+const markOfficeManagedNodes = (nodes: TreeNode[]) => {
+  nodes.forEach(node => {
+    if (!node.isNew && !node.isHolding && node.kind === "company") {
+      node.isOfficeManagedExisting = true;
+    }
+    markOfficeManagedNodes(node.children);
+  });
+};
+
 const buildOwnerTree = (bi: any, ownerName: string, isSpouseTree: boolean, ctx: Ctx): TreeNode | null => {
   const companies: TreeNode[] = [
     ...(bi?.existingCompanies || []).map((c: any) => buildTarget(c, false, ctx)),
     ...(bi?.newCompanies || []).map((c: any) => buildTarget(c, true, ctx)),
   ];
   if (companies.length === 0) return null;
+  if (bi?.existingCompanyFillMode === "office") markOfficeManagedNodes(companies);
   const root = mkPerson(ownerName, isSpouseTree);
   root.children = companies;
   return root;
@@ -466,6 +477,11 @@ const NodeBox = ({ node, compact }: { node: TreeNode; compact: boolean }) => {
         {!node.isNew && !isPerson && (
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full leading-none ${isHolding ? "bg-amber-100 text-amber-700 border border-amber-400" : "bg-slate-100 text-slate-500 border border-slate-300"}`}>
             {isHolding ? "אחזקות" : "קיים"}
+          </span>
+        )}
+        {node.isOfficeManagedExisting && (
+          <span className="text-[9px] text-center text-slate-500 leading-tight px-1 opacity-80">
+            פרטים יושלמו עם המשרד לאחר סיום השאלון
           </span>
         )}
       </div>
