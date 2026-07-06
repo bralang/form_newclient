@@ -1876,7 +1876,7 @@ export const Step2BusinessInfo = () => {
             </div>
             {newCount > 0 && (
               <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 text-sm text-center text-primary font-medium">
-                המשרד ייצור איתך קשר למילוי פרטי {newCount === 1 ? "החברה החדשה" : `${newCount} החברות החדשות`}
+                פרטי {newCount === 1 ? "החברה החדשה" : `${newCount} החברות החדשות`} יושלמו בסיוע המשרד לאחר סיום השאלון — אנא המשיכו למלא את שאר הפרטים
               </div>
             )}
           </div>
