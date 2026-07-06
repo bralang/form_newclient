@@ -143,7 +143,7 @@ export const Step3Documents = () => {
                 <div className="space-y-1">
                   <Label className="text-xs">בחרו מועד</Label>
                   <Input
-                    type="datetime-local"
+                    type="date"
                     value={emailReminderDate}
                     onChange={(e) => setEmailReminderDate(e.target.value)}
                     className="max-w-xs"
