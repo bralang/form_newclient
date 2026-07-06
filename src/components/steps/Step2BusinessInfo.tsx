@@ -1921,7 +1921,7 @@ export const Step2BusinessInfo = () => {
             )}
             {existingCount > 0 && info.existingCompanyFillMode === "office" && (
               <div className="p-3 rounded-xl border border-primary/30 bg-primary/5 text-sm text-center text-primary font-medium">
-                המשרד ייצור איתך קשר לסיוע במילוי פרטי {existingCount === 1 ? "החברה הקיימת" : `${existingCount} החברות הקיימות`}
+                לאחר סיום השאלון, נצור אתכם קשר ונמלא יחד את פרטי {existingCount === 1 ? "החברה הקיימת" : `${existingCount} החברות הקיימות`} — אנא המשיכו למלא את שאר הפרטים
               </div>
             )}
           </div>
