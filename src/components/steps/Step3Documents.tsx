@@ -27,9 +27,9 @@ export const Step3Documents = () => {
     saveFormData,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
+  const [submissionMode, setSubmissionMode] = useState<"upload" | "email" | "phone">("upload");
   const [emailListMode, setEmailListMode] = useState<"" | "now" | "later">("");
   const [emailReminderDate, setEmailReminderDate] = useState("");
-  const [wantsPhoneContact, setWantsPhoneContact] = useState(false);
   const [contactPhone, setContactPhone] = useState(personalInfo.phone || "");
 
   const handleSendEmailList = async (scheduledDate?: string) => {
@@ -115,17 +115,28 @@ export const Step3Documents = () => {
       <div className="p-5 bg-primary/5 rounded-xl border border-primary/15 space-y-4">
         <h3 className="font-bold text-lg text-foreground">📋 כיצד תרצו להגיש את המסמכים?</h3>
 
-        {/* Option 1 — Email list */}
-        <div className="space-y-2">
+        {/* 3 mutually-exclusive mode buttons */}
+        <div className="flex flex-col gap-2">
+          {/* Option 1 — Upload directly (default selected) */}
           <button
             type="button"
-            onClick={() => setEmailListMode(emailListMode ? "" : "now")}
-            className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${emailListMode ? "border-primary/50 bg-primary/5" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
+            onClick={() => setSubmissionMode("upload")}
+            className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${submissionMode === "upload" ? "border-primary/50 bg-primary/10" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
+          >
+            <span className="text-primary shrink-0">📁</span>
+            <span className="text-sm font-medium">העלאה ישירה כאן</span>
+          </button>
+
+          {/* Option 2 — Email list */}
+          <button
+            type="button"
+            onClick={() => { setSubmissionMode("email"); setEmailListMode("now"); }}
+            className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${submissionMode === "email" ? "border-primary/50 bg-primary/10" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
           >
             <Mail className="w-4 h-4 text-primary shrink-0" />
             <span className="text-sm font-medium">אני רוצה לקבל רשימת מסמכים למייל</span>
           </button>
-          {emailListMode && (
+          {submissionMode === "email" && (
             <div className="mr-7 space-y-3">
               <div className="flex gap-2">
                 <Button
@@ -160,19 +171,17 @@ export const Step3Documents = () => {
               </Button>
             </div>
           )}
-        </div>
 
-        {/* Option 2 — Phone contact */}
-        <div className="space-y-2">
+          {/* Option 3 — Phone contact */}
           <button
             type="button"
-            onClick={() => setWantsPhoneContact(!wantsPhoneContact)}
-            className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${wantsPhoneContact ? "border-primary/50 bg-primary/5" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
+            onClick={() => setSubmissionMode("phone")}
+            className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${submissionMode === "phone" ? "border-primary/50 bg-primary/10" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
           >
             <Phone className="w-4 h-4 text-primary shrink-0" />
             <span className="text-sm font-medium">אני רוצה שיצרו איתי קשר טלפוני לסיוע בהעלאת המסמכים</span>
           </button>
-          {wantsPhoneContact && (
+          {submissionMode === "phone" && (
             <div className="mr-7 space-y-2">
               <Label className="text-xs">מספר טלפון ליצירת קשר</Label>
               <div className="flex gap-2 max-w-xs">
@@ -187,11 +196,6 @@ export const Step3Documents = () => {
             </div>
           )}
         </div>
-
-        {/* Option 3 — Upload here (implicit) */}
-        <p className="text-xs text-muted-foreground border-t border-border/30 pt-3">
-          ניתן גם להעלות את המסמכים ישירות כאן למטה
-        </p>
       </div>
 
       {/* Marketing Text */}
@@ -202,8 +206,8 @@ export const Step3Documents = () => {
         <p className="text-lg font-bold text-primary">מתקדמים…</p>
       </div>
 
-      {/* Document Uploads */}
-      <div className="space-y-6">
+      {/* Document Uploads — only shown when "upload" mode is selected */}
+      {submissionMode === "upload" && <div className="space-y-6">
 
         {/* User ID Documents */}
         <div className="space-y-4 p-5 bg-muted/40 rounded-xl">
@@ -613,7 +617,7 @@ export const Step3Documents = () => {
             </div>
           );
         })}
-      </div>
+      </div>}
 
       <FormNavigation
         onNext={handleNext}
