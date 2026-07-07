@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormContext, NonprofitBoardMember, NonprofitAuditMember, NonprofitInfo, GovPortalIdMethod } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -247,7 +247,9 @@ const CompanyChainBlock = ({
     displayName: string,
     keyPrefix: string,
   ) => React.ReactNode;
+  knownChains?: Map<string, any>;
 }) => {
+  const [childCompanyIsNew, setChildCompanyIsNew] = useState(false);
   const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }>) =>
     onChange({ ...data, ...patch });
   const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
@@ -437,24 +439,71 @@ const CompanyChainBlock = ({
             </div>
           )}
 
-          {normalizedSubOwnerType === "company" && (
-            <CompanyChainBlock
-              data={data.childCompany || {}}
-              onChange={(c) => update({ childCompany: c })}
-              heldName={displayName}
-              depth={depth + 1}
-              fillerName={fillerName}
-              gender={gender}
-              chainAllowsNewCompany={chainAllowsNewCompany && !isExistingCompany}
-              selfName={selfName}
-              spouseName={spouseName}
-              showSpouseOption={showSpouseOption}
-              restrictToPersonOrCompany={_restrictToPersonOrCompany}
-              offerSelfInPersonOption={offerSelfInPersonOption}
-              personIsSelfOnly={personIsSelfOnly}
-              renderNewCompanyShareholders={renderNewCompanyShareholders}
-            />
-          )}
+          {normalizedSubOwnerType === "company" && (() => {
+            const childChainOptions = Array.from(knownChains?.values() || [])
+              .filter((chain: any) => chain.companyNumber?.trim() !== data?.companyNumber?.trim());
+            const showChildPicker =
+              childChainOptions.length > 0 &&
+              !data?.childCompany?.companyNumber &&
+              !childCompanyIsNew;
+            return (
+              <>
+                {showChildPicker ? (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground">בחר חברה מחזיקה:</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {childChainOptions.map((chain: any) => (
+                        <button
+                          key={chain.companyNumber}
+                          type="button"
+                          className="px-3 py-1.5 rounded-lg border border-primary/40 bg-primary/5 text-sm font-medium text-primary hover:bg-primary/15 transition-colors"
+                          onClick={() => update({ childCompany: chain })}
+                        >
+                          {chain.companyName || chain.requestedName1 || chain.companyNumber}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        className="px-3 py-1.5 rounded-lg border border-border bg-muted text-sm font-medium text-foreground hover:bg-muted/80 transition-colors"
+                        onClick={() => setChildCompanyIsNew(true)}
+                      >
+                        + חברה מחזיקה חדשה
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {(data?.childCompany?.companyNumber || childCompanyIsNew) && childChainOptions.length > 0 && (
+                      <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline hover:text-foreground"
+                        onClick={() => { setChildCompanyIsNew(false); update({ childCompany: undefined }); }}
+                      >
+                        שנה בחירה
+                      </button>
+                    )}
+                    <CompanyChainBlock
+                      data={data.childCompany || {}}
+                      onChange={(c) => update({ childCompany: c })}
+                      heldName={displayName}
+                      depth={depth + 1}
+                      fillerName={fillerName}
+                      gender={gender}
+                      chainAllowsNewCompany={chainAllowsNewCompany && !isExistingCompany}
+                      selfName={selfName}
+                      spouseName={spouseName}
+                      showSpouseOption={showSpouseOption}
+                      restrictToPersonOrCompany={_restrictToPersonOrCompany}
+                      offerSelfInPersonOption={offerSelfInPersonOption}
+                      personIsSelfOnly={personIsSelfOnly}
+                      renderNewCompanyShareholders={renderNewCompanyShareholders}
+                      knownChains={knownChains}
+                    />
+                  </>
+                )}
+              </>
+            );
+          })()}
         </>
       )}
     </div>
@@ -494,6 +543,7 @@ const SelfViaCompanyBlock = ({
   ) => React.ReactNode;
   knownChains?: Map<string, any>;
 }) => {
+  const [childCompanyIsNew, setChildCompanyIsNew] = useState(false);
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
   const updatePerson = (patch: any) =>
     onChange({ ...(data || {}), personOwner: { ...((data || {}).personOwner || {}), ...patch } });
@@ -508,8 +558,6 @@ const SelfViaCompanyBlock = ({
   const personOwnerWithOther = !!data?.personOwnerWithOther;
   const holdingDisplayName = data?.companyName?.trim() || (data as any)?.requestedName1?.trim() || "החברה המחזיקה";
   const showNewHoldingShareholders = !isExistingHolding && !!renderNewCompanyShareholders;
-  // When the chain was auto-filled from a known ח.פ., hide the shareholder question — it's already set
-  const chainIsKnown = !!(data?.companyNumber?.trim() && knownChains?.get(data.companyNumber.trim())?.subOwnerType);
 
   return (
     <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
@@ -601,40 +649,85 @@ const SelfViaCompanyBlock = ({
         )
       ) : (
         <>
-          {!chainIsKnown && (
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold">
-                אחד מבעלי המניות של {holdingDisplayName}
-              </Label>
-              <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v })}>
-                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
-                  <SelectItem value="company">חברה</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">
+              אחד מבעלי המניות של {holdingDisplayName}
+            </Label>
+            <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v, childCompany: undefined })}>
+              <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
+                <SelectItem value="company">חברה</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {subOwnerType === "person" && null}
 
-          {!chainIsKnown && subOwnerType === "company" && (
-            <CompanyChainBlock
-              data={data?.childCompany || {}}
-              onChange={(c) => update({ childCompany: c })}
-              heldName={holdingDisplayName}
-              depth={1}
-              fillerName={fillerName}
-              gender={gender}
-              chainAllowsNewCompany={isNewCompany && !isExistingHolding}
-              selfName={selfName}
-              spouseName={spouseName}
-              showSpouseOption={showSpouseOption}
-              restrictToPersonOrCompany={true}
-              personIsSelfOnly={true}
-              renderNewCompanyShareholders={renderNewCompanyShareholders}
-            />
-          )}
+          {subOwnerType === "company" && (() => {
+            const childChainOptions = Array.from(knownChains?.values() || [])
+              .filter((chain: any) => chain.companyNumber?.trim() !== data?.companyNumber?.trim());
+            const showChildPicker =
+              childChainOptions.length > 0 &&
+              !data?.childCompany?.companyNumber &&
+              !childCompanyIsNew;
+            return (
+              <>
+                {showChildPicker ? (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-muted-foreground">בחר חברה מחזיקה:</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {childChainOptions.map((chain: any) => (
+                        <button
+                          key={chain.companyNumber}
+                          type="button"
+                          className="px-3 py-1.5 rounded-lg border border-primary/40 bg-primary/5 text-sm font-medium text-primary hover:bg-primary/15 transition-colors"
+                          onClick={() => update({ childCompany: chain })}
+                        >
+                          {chain.companyName || chain.requestedName1 || chain.companyNumber}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        className="px-3 py-1.5 rounded-lg border border-border bg-muted text-sm font-medium text-foreground hover:bg-muted/80 transition-colors"
+                        onClick={() => setChildCompanyIsNew(true)}
+                      >
+                        + חברה מחזיקה חדשה
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {(data?.childCompany?.companyNumber || childCompanyIsNew) && childChainOptions.length > 0 && (
+                      <button
+                        type="button"
+                        className="text-xs text-muted-foreground underline hover:text-foreground"
+                        onClick={() => { setChildCompanyIsNew(false); update({ childCompany: undefined }); }}
+                      >
+                        שנה בחירה
+                      </button>
+                    )}
+                    <CompanyChainBlock
+                      data={data?.childCompany || {}}
+                      onChange={(c) => update({ childCompany: c })}
+                      heldName={holdingDisplayName}
+                      depth={1}
+                      fillerName={fillerName}
+                      gender={gender}
+                      chainAllowsNewCompany={isNewCompany && !isExistingHolding}
+                      selfName={selfName}
+                      spouseName={spouseName}
+                      showSpouseOption={showSpouseOption}
+                      restrictToPersonOrCompany={true}
+                      personIsSelfOnly={true}
+                      renderNewCompanyShareholders={renderNewCompanyShareholders}
+                      knownChains={knownChains}
+                    />
+                  </>
+                )}
+              </>
+            );
+          })()}
         </>
       )}
     </div>
