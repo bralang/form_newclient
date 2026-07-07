@@ -145,6 +145,8 @@ export interface BusinessInfo {
       percentage: string;
     }>;
     spouseIsShareholder?: boolean;
+    selfViaCompany?: any;
+    selfViaCompanyIsNew?: boolean;
   }>;
   newCompanies?: Array<{
     existsInRegistrar?: boolean;

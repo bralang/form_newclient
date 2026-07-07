@@ -1822,6 +1822,12 @@ export const Step2BusinessInfo = () => {
       setInfo({ existingCompanies: updated });
     };
 
+    const resetSelfViaCompany = (idx: number) => {
+      const updated = [...(info.existingCompanies || [])];
+      updated[idx] = { ...updated[idx], selfViaCompany: undefined, selfViaCompanyIsNew: false };
+      setInfo({ existingCompanies: updated });
+    };
+
     // Renderer for "new company" branches inside SelfViaCompanyBlock chain
     const renderNewCompanyShareholdersTop = (
       node: any,
@@ -2037,21 +2043,66 @@ export const Step2BusinessInfo = () => {
 
             </div>
 
-            {company.shareholderType === "self_via_company" && (
-              <SelfViaCompanyBlock
-                data={company.selfViaCompany || {}}
-                onChange={(d) => updateExistingCompany(idx, "selfViaCompany", d)}
-                parentCompanyName={company.name || `החברה הקיימת #${idx + 1}`}
-                isNewCompany={false}
-                fillerName={name}
-                gender={gender}
-                selfName={name}
-                spouseName={spouseDisplayName}
-                showSpouseOption={showSpouseOption}
-                renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
-                knownChains={knownChains}
-              />
-            )}
+            {company.shareholderType === "self_via_company" && (() => {
+              const knownChainsList = Array.from(knownChains.values());
+              const showPicker =
+                !company.selfViaCompany?.companyNumber &&
+                !company.selfViaCompanyIsNew &&
+                knownChainsList.length > 0;
+              return (
+                <>
+                  {showPicker ? (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-muted-foreground">בחר חברה מחזיקה:</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {knownChainsList.map((chain: any) => (
+                          <button
+                            key={chain.companyNumber}
+                            type="button"
+                            className="px-3 py-1.5 rounded-lg border border-primary/40 bg-primary/5 text-sm font-medium text-primary hover:bg-primary/15 transition-colors"
+                            onClick={() => updateExistingCompany(idx, "selfViaCompany", chain)}
+                          >
+                            {chain.companyName || chain.requestedName1 || chain.companyNumber}
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 rounded-lg border border-border bg-muted text-sm font-medium text-foreground hover:bg-muted/80 transition-colors"
+                          onClick={() => updateExistingCompany(idx, "selfViaCompanyIsNew", true)}
+                        >
+                          + חברה מחזיקה חדשה
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {(company.selfViaCompany?.companyNumber || company.selfViaCompanyIsNew) && knownChainsList.length > 0 && (
+                        <button
+                          type="button"
+                          className="text-xs text-muted-foreground underline hover:text-foreground"
+                          onClick={() => resetSelfViaCompany(idx)}
+                        >
+                          שנה בחירה
+                        </button>
+                      )}
+                      <SelfViaCompanyBlock
+                        data={company.selfViaCompany || {}}
+                        onChange={(d) => updateExistingCompany(idx, "selfViaCompany", d)}
+                        parentCompanyName={company.name || `החברה הקיימת #${idx + 1}`}
+                        isNewCompany={false}
+                        fillerName={name}
+                        gender={gender}
+                        selfName={name}
+                        spouseName={spouseDisplayName}
+                        showSpouseOption={showSpouseOption}
+                        renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
+                        knownChains={knownChains}
+                      />
+                    </>
+                  )}
+                </>
+              );
+            })()}
           </div>
         ))}
 
