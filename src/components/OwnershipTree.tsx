@@ -227,9 +227,20 @@ const markOfficeManagedNodes = (nodes: TreeNode[]) => {
 };
 
 const buildOwnerTree = (bi: any, ownerName: string, isSpouseTree: boolean, ctx: Ctx): TreeNode | null => {
+  const existingList = bi?.existingCompanies || [];
+  const newList = bi?.newCompanies || [];
+  const existingCount = bi?.existingCompanyCount || 0;
+  const newCount = bi?.newCompanyCount || 0;
+
+  // If a count was entered but the array isn't populated yet, use placeholder entries
+  const effectiveExisting = existingList.length > 0 ? existingList
+    : Array.from({ length: existingCount }, () => ({ name: "", companyNumber: "" }));
+  const effectiveNew = newList.length > 0 ? newList
+    : Array.from({ length: newCount }, () => ({ requestedName1: "" }));
+
   const companies: TreeNode[] = [
-    ...(bi?.existingCompanies || []).map((c: any) => buildTarget(c, false, ctx)),
-    ...(bi?.newCompanies || []).map((c: any) => buildTarget(c, true, ctx)),
+    ...effectiveExisting.map((c: any) => buildTarget(c, false, ctx)),
+    ...effectiveNew.map((c: any) => buildTarget(c, true, ctx)),
   ];
   if (companies.length === 0) return null;
   if (bi?.existingCompanyFillMode === "office") markOfficeManagedNodes(companies);
@@ -734,17 +745,23 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     ...businessInfo,
     newCompanies: userHasNew ? (businessInfo?.newCompanies || []) : [],
     existingCompanies: userHasExisting ? (businessInfo?.existingCompanies || []) : [],
+    existingCompanyCount: userHasExisting ? (businessInfo?.existingCompanyCount || 0) : 0,
+    newCompanyCount: userHasNew ? (businessInfo?.newCompanyCount || 0) : 0,
   };
   const filteredSpouseBI = {
     ...spouseBusinessInfo,
     newCompanies: spouseHasNew ? (spouseBusinessInfo?.newCompanies || []) : [],
     existingCompanies: spouseHasExisting ? (spouseBusinessInfo?.existingCompanies || []) : [],
+    existingCompanyCount: spouseHasExisting ? (spouseBusinessInfo?.existingCompanyCount || 0) : 0,
+    newCompanyCount: spouseHasNew ? (spouseBusinessInfo?.newCompanyCount || 0) : 0,
   };
 
   const spouseHasOwnTree =
     !!spouseRaw &&
     (
       ((filteredSpouseBI.existingCompanies.length) + (filteredSpouseBI.newCompanies.length)) > 0 ||
+      (spouseHasExisting && (spouseBusinessInfo?.existingCompanyCount || 0) > 0) ||
+      (spouseHasNew && (spouseBusinessInfo?.newCompanyCount || 0) > 0) ||
       hasSpouseCoowned(filteredBI, spouseName)
     );
 

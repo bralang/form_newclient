@@ -198,7 +198,7 @@ export const Step3Documents = () => {
               <div className="space-y-1">
                 <Label className="text-xs">יום מועדף</Label>
                 <div className="flex flex-wrap gap-1.5">
-                  {["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "גמיש"].map((day) => (
+                  {["ראשון", "שני", "שלישי", "רביעי", "חמישי", "גמיש"].map((day) => (
                     <button
                       key={day}
                       type="button"
@@ -214,9 +214,9 @@ export const Step3Documents = () => {
                 <Label className="text-xs">טווח שעות מועדף</Label>
                 <div className="flex flex-wrap gap-1.5">
                   {[
-                    { value: "בוקר", label: "בוקר (8–12)" },
-                    { value: "צהריים", label: "צהריים (12–16)" },
-                    { value: "אחה״צ", label: "אחה״צ (16–19)" },
+                    { value: "בוקר", label: "בוקר (10–12)" },
+                    { value: "צהריים א", label: "צהריים (12–14)" },
+                    { value: "צהריים ב", label: "אחה״צ (14–16)" },
                     { value: "גמיש", label: "גמיש" },
                   ].map((opt) => (
                     <button
