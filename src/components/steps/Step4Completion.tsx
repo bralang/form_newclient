@@ -1,7 +1,6 @@
 import { useFormContext } from "@/contexts/FormContext";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Loader2 } from "lucide-react";
@@ -124,21 +123,6 @@ export const Step4Completion = () => {
       <div>
         <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">סיום</h2>
         <div className="h-1 w-20 bg-primary rounded-full" />
-      </div>
-
-      {/* Agree to notifications */}
-      <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl border border-border/50">
-        <Checkbox
-          id="agreeNotif"
-          checked={feedbackInfo.agreeToNotifications}
-          onCheckedChange={(checked) => setFeedbackInfo({ agreeToNotifications: checked === true })}
-        />
-        <div className="space-y-1">
-          <Label htmlFor="agreeNotif" className="cursor-pointer font-bold">
-            אני מאשר/ת הרשמה לקבלת הודעות *
-          </Label>
-          <p className="text-sm text-muted-foreground">קבלת עדכונים והודעות רלוונטיות בנוגע לשירות</p>
-        </div>
       </div>
 
       {/* Meeting scheduling */}
