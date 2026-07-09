@@ -31,6 +31,8 @@ export const Step3Documents = () => {
   const [emailListMode, setEmailListMode] = useState<"" | "now" | "later">("");
   const [emailReminderDate, setEmailReminderDate] = useState("");
   const [contactPhone, setContactPhone] = useState(personalInfo.phone || "");
+  const [contactDay, setContactDay] = useState("");
+  const [contactTimeRange, setContactTimeRange] = useState("");
 
   const handleSendEmailList = async (scheduledDate?: string) => {
     await sendToWebhook(
@@ -43,7 +45,7 @@ export const Step3Documents = () => {
   const handleSendPhoneContact = async () => {
     await sendToWebhook(
       "https://n8n.chasida.biz/webhook/send-reminder",
-      { phone: contactPhone, personalInfo, serviceType },
+      { phone: contactPhone, preferredDay: contactDay, preferredTime: contactTimeRange, personalInfo, serviceType },
       { silent: false }
     );
   };
@@ -182,17 +184,56 @@ export const Step3Documents = () => {
             <span className="text-sm font-medium">אני רוצה שיצרו איתי קשר טלפוני לסיוע בהעלאת המסמכים</span>
           </button>
           {submissionMode === "phone" && (
-            <div className="mr-7 space-y-2">
-              <Label className="text-xs">מספר טלפון ליצירת קשר</Label>
-              <div className="flex gap-2 max-w-xs">
+            <div className="mr-7 space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">מספר טלפון ליצירת קשר</Label>
                 <Input
                   type="tel"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                   placeholder="050-0000000"
+                  className="max-w-xs"
                 />
-                <Button size="sm" onClick={handleSendPhoneContact} disabled={!contactPhone}>שלח</Button>
               </div>
+              <div className="space-y-1">
+                <Label className="text-xs">יום מועדף</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "גמיש"].map((day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => setContactDay(contactDay === day ? "" : day)}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${contactDay === day ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background hover:bg-muted"}`}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">טווח שעות מועדף</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { value: "בוקר", label: "בוקר (8–12)" },
+                    { value: "צהריים", label: "צהריים (12–16)" },
+                    { value: "אחה״צ", label: "אחה״צ (16–19)" },
+                    { value: "גמיש", label: "גמיש" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setContactTimeRange(contactTimeRange === opt.value ? "" : opt.value)}
+                      className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${contactTimeRange === opt.value ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background hover:bg-muted"}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <Button size="sm" onClick={handleSendPhoneContact} disabled={!contactPhone}>
+                <Phone className="ml-2 h-4 w-4" />
+                שלח
+              </Button>
             </div>
           )}
         </div>
