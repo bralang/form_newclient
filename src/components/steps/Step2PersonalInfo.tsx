@@ -57,14 +57,6 @@ export const Step2PersonalInfo = () => {
     { value: "fastLogin", label: "כניסה מהירה (ביומטרי)", icon: "👆", desc: "כניסה ללא סיסמה בעזרת זיהוי ביומטרי מטלפון חכם" },
   ];
 
-  // Auto-set spouse gender to opposite
-  useEffect(() => {
-    if (detailedInfo.gender && !spouseInfo.gender) {
-      setSpouseInfo({
-        gender: detailedInfo.gender === "male" ? "female" : "male",
-      });
-    }
-  }, [detailedInfo.gender]);
 
   const ml = (male: string, female: string, both: string) => gender ? g(gender, male, female) : both;
   const maritalOptions = [
