@@ -128,7 +128,7 @@ export const Step4Completion = () => {
       {/* Meeting scheduling */}
       <div className="space-y-5 pt-6 border-t border-border">
         <h3 className="text-xl font-bold text-foreground">
-          תיאום מועד לשיחת היכרות ראשונית
+          אם עדיין לא דיברתם איתנו ניתן לתאם כאן מועד לשיחת היכרות
         </h3>
 
         <div className="space-y-2">
