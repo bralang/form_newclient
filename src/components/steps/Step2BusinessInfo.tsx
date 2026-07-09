@@ -253,6 +253,7 @@ const CompanyChainBlock = ({
   const [childCompanyIsNew, setChildCompanyIsNew] = useState(false);
   const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }>) =>
     onChange({ ...data, ...patch });
+  if (depth > 6) return null;
   const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
   const subOwnerType = data.subOwnerType || "";
   const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
@@ -1883,11 +1884,15 @@ export const Step2BusinessInfo = () => {
     // so SelfViaCompanyBlock can auto-fill when the same holding company is reused.
     const collectKnownChains = (): Map<string, any> => {
       const map = new Map<string, any>();
-      const walk = (svc: any) => {
+      const walk = (svc: any, seen = new Set<string>()) => {
         if (!svc) return;
         const key = svc?.companyNumber?.trim();
+        if (key) {
+          if (seen.has(key)) return;
+          seen.add(key);
+        }
         if (key && svc.subOwnerType) map.set(key, svc);
-        if (svc.childCompany) walk(svc.childCompany);
+        if (svc.childCompany) walk(svc.childCompany, seen);
       };
       for (const c of [...(info?.existingCompanies || []), ...(info?.newCompanies || [])]) {
         if (c.selfViaCompany) walk(c.selfViaCompany);
