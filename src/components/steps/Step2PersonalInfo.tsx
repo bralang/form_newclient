@@ -66,20 +66,14 @@ export const Step2PersonalInfo = () => {
     }
   }, [detailedInfo.gender]);
 
-  const maritalOptions = isMarried
-    ? [
-        { value: "single", label: "רווק/ה" },
-        { value: "divorced", label: g(gender, "גרוש", "גרושה") },
-        { value: "widowed", label: g(gender, "אלמן", "אלמנה") },
-        { value: "separated", label: g(gender, "פרוד", "פרודה") },
-        { value: "married", label: g(gender, "נשוי", "נשואה") },
-      ]
-    : [
-        { value: "single", label: "רווק/ה" },
-        { value: "divorced", label: g(gender, "גרוש", "גרושה") },
-        { value: "widowed", label: g(gender, "אלמן", "אלמנה") },
-        { value: "separated", label: g(gender, "פרוד", "פרודה") },
-      ];
+  const ml = (male: string, female: string, both: string) => gender ? g(gender, male, female) : both;
+  const maritalOptions = [
+    { value: "married",   label: ml("נשוי",  "נשואה",  "נשוי/אה")  },
+    { value: "single",    label: ml("רווק",  "רווקה",  "רווק/ה")   },
+    { value: "divorced",  label: ml("גרוש",  "גרושה",  "גרוש/ה")   },
+    { value: "widowed",   label: ml("אלמן",  "אלמנה",  "אלמן/ה")   },
+    { value: "separated", label: ml("פרוד",  "פרודה",  "פרוד/ה")   },
+  ];
 
   const additionalIdOptions = [
     { value: "parentId", label: "מס׳ זהות של הורה" },
