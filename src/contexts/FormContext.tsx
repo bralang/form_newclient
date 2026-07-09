@@ -369,7 +369,7 @@ export const FormProvider: React.FC<{
     lastName: "",
     phone: "",
     email: "",
-    maritalStatus: "married",
+    maritalStatus: "",
     spouseName: "",
     agreeToMessages: false,
     agreeToPrivacy: false,
