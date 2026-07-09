@@ -227,6 +227,7 @@ const CompanyChainBlock = ({
   offerSelfInPersonOption = false,
   personIsSelfOnly = false,
   renderNewCompanyShareholders,
+  knownChains,
 }: {
   data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean };
   onChange: (next: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }) => void;
