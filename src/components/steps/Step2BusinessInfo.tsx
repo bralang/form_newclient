@@ -2687,6 +2687,13 @@ export const Step2BusinessInfo = () => {
   const spouseHasNewNonprofit = spouseHasNonprofit && serviceType.spousePurposeStatus?.nonprofit?.includes("new");
   const spouseHasExistingNonprofit = spouseHasNonprofit && (serviceType.spousePurposeStatus?.nonprofit?.includes("existing") || spouseWarEntities.includes("nonprofit"));
 
+  const hasAnyBusinessContent =
+    userHasNewBusiness || userHasExistingBusiness || userHasNonprofit || userHasCompany ||
+    (isMarried && (spouseHasNewBusiness || spouseHasExistingBusiness || spouseHasNonprofit || spouseHasCompany)) ||
+    showWarCompensation;
+
+  if (!hasAnyBusinessContent) return null;
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-foreground">
