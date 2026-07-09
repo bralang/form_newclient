@@ -368,7 +368,7 @@ export const Step3Documents = () => {
               </h3>
               <FileUpload
                 id={`incorp-${who}-${idx}`}
-                label="תעודת התאגדות ו/או נסח רשם החברות"
+                label="נסח רשם החברות"
                 multiple
                 onChange={(files) => {
                   const updated = [...companies];
@@ -376,15 +376,17 @@ export const Step3Documents = () => {
                   setBi({ existingCompanies: updated });
                 }}
               />
-              <FileUpload
-                id={`bank-${who}-${idx}`}
-                label="אישור ניהול חשבון או צילום שיק"
-                onChange={(files) => {
-                  const updated = [...companies];
-                  updated[idx] = { ...updated[idx], companyBankConfirmationFile: files?.[0] || undefined };
-                  setBi({ existingCompanies: updated });
-                }}
-              />
+              {(company.hasBankAccount === true || company.bankDetails?.accountNumber) && (
+                <FileUpload
+                  id={`bank-${who}-${idx}`}
+                  label="אישור ניהול חשבון או צילום שיק"
+                  onChange={(files) => {
+                    const updated = [...companies];
+                    updated[idx] = { ...updated[idx], companyBankConfirmationFile: files?.[0] || undefined };
+                    setBi({ existingCompanies: updated });
+                  }}
+                />
+              )}
             </div>
           ));
         })}
