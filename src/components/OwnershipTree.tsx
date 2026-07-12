@@ -4,6 +4,21 @@ import { toPng } from "html-to-image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+const safeStringify = (obj: any): string => {
+  const seen = new Set();
+  try {
+    return JSON.stringify(obj, (_k, v) => {
+      if (typeof v === "object" && v !== null) {
+        if (seen.has(v)) return "[Circular]";
+        seen.add(v);
+      }
+      return v;
+    });
+  } catch {
+    return "";
+  }
+};
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type NodeKind = "person" | "company";
@@ -795,8 +810,8 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
     return result;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    JSON.stringify(filteredBI),
-    JSON.stringify(filteredSpouseBI),
+    safeStringify(filteredBI),
+    safeStringify(filteredSpouseBI),
     selfName, spouseName, spouseHasOwnTree, activeLabel, tick,
   ]);
 

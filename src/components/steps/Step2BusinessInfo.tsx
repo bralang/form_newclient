@@ -253,7 +253,6 @@ const CompanyChainBlock = ({
   const [childCompanyIsNew, setChildCompanyIsNew] = useState(false);
   const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }>) =>
     onChange({ ...data, ...patch });
-  if (depth > 6) return null;
   const updatePerson = (patch: any) => onChange({ ...data, personOwner: { ...(data.personOwner || {}), ...patch } });
   const subOwnerType = data.subOwnerType || "";
   const heShe = gender ? g(gender, "הוא", "היא") : "הוא/היא";
