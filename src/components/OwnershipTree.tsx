@@ -403,21 +403,21 @@ const findEditedHoldingLabel = (curr: any, prev: any): string | null => {
     if (!svc) return null;
     const name = svc?.companyName?.trim() || svc?.requestedName1?.trim() || null;
     const flat = (x: any) => ({ ...x, childCompany: undefined, shareholders: undefined });
-    if (JSON.stringify(flat(svc)) !== JSON.stringify(flat(prevSvc || {}))) return name;
-    if (JSON.stringify(svc.shareholders || []) !== JSON.stringify((prevSvc || {}).shareholders || [])) return name;
+    if (safeStringify(flat(svc)) !== safeStringify(flat(prevSvc || {}))) return name;
+    if (safeStringify(svc.shareholders || []) !== safeStringify((prevSvc || {}).shareholders || [])) return name;
     if (svc?.childCompany) return deepLabel(svc.childCompany, (prevSvc || {}).childCompany);
     return null;
   };
   const currSVC = curr?.selfViaCompany;
   const prevSVC = (prev || {})?.selfViaCompany;
-  if (currSVC && JSON.stringify(currSVC) !== JSON.stringify(prevSVC || {})) {
+  if (currSVC && safeStringify(currSVC) !== safeStringify(prevSVC || {})) {
     return deepLabel(currSVC, prevSVC);
   }
   const currSh: any[] = curr?.shareholders || [];
   const prevSh: any[] = (prev || {})?.shareholders || [];
   for (let j = 0; j < currSh.length; j++) {
     const s = currSh[j];
-    if (s?.holderType === "self_via_company" && JSON.stringify(s) !== JSON.stringify(prevSh[j] || {})) {
+    if (s?.holderType === "self_via_company" && safeStringify(s) !== safeStringify(prevSh[j] || {})) {
       return deepLabel(s, prevSh[j]);
     }
   }
@@ -676,7 +676,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   // Highlights the holding company when its own fields are being edited,
   // otherwise highlights the top-level target company.
   useEffect(() => {
-    const curr = JSON.stringify(businessInfo || {});
+    const curr = safeStringify(businessInfo || {});
     if (curr === prevBIRef.current) return;
     const prev = prevBIRef.current ? JSON.parse(prevBIRef.current) : null;
     prevBIRef.current = curr;
@@ -685,7 +685,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       const currList = ((businessInfo || {})[key] || []) as any[];
       const prevList = ((prev)[key] || []) as any[];
       for (let i = 0; i < currList.length; i++) {
-        if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i] || {})) {
+        if (safeStringify(currList[i]) !== safeStringify(prevList[i] || {})) {
           const holdingLabel = findEditedHoldingLabel(currList[i], prevList[i] || {});
           if (holdingLabel) { setActiveLabel(holdingLabel); return; }
           setActiveLabel(currList[i]?.[suffix]?.trim() || null);
@@ -696,7 +696,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
   }, [businessInfo]);
 
   useEffect(() => {
-    const curr = JSON.stringify(spouseBusinessInfo || {});
+    const curr = safeStringify(spouseBusinessInfo || {});
     if (curr === prevSpouseBIRef.current) return;
     const prev = prevSpouseBIRef.current ? JSON.parse(prevSpouseBIRef.current) : null;
     prevSpouseBIRef.current = curr;
@@ -705,7 +705,7 @@ export const OwnershipTree = ({ compact = false }: { compact?: boolean }) => {
       const currList = ((spouseBusinessInfo || {})[key] || []) as any[];
       const prevList = ((prev)[key] || []) as any[];
       for (let i = 0; i < currList.length; i++) {
-        if (JSON.stringify(currList[i]) !== JSON.stringify(prevList[i] || {})) {
+        if (safeStringify(currList[i]) !== safeStringify(prevList[i] || {})) {
           const holdingLabel = findEditedHoldingLabel(currList[i], prevList[i] || {});
           if (holdingLabel) { setActiveLabel(holdingLabel); return; }
           setActiveLabel(currList[i]?.[suffix]?.trim() || null);
