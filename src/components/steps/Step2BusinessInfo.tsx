@@ -1890,8 +1890,8 @@ export const Step2BusinessInfo = () => {
         if (key) {
           if (seen.has(key)) return;
           seen.add(key);
+          map.set(key, svc);
         }
-        if (key && svc.subOwnerType) map.set(key, svc);
         if (svc.childCompany) walk(svc.childCompany, seen);
       };
       for (const c of [...(info?.existingCompanies || []), ...(info?.newCompanies || [])]) {
