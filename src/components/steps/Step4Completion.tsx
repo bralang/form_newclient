@@ -20,6 +20,7 @@ export const Step4Completion = () => {
     setCurrentStep,
     sendToWebhook,
     saveFormData,
+    updateLeadStatus,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -60,6 +61,7 @@ export const Step4Completion = () => {
         { silent: true }
       ),
       saveFormData("הוגש"),
+      updateLeadStatus("הושלם מילוי שאלון"),
     ]);
     const gmailData = buildGmailData();
 

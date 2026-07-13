@@ -24,6 +24,7 @@ export const Step1Purpose = () => {
     setCurrentStep,
     sendToWebhook,
     saveFormData,
+    updateLeadStatus,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const isMarried = personalInfo.maritalStatus === "married";
@@ -88,6 +89,7 @@ export const Step1Purpose = () => {
         { silent: true }
       ),
       saveFormData(),
+      updateLeadStatus("שאלון באמצע מילוי"),
     ]);
     setLoading(false);
     setCurrentStep(3);

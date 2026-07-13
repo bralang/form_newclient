@@ -317,6 +317,7 @@ interface FormContextType {
   ) => Promise<boolean>;
 
   saveFormData: (overrideStatus?: string) => Promise<void>;
+  updateLeadStatus: (statusLead: string) => Promise<void>;
 
   isLoading: boolean;
   questionnaireId: number | null;
@@ -357,6 +358,7 @@ export const FormProvider: React.FC<{
   questionnaireId?: number | null;
 }> = ({ children, questionnaireId = null }) => {
   const [isLoading, setIsLoading] = useState(!!questionnaireId);
+  const [leadId, setLeadId] = useState<number | null>(null);
   const [currentStep, setCurrentStepRaw] = useState(1);
   const setCurrentStep = (step: number) => {
     setCurrentStepRaw(step);
@@ -603,6 +605,8 @@ export const FormProvider: React.FC<{
 
         // 2. אחר כך persons ממלא רק שדות ריקים (טבלת persons היא המקור הסמכותי לפרטי הבסיס)
         if (questionnaire.lead_id) {
+          setLeadId(questionnaire.lead_id);
+
           const { data: lead } = await (supabase as any)
             .from("leads")
             .select("*")
@@ -760,6 +764,18 @@ export const FormProvider: React.FC<{
     if (error) console.error("Failed to save form data:", error);
   };
 
+  // ─── Lead Status ──────────────────────
+  const updateLeadStatus = async (statusLead: string): Promise<void> => {
+    if (!leadId) return;
+
+    const { error } = await (supabase as any)
+      .from("leads")
+      .update({ status_lead: statusLead })
+      .eq("lead_id", leadId);
+
+    if (error) console.error("Failed to update lead status:", error);
+  };
+
   // ─── Webhook ──────────────────────────
   const sendToWebhook = async (
     url: string,
@@ -866,6 +882,7 @@ export const FormProvider: React.FC<{
         setFeedbackInfo,
         sendToWebhook,
         saveFormData,
+        updateLeadStatus,
         isLoading,
         questionnaireId,
       }}
