@@ -169,7 +169,7 @@ export const Step4Completion = () => {
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={!feedbackInfo.agreeToNotifications || loading}
+          disabled={loading}
           size="lg"
           className="text-lg px-8"
         >
