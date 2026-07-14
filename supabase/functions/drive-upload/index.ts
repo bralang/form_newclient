@@ -6,64 +6,27 @@ const corsHeaders = {
 const DRIVE_ROOT_FOLDER_ID = "1JOo7JC_rJ6x4mLzNAFo_WBT1x29lU5PE";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-type ServiceAccount = {
-  client_email: string;
-  private_key: string;
-};
-
-function base64UrlEncode(bytes: Uint8Array): string {
-  let str = "";
-  for (const b of bytes) str += String.fromCharCode(b);
-  return btoa(str).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-async function getAccessToken(serviceAccount: ServiceAccount): Promise<string> {
-  const header = { alg: "RS256", typ: "JWT" };
-  const now = Math.floor(Date.now() / 1000);
-  const claim = {
-    iss: serviceAccount.client_email,
-    scope: "https://www.googleapis.com/auth/drive",
-    aud: "https://oauth2.googleapis.com/token",
-    exp: now + 3600,
-    iat: now,
-  };
-
-  const enc = (obj: unknown) =>
-    base64UrlEncode(new TextEncoder().encode(JSON.stringify(obj)));
-  const unsigned = `${enc(header)}.${enc(claim)}`;
-
-  const pemContents = serviceAccount.private_key
-    .replace("-----BEGIN PRIVATE KEY-----", "")
-    .replace("-----END PRIVATE KEY-----", "")
-    .replace(/\s/g, "");
-  const binaryDer = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
-
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    binaryDer.buffer,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-
-  const signature = await crypto.subtle.sign(
-    "RSASSA-PKCS1-v1_5",
-    key,
-    new TextEncoder().encode(unsigned)
-  );
-  const jwt = `${unsigned}.${base64UrlEncode(new Uint8Array(signature))}`;
+async function getAccessToken(): Promise<string> {
+  const clientId = Deno.env.get("GDRIVE_CLIENT_ID");
+  const clientSecret = Deno.env.get("GDRIVE_CLIENT_SECRET");
+  const refreshToken = Deno.env.get("GDRIVE_REFRESH_TOKEN");
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error("Google OAuth env vars are not configured");
+  }
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: jwt,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: clientId,
+      client_secret: clientSecret,
     }),
   });
   const tokenJson = await tokenRes.json();
   if (!tokenRes.ok) {
-    throw new Error(`Google token exchange failed: ${JSON.stringify(tokenJson)}`);
+    throw new Error(`Google token refresh failed: ${JSON.stringify(tokenJson)}`);
   }
   return tokenJson.access_token as string;
 }
@@ -235,12 +198,6 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const serviceAccountJson = Deno.env.get("GDRIVE_SERVICE_ACCOUNT_JSON");
-    if (!serviceAccountJson) {
-      throw new Error("GDRIVE_SERVICE_ACCOUNT_JSON secret is not configured");
-    }
-    const serviceAccount = JSON.parse(serviceAccountJson) as ServiceAccount;
-
     const body = await req.json();
     const { action } = body;
 
@@ -265,7 +222,7 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      const accessToken = await getAccessToken(serviceAccount);
+      const accessToken = await getAccessToken();
       const folder = await driveCreateFolder(
         accessToken,
         `${clientName} (#${questionnaireId})`,
@@ -283,7 +240,7 @@ Deno.serve(async (req: Request) => {
       const { folderId } = body as { folderId: string };
       if (!folderId) throw new Error("Missing folderId");
 
-      const accessToken = await getAccessToken(serviceAccount);
+      const accessToken = await getAccessToken();
       const files = await driveListFiles(accessToken, folderId);
       const byFieldKey: Record<string, { fileId: string; fileName: string; webViewLink: string }> = {};
       for (const f of files) {
@@ -319,7 +276,7 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      const accessToken = await getAccessToken(serviceAccount);
+      const accessToken = await getAccessToken();
       const existingFiles = await driveListFiles(accessToken, folderId);
       const existing = existingFiles.find((f) => f.properties?.fieldKey === fieldKey);
 
