@@ -11,6 +11,7 @@ type UploadedFile = { fileId: string; fileName: string; webViewLink: string };
 
 const DRIVE_UPLOAD_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/drive-upload`;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const MAX_UPLOAD_SIZE_MB = 8;
 
 export const Step3Documents = () => {
   const {
@@ -44,7 +45,7 @@ export const Step3Documents = () => {
   // ─── Drive folder + already-uploaded files ───
   const [driveFolderId, setDriveFolderId] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, UploadedFile>>({});
-  const [uploadStatus, setUploadStatus] = useState<Record<string, "uploading" | "error">>({});
+  const [uploadStatus, setUploadStatus] = useState<Record<string, { kind: "uploading" } | { kind: "error"; message: string }>>({});
 
   useEffect(() => {
     if (!questionnaireId) return;
@@ -72,7 +73,7 @@ export const Step3Documents = () => {
 
   const uploadFileToDrive = async (fieldKey: string, file: File) => {
     if (!driveFolderId) return;
-    setUploadStatus((prev) => ({ ...prev, [fieldKey]: "uploading" }));
+    setUploadStatus((prev) => ({ ...prev, [fieldKey]: { kind: "uploading" } }));
     try {
       const form = new FormData();
       form.append("action", "uploadFile");
@@ -101,9 +102,12 @@ export const Step3Documents = () => {
         delete next[fieldKey];
         return next;
       });
-    } catch (e) {
+    } catch (e: any) {
       console.error(`Drive upload failed for ${fieldKey}:`, e);
-      setUploadStatus((prev) => ({ ...prev, [fieldKey]: "error" }));
+      const message = e?.message?.includes("File too large")
+        ? `הקובץ גדול מדי (מקסימום ${(MAX_UPLOAD_SIZE_MB)}MB) — נסו לצלם/לשמור באיכות נמוכה יותר`
+        : "שגיאה בהעלאה לדרייב";
+      setUploadStatus((prev) => ({ ...prev, [fieldKey]: { kind: "error", message } }));
     }
   };
 
@@ -200,14 +204,14 @@ export const Step3Documents = () => {
           if (!uploaded && !status) return null;
           return (
             <p key={key} className="text-xs flex items-center gap-1">
-              {status === "uploading" && (
+              {status?.kind === "uploading" && (
                 <span className="text-muted-foreground flex items-center gap-1">
                   <Loader2 className="w-3 h-3 animate-spin" /> מעלה לדרייב...
                 </span>
               )}
-              {status === "error" && (
+              {status?.kind === "error" && (
                 <span className="text-destructive flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" /> שגיאה בהעלאה לדרייב
+                  <AlertCircle className="w-3 h-3" /> {status.message}
                 </span>
               )}
               {uploaded && !status && (

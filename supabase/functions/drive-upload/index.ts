@@ -195,7 +195,7 @@ Deno.serve(async (req: Request) => {
         }
         if (file.size > MAX_FILE_SIZE) {
           return new Response(
-            JSON.stringify({ ok: false, error: "File too large (max 10MB)" }),
+            JSON.stringify({ ok: false, error: `File too large (max ${MAX_FILE_SIZE / (1024 * 1024)}MB)` }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
