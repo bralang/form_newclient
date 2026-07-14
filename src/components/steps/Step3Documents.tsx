@@ -12,6 +12,41 @@ type UploadedFile = { fileId: string; fileName: string; webViewLink: string };
 const DRIVE_UPLOAD_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/drive-upload`;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const MAX_UPLOAD_SIZE_MB = 8;
+const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
+const MAX_IMAGE_DIMENSION = 1920;
+
+// Large phone photos get downsized/re-encoded client-side before upload — this keeps
+// the server's memory-constrained Edge Function well under its cap without needing
+// a bigger raw file-size ceiling. PDFs/docs are left untouched.
+const compressImageIfNeeded = async (file: File): Promise<File> => {
+  if (!file.type.startsWith("image/") || file.type === "image/svg+xml") return file;
+  if (file.size <= MAX_UPLOAD_SIZE_BYTES) return file;
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    let { width, height } = bitmap;
+    if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+      const scale = MAX_IMAGE_DIMENSION / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, width, height);
+
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
+    if (!blob) return file;
+
+    const newName = file.name.replace(/\.[^./\\]+$/, "") + ".jpg";
+    return new File([blob], newName, { type: "image/jpeg" });
+  } catch (e) {
+    console.error("Image compression failed, uploading original file:", e);
+    return file;
+  }
+};
 
 export const Step3Documents = () => {
   const {
@@ -71,17 +106,22 @@ export const Step3Documents = () => {
     })();
   }, [questionnaireId]);
 
-  const uploadFileToDrive = async (fieldKey: string, file: File) => {
+  const uploadFileToDrive = async (fieldKey: string, file: File, driveLabel: string) => {
     if (!driveFolderId) return;
     setUploadStatus((prev) => ({ ...prev, [fieldKey]: { kind: "uploading" } }));
     try {
+      const processedFile = await compressImageIfNeeded(file);
+      const clientName = `${personalInfo.firstName || ""} ${personalInfo.lastName || ""}`.trim() || "לקוח";
+      const ext = processedFile.name.match(/\.[^./\\]+$/)?.[0] || "";
+      const driveFileName = `${clientName} - ${driveLabel}${ext}`;
+
       const form = new FormData();
       form.append("action", "uploadFile");
       form.append("folderId", driveFolderId);
       form.append("questionnaireId", String(questionnaireId ?? ""));
       form.append("fieldKey", fieldKey);
-      form.append("fileName", file.name);
-      form.append("file", file, file.name);
+      form.append("fileName", driveFileName);
+      form.append("file", processedFile, driveFileName);
 
       const res = await fetch(DRIVE_UPLOAD_URL, {
         method: "POST",
@@ -170,12 +210,15 @@ export const Step3Documents = () => {
   };
 
   const FileUpload = ({ id, label, multiple = false, onChange }: { id: string; label: string; multiple?: boolean; onChange: (files: FileList | null) => void }) => {
+    const cleanLabel = label.replace(/\s*\*.*$/, "").replace(/\s*\(.*$/, "").trim() || id;
+
     const handleChange = (files: FileList | null) => {
       onChange(files);
       if (!files || files.length === 0) return;
       Array.from(files).forEach((file, idx) => {
         const fieldKey = multiple ? `${id}-${idx}` : id;
-        uploadFileToDrive(fieldKey, file);
+        const driveLabel = multiple ? `${cleanLabel} (${idx + 1})` : cleanLabel;
+        uploadFileToDrive(fieldKey, file, driveLabel);
       });
     };
 
