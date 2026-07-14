@@ -828,16 +828,19 @@ export const Step2BusinessInfo = () => {
 
     const handlePartnerCountChange = (count: number) => {
       const adjusted = Array.from({ length: count }, (_, i) => {
+        const existing = partners[i];
         if (i === 0) {
           // Partner #1 is always the questionnaire filler – auto-fill
           return {
-            ...(partners[0] || {}),
+            ...(existing || {}),
+            id: existing?.id || crypto.randomUUID(),
             isSelf: true,
             name: selfName,
             idNumber: selfIdNumber,
           };
         }
-        return partners[i] || {
+        return existing || {
+          id: crypto.randomUUID(),
           name: "",
           idNumber: "",
           percentage: "",
@@ -1073,8 +1076,10 @@ export const Step2BusinessInfo = () => {
       if (!includeSelfAsFirstShareholder) {
         const result: any[] = [];
         for (let i = 0; i < totalCount; i++) {
+          const existing = shareholders[i];
           result.push(
-            shareholders[i] || {
+            existing || {
+              id: crypto.randomUUID(),
               isSelf: false,
               isSpouse: false,
               name: "",
@@ -1094,6 +1099,7 @@ export const Step2BusinessInfo = () => {
       // #1 — always self (auto-filled from personal info)
       result.push({
         ...(shareholders[0] || {}),
+        id: shareholders[0]?.id || crypto.randomUUID(),
         isSelf: true,
         isSpouse: false,
         name: selfName,
@@ -1106,6 +1112,7 @@ export const Step2BusinessInfo = () => {
       if (spouseFlag) {
         result.push({
           ...(shareholders[nextIdx] || {}),
+          id: shareholders[nextIdx]?.id || crypto.randomUUID(),
           isSelf: false,
           isSpouse: true,
           name: spouseDisplayName,
@@ -1122,8 +1129,10 @@ export const Step2BusinessInfo = () => {
           .filter((s: any) => !s?.isSelf && !s?.isSpouse)
           .map((s: any) => ({ ...s, isSelf: false, isSpouse: false }));
         const manualIdx = i - nextIdx;
+        const existing = existingManual[manualIdx];
         result.push(
-          existingManual[manualIdx] || {
+          existing || {
+            id: crypto.randomUUID(),
             isSelf: false,
             isSpouse: false,
             name: "",
@@ -1973,7 +1982,7 @@ export const Step2BusinessInfo = () => {
                 onChange={(e) => {
                   const count = parseInt(e.target.value) || 0;
                   const companies = info.newCompanies || [];
-                  const adjusted = Array.from({ length: count }, (_, i) => companies[i] || {});
+                  const adjusted = Array.from({ length: count }, (_, i) => companies[i] || { id: crypto.randomUUID() });
                   setInfo({ newCompanyCount: count, newCompanies: adjusted });
                 }}
               />
@@ -2005,7 +2014,7 @@ export const Step2BusinessInfo = () => {
                 onChange={(e) => {
                   const count = parseInt(e.target.value) || 0;
                   const companies = info.existingCompanies || [];
-                  const adjusted = Array.from({ length: count }, (_, i) => companies[i] || { name: "", companyNumber: "" });
+                  const adjusted = Array.from({ length: count }, (_, i) => companies[i] || { id: crypto.randomUUID(), name: "", companyNumber: "" });
                   setInfo({ existingCompanyCount: count, existingCompanies: adjusted });
                 }}
               />
@@ -2281,7 +2290,7 @@ export const Step2BusinessInfo = () => {
     const handleBoardCountChange = (count: number) => {
       if (count < 7) count = 7;
       const adjusted: NonprofitBoardMember[] = Array.from({ length: count }, (_, i) =>
-        boardMembers[i] || { name: "", idNumber: "", email: "", phone: "", address: "", isAuthorizedSigner: false, isAuditCommittee: false }
+        boardMembers[i] || { id: crypto.randomUUID(), name: "", idNumber: "", email: "", phone: "", address: "", isAuthorizedSigner: false, isAuditCommittee: false }
       );
       setInfo({ boardMemberCount: count, boardMembers: adjusted });
     };
@@ -2488,7 +2497,7 @@ export const Step2BusinessInfo = () => {
 
     const handleCountChange = (count: number) => {
       const adjusted: NonprofitBoardMember[] = Array.from({ length: count }, (_, i) =>
-        boardMembers[i] || { name: "", idNumber: "", email: "", phone: "", address: "", isAuthorizedSigner: false }
+        boardMembers[i] || { id: crypto.randomUUID(), name: "", idNumber: "", email: "", phone: "", address: "", isAuthorizedSigner: false }
       );
       setInfo({ existingBoardMemberCount: count, existingBoardMembers: adjusted });
     };

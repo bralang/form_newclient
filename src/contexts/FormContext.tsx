@@ -69,6 +69,7 @@ export interface BusinessInfo {
 
   // Partnership details (new business)
   partners?: Array<{
+    id?: string;
     name: string;
     idNumber: string;
     percentage: string;
@@ -79,6 +80,7 @@ export interface BusinessInfo {
   }>;
   partnershipAgreementFile?: File;
   existingPartners?: Array<{
+    id?: string;
     name: string;
     idNumber: string;
     percentage: string;
@@ -116,6 +118,7 @@ export interface BusinessInfo {
   existingCompanyFillMode?: "self" | "office" | "";
   newCompanyCount?: number;
   existingCompanies?: Array<{
+    id?: string;
     name: string;
     companyNumber: string;
     hasTaxFile?: boolean;
@@ -132,6 +135,7 @@ export interface BusinessInfo {
     shareholderType?: "alone" | "other" | "";
     shareholderCount?: number;
     shareholders?: Array<{
+      id?: string;
       isSelf?: boolean;
       isSpouse?: boolean;
       name: string;
@@ -149,6 +153,7 @@ export interface BusinessInfo {
     selfViaCompanyIsNew?: boolean;
   }>;
   newCompanies?: Array<{
+    id?: string;
     existsInRegistrar?: boolean;
     requestedName1?: string;
     requestedName2?: string;
@@ -156,6 +161,7 @@ export interface BusinessInfo {
     shareholderType?: "alone" | "other" | "";
     shareholderCount?: number;
     shareholders?: Array<{
+      id?: string;
       isSelf?: boolean;
       isSpouse?: boolean;
       name: string;
@@ -176,6 +182,7 @@ export interface BusinessInfo {
 // ─── Nonprofit Interfaces ───────────────────────────
 
 export interface NonprofitBoardMember {
+  id?: string;
   name: string;
   idNumber: string;
   idFile?: File;
