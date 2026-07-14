@@ -4,7 +4,7 @@ const corsHeaders = {
 };
 
 const DRIVE_ROOT_FOLDER_ID = "1JOo7JC_rJ6x4mLzNAFo_WBT1x29lU5PE";
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
 
 async function getAccessToken(): Promise<string> {
   const clientId = Deno.env.get("GDRIVE_CLIENT_ID");
@@ -69,51 +69,31 @@ async function driveListFiles(accessToken: string, folderId: string) {
   }>;
 }
 
-function buildMultipartBody(
-  metadata: Record<string, unknown>,
-  mimeType: string,
-  bytes: Uint8Array,
-  boundary: string
-): Uint8Array {
-  const encoder = new TextEncoder();
-  const metadataPart = encoder.encode(
-    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(
-      metadata
-    )}\r\n--${boundary}\r\nContent-Type: ${mimeType}\r\n\r\n`
-  );
-  const closingPart = encoder.encode(`\r\n--${boundary}--`);
-  const body = new Uint8Array(metadataPart.length + bytes.length + closingPart.length);
-  body.set(metadataPart, 0);
-  body.set(bytes, metadataPart.length);
-  body.set(closingPart, metadataPart.length + bytes.length);
-  return body;
-}
-
 async function driveCreateFile(
   accessToken: string,
   folderId: string,
   fileName: string,
   mimeType: string,
-  bytes: Uint8Array,
+  fileBlob: Blob,
   fieldKey: string,
   questionnaireId: string
 ) {
-  const boundary = `drive_upload_${crypto.randomUUID()}`;
-  const body = buildMultipartBody(
-    { name: fileName, parents: [folderId], properties: { fieldKey, questionnaireId } },
-    mimeType,
-    bytes,
-    boundary
+  const form = new FormData();
+  form.append(
+    "metadata",
+    new Blob(
+      [JSON.stringify({ name: fileName, parents: [folderId], properties: { fieldKey, questionnaireId } })],
+      { type: "application/json; charset=UTF-8" }
+    )
   );
+  form.append("file", fileBlob, fileName);
+
   const res = await fetch(
     "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink,name",
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": `multipart/related; boundary=${boundary}`,
-      },
-      body,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: form,
     }
   );
   const json = await res.json();
@@ -126,19 +106,18 @@ async function driveReplaceFileContent(
   fileId: string,
   fileName: string,
   mimeType: string,
-  bytes: Uint8Array
+  fileBlob: Blob
 ) {
-  const boundary = `drive_update_${crypto.randomUUID()}`;
-  const body = buildMultipartBody({ name: fileName }, mimeType, bytes, boundary);
+  const form = new FormData();
+  form.append("metadata", new Blob([JSON.stringify({ name: fileName })], { type: "application/json; charset=UTF-8" }));
+  form.append("file", fileBlob, fileName);
+
   const res = await fetch(
     `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&fields=id,webViewLink,name`,
     {
       method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": `multipart/related; boundary=${boundary}`,
-      },
-      body,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: form,
     }
   );
   const json = await res.json();
@@ -198,6 +177,62 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    const contentType = req.headers.get("content-type") || "";
+
+    if (contentType.includes("multipart/form-data")) {
+      const form = await req.formData();
+      const action = form.get("action");
+
+      if (action === "uploadFile") {
+        const folderId = form.get("folderId") as string | null;
+        const questionnaireId = form.get("questionnaireId") as string | null;
+        const fieldKey = form.get("fieldKey") as string | null;
+        const fileName = (form.get("fileName") as string | null) || "file";
+        const file = form.get("file") as File | null;
+
+        if (!folderId || !fieldKey || !file) {
+          throw new Error("Missing required upload fields");
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          return new Response(
+            JSON.stringify({ ok: false, error: "File too large (max 10MB)" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const accessToken = await getAccessToken();
+        const existingFiles = await driveListFiles(accessToken, folderId);
+        const existing = existingFiles.find((f) => f.properties?.fieldKey === fieldKey);
+
+        const result = existing
+          ? await driveReplaceFileContent(accessToken, existing.id, fileName, file.type, file)
+          : await driveCreateFile(
+              accessToken,
+              folderId,
+              fileName,
+              file.type,
+              file,
+              fieldKey,
+              questionnaireId ?? ""
+            );
+
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            fileId: result.id,
+            fileName: result.name,
+            webViewLink: result.webViewLink,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(JSON.stringify({ ok: false, error: "Unknown action" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body = await req.json();
     const { action } = body;
 
@@ -253,54 +288,6 @@ Deno.serve(async (req: Request) => {
       return new Response(JSON.stringify({ ok: true, files: byFieldKey }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    if (action === "uploadFile") {
-      const { folderId, questionnaireId, fieldKey, fileName, mimeType, fileBase64 } = body as {
-        folderId: string;
-        questionnaireId: number;
-        fieldKey: string;
-        fileName: string;
-        mimeType: string;
-        fileBase64: string;
-      };
-      if (!folderId || !fieldKey || !fileName || !fileBase64) {
-        throw new Error("Missing required upload fields");
-      }
-
-      const bytes = Uint8Array.from(atob(fileBase64), (c) => c.charCodeAt(0));
-      if (bytes.length > MAX_FILE_SIZE) {
-        return new Response(
-          JSON.stringify({ ok: false, error: "File too large (max 10MB)" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      const accessToken = await getAccessToken();
-      const existingFiles = await driveListFiles(accessToken, folderId);
-      const existing = existingFiles.find((f) => f.properties?.fieldKey === fieldKey);
-
-      const result = existing
-        ? await driveReplaceFileContent(accessToken, existing.id, fileName, mimeType, bytes)
-        : await driveCreateFile(
-            accessToken,
-            folderId,
-            fileName,
-            mimeType,
-            bytes,
-            fieldKey,
-            String(questionnaireId ?? "")
-          );
-
-      return new Response(
-        JSON.stringify({
-          ok: true,
-          fileId: result.id,
-          fileName: result.name,
-          webViewLink: result.webViewLink,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
     }
 
     return new Response(JSON.stringify({ ok: false, error: "Unknown action" }), {

@@ -9,16 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 type UploadedFile = { fileId: string; fileName: string; webViewLink: string };
 
-const fileToBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      resolve(result.split(",")[1] || "");
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
+const DRIVE_UPLOAD_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/drive-upload`;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 export const Step3Documents = () => {
   const {
@@ -82,19 +74,24 @@ export const Step3Documents = () => {
     if (!driveFolderId) return;
     setUploadStatus((prev) => ({ ...prev, [fieldKey]: "uploading" }));
     try {
-      const fileBase64 = await fileToBase64(file);
-      const { data, error } = await supabase.functions.invoke("drive-upload", {
-        body: {
-          action: "uploadFile",
-          folderId: driveFolderId,
-          questionnaireId,
-          fieldKey,
-          fileName: file.name,
-          mimeType: file.type || "application/octet-stream",
-          fileBase64,
+      const form = new FormData();
+      form.append("action", "uploadFile");
+      form.append("folderId", driveFolderId);
+      form.append("questionnaireId", String(questionnaireId ?? ""));
+      form.append("fieldKey", fieldKey);
+      form.append("fileName", file.name);
+      form.append("file", file, file.name);
+
+      const res = await fetch(DRIVE_UPLOAD_URL, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
+        body: form,
       });
-      if (error || !data?.ok) throw new Error(data?.error || error?.message || "Unknown error");
+      const data = await res.json();
+      if (!res.ok || !data?.ok) throw new Error(data?.error || "Unknown error");
       setUploadedFiles((prev) => ({
         ...prev,
         [fieldKey]: { fileId: data.fileId, fileName: data.fileName, webViewLink: data.webViewLink },
