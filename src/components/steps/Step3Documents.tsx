@@ -3,8 +3,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FormNavigation } from "@/components/FormNavigation";
-import { useState } from "react";
-import { Mail, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Mail, Phone, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+type UploadedFile = { fileId: string; fileName: string; webViewLink: string };
+
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1] || "");
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 export const Step3Documents = () => {
   const {
@@ -25,6 +39,7 @@ export const Step3Documents = () => {
     setCurrentStep,
     sendToWebhook,
     saveFormData,
+    questionnaireId,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const [submissionMode, setSubmissionMode] = useState<"upload" | "email" | "phone">("upload");
@@ -33,6 +48,67 @@ export const Step3Documents = () => {
   const [contactPhone, setContactPhone] = useState(personalInfo.phone || "");
   const [contactDay, setContactDay] = useState("");
   const [contactTimeRange, setContactTimeRange] = useState("");
+
+  // ─── Drive folder + already-uploaded files ───
+  const [driveFolderId, setDriveFolderId] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, UploadedFile>>({});
+  const [uploadStatus, setUploadStatus] = useState<Record<string, "uploading" | "error">>({});
+
+  useEffect(() => {
+    if (!questionnaireId) return;
+    const clientName = `${personalInfo.firstName || ""} ${personalInfo.lastName || ""}`.trim() || "לקוח";
+
+    (async () => {
+      try {
+        const { data: ensureData, error: ensureError } = await supabase.functions.invoke("drive-upload", {
+          body: { action: "ensureFolder", questionnaireId, clientName },
+        });
+        if (ensureError || !ensureData?.ok) return;
+        setDriveFolderId(ensureData.folderId);
+
+        const { data: listData, error: listError } = await supabase.functions.invoke("drive-upload", {
+          body: { action: "listFiles", folderId: ensureData.folderId },
+        });
+        if (!listError && listData?.ok) {
+          setUploadedFiles(listData.files || {});
+        }
+      } catch (e) {
+        console.error("Drive folder init failed:", e);
+      }
+    })();
+  }, [questionnaireId]);
+
+  const uploadFileToDrive = async (fieldKey: string, file: File) => {
+    if (!driveFolderId) return;
+    setUploadStatus((prev) => ({ ...prev, [fieldKey]: "uploading" }));
+    try {
+      const fileBase64 = await fileToBase64(file);
+      const { data, error } = await supabase.functions.invoke("drive-upload", {
+        body: {
+          action: "uploadFile",
+          folderId: driveFolderId,
+          questionnaireId,
+          fieldKey,
+          fileName: file.name,
+          mimeType: file.type || "application/octet-stream",
+          fileBase64,
+        },
+      });
+      if (error || !data?.ok) throw new Error(data?.error || error?.message || "Unknown error");
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [fieldKey]: { fileId: data.fileId, fileName: data.fileName, webViewLink: data.webViewLink },
+      }));
+      setUploadStatus((prev) => {
+        const next = { ...prev };
+        delete next[fieldKey];
+        return next;
+      });
+    } catch (e) {
+      console.error(`Drive upload failed for ${fieldKey}:`, e);
+      setUploadStatus((prev) => ({ ...prev, [fieldKey]: "error" }));
+    }
+  };
 
   const handleSendEmailList = async (scheduledDate?: string) => {
     await sendToWebhook(
@@ -92,18 +168,65 @@ export const Step3Documents = () => {
     setCurrentStep(5);
   };
 
-  const FileUpload = ({ id, label, multiple = false, onChange }: { id: string; label: string; multiple?: boolean; onChange: (files: FileList | null) => void }) => (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type="file"
-        accept="image/*,.pdf,.doc,.docx"
-        multiple={multiple}
-        onChange={(e) => onChange(e.target.files)}
-      />
-    </div>
-  );
+  const FileUpload = ({ id, label, multiple = false, onChange }: { id: string; label: string; multiple?: boolean; onChange: (files: FileList | null) => void }) => {
+    const handleChange = (files: FileList | null) => {
+      onChange(files);
+      if (!files || files.length === 0) return;
+      Array.from(files).forEach((file, idx) => {
+        const fieldKey = multiple ? `${id}-${idx}` : id;
+        uploadFileToDrive(fieldKey, file);
+      });
+    };
+
+    const relevantKeys = multiple
+      ? Array.from(
+          new Set([
+            ...Object.keys(uploadedFiles).filter((k) => k.startsWith(`${id}-`)),
+            ...Object.keys(uploadStatus).filter((k) => k.startsWith(`${id}-`)),
+          ])
+        ).sort()
+      : [id];
+
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={id}>{label}</Label>
+        <Input
+          id={id}
+          type="file"
+          accept="image/*,.pdf,.doc,.docx"
+          multiple={multiple}
+          onChange={(e) => handleChange(e.target.files)}
+        />
+        {relevantKeys.map((key) => {
+          const uploaded = uploadedFiles[key];
+          const status = uploadStatus[key];
+          if (!uploaded && !status) return null;
+          return (
+            <p key={key} className="text-xs flex items-center gap-1">
+              {status === "uploading" && (
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" /> מעלה לדרייב...
+                </span>
+              )}
+              {status === "error" && (
+                <span className="text-destructive flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> שגיאה בהעלאה לדרייב
+                </span>
+              )}
+              {uploaded && !status && (
+                <span className="text-primary flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> כבר הועלה: {uploaded.fileName}{" "}
+                  <a href={uploaded.webViewLink} target="_blank" rel="noreferrer" className="underline">
+                    (צפייה)
+                  </a>
+                </span>
+              )}
+            </p>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-8">
