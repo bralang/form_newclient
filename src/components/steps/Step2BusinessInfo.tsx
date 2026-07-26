@@ -1696,13 +1696,13 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>
-          {g(gender, "האם היה לך עסק עצמאי בעבר?", "האם היה לך עסק עצמאי בעבר?")}
+          {g(gender, "האם היה לך עסק עצמאי בעבר?", "האם היה לך עסק עצמאי בעבר?")} *
         </Label>
         <YesNoSelect value={info.hadPreviousBusiness} onChange={(v) => setInfo({ hadPreviousBusiness: v })} />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor={`${prefix}businessField`}>תחום העיסוק</Label>
+        <Label htmlFor={`${prefix}businessField`}>תחום העיסוק *</Label>
         <Input id={`${prefix}businessField`} value={info.businessField || ""} onChange={(e) => setInfo({ businessField: e.target.value })} />
       </div>
 
@@ -1765,7 +1765,7 @@ export const Step2BusinessInfo = () => {
       </div>
 
       <div className="space-y-2">
-        <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")}</Label>
+        <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")} *</Label>
         <Select value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })}>
           <SelectTrigger>
             <SelectValue placeholder="בחר" />
@@ -1780,7 +1780,7 @@ export const Step2BusinessInfo = () => {
       {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
 
       <div className="space-y-2">
-        <Label>האם העסק מתנהל מהבית?</Label>
+        <Label>האם העסק מתנהל מהבית? *</Label>
         <YesNoSelect value={info.isHomeOffice} onChange={(v) => setInfo({ isHomeOffice: v })} />
       </div>
 
