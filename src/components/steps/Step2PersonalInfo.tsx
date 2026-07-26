@@ -199,7 +199,7 @@ export const Step2PersonalInfo = () => {
 
         {!userOnlyNewNonprofit && (
         <div className="space-y-2">
-          <Label>מצב משפחתי מפורט</Label>
+          <Label>מצב משפחתי מפורט *</Label>
           <Select
             value={detailedInfo.detailedMaritalStatus}
             onValueChange={(v: any) => setDetailedInfo({ detailedMaritalStatus: v })}
