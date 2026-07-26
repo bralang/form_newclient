@@ -219,7 +219,7 @@ export const Step2PersonalInfo = () => {
         {/* Additional ID - multi-select */}
         {!userOnlyNewNonprofit && (
         <div className="space-y-3">
-          <Label>אמצעי זיהוי נוסף *</Label>
+          <Label>אמצעי זיהוי נוסף</Label>
           <div className="flex flex-wrap flex-row-reverse gap-3 justify-end">
             {additionalIdOptions.map((opt) => (
               <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
@@ -390,7 +390,7 @@ export const Step2PersonalInfo = () => {
 
           {/* Spouse Additional ID - multi-select */}
           <div className="space-y-3">
-            <Label>אמצעי זיהוי נוסף *</Label>
+            <Label>אמצעי זיהוי נוסף</Label>
             <div className="flex flex-wrap flex-row-reverse gap-3 justify-end">
               {additionalIdOptions.map((opt) => (
                 <div key={opt.value} className="flex items-center space-x-2 space-x-reverse">
