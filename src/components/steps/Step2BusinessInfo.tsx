@@ -2372,8 +2372,8 @@ export const Step2BusinessInfo = () => {
                 <div className="space-y-1"><Label>מס׳ תעודת זהות</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} /></div>
               </div>
 
-              <div className="space-y-2 p-3 rounded-xl border border-primary/30 bg-primary/5">
-                <Label className="text-sm font-semibold">טלפון או מייל — יש למלא לפחות אחד מהשניים *</Label>
+              <div className="space-y-1.5 p-2.5 rounded-lg border border-border/60">
+                <Label className="text-xs font-normal text-muted-foreground">טלפון או מייל — יש למלא לפחות אחד מהשניים *</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
                   <div className="space-y-1"><Label>מייל</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
