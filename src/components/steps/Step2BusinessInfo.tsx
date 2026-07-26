@@ -2370,13 +2370,21 @@ export const Step2BusinessInfo = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} /></div>
                 <div className="space-y-1"><Label>מס׳ תעודת זהות</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} /></div>
-                <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
-                <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
+              </div>
+
+              <div className="space-y-2 p-3 rounded-xl border border-primary/30 bg-primary/5">
+                <Label className="text-sm font-semibold">טלפון או מייל — יש למלא לפחות אחד מהשניים *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מייל</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1"><Label>כתובת</Label><Input value={member.address || ""} onChange={(e) => updateBoardMember(idx, "address", e.target.value)} placeholder="רחוב ומספר" /></div>
                 <div className="space-y-1"><Label>עיר</Label><Input value={member.city || ""} onChange={(e) => updateBoardMember(idx, "city", e.target.value)} /></div>
                 <div className="space-y-1"><Label>מיקוד (עדיף)</Label><Input value={member.zip || ""} onChange={(e) => updateBoardMember(idx, "zip", e.target.value)} /></div>
               </div>
-              <p className="text-xs text-muted-foreground">* יש למלא לפחות אחד מבין טלפון או מייל</p>
 
               {/* Role checkboxes */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-border/50">
