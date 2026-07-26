@@ -2328,7 +2328,7 @@ export const Step2BusinessInfo = () => {
 
         {/* 3 requested names */}
         <div className="space-y-3">
-          <Label className="font-semibold">3 שמות רצויים לעמותה (לפי סדר עדיפות)</Label>
+          <Label className="font-semibold">3 שמות רצויים לעמותה (לפי סדר עדיפות) *</Label>
           {[1, 2, 3].map((n) => (
             <Input
               key={n}
@@ -2352,7 +2352,7 @@ export const Step2BusinessInfo = () => {
 
         {/* Board member count */}
         <div className="space-y-2">
-          <Label>מספר חברי ועד (מינימום 7)</Label>
+          <Label>מספר חברי ועד (מינימום 7) *</Label>
           <Input
             type="text" inputMode="numeric" pattern="[0-9]*"
             value={info.boardMemberCount || ""}
