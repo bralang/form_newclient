@@ -2540,7 +2540,7 @@ export const Step2BusinessInfo = () => {
             />
           </div>
           <div className="space-y-1">
-            <Label>מספר העמותה *</Label>
+            <Label>מספר העמותה</Label>
             <Input
               value={info.nonprofitNumber || ""}
               onChange={(e) => setInfo({ nonprofitNumber: e.target.value })}
@@ -2581,17 +2581,26 @@ export const Step2BusinessInfo = () => {
                 <h4 className="font-bold text-primary">חבר ועד לצורך הפקת ייצוג{rep.name ? ` – ${rep.name}` : ""}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1"><Label>שם מלא *</Label><Input value={rep.name || ""} onChange={(e) => updateRep("name", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={rep.idNumber || ""} onChange={(e) => updateRep("idNumber", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={rep.phone || ""} onChange={(e) => updateRep("phone", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={rep.email || ""} onChange={(e) => updateRep("email", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>כתובת *</Label><Input value={rep.address || ""} onChange={(e) => updateRep("address", e.target.value)} placeholder="רחוב ומספר" /></div>
-                  <div className="space-y-1"><Label>עיר *</Label><Input value={rep.city || ""} onChange={(e) => updateRep("city", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>מס׳ תעודת זהות</Label><Input value={rep.idNumber || ""} onChange={(e) => updateRep("idNumber", e.target.value)} /></div>
+                </div>
+
+                <div className="space-y-1.5 p-2.5 rounded-lg border border-border/60">
+                  <Label className="text-xs font-normal text-muted-foreground">טלפון או מייל — יש למלא לפחות אחד מהשניים *</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={rep.phone || ""} onChange={(e) => updateRep("phone", e.target.value)} /></div>
+                    <div className="space-y-1"><Label>מייל</Label><Input type="email" value={rep.email || ""} onChange={(e) => updateRep("email", e.target.value)} /></div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1"><Label>כתובת</Label><Input value={rep.address || ""} onChange={(e) => updateRep("address", e.target.value)} placeholder="רחוב ומספר" /></div>
+                  <div className="space-y-1"><Label>עיר</Label><Input value={rep.city || ""} onChange={(e) => updateRep("city", e.target.value)} /></div>
                   <div className="space-y-1"><Label>מיקוד (עדיף)</Label><Input value={rep.zip || ""} onChange={(e) => updateRep("zip", e.target.value)} /></div>
                 </div>
 
                 {/* Additional ID */}
                 <div className="space-y-2 pt-3 border-t border-border/50">
-                  <Label className="font-semibold">אמצעי זיהוי נוסף *</Label>
+                  <Label className="font-semibold">אמצעי זיהוי נוסף</Label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {[
                       { value: "passport" as const, label: "דרכון" },
