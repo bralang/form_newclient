@@ -2551,7 +2551,7 @@ export const Step2BusinessInfo = () => {
         {/* Tax file question - drives the entire flow (hidden for war compensation: tax file is required) */}
         {!isWarComp && (
           <div className="space-y-2">
-            <Label>האם לעמותה קיים תיק ברשות המיסים?</Label>
+            <Label>האם לעמותה קיים תיק ברשות המיסים? *</Label>
             <YesNoSelect
               value={info.hasTaxFile}
               onChange={(v) => setInfo({ hasTaxFile: v })}
