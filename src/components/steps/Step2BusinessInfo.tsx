@@ -1838,7 +1838,7 @@ export const Step2BusinessInfo = () => {
       </h3>
 
       <div className="space-y-2">
-        <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")}</Label>
+        <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")} *</Label>
         <Select value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })}>
           <SelectTrigger>
             <SelectValue placeholder="בחר" />
@@ -1865,7 +1865,7 @@ export const Step2BusinessInfo = () => {
       {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix, isWarComp, "existingPartners", "existingPartnershipAgreementFile")}
 
       <div className="space-y-2">
-        <Label>האם העסק מעסיק עובדים?</Label>
+        <Label>האם העסק מעסיק עובדים? *</Label>
         <YesNoSelect value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} />
       </div>
     </div>
