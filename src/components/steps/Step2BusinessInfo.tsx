@@ -652,7 +652,7 @@ const SelfViaCompanyBlock = ({
         <>
           <div className="space-y-2">
             <Label className="text-sm font-semibold">
-              אחד מבעלי המניות של {holdingDisplayName}
+              אחד מבעלי המניות של {holdingDisplayName} *
             </Label>
             <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v, childCompany: undefined })}>
               <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
@@ -2061,14 +2061,14 @@ export const Step2BusinessInfo = () => {
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label>שם חברה</Label>
+                <Label>שם חברה *</Label>
                 <Input
                   value={company.name || ""}
                   onChange={(e) => updateExistingCompany(idx, "name", e.target.value)}
                 />
               </div>
               <div className="space-y-1">
-                <Label>ח.פ.</Label>
+                <Label>ח.פ. *</Label>
                 <Input
                   value={company.companyNumber || ""}
                   onChange={(e) => updateExistingCompany(idx, "companyNumber", e.target.value)}
@@ -2079,7 +2079,7 @@ export const Step2BusinessInfo = () => {
             {/* Tax file question (hidden for war compensation: tax file is required) */}
             {!isWarComp && (
               <div className="space-y-2">
-                <Label>האם יש לחברה תיק ברשות המיסים?</Label>
+                <Label>האם יש לחברה תיק ברשות המיסים? *</Label>
                 <YesNoSelect
                   value={company.hasTaxFile}
                   onChange={(v) => updateExistingCompany(idx, "hasTaxFile", v)}
