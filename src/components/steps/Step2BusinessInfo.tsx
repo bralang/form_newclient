@@ -9,6 +9,19 @@ import { g } from "@/lib/gender-utils";
 import { AlertTriangle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
+// Known-chain entries picked from elsewhere in the form are live references into form state.
+// Assigning one directly as a childCompany/selfViaCompany can create a real circular reference
+// (a node ends up pointing back to one of its own ancestors), which freezes the page when React
+// tries to render the now-infinite chain. Clone before assigning to break the shared reference.
+const cloneChainNode = (obj: any): any => {
+  if (!obj) return obj;
+  try {
+    return structuredClone(obj);
+  } catch {
+    return { ...obj };
+  }
+};
+
 const PercentageInput = ({
   value,
   onChange,
@@ -327,7 +340,7 @@ const CompanyChainBlock = ({
         <>
           <div className="space-y-2">
             <Label className="text-sm font-semibold">
-              {isExistingCompany ? `אחד מבעלי המניות של ${displayName}` : `סוג בעל המניות של ${displayName}`}
+              {isExistingCompany ? `אחד מבעלי המניות של ${displayName} *` : `סוג בעל המניות של ${displayName} *`}
             </Label>
             <Select value={normalizedSubOwnerType} onValueChange={(v: any) => update({ subOwnerType: v, ...(personIsSelfOnly && v === "person" ? { personOwnerType: "self" as const } : {}) })}>
               <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
@@ -458,7 +471,7 @@ const CompanyChainBlock = ({
                           key={chain.companyNumber}
                           type="button"
                           className="px-3 py-1.5 rounded-lg border border-primary/40 bg-primary/5 text-sm font-medium text-primary hover:bg-primary/15 transition-colors"
-                          onClick={() => update({ childCompany: chain })}
+                          onClick={() => update({ childCompany: cloneChainNode(chain) })}
                         >
                           {chain.companyName || chain.requestedName1 || chain.companyNumber}
                         </button>
@@ -599,8 +612,8 @@ const SelfViaCompanyBlock = ({
                     companyNumber: num,
                     companyName: data?.companyName || known.companyName || "",
                     subOwnerType: known.subOwnerType,
-                    childCompany: known.childCompany,
-                    shareholders: known.shareholders,
+                    childCompany: cloneChainNode(known.childCompany),
+                    shareholders: cloneChainNode(known.shareholders),
                   });
                 } else {
                   update({ companyNumber: num });
@@ -683,7 +696,7 @@ const SelfViaCompanyBlock = ({
                           key={chain.companyNumber}
                           type="button"
                           className="px-3 py-1.5 rounded-lg border border-primary/40 bg-primary/5 text-sm font-medium text-primary hover:bg-primary/15 transition-colors"
-                          onClick={() => update({ childCompany: chain })}
+                          onClick={() => update({ childCompany: cloneChainNode(chain) })}
                         >
                           {chain.companyName || chain.requestedName1 || chain.companyNumber}
                         </button>
@@ -1583,7 +1596,7 @@ export const Step2BusinessInfo = () => {
                           <>
                             <div className="space-y-2">
                               <Label className="text-sm font-semibold">
-                                אחד מבעלי המניות של {sh.companyName || "החברה המחזיקה"}
+                                אחד מבעלי המניות של {sh.companyName || "החברה המחזיקה"} *
                               </Label>
                               <Select
                                 value={sh.subOwnerType === "self_via_company" ? "company" : sh.subOwnerType || ""}
@@ -2167,7 +2180,7 @@ export const Step2BusinessInfo = () => {
                             key={chain.companyNumber}
                             type="button"
                             className="px-3 py-1.5 rounded-lg border border-primary/40 bg-primary/5 text-sm font-medium text-primary hover:bg-primary/15 transition-colors"
-                            onClick={() => updateExistingCompany(idx, "selfViaCompany", chain)}
+                            onClick={() => updateExistingCompany(idx, "selfViaCompany", cloneChainNode(chain))}
                           >
                             {chain.companyName || chain.requestedName1 || chain.companyNumber}
                           </button>
