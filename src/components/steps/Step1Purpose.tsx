@@ -4,6 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormNavigation } from "@/components/FormNavigation";
+import { FieldError } from "@/components/FieldError";
+import { errClass, errBoxClass, scrollToFirstError } from "@/lib/form-validation";
 import { useState } from "react";
 
 const PURPOSES = [
@@ -27,7 +29,25 @@ export const Step1Purpose = () => {
     updateLeadStatus,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const isMarried = personalInfo.maritalStatus === "married";
+
+  const purposeSelected = isMarried
+    ? serviceType.userPurposes.length > 0 || serviceType.spousePurposes.length > 0
+    : serviceType.userPurposes.length > 0;
+
+  const errors = {
+    firstName: !personalInfo.firstName.trim(),
+    lastName: !personalInfo.lastName.trim(),
+    email: !personalInfo.email.trim(),
+    phone: !personalInfo.phone.trim(),
+    maritalStatus: !personalInfo.maritalStatus,
+    spouseName: isMarried && !personalInfo.spouseName.trim(),
+    purpose: !purposeSelected,
+    agreeToMessages: !personalInfo.agreeToMessages,
+    agreeToPrivacy: !personalInfo.agreeToPrivacy,
+  };
+  const isStepValid = !Object.values(errors).some(Boolean);
 
   const togglePurpose = (
     id: string,
@@ -80,6 +100,11 @@ export const Step1Purpose = () => {
   };
 
   const handleNext = async () => {
+    if (!isStepValid) {
+      setShowErrors(true);
+      scrollToFirstError();
+      return;
+    }
     setPersonalInfo({ step1CompletedAt: new Date().toISOString() });
     setLoading(true);
     await Promise.all([
@@ -381,7 +406,9 @@ export const Step1Purpose = () => {
               id="firstName"
               value={personalInfo.firstName}
               onChange={(e) => setPersonalInfo({ firstName: e.target.value })}
+              className={errClass(showErrors && errors.firstName)}
             />
+            <FieldError show={showErrors && errors.firstName} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="lastName">שם משפחה *</Label>
@@ -389,7 +416,9 @@ export const Step1Purpose = () => {
               id="lastName"
               value={personalInfo.lastName}
               onChange={(e) => setPersonalInfo({ lastName: e.target.value })}
+              className={errClass(showErrors && errors.lastName)}
             />
+            <FieldError show={showErrors && errors.lastName} />
           </div>
         </div>
 
@@ -401,7 +430,9 @@ export const Step1Purpose = () => {
               type="email"
               value={personalInfo.email}
               onChange={(e) => setPersonalInfo({ email: e.target.value })}
+              className={errClass(showErrors && errors.email)}
             />
+            <FieldError show={showErrors && errors.email} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">טלפון *</Label>
@@ -410,7 +441,9 @@ export const Step1Purpose = () => {
               type="tel"
               value={personalInfo.phone}
               onChange={(e) => setPersonalInfo({ phone: e.target.value })}
+              className={errClass(showErrors && errors.phone)}
             />
+            <FieldError show={showErrors && errors.phone} />
           </div>
         </div>
 
@@ -421,7 +454,7 @@ export const Step1Purpose = () => {
             value={personalInfo.maritalStatus}
             onValueChange={(v: any) => setPersonalInfo({ maritalStatus: v })}
           >
-            <SelectTrigger>
+            <SelectTrigger className={errClass(showErrors && errors.maritalStatus)}>
               <SelectValue placeholder="בחר מצב משפחתי" />
             </SelectTrigger>
             <SelectContent>
@@ -429,6 +462,7 @@ export const Step1Purpose = () => {
               <SelectItem value="married">יש לי בן/בת זוג</SelectItem>
             </SelectContent>
           </Select>
+          <FieldError show={showErrors && errors.maritalStatus} />
         </div>
 
         {isMarried && (
@@ -438,15 +472,18 @@ export const Step1Purpose = () => {
               id="spouseName"
               value={personalInfo.spouseName}
               onChange={(e) => setPersonalInfo({ spouseName: e.target.value })}
+              className={errClass(showErrors && errors.spouseName)}
             />
+            <FieldError show={showErrors && errors.spouseName} />
           </div>
         )}
       </div>
 
       {/* Purpose Selection */}
-      <div className="space-y-5">
+      <div className={`space-y-5 p-3 -m-3 ${errBoxClass(showErrors && errors.purpose)}`}>
         <h3 className="text-xl font-bold text-foreground">בעבור מה אני פונה לקבל שירות? *</h3>
         {isMarried ? renderTablePurposes() : renderSinglePurposeList()}
+        <FieldError show={showErrors && errors.purpose} message="יש לבחור לפחות נושא אחד" />
       </div>
 
       {/* Consent Checkboxes */}
@@ -455,18 +492,20 @@ export const Step1Purpose = () => {
           <Checkbox
             checked={personalInfo.agreeToMessages}
             onCheckedChange={(checked) => setPersonalInfo({ agreeToMessages: !!checked })}
-            className="mt-0.5"
+            className={`mt-0.5 ${errClass(showErrors && errors.agreeToMessages)}`}
           />
           <span className="text-sm text-foreground">אני מאשר/ת הרשמה לקבלת הודעות *</span>
         </label>
+        <FieldError show={showErrors && errors.agreeToMessages} message="יש לאשר סעיף זה" />
         <label className="flex items-start gap-3 cursor-pointer">
           <Checkbox
             checked={personalInfo.agreeToPrivacy}
             onCheckedChange={(checked) => setPersonalInfo({ agreeToPrivacy: !!checked })}
-            className="mt-0.5"
+            className={`mt-0.5 ${errClass(showErrors && errors.agreeToPrivacy)}`}
           />
           <span className="text-sm text-foreground">אני מאשר/ת את מדיניות הפרטיות של המשרד *</span>
         </label>
+        <FieldError show={showErrors && errors.agreeToPrivacy} message="יש לאשר סעיף זה" />
       </div>
 
       <FormNavigation

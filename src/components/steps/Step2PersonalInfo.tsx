@@ -4,11 +4,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { FormNavigation } from "@/components/FormNavigation";
-import { Step2BusinessInfo, isPartnershipValid } from "./Step2BusinessInfo";
+import { Step2BusinessInfo, isPartnershipValid, isBusinessSectionValid } from "./Step2BusinessInfo";
 import { useState, useEffect } from "react";
 import { g } from "@/lib/gender-utils";
 import { Mail, Phone } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FieldError } from "@/components/FieldError";
+import { errClass, scrollToFirstError } from "@/lib/form-validation";
 
 export const Step2PersonalInfo = () => {
   const {
@@ -20,11 +22,14 @@ export const Step2PersonalInfo = () => {
     serviceType,
     businessInfo,
     spouseBusinessInfo,
+    nonprofitInfo,
+    spouseNonprofitInfo,
     setCurrentStep,
     sendToWebhook,
     saveFormData,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
+  const [showErrors, setShowErrors] = useState(false);
   const [reminderDate, setReminderDate] = useState("");
   const [reminderTime, setReminderTime] = useState("");
   const [emailReminderTime, setEmailReminderTime] = useState("");
@@ -73,7 +78,22 @@ export const Step2PersonalInfo = () => {
     { value: "passport", label: "דרכון" },
   ];
 
+  const errors = {
+    idNumber: !userOnlyNewNonprofit && !detailedInfo.idNumber.trim(),
+    gender: !detailedInfo.gender,
+    birthDate: !detailedInfo.birthDate.trim(),
+    detailedMaritalStatus: !userOnlyNewNonprofit && !detailedInfo.detailedMaritalStatus,
+    spouseIdNumber: isMarried && !spouseOnlyNonprofit && !spouseInfo.idNumber.trim(),
+  };
+  const isOwnStepValid = !Object.values(errors).some(Boolean);
+  const isStepValid = isOwnStepValid && isBusinessSectionValid(serviceType, businessInfo, spouseBusinessInfo, nonprofitInfo, spouseNonprofitInfo);
+
   const handleNext = async () => {
+    if (!isStepValid) {
+      setShowErrors(true);
+      scrollToFirstError();
+      return;
+    }
     setLoading(true);
     await Promise.all([
       sendToWebhook(
@@ -137,7 +157,9 @@ export const Step2PersonalInfo = () => {
                 value={detailedInfo.idNumber}
                 onChange={(e) => setDetailedInfo({ idNumber: e.target.value })}
                 maxLength={9}
+                className={errClass(showErrors && errors.idNumber)}
               />
+              <FieldError show={showErrors && errors.idNumber} />
             </div>
           )}
           <div className="space-y-2">
@@ -159,7 +181,7 @@ export const Step2PersonalInfo = () => {
               value={detailedInfo.gender}
               onValueChange={(v: any) => setDetailedInfo({ gender: v })}
             >
-              <SelectTrigger>
+              <SelectTrigger className={errClass(showErrors && errors.gender)}>
                 <SelectValue placeholder="בחר מגדר" />
               </SelectTrigger>
               <SelectContent>
@@ -167,6 +189,7 @@ export const Step2PersonalInfo = () => {
                 <SelectItem value="female">נקבה</SelectItem>
               </SelectContent>
             </Select>
+            <FieldError show={showErrors && errors.gender} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="birthDate">תאריך לידה *</Label>
@@ -175,7 +198,9 @@ export const Step2PersonalInfo = () => {
               type="date"
               value={detailedInfo.birthDate}
               onChange={(e) => setDetailedInfo({ birthDate: e.target.value })}
+              className={errClass(showErrors && errors.birthDate)}
             />
+            <FieldError show={showErrors && errors.birthDate} />
           </div>
         </div>
 
@@ -204,7 +229,7 @@ export const Step2PersonalInfo = () => {
             value={detailedInfo.detailedMaritalStatus}
             onValueChange={(v: any) => setDetailedInfo({ detailedMaritalStatus: v })}
           >
-            <SelectTrigger>
+            <SelectTrigger className={errClass(showErrors && errors.detailedMaritalStatus)}>
               <SelectValue placeholder="בחר מצב משפחתי" />
             </SelectTrigger>
             <SelectContent>
@@ -213,6 +238,7 @@ export const Step2PersonalInfo = () => {
               ))}
             </SelectContent>
           </Select>
+          <FieldError show={showErrors && errors.detailedMaritalStatus} />
         </div>
         )}
 
@@ -347,7 +373,9 @@ export const Step2PersonalInfo = () => {
                   value={spouseInfo.idNumber}
                   onChange={(e) => setSpouseInfo({ idNumber: e.target.value })}
                   maxLength={9}
+                  className={errClass(showErrors && errors.spouseIdNumber)}
                 />
+                <FieldError show={showErrors && errors.spouseIdNumber} />
               </div>
             )}
             <div className="space-y-2">
@@ -524,7 +552,7 @@ export const Step2PersonalInfo = () => {
       {hasAnyPurpose && (
         <div className="pt-8">
           <div className="h-1 bg-gradient-to-l from-primary/40 to-secondary/60 rounded-full mb-8" />
-          <Step2BusinessInfo />
+          <Step2BusinessInfo showErrors={showErrors} />
         </div>
       )}
 

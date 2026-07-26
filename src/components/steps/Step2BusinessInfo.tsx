@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { g } from "@/lib/gender-utils";
 import { AlertTriangle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { FieldError } from "@/components/FieldError";
+import { errClass, errBoxClass } from "@/lib/form-validation";
+
+const isEmpty = (v: any) => v === undefined || v === null || !String(v).trim();
 
 // Known-chain entries picked from elsewhere in the form are live references into form state.
 // Assigning one directly as a childCompany/selfViaCompany can create a real circular reference
@@ -241,6 +245,7 @@ const CompanyChainBlock = ({
   personIsSelfOnly = false,
   renderNewCompanyShareholders,
   knownChains,
+  showErrors = false,
 }: {
   data: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean };
   onChange: (next: CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }) => void;
@@ -262,6 +267,7 @@ const CompanyChainBlock = ({
     keyPrefix: string,
   ) => React.ReactNode;
   knownChains?: Map<string, any>;
+  showErrors?: boolean;
 }) => {
   const [childCompanyIsNew, setChildCompanyIsNew] = useState(false);
   const update = (patch: Partial<CompanyNode & { isExistingCompany?: boolean; personOwnerType?: "self" | "spouse" | "other" | ""; personOwnerWithOther?: boolean }>) =>
@@ -308,11 +314,13 @@ const CompanyChainBlock = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label>שם החברה המחזיקה את {heldName} *</Label>
-            <Input value={data.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
+            <Input value={data.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} className={errClass(showErrors && isEmpty(data.companyName))} />
+            <FieldError show={showErrors && isEmpty(data.companyName)} />
           </div>
           <div className="space-y-1">
             <Label>ח.פ. *</Label>
-            <Input value={data.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} />
+            <Input value={data.companyNumber || ""} onChange={(e) => update({ companyNumber: e.target.value })} className={errClass(showErrors && isEmpty(data.companyNumber))} />
+            <FieldError show={showErrors && isEmpty(data.companyNumber)} />
           </div>
         </div>
       ) : (
@@ -343,12 +351,13 @@ const CompanyChainBlock = ({
               {isExistingCompany ? `אחד מבעלי המניות של ${displayName} *` : `סוג בעל המניות של ${displayName} *`}
             </Label>
             <Select value={normalizedSubOwnerType} onValueChange={(v: any) => update({ subOwnerType: v, ...(personIsSelfOnly && v === "person" ? { personOwnerType: "self" as const } : {}) })}>
-              <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+              <SelectTrigger className={errClass(showErrors && isEmpty(normalizedSubOwnerType))}><SelectValue placeholder="בחר" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="person">{personIsSelfOnly ? `אדם פרטי - ${effectiveSelfName}` : "אדם פרטי"}</SelectItem>
                 <SelectItem value="company">חברה</SelectItem>
               </SelectContent>
             </Select>
+            <FieldError show={showErrors && isEmpty(normalizedSubOwnerType)} />
           </div>
 
           {normalizedSubOwnerType === "person" && offerSelfInPersonOption && (
@@ -376,8 +385,8 @@ const CompanyChainBlock = ({
               {effectivePersonOwnerType === "other" && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
-                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
+                    <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} className={errClass(showErrors && isEmpty(data.personOwner?.name))} /><FieldError show={showErrors && isEmpty(data.personOwner?.name)} /></div>
+                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} className={errClass(showErrors && isEmpty(data.personOwner?.idNumber))} /><FieldError show={showErrors && isEmpty(data.personOwner?.idNumber)} /></div>
                     <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
                     <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
                   </div>
@@ -410,8 +419,8 @@ const CompanyChainBlock = ({
             <div className="space-y-3 p-3 bg-muted/30 rounded-lg border border-border/50">
               <p className="text-xs text-muted-foreground">בעל המניות הסופי (אדם פרטי) של {displayName}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
-                <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
+                <div className="space-y-1"><Label>שם מלא *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} className={errClass(showErrors && isEmpty(data.personOwner?.name))} /><FieldError show={showErrors && isEmpty(data.personOwner?.name)} /></div>
+                <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} className={errClass(showErrors && isEmpty(data.personOwner?.idNumber))} /><FieldError show={showErrors && isEmpty(data.personOwner?.idNumber)} /></div>
                 <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
                 <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
               </div>
@@ -444,8 +453,8 @@ const CompanyChainBlock = ({
               </label>
               {personOwnerWithOther && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-                  <div className="space-y-1"><Label>שם מלא של השותף *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} /></div>
-                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} /></div>
+                  <div className="space-y-1"><Label>שם מלא של השותף *</Label><Input value={data.personOwner?.name || ""} onChange={(e) => updatePerson({ name: e.target.value })} className={errClass(showErrors && isEmpty(data.personOwner?.name))} /><FieldError show={showErrors && isEmpty(data.personOwner?.name)} /></div>
+                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={data.personOwner?.idNumber || ""} onChange={(e) => updatePerson({ idNumber: e.target.value })} className={errClass(showErrors && isEmpty(data.personOwner?.idNumber))} /><FieldError show={showErrors && isEmpty(data.personOwner?.idNumber)} /></div>
                   <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={data.personOwner?.phone || ""} onChange={(e) => updatePerson({ phone: e.target.value })} /></div>
                   <div className="space-y-1"><Label>מייל</Label><Input type="email" value={data.personOwner?.email || ""} onChange={(e) => updatePerson({ email: e.target.value })} /></div>
                 </div>
@@ -512,6 +521,7 @@ const CompanyChainBlock = ({
                       personIsSelfOnly={personIsSelfOnly}
                       renderNewCompanyShareholders={renderNewCompanyShareholders}
                       knownChains={knownChains}
+                      showErrors={showErrors}
                     />
                   </>
                 )}
@@ -539,6 +549,7 @@ const SelfViaCompanyBlock = ({
   showSpouseOption = false,
   renderNewCompanyShareholders,
   knownChains,
+  showErrors = false,
 }: {
   data: any;
   onChange: (next: any) => void;
@@ -556,6 +567,7 @@ const SelfViaCompanyBlock = ({
     keyPrefix: string,
   ) => React.ReactNode;
   knownChains?: Map<string, any>;
+  showErrors?: boolean;
 }) => {
   const [childCompanyIsNew, setChildCompanyIsNew] = useState(false);
   const update = (patch: any) => onChange({ ...(data || {}), ...patch });
@@ -597,7 +609,8 @@ const SelfViaCompanyBlock = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label>שם החברה דרכה אני {holds} *</Label>
-            <Input value={data?.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} />
+            <Input value={data?.companyName || ""} onChange={(e) => update({ companyName: e.target.value })} className={errClass(showErrors && isEmpty(data?.companyName))} />
+            <FieldError show={showErrors && isEmpty(data?.companyName)} />
           </div>
           <div className="space-y-1">
             <Label>ח.פ. *</Label>
@@ -619,7 +632,9 @@ const SelfViaCompanyBlock = ({
                   update({ companyNumber: num });
                 }
               }}
+              className={errClass(showErrors && isEmpty(data?.companyNumber))}
             />
+            <FieldError show={showErrors && isEmpty(data?.companyNumber)} />
           </div>
           {isNewCompany && (
             <div className="space-y-1">
@@ -628,6 +643,7 @@ const SelfViaCompanyBlock = ({
                 value={data?.percentage || ""}
                 onChange={(value) => update({ percentage: value })}
               />
+              <FieldError show={showErrors && isEmpty(data?.percentage)} />
             </div>
           )}
         </div>
@@ -649,6 +665,7 @@ const SelfViaCompanyBlock = ({
                 value={data?.percentage || ""}
                 onChange={(value) => update({ percentage: value })}
               />
+              <FieldError show={showErrors && isEmpty(data?.percentage)} />
             </div>
           )}
         </div>
@@ -668,12 +685,13 @@ const SelfViaCompanyBlock = ({
               אחד מבעלי המניות של {holdingDisplayName} *
             </Label>
             <Select value={subOwnerType} onValueChange={(v: any) => update({ subOwnerType: v, childCompany: undefined })}>
-              <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+              <SelectTrigger className={errClass(showErrors && isEmpty(subOwnerType))}><SelectValue placeholder="בחר" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="person">אדם פרטי - {effectiveSelfName}</SelectItem>
                 <SelectItem value="company">חברה</SelectItem>
               </SelectContent>
             </Select>
+            <FieldError show={showErrors && isEmpty(subOwnerType)} />
           </div>
 
           {subOwnerType === "person" && null}
@@ -736,6 +754,7 @@ const SelfViaCompanyBlock = ({
                       personIsSelfOnly={true}
                       renderNewCompanyShareholders={renderNewCompanyShareholders}
                       knownChains={knownChains}
+                      showErrors={showErrors}
                     />
                   </>
                 )}
@@ -748,7 +767,7 @@ const SelfViaCompanyBlock = ({
   );
 };
 
-export const Step2BusinessInfo = () => {
+export const Step2BusinessInfo = ({ showErrors = false }: { showErrors?: boolean }) => {
   const {
     serviceType,
     businessInfo,
@@ -796,15 +815,17 @@ export const Step2BusinessInfo = () => {
   const YesNoSelect = ({
     value,
     onChange,
+    className = "",
   }: {
     value: boolean | undefined;
     onChange: (v: boolean) => void;
+    className?: string;
   }) => (
     <Select
       value={value === true ? "yes" : value === false ? "no" : ""}
       onValueChange={(v) => onChange(v === "yes")}
     >
-      <SelectTrigger>
+      <SelectTrigger className={className}>
         <SelectValue placeholder="בחר" />
       </SelectTrigger>
       <SelectContent>
@@ -993,7 +1014,7 @@ export const Step2BusinessInfo = () => {
                     value={partner.additionalIdType || ""}
                     onValueChange={(v) => updatePartner(idx, "additionalIdType", v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={errClass(showErrors && isEmpty(partner.additionalIdType))}>
                       <SelectValue placeholder="בחר אמצעי זיהוי" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1002,6 +1023,7 @@ export const Step2BusinessInfo = () => {
                       <SelectItem value="passport">דרכון</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FieldError show={showErrors && isEmpty(partner.additionalIdType)} />
                   {partner.additionalIdType && (
                     <Input
                       placeholder="מספר אמצעי זיהוי"
@@ -1305,6 +1327,7 @@ export const Step2BusinessInfo = () => {
                       max={maxPct}
                       autoFillTo={pctAutoFill}
                     />
+                    <FieldError show={showErrors && isEmpty(sh.percentage)} />
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground">הפרטים מולאו אוטומטית.</p>
@@ -1365,8 +1388,8 @@ export const Step2BusinessInfo = () => {
                       {includeSelfAsFirstShareholder && (
                         <>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
-                            <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
+                            <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} className={errClass(showErrors && isEmpty(sh.name))} /><FieldError show={showErrors && isEmpty(sh.name)} /></div>
+                            <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} className={errClass(showErrors && isEmpty(sh.idNumber))} /><FieldError show={showErrors && isEmpty(sh.idNumber)} /></div>
                             {isNewCompany && (
                               <div className="space-y-1">
                                 <Label>אחוזי אחזקה *</Label>
@@ -1376,6 +1399,7 @@ export const Step2BusinessInfo = () => {
                                   max={maxPct}
                                   autoFillTo={pctAutoFill}
                                 />
+                                <FieldError show={showErrors && isEmpty(sh.percentage)} />
                               </div>
                             )}
                             <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.phone || ""} onChange={(e) => updateShareholder(idx, "phone", e.target.value)} /></div>
@@ -1399,8 +1423,8 @@ export const Step2BusinessInfo = () => {
                       )}
                       {sh.personOwnerType === "other" && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} /></div>
-                          <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} /></div>
+                          <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.name || ""} onChange={(e) => updateShareholder(idx, "name", e.target.value)} className={errClass(showErrors && isEmpty(sh.name))} /><FieldError show={showErrors && isEmpty(sh.name)} /></div>
+                          <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.idNumber || ""} onChange={(e) => updateShareholder(idx, "idNumber", e.target.value)} className={errClass(showErrors && isEmpty(sh.idNumber))} /><FieldError show={showErrors && isEmpty(sh.idNumber)} /></div>
                           {isNewCompany && (
                             <div className="space-y-1">
                               <Label>אחוזי אחזקה *</Label>
@@ -1410,6 +1434,7 @@ export const Step2BusinessInfo = () => {
                                 max={maxPct}
                                 autoFillTo={pctAutoFill}
                               />
+                              <FieldError show={showErrors && isEmpty(sh.percentage)} />
                             </div>
                           )}
                         </div>
@@ -1423,6 +1448,7 @@ export const Step2BusinessInfo = () => {
                             max={maxPct}
                             autoFillTo={pctAutoFill}
                           />
+                          <FieldError show={showErrors && isEmpty(sh.percentage)} />
                         </div>
                       )}
                     </>
@@ -1435,8 +1461,8 @@ export const Step2BusinessInfo = () => {
                           <>
                       <p className="text-xs text-primary font-semibold">אני (ממלא/ת השאלון) מחזיק/ה ב{parentCompanyName || "חברה זו"} באמצעות חברה.</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="space-y-1"><Label>שם החברה דרכה אני מחזיק/ה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
-                        <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
+                        <div className="space-y-1"><Label>שם החברה דרכה אני מחזיק/ה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} className={errClass(showErrors && isEmpty(sh.companyName))} /><FieldError show={showErrors && isEmpty(sh.companyName)} /></div>
+                        <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} className={errClass(showErrors && isEmpty(sh.companyNumber))} /><FieldError show={showErrors && isEmpty(sh.companyNumber)} /></div>
                         {isNewCompany && (
                           <div className="space-y-1">
                             <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
@@ -1446,6 +1472,7 @@ export const Step2BusinessInfo = () => {
                               max={maxPct}
                               autoFillTo={pctAutoFill}
                             />
+                            <FieldError show={showErrors && isEmpty(sh.percentage)} />
                           </div>
                         )}
                       </div>
@@ -1488,8 +1515,8 @@ export const Step2BusinessInfo = () => {
                           )}
                           {nestedPersonOwnerType === "other" && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), name: e.target.value })} /></div>
-                              <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idNumber: e.target.value })} /></div>
+                              <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), name: e.target.value })} className={errClass(showErrors && isEmpty(sh.personOwner?.name))} /><FieldError show={showErrors && isEmpty(sh.personOwner?.name)} /></div>
+                              <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idNumber: e.target.value })} className={errClass(showErrors && isEmpty(sh.personOwner?.idNumber))} /><FieldError show={showErrors && isEmpty(sh.personOwner?.idNumber)} /></div>
                               <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.personOwner?.phone || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), phone: e.target.value })} /></div>
                               <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.personOwner?.email || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), email: e.target.value })} /></div>
                             </div>
@@ -1507,6 +1534,7 @@ export const Step2BusinessInfo = () => {
                           spouseName={spouseDisplayName}
                           showSpouseOption={showSpouseOption}
                           renderNewCompanyShareholders={renderNewCompanyShareholders}
+                          showErrors={showErrors}
                         />
                       )}
                           </>
@@ -1530,8 +1558,8 @@ export const Step2BusinessInfo = () => {
                       )}
                       {(sh.isExistingCompany ?? true) ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} /></div>
-                          <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} /></div>
+                          <div className="space-y-1"><Label>שם החברה המחזיקה *</Label><Input value={sh.companyName || ""} onChange={(e) => updateShareholder(idx, "companyName", e.target.value)} className={errClass(showErrors && isEmpty(sh.companyName))} /><FieldError show={showErrors && isEmpty(sh.companyName)} /></div>
+                          <div className="space-y-1"><Label>ח.פ. *</Label><Input value={sh.companyNumber || ""} onChange={(e) => updateShareholder(idx, "companyNumber", e.target.value)} className={errClass(showErrors && isEmpty(sh.companyNumber))} /><FieldError show={showErrors && isEmpty(sh.companyNumber)} /></div>
                           {isNewCompany && (
                             <div className="space-y-1">
                               <Label>אחוזי אחזקה ב{parentCompanyName || "חברה החדשה"} *</Label>
@@ -1541,6 +1569,7 @@ export const Step2BusinessInfo = () => {
                                 max={maxPct}
                                 autoFillTo={pctAutoFill}
                               />
+                              <FieldError show={showErrors && isEmpty(sh.percentage)} />
                             </div>
                           )}
                         </div>
@@ -1566,6 +1595,7 @@ export const Step2BusinessInfo = () => {
                                 max={maxPct}
                                 autoFillTo={pctAutoFill}
                               />
+                              <FieldError show={showErrors && isEmpty(sh.percentage)} />
                             </div>
                           )}
                         </div>
@@ -1602,12 +1632,13 @@ export const Step2BusinessInfo = () => {
                                 value={sh.subOwnerType === "self_via_company" ? "company" : sh.subOwnerType || ""}
                                 onValueChange={(v: any) => updateShareholder(idx, "subOwnerType", v)}
                               >
-                                <SelectTrigger><SelectValue placeholder="בחר" /></SelectTrigger>
+                                <SelectTrigger className={errClass(showErrors && isEmpty(sh.subOwnerType))}><SelectValue placeholder="בחר" /></SelectTrigger>
                                 <SelectContent>
                                   <SelectItem value="person">אדם פרטי</SelectItem>
                                   <SelectItem value="company">חברה</SelectItem>
                                 </SelectContent>
                               </Select>
+                              <FieldError show={showErrors && isEmpty(sh.subOwnerType)} />
                             </div>
 
                             {shNormalizedSubOwnerType === "person" && (
@@ -1634,8 +1665,8 @@ export const Step2BusinessInfo = () => {
                                 )}
                                 {sh.personOwnerType === "other" && (
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), name: e.target.value })} /></div>
-                                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idNumber: e.target.value })} /></div>
+                                    <div className="space-y-1"><Label>שם מלא *</Label><Input value={sh.personOwner?.name || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), name: e.target.value })} className={errClass(showErrors && isEmpty(sh.personOwner?.name))} /><FieldError show={showErrors && isEmpty(sh.personOwner?.name)} /></div>
+                                    <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={sh.personOwner?.idNumber || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), idNumber: e.target.value })} className={errClass(showErrors && isEmpty(sh.personOwner?.idNumber))} /><FieldError show={showErrors && isEmpty(sh.personOwner?.idNumber)} /></div>
                                     <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={sh.personOwner?.phone || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), phone: e.target.value })} /></div>
                                     <div className="space-y-1"><Label>מייל</Label><Input type="email" value={sh.personOwner?.email || ""} onChange={(e) => updateShareholder(idx, "personOwner", { ...(sh.personOwner || {}), email: e.target.value })} /></div>
                                   </div>
@@ -1654,6 +1685,7 @@ export const Step2BusinessInfo = () => {
                                 spouseName={spouseDisplayName}
                                 showSpouseOption={showSpouseOption}
                                 offerSelfInPersonOption={true}
+                                showErrors={showErrors}
                                 renderNewCompanyShareholders={renderNewCompanyShareholders}
                               />
                             )}
@@ -1704,19 +1736,22 @@ export const Step2BusinessInfo = () => {
         <Label>
           {g(gender, "האם אתה עכשיו באבטלה או בחופשת לידה?", "האם את עכשיו באבטלה או בחופשת לידה?")} *
         </Label>
-        <YesNoSelect value={info.isUnemployedOrMaternity} onChange={(v) => setInfo({ isUnemployedOrMaternity: v })} />
+        <YesNoSelect value={info.isUnemployedOrMaternity} onChange={(v) => setInfo({ isUnemployedOrMaternity: v })} className={errClass(showErrors && info.isUnemployedOrMaternity === undefined)} />
+        <FieldError show={showErrors && info.isUnemployedOrMaternity === undefined} />
       </div>
 
       <div className="space-y-2">
         <Label>
           {g(gender, "האם היה לך עסק עצמאי בעבר?", "האם היה לך עסק עצמאי בעבר?")} *
         </Label>
-        <YesNoSelect value={info.hadPreviousBusiness} onChange={(v) => setInfo({ hadPreviousBusiness: v })} />
+        <YesNoSelect value={info.hadPreviousBusiness} onChange={(v) => setInfo({ hadPreviousBusiness: v })} className={errClass(showErrors && info.hadPreviousBusiness === undefined)} />
+        <FieldError show={showErrors && info.hadPreviousBusiness === undefined} />
       </div>
 
       <div className="space-y-2">
         <Label htmlFor={`${prefix}businessField`}>תחום העיסוק *</Label>
-        <Input id={`${prefix}businessField`} value={info.businessField || ""} onChange={(e) => setInfo({ businessField: e.target.value })} />
+        <Input id={`${prefix}businessField`} value={info.businessField || ""} onChange={(e) => setInfo({ businessField: e.target.value })} className={errClass(showErrors && isEmpty(info.businessField))} />
+        <FieldError show={showErrors && isEmpty(info.businessField)} />
       </div>
 
       <div className="space-y-2">
@@ -1752,13 +1787,13 @@ export const Step2BusinessInfo = () => {
 
       {/* Bank details for authorized - shown when separate account exists */}
       {info.businessType === "authorized" && info.hasSeparateBankAccount === true && (
-        <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
+        <div className={`space-y-3 p-4 bg-card rounded-xl border border-border ${errBoxClass(showErrors && (isEmpty(info.bankDetails?.bank) || isEmpty(info.bankDetails?.branch) || isEmpty(info.bankDetails?.accountNumber) || isEmpty(info.bankDetails?.accountHolder)))}`}>
           <Label className="text-base font-semibold">פרטי חשבון בנק של העסק *</Label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1"><Label>בנק *</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} /></div>
-            <div className="space-y-1"><Label>סניף *</Label><Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} /></div>
-            <div className="space-y-1"><Label>מספר חשבון *</Label><Input value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} /></div>
-            <div className="space-y-1"><Label>שם בעל החשבון *</Label><Input value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} /></div>
+            <div className="space-y-1"><Label>בנק *</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} className={errClass(showErrors && isEmpty(info.bankDetails?.bank))} /></div>
+            <div className="space-y-1"><Label>סניף *</Label><Input value={info.bankDetails?.branch || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, branch: e.target.value } })} className={errClass(showErrors && isEmpty(info.bankDetails?.branch))} /></div>
+            <div className="space-y-1"><Label>מספר חשבון *</Label><Input value={info.bankDetails?.accountNumber || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountNumber: e.target.value } })} className={errClass(showErrors && isEmpty(info.bankDetails?.accountNumber))} /></div>
+            <div className="space-y-1"><Label>שם בעל החשבון *</Label><Input value={info.bankDetails?.accountHolder || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, accountHolder: e.target.value } })} className={errClass(showErrors && isEmpty(info.bankDetails?.accountHolder))} /></div>
           </div>
         </div>
       )}
@@ -1780,7 +1815,7 @@ export const Step2BusinessInfo = () => {
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")} *</Label>
         <Select value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })}>
-          <SelectTrigger>
+          <SelectTrigger className={errClass(showErrors && isEmpty(info.ownershipType))}>
             <SelectValue placeholder="בחר" />
           </SelectTrigger>
           <SelectContent>
@@ -1788,13 +1823,15 @@ export const Step2BusinessInfo = () => {
             <SelectItem value="partnership">שותפות</SelectItem>
           </SelectContent>
         </Select>
+        <FieldError show={showErrors && isEmpty(info.ownershipType)} />
       </div>
 
       {info.ownershipType === "partnership" && renderPartnershipSection(info, setInfo, name, idNumber, prefix)}
 
       <div className="space-y-2">
         <Label>האם העסק מתנהל מהבית? *</Label>
-        <YesNoSelect value={info.isHomeOffice} onChange={(v) => setInfo({ isHomeOffice: v })} />
+        <YesNoSelect value={info.isHomeOffice} onChange={(v) => setInfo({ isHomeOffice: v })} className={errClass(showErrors && info.isHomeOffice === undefined)} />
+        <FieldError show={showErrors && info.isHomeOffice === undefined} />
       </div>
 
 
@@ -1853,7 +1890,7 @@ export const Step2BusinessInfo = () => {
       <div className="space-y-2">
         <Label>{g(gender, "האם אתה בעלים יחיד או בשותפות?", "האם את בעלים יחידה או בשותפות?")} *</Label>
         <Select value={info.ownershipType || ""} onValueChange={(v: any) => setInfo({ ownershipType: v })}>
-          <SelectTrigger>
+          <SelectTrigger className={errClass(showErrors && isEmpty(info.ownershipType))}>
             <SelectValue placeholder="בחר" />
           </SelectTrigger>
           <SelectContent>
@@ -1861,6 +1898,7 @@ export const Step2BusinessInfo = () => {
             <SelectItem value="partnership">שותפות</SelectItem>
           </SelectContent>
         </Select>
+        <FieldError show={showErrors && isEmpty(info.ownershipType)} />
       </div>
 
       {/* Business / partnership number – only shown for partnership */}
@@ -1879,7 +1917,8 @@ export const Step2BusinessInfo = () => {
 
       <div className="space-y-2">
         <Label>האם העסק מעסיק עובדים? *</Label>
-        <YesNoSelect value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} />
+        <YesNoSelect value={info.hasEmployees} onChange={(v) => setInfo({ hasEmployees: v })} className={errClass(showErrors && info.hasEmployees === undefined)} />
+        <FieldError show={showErrors && info.hasEmployees === undefined} />
       </div>
     </div>
   );
@@ -2078,14 +2117,18 @@ export const Step2BusinessInfo = () => {
                 <Input
                   value={company.name || ""}
                   onChange={(e) => updateExistingCompany(idx, "name", e.target.value)}
+                  className={errClass(showErrors && isEmpty(company.name))}
                 />
+                <FieldError show={showErrors && isEmpty(company.name)} />
               </div>
               <div className="space-y-1">
                 <Label>ח.פ. *</Label>
                 <Input
                   value={company.companyNumber || ""}
                   onChange={(e) => updateExistingCompany(idx, "companyNumber", e.target.value)}
+                  className={errClass(showErrors && isEmpty(company.companyNumber))}
                 />
+                <FieldError show={showErrors && isEmpty(company.companyNumber)} />
               </div>
             </div>
 
@@ -2096,7 +2139,9 @@ export const Step2BusinessInfo = () => {
                 <YesNoSelect
                   value={company.hasTaxFile}
                   onChange={(v) => updateExistingCompany(idx, "hasTaxFile", v)}
+                  className={errClass(showErrors && company.hasTaxFile === undefined)}
                 />
+                <FieldError show={showErrors && company.hasTaxFile === undefined} />
               </div>
             )}
 
@@ -2121,7 +2166,7 @@ export const Step2BusinessInfo = () => {
                 )}
 
                 {company.hasBankAccount === true && (
-                  <div className="space-y-3 p-4 bg-card rounded-xl border border-border">
+                  <div className={`space-y-3 p-4 bg-card rounded-xl border border-border ${errBoxClass(showErrors && (isEmpty(company.bankDetails?.bank) || isEmpty(company.bankDetails?.branch) || isEmpty(company.bankDetails?.accountNumber) || isEmpty(company.bankDetails?.accountHolder)))}`}>
                     <Label className="text-base font-semibold">פרטי חשבון בנק של החברה *</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-1"><Label>בנק</Label><Input value={company.bankDetails?.bank || ""} onChange={(e) => updateExistingCompany(idx, "bankDetails", { ...company.bankDetails, bank: e.target.value })} /></div>
@@ -2217,6 +2262,7 @@ export const Step2BusinessInfo = () => {
                         showSpouseOption={showSpouseOption}
                         renderNewCompanyShareholders={renderNewCompanyShareholdersTop}
                         knownChains={knownChains}
+                        showErrors={showErrors}
                       />
                     </>
                   )}
@@ -2327,7 +2373,7 @@ export const Step2BusinessInfo = () => {
         </div>
 
         {/* 3 requested names */}
-        <div className="space-y-3">
+        <div className={`space-y-3 p-2 -m-2 ${errBoxClass(showErrors && isEmpty(info.requestedName1))}`}>
           <Label className="font-semibold">3 שמות רצויים לעמותה (לפי סדר עדיפות) *</Label>
           {[1, 2, 3].map((n) => (
             <Input
@@ -2337,6 +2383,7 @@ export const Step2BusinessInfo = () => {
               onChange={(e) => setInfo({ [`requestedName${n}`]: e.target.value } as any)}
             />
           ))}
+          <FieldError show={showErrors && isEmpty(info.requestedName1)} message="יש למלא לפחות שם רצוי אחד" />
         </div>
 
         {/* Objectives */}
@@ -2347,7 +2394,9 @@ export const Step2BusinessInfo = () => {
             onChange={(e) => setInfo({ objectives: e.target.value })}
             placeholder="תאר/י את מטרות העמותה..."
             rows={4}
+            className={errClass(showErrors && isEmpty(info.objectives))}
           />
+          <FieldError show={showErrors && isEmpty(info.objectives)} />
         </div>
 
         {/* Board member count */}
@@ -2357,7 +2406,9 @@ export const Step2BusinessInfo = () => {
             type="text" inputMode="numeric" pattern="[0-9]*"
             value={info.boardMemberCount || ""}
             onChange={(e) => handleBoardCountChange(parseInt(e.target.value) || 7)}
+            className={errClass(showErrors && !info.boardMemberCount)}
           />
+          <FieldError show={showErrors && !info.boardMemberCount} />
         </div>
 
         {/* Board members details */}
@@ -2368,16 +2419,17 @@ export const Step2BusinessInfo = () => {
             <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
               <h4 className="font-bold text-primary">חבר ועד #{idx + 1}{member.name ? ` – ${member.name}` : ""}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} /></div>
+                <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} className={errClass(showErrors && isEmpty(member.name))} /><FieldError show={showErrors && isEmpty(member.name)} /></div>
                 <div className="space-y-1"><Label>מס׳ תעודת זהות</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} /></div>
               </div>
 
-              <div className="space-y-1.5 p-2.5 rounded-lg border border-border/60">
+              <div className={`space-y-1.5 p-2.5 rounded-lg border border-border/60 ${errBoxClass(showErrors && isEmpty(member.phone) && isEmpty(member.email))}`}>
                 <Label className="text-xs font-normal text-muted-foreground">טלפון או מייל — יש למלא לפחות אחד מהשניים *</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
                   <div className="space-y-1"><Label>מייל</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
                 </div>
+                <FieldError show={showErrors && isEmpty(member.phone) && isEmpty(member.email)} message="יש למלא טלפון או מייל" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2537,7 +2589,9 @@ export const Step2BusinessInfo = () => {
             <Input
               value={info.nonprofitName || ""}
               onChange={(e) => setInfo({ nonprofitName: e.target.value })}
+              className={errClass(showErrors && isEmpty(info.nonprofitName))}
             />
+            <FieldError show={showErrors && isEmpty(info.nonprofitName)} />
           </div>
           <div className="space-y-1">
             <Label>מספר העמותה</Label>
@@ -2555,7 +2609,9 @@ export const Step2BusinessInfo = () => {
             <YesNoSelect
               value={info.hasTaxFile}
               onChange={(v) => setInfo({ hasTaxFile: v })}
+              className={errClass(showErrors && info.hasTaxFile === undefined)}
             />
+            <FieldError show={showErrors && info.hasTaxFile === undefined} />
           </div>
         )}
 
@@ -2580,16 +2636,17 @@ export const Step2BusinessInfo = () => {
               <div className="space-y-3 p-4 border border-border rounded-xl bg-card">
                 <h4 className="font-bold text-primary">חבר ועד לצורך הפקת ייצוג{rep.name ? ` – ${rep.name}` : ""}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1"><Label>שם מלא *</Label><Input value={rep.name || ""} onChange={(e) => updateRep("name", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>שם מלא *</Label><Input value={rep.name || ""} onChange={(e) => updateRep("name", e.target.value)} className={errClass(showErrors && isEmpty(rep.name))} /><FieldError show={showErrors && isEmpty(rep.name)} /></div>
                   <div className="space-y-1"><Label>מס׳ תעודת זהות</Label><Input value={rep.idNumber || ""} onChange={(e) => updateRep("idNumber", e.target.value)} /></div>
                 </div>
 
-                <div className="space-y-1.5 p-2.5 rounded-lg border border-border/60">
+                <div className={`space-y-1.5 p-2.5 rounded-lg border border-border/60 ${errBoxClass(showErrors && isEmpty(rep.phone) && isEmpty(rep.email))}`}>
                   <Label className="text-xs font-normal text-muted-foreground">טלפון או מייל — יש למלא לפחות אחד מהשניים *</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1"><Label>טלפון</Label><Input type="tel" value={rep.phone || ""} onChange={(e) => updateRep("phone", e.target.value)} /></div>
                     <div className="space-y-1"><Label>מייל</Label><Input type="email" value={rep.email || ""} onChange={(e) => updateRep("email", e.target.value)} /></div>
                   </div>
+                  <FieldError show={showErrors && isEmpty(rep.phone) && isEmpty(rep.email)} message="יש למלא טלפון או מייל" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2663,10 +2720,10 @@ export const Step2BusinessInfo = () => {
               <div key={idx} className="space-y-3 p-4 border border-border rounded-xl bg-card">
                 <h4 className="font-bold text-primary">חבר ועד #{idx + 1}{member.name ? ` – ${member.name}` : ""}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} /></div>
-                  <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} /></div>
+                  <div className="space-y-1"><Label>שם מלא *</Label><Input value={member.name || ""} onChange={(e) => updateBoardMember(idx, "name", e.target.value)} className={errClass(showErrors && isEmpty(member.name))} /><FieldError show={showErrors && isEmpty(member.name)} /></div>
+                  <div className="space-y-1"><Label>מס׳ תעודת זהות *</Label><Input value={member.idNumber || ""} onChange={(e) => updateBoardMember(idx, "idNumber", e.target.value)} className={errClass(showErrors && isEmpty(member.idNumber))} /><FieldError show={showErrors && isEmpty(member.idNumber)} /></div>
+                  <div className="space-y-1"><Label>טלפון *</Label><Input type="tel" value={member.phone || ""} onChange={(e) => updateBoardMember(idx, "phone", e.target.value)} className={errClass(showErrors && isEmpty(member.phone))} /><FieldError show={showErrors && isEmpty(member.phone)} /></div>
+                  <div className="space-y-1"><Label>מייל *</Label><Input type="email" value={member.email || ""} onChange={(e) => updateBoardMember(idx, "email", e.target.value)} className={errClass(showErrors && isEmpty(member.email))} /><FieldError show={showErrors && isEmpty(member.email)} /></div>
                 </div>
               </div>
             ))}
@@ -2678,7 +2735,7 @@ export const Step2BusinessInfo = () => {
                   value={info.representativeBoardMemberIdx !== undefined ? String(info.representativeBoardMemberIdx) : ""}
                   onValueChange={(v) => setInfo({ representativeBoardMemberIdx: parseInt(v) })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={errClass(showErrors && info.representativeBoardMemberIdx === undefined)}>
                     <SelectValue placeholder="בחר חבר ועד" />
                   </SelectTrigger>
                   <SelectContent>
@@ -2689,6 +2746,7 @@ export const Step2BusinessInfo = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                <FieldError show={showErrors && info.representativeBoardMemberIdx === undefined} />
               </div>
             )}
 
@@ -2711,7 +2769,7 @@ export const Step2BusinessInfo = () => {
             </div>
 
             {info.hasBankAccount === true && (
-              <div className="space-y-3 p-4 bg-card rounded-xl border border-border mr-4">
+              <div className={`space-y-3 p-4 bg-card rounded-xl border border-border mr-4 ${errBoxClass(showErrors && (isEmpty(info.bankDetails?.bank) || isEmpty(info.bankDetails?.branch) || isEmpty(info.bankDetails?.accountNumber) || isEmpty(info.bankDetails?.accountHolder)))}`}>
                 <Label className="text-base font-semibold">פרטי חשבון בנק של העמותה *</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1"><Label>בנק</Label><Input value={info.bankDetails?.bank || ""} onChange={(e) => setInfo({ bankDetails: { ...info.bankDetails, bank: e.target.value } })} /></div>
@@ -2813,3 +2871,320 @@ export const Step2BusinessInfo = () => {
     </div>
   );
 };
+
+// ─── Pure validity helpers for Step2BusinessInfo (used by isBusinessSectionValid) ───
+// These mirror the "*" required fields rendered above, and the same conditional
+// gating logic used inside the component (re-derived here from serviceType since
+// this function lives outside the component and has no access to its local consts).
+
+const chainFilled = (v: any) => !isEmpty(v);
+
+// Validates one node of a CompanyChainBlock-shaped ownership chain: { companyName,
+// companyNumber, isExistingCompany, subOwnerType, personOwnerType, personOwnerWithOther,
+// personOwner: { name, idNumber }, childCompany }.
+function isChainNodeValid(
+  node: any,
+  opts: { allowNew?: boolean; offerSelfInPersonOption?: boolean; personIsSelfOnly?: boolean } = {}
+): boolean {
+  if (!node) return false;
+  const isExisting = opts.allowNew ? (node.isExistingCompany ?? true) : true;
+  if (isExisting) {
+    if (!chainFilled(node.companyName) || !chainFilled(node.companyNumber)) return false;
+  }
+  // When "new company" is chosen, only the 3 requested-name fields are shown and none
+  // of them carry a "*" — nothing further to validate for that branch.
+
+  const subOwnerType = node.subOwnerType || "";
+  if (!subOwnerType) return false;
+
+  if (subOwnerType === "self") {
+    if (node.personOwnerWithOther) {
+      return chainFilled(node.personOwner?.name) && chainFilled(node.personOwner?.idNumber);
+    }
+    return true;
+  }
+
+  if (subOwnerType === "person") {
+    if (opts.personIsSelfOnly) return true;
+    if (opts.offerSelfInPersonOption) {
+      const personOwnerType = node.personOwnerType || "";
+      if (!personOwnerType) return false;
+      if (personOwnerType === "other") {
+        return chainFilled(node.personOwner?.name) && chainFilled(node.personOwner?.idNumber);
+      }
+      return true;
+    }
+    // Final beneficial-owner person (no self/spouse/other picker offered)
+    return chainFilled(node.personOwner?.name) && chainFilled(node.personOwner?.idNumber);
+  }
+
+  if (subOwnerType === "company") {
+    return isChainNodeValid(node.childCompany, { allowNew: opts.allowNew && !isExisting, offerSelfInPersonOption: true });
+  }
+
+  return true;
+}
+
+// Validates a SelfViaCompanyBlock-shaped node: same shape as above plus a required
+// "percentage" field when nested inside a new-company flow.
+function isSelfViaCompanyValid(node: any, isNewCompanyParent: boolean): boolean {
+  if (!node) return false;
+  const isExisting = isNewCompanyParent ? (node.isExistingCompany ?? true) : true;
+  if (isExisting) {
+    if (!chainFilled(node.companyName) || !chainFilled(node.companyNumber)) return false;
+  }
+  if (isNewCompanyParent && !chainFilled(node.percentage)) return false;
+  const subOwnerType = node.subOwnerType || "";
+  if (!subOwnerType) return false;
+  if (subOwnerType === "company") {
+    return isChainNodeValid(node.childCompany, { allowNew: isNewCompanyParent && !isExisting, personIsSelfOnly: true });
+  }
+  // subOwnerType === "person" here always means "self" (no further fields required)
+  return true;
+}
+
+function isPartnerRepValid(partners: any[] = []): boolean {
+  return partners.every((p: any, idx: number) => {
+    if (p?.isVatRepresentative && idx !== 0) {
+      return chainFilled(p?.additionalIdType);
+    }
+    return true;
+  });
+}
+
+// Validates one entry of a shareholders[] array (renderShareholdersSection shape).
+function isShareholderValid(
+  sh: any,
+  opts: { isNewCompany: boolean; includeSelfAsFirstShareholder: boolean }
+): boolean {
+  if (!sh) return false;
+  const isAuto = opts.includeSelfAsFirstShareholder && (sh.isSelf || sh.isSpouse);
+  if (isAuto) {
+    if (opts.isNewCompany && !chainFilled(sh.percentage)) return false;
+    return true;
+  }
+
+  if (!opts.includeSelfAsFirstShareholder) {
+    const holderType = sh.holderType || "";
+    if (!holderType) return false;
+    if (holderType === "person") {
+      const pot = sh.personOwnerType || "";
+      if (!pot) return false;
+      if (pot === "other" && (!chainFilled(sh.name) || !chainFilled(sh.idNumber))) return false;
+      if (opts.isNewCompany && !chainFilled(sh.percentage)) return false;
+      return true;
+    }
+    // company / self_via_company holder types fall through to the shared logic below
+  }
+
+  const holderType = sh.holderType || "";
+  if (!holderType) return false;
+
+  if (holderType === "person") {
+    if (!chainFilled(sh.name) || !chainFilled(sh.idNumber)) return false;
+    if (opts.isNewCompany && !chainFilled(sh.percentage)) return false;
+    return true;
+  }
+
+  if (holderType === "self_via_company") {
+    if (!chainFilled(sh.companyName) || !chainFilled(sh.companyNumber)) return false;
+    if (opts.isNewCompany && !chainFilled(sh.percentage)) return false;
+    const nestedSubOwnerType = sh.subOwnerType === "self_via_company" ? "person" : sh.subOwnerType || "";
+    if (nestedSubOwnerType === "person") {
+      const npot = sh.personOwnerType || (sh.subOwnerType === "self_via_company" ? "self" : "");
+      if (!npot) return false;
+      if (npot === "other" && (!chainFilled(sh.personOwner?.name) || !chainFilled(sh.personOwner?.idNumber))) return false;
+    }
+    if (sh.subOwnerType === "company") {
+      if (!isChainNodeValid(sh.childCompany, {})) return false;
+    }
+    return true;
+  }
+
+  if (holderType === "company") {
+    const shIsExisting = opts.isNewCompany ? (sh.isExistingCompany ?? true) : true;
+    if (!shIsExisting) {
+      // Shareholder is itself a brand-new company: recurse into its own shareholders flow.
+      return isShareholdersArrayValid(sh.shareholders, { isNewCompany: true, includeSelfAsFirstShareholder: false });
+    }
+    if (!chainFilled(sh.companyName) || !chainFilled(sh.companyNumber)) return false;
+    if (opts.isNewCompany && !chainFilled(sh.percentage)) return false;
+    const subOwnerType = sh.subOwnerType === "self_via_company" ? "company" : sh.subOwnerType || "";
+    if (!subOwnerType) return false;
+    if (subOwnerType === "person") {
+      const pot = sh.personOwnerType || "";
+      if (!pot) return false;
+      if (pot === "other" && (!chainFilled(sh.personOwner?.name) || !chainFilled(sh.personOwner?.idNumber))) return false;
+    }
+    if (sh.subOwnerType === "company" || sh.subOwnerType === "self_via_company") {
+      if (!isChainNodeValid(sh.childCompany, { offerSelfInPersonOption: true })) return false;
+    }
+    return true;
+  }
+
+  return true;
+}
+
+function isShareholdersArrayValid(
+  shareholders: any[] | undefined,
+  opts: { isNewCompany: boolean; includeSelfAsFirstShareholder: boolean }
+): boolean {
+  const list = shareholders || [];
+  if (list.length === 0) return true;
+  return list.every((sh) => isShareholderValid(sh, opts));
+}
+
+function isBusinessNewValid(info: any): boolean {
+  if (!info) return false;
+  if (info.isUnemployedOrMaternity === undefined) return false;
+  if (info.hadPreviousBusiness === undefined) return false;
+  if (!chainFilled(info.businessField)) return false;
+  if (info.businessType === "authorized" && info.hasSeparateBankAccount === true) {
+    const b = info.bankDetails;
+    if (!chainFilled(b?.bank) || !chainFilled(b?.branch) || !chainFilled(b?.accountNumber) || !chainFilled(b?.accountHolder)) return false;
+  }
+  if (!chainFilled(info.ownershipType)) return false;
+  if (info.ownershipType === "partnership") {
+    if (!isPartnerRepValid(info.partners)) return false;
+    if (!isPartnershipValid(info)) return false;
+  }
+  if (info.isHomeOffice === undefined) return false;
+  return true;
+}
+
+function isBusinessExistingValid(info: any): boolean {
+  if (!info) return false;
+  if (!chainFilled(info.ownershipType)) return false;
+  if (info.ownershipType === "partnership") {
+    if (!isPartnerRepValid(info.existingPartners)) return false;
+    if (!isPartnershipValid(info, "existingPartners")) return false;
+  }
+  if (info.hasEmployees === undefined) return false;
+  return true;
+}
+
+function isCompanyExistingEntryValid(company: any, isWarComp: boolean): boolean {
+  if (!company) return false;
+  if (!chainFilled(company.name) || !chainFilled(company.companyNumber)) return false;
+  if (!isWarComp) {
+    if (company.hasTaxFile === undefined) return false;
+    if (company.hasTaxFile === false && company.hasBankAccount === true) {
+      const b = company.bankDetails;
+      if (!chainFilled(b?.bank) || !chainFilled(b?.branch) || !chainFilled(b?.accountNumber) || !chainFilled(b?.accountHolder)) return false;
+    }
+  }
+  if (company.shareholderType === "self_via_company") {
+    if (!isSelfViaCompanyValid(company.selfViaCompany, false)) return false;
+  }
+  return true;
+}
+
+function isCompanySectionValid(
+  info: any,
+  hasExistingPurpose: boolean,
+  isWarComp: boolean,
+): boolean {
+  if (!hasExistingPurpose) return true;
+  const count = info?.existingCompanyCount || 0;
+  if (count > 0 && info?.existingCompanyFillMode === "self") {
+    const companies = info?.existingCompanies || [];
+    for (let i = 0; i < count; i++) {
+      if (!isCompanyExistingEntryValid(companies[i], isWarComp)) return false;
+    }
+  }
+  return true;
+}
+
+function isNonprofitBoardMemberValid(m: any): boolean {
+  if (!m) return false;
+  if (!chainFilled(m.name)) return false;
+  if (!chainFilled(m.phone) && !chainFilled(m.email)) return false;
+  return true;
+}
+
+function isNonprofitNewValid(info: any): boolean {
+  if (!info) return false;
+  if (!chainFilled(info.requestedName1)) return false;
+  if (!chainFilled(info.objectives)) return false;
+  if (!info.boardMemberCount) return false;
+  const boardMembers = info.boardMembers || [];
+  if (boardMembers.length === 0) return false;
+  if (!boardMembers.every(isNonprofitBoardMemberValid)) return false;
+  return true;
+}
+
+function isNonprofitExistingValid(info: any, isWarComp: boolean): boolean {
+  if (!info) return false;
+  if (!chainFilled(info.nonprofitName)) return false;
+  if (!isWarComp && info.hasTaxFile === undefined) return false;
+  const hasTax = isWarComp || info.hasTaxFile === true;
+  if (hasTax) {
+    const rep = info.representativeMember;
+    if (!rep) return false;
+    if (!chainFilled(rep.name)) return false;
+    if (!chainFilled(rep.phone) && !chainFilled(rep.email)) return false;
+  } else if (info.hasTaxFile === false) {
+    const boardMembers = info.existingBoardMembers || [];
+    if (boardMembers.length === 0) return false;
+    for (const m of boardMembers) {
+      if (!chainFilled(m.name) || !chainFilled(m.idNumber) || !chainFilled(m.phone) || !chainFilled(m.email)) return false;
+    }
+    if (info.representativeBoardMemberIdx === undefined) return false;
+    if (info.hasBankAccount === true) {
+      const b = info.bankDetails;
+      if (!chainFilled(b?.bank) || !chainFilled(b?.branch) || !chainFilled(b?.accountNumber) || !chainFilled(b?.accountHolder)) return false;
+    }
+  }
+  return true;
+}
+
+// Standalone re-derivation of Step2BusinessInfo's conditional gating (which sections are
+// actually visible), driven purely off serviceType — mirrors lines ~786-812 and ~2788-2791
+// inside the component.
+export function isBusinessSectionValid(
+  serviceType: any,
+  businessInfo: any,
+  spouseBusinessInfo: any,
+  nonprofitInfo: any,
+  spouseNonprofitInfo: any,
+): boolean {
+  if (!serviceType) return true;
+
+  const userWarEntities = serviceType.userWarCompensationEntities || [];
+  const spouseWarEntities = serviceType.spouseWarCompensationEntities || [];
+
+  const userHasNewBusiness = serviceType.userPurposes?.includes("business") && serviceType.userPurposeStatus?.business?.includes("new");
+  const userHasExistingBusiness = (serviceType.userPurposes?.includes("business") && serviceType.userPurposeStatus?.business?.includes("existing")) || userWarEntities.includes("business");
+  const userHasCompany = serviceType.userPurposes?.includes("company") || userWarEntities.includes("company");
+  const userHasNonprofit = serviceType.userPurposes?.includes("nonprofit") || userWarEntities.includes("nonprofit");
+
+  const spouseHasNewBusiness = serviceType.spousePurposes?.includes("business") && serviceType.spousePurposeStatus?.business?.includes("new");
+  const spouseHasExistingBusiness = (serviceType.spousePurposes?.includes("business") && serviceType.spousePurposeStatus?.business?.includes("existing")) || spouseWarEntities.includes("business");
+  const spouseHasCompany = serviceType.spousePurposes?.includes("company") || spouseWarEntities.includes("company");
+  const spouseHasNonprofit = serviceType.spousePurposes?.includes("nonprofit") || spouseWarEntities.includes("nonprofit");
+
+  const userHasNewNonprofit = userHasNonprofit && serviceType.userPurposeStatus?.nonprofit?.includes("new");
+  const userHasExistingNonprofit = userHasNonprofit && (serviceType.userPurposeStatus?.nonprofit?.includes("existing") || userWarEntities.includes("nonprofit"));
+  const spouseHasNewNonprofit = spouseHasNonprofit && serviceType.spousePurposeStatus?.nonprofit?.includes("new");
+  const spouseHasExistingNonprofit = spouseHasNonprofit && (serviceType.spousePurposeStatus?.nonprofit?.includes("existing") || spouseWarEntities.includes("nonprofit"));
+
+  if (userHasNewBusiness && !isBusinessNewValid(businessInfo)) return false;
+  if (userHasExistingBusiness && !isBusinessExistingValid(businessInfo)) return false;
+  if (userHasNewNonprofit && !isNonprofitNewValid(nonprofitInfo)) return false;
+  if (userHasExistingNonprofit && !isNonprofitExistingValid(nonprofitInfo, userWarEntities.includes("nonprofit"))) return false;
+  if (userHasCompany) {
+    const hasExistingPurpose = serviceType.userPurposeStatus?.company?.includes("existing") || userWarEntities.includes("company");
+    if (!isCompanySectionValid(businessInfo, !!hasExistingPurpose, userWarEntities.includes("company"))) return false;
+  }
+
+  if (spouseHasNewBusiness && !isBusinessNewValid(spouseBusinessInfo)) return false;
+  if (spouseHasExistingBusiness && !isBusinessExistingValid(spouseBusinessInfo)) return false;
+  if (spouseHasNewNonprofit && !isNonprofitNewValid(spouseNonprofitInfo)) return false;
+  if (spouseHasExistingNonprofit && !isNonprofitExistingValid(spouseNonprofitInfo, spouseWarEntities.includes("nonprofit"))) return false;
+  if (spouseHasCompany) {
+    const hasExistingPurposeSp = serviceType.spousePurposeStatus?.company?.includes("existing") || spouseWarEntities.includes("company");
+    if (!isCompanySectionValid(spouseBusinessInfo, !!hasExistingPurposeSp, spouseWarEntities.includes("company"))) return false;
+  }
+
+  return true;
+}
