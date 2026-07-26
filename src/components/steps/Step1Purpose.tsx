@@ -445,7 +445,7 @@ export const Step1Purpose = () => {
 
       {/* Purpose Selection */}
       <div className="space-y-5">
-        <h3 className="text-xl font-bold text-foreground">בעבור מה אני פונה לקבל שירות?</h3>
+        <h3 className="text-xl font-bold text-foreground">בעבור מה אני פונה לקבל שירות? *</h3>
         {isMarried ? renderTablePurposes() : renderSinglePurposeList()}
       </div>
 
@@ -457,7 +457,7 @@ export const Step1Purpose = () => {
             onCheckedChange={(checked) => setPersonalInfo({ agreeToMessages: !!checked })}
             className="mt-0.5"
           />
-          <span className="text-sm text-foreground">אני מאשר/ת הרשמה לקבלת הודעות</span>
+          <span className="text-sm text-foreground">אני מאשר/ת הרשמה לקבלת הודעות *</span>
         </label>
         <label className="flex items-start gap-3 cursor-pointer">
           <Checkbox
@@ -465,7 +465,7 @@ export const Step1Purpose = () => {
             onCheckedChange={(checked) => setPersonalInfo({ agreeToPrivacy: !!checked })}
             className="mt-0.5"
           />
-          <span className="text-sm text-foreground">אני מאשר/ת את מדיניות הפרטיות של המשרד</span>
+          <span className="text-sm text-foreground">אני מאשר/ת את מדיניות הפרטיות של המשרד *</span>
         </label>
       </div>
 
