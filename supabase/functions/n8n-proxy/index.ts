@@ -16,6 +16,7 @@ const N8N_ENDPOINTS: Record<string, string> = {
   "chasida-send-document-list": "https://n8n.chasida.biz/webhook/send-document-list",
   "chasida-send-reminder": "https://n8n.chasida.biz/webhook/send-reminder",
   "chasida-send-email-reminder": "https://n8n.chasida.biz/webhook/send-email-reminder",
+  "chasida-sendEmailWithForms": "https://n8n.chasida.biz/webhook/sendEmailWithForms",
 };
 
 type RequestBody = {

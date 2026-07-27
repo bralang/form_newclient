@@ -71,8 +71,6 @@ export const Step3Documents = () => {
   } = useFormContext();
   const [loading, setLoading] = useState(false);
   const [submissionMode, setSubmissionMode] = useState<"upload" | "email">("upload");
-  const [emailListMode, setEmailListMode] = useState<"" | "now" | "later">("");
-  const [emailReminderDate, setEmailReminderDate] = useState("");
 
   // ─── Drive folder + already-uploaded files ───
   const [driveFolderId, setDriveFolderId] = useState<string | null>(null);
@@ -292,10 +290,10 @@ export const Step3Documents = () => {
     return items;
   };
 
-  const handleSendEmailList = async (email: string, scheduledDate?: string) => {
+  const handleSendEmailList = async (email: string) => {
     await sendToWebhook(
       "https://n8n.chasida.biz/webhook/sendEmailWithForms",
-      { email, reminderTime: scheduledDate || undefined, personalInfo, serviceType, documentList: buildDocumentList() },
+      { email, personalInfo, serviceType, documentList: buildDocumentList() },
       { silent: false }
     );
   };
@@ -412,7 +410,7 @@ export const Step3Documents = () => {
           {/* Option 2 — Email list */}
           <button
             type="button"
-            onClick={() => { setSubmissionMode("email"); setEmailListMode("now"); }}
+            onClick={() => setSubmissionMode("email")}
             className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${submissionMode === "email" ? "border-primary/50 bg-primary/10" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
           >
             <Mail className="w-4 h-4 text-primary shrink-0" />
@@ -424,33 +422,10 @@ export const Step3Documents = () => {
                 הרשימה תישלח לכתובת <span className="font-semibold text-foreground">{personalInfo.email || "שהוזנה בעמוד הראשון"}</span>.
                 {" "}לשינוי הכתובת יש לחזור לעמוד הראשון.
               </p>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant={emailListMode === "now" ? "default" : "outline"}
-                  onClick={() => setEmailListMode("now")}
-                >כעת</Button>
-                <Button
-                  size="sm"
-                  variant={emailListMode === "later" ? "default" : "outline"}
-                  onClick={() => setEmailListMode("later")}
-                >במועד אחר</Button>
-              </div>
-              {emailListMode === "later" && (
-                <div className="space-y-1">
-                  <Label className="text-xs">בחרו מועד</Label>
-                  <Input
-                    type="date"
-                    value={emailReminderDate}
-                    onChange={(e) => setEmailReminderDate(e.target.value)}
-                    className="max-w-xs"
-                  />
-                </div>
-              )}
               <Button
                 size="sm"
-                onClick={() => handleSendEmailList(personalInfo.email, emailListMode === "later" ? emailReminderDate : undefined)}
-                disabled={!personalInfo.email || (emailListMode === "later" && !emailReminderDate)}
+                onClick={() => handleSendEmailList(personalInfo.email)}
+                disabled={!personalInfo.email}
               >
                 <Mail className="ml-2 h-4 w-4" />
                 שלחו אל {personalInfo.email || "המייל שלי"}
