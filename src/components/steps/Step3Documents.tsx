@@ -73,7 +73,6 @@ export const Step3Documents = () => {
   const [submissionMode, setSubmissionMode] = useState<"upload" | "email">("upload");
   const [emailListMode, setEmailListMode] = useState<"" | "now" | "later">("");
   const [emailReminderDate, setEmailReminderDate] = useState("");
-  const [confirmEmail, setConfirmEmail] = useState(personalInfo.email || "");
 
   // ─── Drive folder + already-uploaded files ───
   const [driveFolderId, setDriveFolderId] = useState<string | null>(null);
@@ -421,15 +420,10 @@ export const Step3Documents = () => {
           </button>
           {submissionMode === "email" && (
             <div className="mr-7 space-y-3">
-              <div className="space-y-1">
-                <Label className="text-xs">כתובת המייל לשליחת רשימת המסמכים</Label>
-                <Input
-                  type="email"
-                  value={confirmEmail}
-                  onChange={(e) => setConfirmEmail(e.target.value)}
-                  className="max-w-xs"
-                />
-              </div>
+              <p className="text-sm text-muted-foreground">
+                הרשימה תישלח לכתובת <span className="font-semibold text-foreground">{personalInfo.email || "שהוזנה בעמוד הראשון"}</span>.
+                {" "}לשינוי הכתובת יש לחזור לעמוד הראשון.
+              </p>
               <div className="flex gap-2">
                 <Button
                   size="sm"
@@ -455,11 +449,11 @@ export const Step3Documents = () => {
               )}
               <Button
                 size="sm"
-                onClick={() => handleSendEmailList(confirmEmail, emailListMode === "later" ? emailReminderDate : undefined)}
-                disabled={!confirmEmail || (emailListMode === "later" && !emailReminderDate)}
+                onClick={() => handleSendEmailList(personalInfo.email, emailListMode === "later" ? emailReminderDate : undefined)}
+                disabled={!personalInfo.email || (emailListMode === "later" && !emailReminderDate)}
               >
                 <Mail className="ml-2 h-4 w-4" />
-                שלחו אל {confirmEmail || "המייל שלי"}
+                שלחו אל {personalInfo.email || "המייל שלי"}
               </Button>
             </div>
           )}
