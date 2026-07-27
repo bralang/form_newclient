@@ -280,6 +280,14 @@ export const Step3Documents = () => {
         <div className="h-1 w-20 bg-primary rounded-full" />
       </div>
 
+      {/* Marketing Text */}
+      <div className="p-5 bg-gradient-to-r from-primary/5 to-secondary/20 rounded-xl border border-primary/10 space-y-3">
+        <h3 className="text-xl font-bold text-foreground">מסכימים להרוויח יותר מהעסק שלכם?</h3>
+        <p className="text-muted-foreground">מסמיכים אותנו להיות המייצגים מול הרשויות?</p>
+        <p className="text-sm text-muted-foreground">המסמכים שתעלו בשלב זה יתנו לנו את הרשות להוציא טופסי ייצוג לחתימה.</p>
+        <p className="text-lg font-bold text-primary">מתקדמים…</p>
+      </div>
+
       {/* ─── Document Prep Box ─── */}
       <div className="p-5 bg-primary/5 rounded-xl border border-primary/15 space-y-4">
         <h3 className="font-bold text-lg text-foreground">📋 כיצד תרצו להגיש את המסמכים?</h3>
@@ -404,14 +412,6 @@ export const Step3Documents = () => {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Marketing Text */}
-      <div className="p-5 bg-gradient-to-r from-primary/5 to-secondary/20 rounded-xl border border-primary/10 space-y-3">
-        <h3 className="text-xl font-bold text-foreground">מסכימים להרוויח יותר מהעסק שלכם?</h3>
-        <p className="text-muted-foreground">מסמיכים אותנו להיות המייצגים מול הרשויות?</p>
-        <p className="text-sm text-muted-foreground">המסמכים שתעלו בשלב זה יתנו לנו את הרשות להוציא טופסי ייצוג לחתימה.</p>
-        <p className="text-lg font-bold text-primary">מתקדמים…</p>
       </div>
 
       {/* Document Uploads — only shown when "upload" mode is selected */}
