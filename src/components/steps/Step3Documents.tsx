@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { FormNavigation } from "@/components/FormNavigation";
 import { useEffect, useState } from "react";
-import { Mail, Phone, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { Mail, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type UploadedFile = { fileId: string; fileName: string; webViewLink: string };
@@ -70,12 +70,10 @@ export const Step3Documents = () => {
     questionnaireId,
   } = useFormContext();
   const [loading, setLoading] = useState(false);
-  const [submissionMode, setSubmissionMode] = useState<"upload" | "email" | "phone">("upload");
+  const [submissionMode, setSubmissionMode] = useState<"upload" | "email">("upload");
   const [emailListMode, setEmailListMode] = useState<"" | "now" | "later">("");
   const [emailReminderDate, setEmailReminderDate] = useState("");
-  const [contactPhone, setContactPhone] = useState(personalInfo.phone || "");
-  const [contactDay, setContactDay] = useState("");
-  const [contactTimeRange, setContactTimeRange] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState(personalInfo.email || "");
 
   // ─── Drive folder + already-uploaded files ───
   const [driveFolderId, setDriveFolderId] = useState<string | null>(null);
@@ -151,22 +149,6 @@ export const Step3Documents = () => {
     }
   };
 
-  const handleSendEmailList = async (scheduledDate?: string) => {
-    await sendToWebhook(
-      "https://n8n.chasida.biz/webhook/send-document-list",
-      { email: personalInfo.email, reminderTime: scheduledDate || undefined, personalInfo, serviceType },
-      { silent: false }
-    );
-  };
-
-  const handleSendPhoneContact = async () => {
-    await sendToWebhook(
-      "https://n8n.chasida.biz/webhook/send-reminder",
-      { phone: contactPhone, preferredDay: contactDay, preferredTime: contactTimeRange, personalInfo, serviceType },
-      { silent: false }
-    );
-  };
-
   const isMarried = personalInfo.maritalStatus === "married";
   const userPurposes = serviceType.userPurposes;
   const spousePurposes = serviceType.spousePurposes;
@@ -194,6 +176,130 @@ export const Step3Documents = () => {
   const userExistingPartnership = userHasExistingBusiness && businessInfo.ownershipType === "partnership" && (businessInfo.existingPartners?.length || 0) > 0;
   const spouseNewPartnership = spouseHasNewBusiness && spouseBusinessInfo.ownershipType === "partnership" && (spouseBusinessInfo.partners?.length || 0) > 0;
   const spouseExistingPartnership = spouseHasExistingBusiness && spouseBusinessInfo.ownershipType === "partnership" && (spouseBusinessInfo.existingPartners?.length || 0) > 0;
+
+  // Builds the same per-person document checklist shown in the upload section below,
+  // as plain {person, label} rows — used to send a detailed list by email instead.
+  const buildDocumentList = (): { person: string; label: string }[] => {
+    const items: { person: string; label: string }[] = [];
+    const userName = personalInfo.firstName || "אני";
+    const spouseName = personalInfo.spouseName || "בן/בת הזוג";
+
+    items.push({ person: userName, label: "צילום ת.ז. + ספח" });
+    if (detailedInfo.additionalIdTypes?.includes("license")) items.push({ person: userName, label: "רישיון נהיגה" });
+    if (detailedInfo.additionalIdTypes?.includes("passport")) items.push({ person: userName, label: "דרכון" });
+
+    if (isMarried) {
+      items.push({ person: spouseName, label: "צילום ת.ז. + ספח" });
+      if (spouseInfo.additionalIdTypes?.includes("license")) items.push({ person: spouseName, label: "רישיון נהיגה" });
+      if (spouseInfo.additionalIdTypes?.includes("passport")) items.push({ person: spouseName, label: "דרכון" });
+    }
+
+    if (userHasAuthorized) items.push({ person: userName, label: "אישור ניהול חשבון או צילום שיק" });
+    if (spouseHasAuthorized) items.push({ person: spouseName, label: "אישור ניהול חשבון או צילום שיק" });
+
+    if (userNeedsLease) items.push({ person: userName, label: "הסכם שכירות לעסק" });
+    if (spouseNeedsLease) items.push({ person: spouseName, label: "הסכם שכירות לעסק" });
+
+    if (userNewPartnership) items.push({ person: userName, label: userExistingPartnership ? "הסכם שותפות – עסק חדש" : "הסכם שותפות" });
+    if (userExistingPartnership) items.push({ person: userName, label: userNewPartnership ? "הסכם שותפות – עסק קיים" : "הסכם שותפות" });
+    if (spouseNewPartnership) items.push({ person: spouseName, label: spouseExistingPartnership ? "הסכם שותפות – עסק חדש" : "הסכם שותפות" });
+    if (spouseExistingPartnership) items.push({ person: spouseName, label: spouseNewPartnership ? "הסכם שותפות – עסק קיים" : "הסכם שותפות" });
+
+    (["user", "spouse"] as const).forEach((who) => {
+      const bi = who === "user" ? businessInfo : spouseBusinessInfo;
+      const name = who === "user" ? userName : spouseName;
+      if (bi.existingCompanyFillMode !== "self") return;
+      (bi.existingCompanies || []).forEach((company: any, idx: number) => {
+        const compName = company.name || `חברה קיימת #${idx + 1}`;
+        items.push({ person: name, label: `נסח רשם החברות – ${compName}` });
+        if (company.hasBankAccount === true || company.bankDetails?.accountNumber) {
+          items.push({ person: name, label: `אישור ניהול חשבון או צילום שיק – ${compName}` });
+        }
+      });
+    });
+
+    (["user", "spouse"] as const).forEach((who) => {
+      const info = who === "user" ? businessInfo : spouseBusinessInfo;
+      const purposes = who === "user" ? userPurposes : spousePurposes;
+      const name = who === "user" ? userName : spouseName;
+      if (!purposes.includes("company")) return;
+
+      const pushPersonOwner = (po: any, context: string) => {
+        if (!po || !po.name) return;
+        items.push({ person: name, label: `צילום ת.ז. + ספח של ${po.name}${context ? ` (${context})` : ""}` });
+        if (po.additionalIdType) {
+          const t = po.additionalIdType === "license" ? "רישיון נהיגה" : po.additionalIdType === "passport" ? "דרכון" : "ת.ז. הורה";
+          items.push({ person: name, label: `צילום ${t} של ${po.name}${context ? ` (${context})` : ""}` });
+        }
+      };
+      const pushChild = (childCompany: any, context: string) => {
+        if (!childCompany) return;
+        const ctx = childCompany.companyName || childCompany.requestedName1 || context;
+        pushPersonOwner(childCompany.personOwner, ctx);
+        if (childCompany.childCompany) pushChild(childCompany.childCompany, ctx);
+      };
+      const pushShareholders = (companyList: any[]) => {
+        (companyList || []).forEach((company: any, cIdx: number) => {
+          const compName = company.name || company.requestedName1 || `חברה #${cIdx + 1}`;
+          (company.shareholders || []).forEach((sh: any) => {
+            if (sh.isSelf || sh.isSpouse) return;
+            if ((sh.holderType || "person") === "person" && sh.name) {
+              items.push({ person: name, label: `צילום ת.ז. + ספח של ${sh.name} (${compName})` });
+              if (sh.additionalIdType) {
+                const t = sh.additionalIdType === "license" ? "רישיון נהיגה" : sh.additionalIdType === "passport" ? "דרכון" : "ת.ז. הורה";
+                items.push({ person: name, label: `צילום ${t} של ${sh.name} (${compName})` });
+              }
+            } else if (sh.holderType === "company") {
+              pushPersonOwner(sh.personOwner, sh.companyName || compName);
+              if (sh.childCompany) pushChild(sh.childCompany, sh.companyName || compName);
+            }
+          });
+        });
+      };
+      pushShareholders(info.existingCompanies || []);
+      pushShareholders(info.newCompanies || []);
+    });
+
+    (["user", "spouse"] as const).forEach((who) => {
+      const info = who === "user" ? nonprofitInfo : spouseNonprofitInfo;
+      const purposes = who === "user" ? userPurposes : spousePurposes;
+      const name = who === "user" ? userName : spouseName;
+      if (!purposes.includes("nonprofit")) return;
+
+      const rep = info.representativeMember;
+      const hasRep = !!rep && info.hasTaxFile === true;
+      if (hasRep) {
+        const types = (rep as any).additionalIdTypes as string[] | undefined;
+        if (types?.includes("passport")) items.push({ person: name, label: `צילום דרכון – ${rep!.name || "חבר הועד"}` });
+        if (types?.includes("license")) items.push({ person: name, label: `צילום רישיון נהיגה – ${rep!.name || "חבר הועד"}` });
+        if (types?.includes("parentId")) items.push({ person: name, label: `צילום ת.ז. הורה – ${rep!.name || "חבר הועד"}` });
+      }
+
+      (info.boardMembers || []).forEach((m: any, idx: number) => {
+        items.push({ person: name, label: `צילום ת.ז. + ספח של ${m.name || `חבר ועד #${idx + 1}`}` });
+      });
+      (info.existingBoardMembers || []).forEach((m: any, idx: number) => {
+        items.push({ person: name, label: `צילום ת.ז. + ספח של ${m.name || `חבר ועד #${idx + 1}`}` });
+      });
+      if (hasRep) {
+        items.push({ person: name, label: `צילום ת.ז. + ספח של ${rep!.name || "חבר הועד שיופיע בייצוג"}` });
+      }
+
+      if (info.hasTaxFile === false && info.hasBankAccount === true) {
+        items.push({ person: name, label: "אישור ניהול חשבון או צילום שיק של העמותה" });
+      }
+    });
+
+    return items;
+  };
+
+  const handleSendEmailList = async (email: string, scheduledDate?: string) => {
+    await sendToWebhook(
+      "https://n8n.chasida.biz/webhook/sendEmailWithForms",
+      { email, reminderTime: scheduledDate || undefined, personalInfo, serviceType, documentList: buildDocumentList() },
+      { silent: false }
+    );
+  };
 
   const handleNext = async () => {
     setLoading(true);
@@ -315,6 +421,15 @@ export const Step3Documents = () => {
           </button>
           {submissionMode === "email" && (
             <div className="mr-7 space-y-3">
+              <div className="space-y-1">
+                <Label className="text-xs">כתובת המייל לשליחת רשימת המסמכים</Label>
+                <Input
+                  type="email"
+                  value={confirmEmail}
+                  onChange={(e) => setConfirmEmail(e.target.value)}
+                  className="max-w-xs"
+                />
+              </div>
               <div className="flex gap-2">
                 <Button
                   size="sm"
@@ -340,74 +455,11 @@ export const Step3Documents = () => {
               )}
               <Button
                 size="sm"
-                onClick={() => handleSendEmailList(emailListMode === "later" ? emailReminderDate : undefined)}
-                disabled={emailListMode === "later" && !emailReminderDate}
+                onClick={() => handleSendEmailList(confirmEmail, emailListMode === "later" ? emailReminderDate : undefined)}
+                disabled={!confirmEmail || (emailListMode === "later" && !emailReminderDate)}
               >
                 <Mail className="ml-2 h-4 w-4" />
-                שלחו אל {personalInfo.email || "המייל שלי"}
-              </Button>
-            </div>
-          )}
-
-          {/* Option 3 — Phone contact */}
-          <button
-            type="button"
-            onClick={() => setSubmissionMode("phone")}
-            className={`w-full text-right flex items-center gap-3 p-3 rounded-lg border transition-colors ${submissionMode === "phone" ? "border-primary/50 bg-primary/10" : "border-border/50 bg-background/60 hover:bg-muted/40"}`}
-          >
-            <Phone className="w-4 h-4 text-primary shrink-0" />
-            <span className="text-sm font-medium">אני רוצה שיצרו איתי קשר טלפוני לסיוע בהעלאת המסמכים</span>
-          </button>
-          {submissionMode === "phone" && (
-            <div className="mr-7 space-y-3">
-              <div className="space-y-1">
-                <Label className="text-xs">מספר טלפון ליצירת קשר</Label>
-                <Input
-                  type="tel"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="050-0000000"
-                  className="max-w-xs"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">יום מועדף</Label>
-                <div className="flex flex-wrap gap-1.5">
-                  {["ראשון", "שני", "שלישי", "רביעי", "חמישי", "גמיש"].map((day) => (
-                    <button
-                      key={day}
-                      type="button"
-                      onClick={() => setContactDay(contactDay === day ? "" : day)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${contactDay === day ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background hover:bg-muted"}`}
-                    >
-                      {day}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">טווח שעות מועדף</Label>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    { value: "בוקר", label: "בוקר (10–12)" },
-                    { value: "צהריים א", label: "צהריים (12–14)" },
-                    { value: "צהריים ב", label: "אחה״צ (14–16)" },
-                    { value: "גמיש", label: "גמיש" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setContactTimeRange(contactTimeRange === opt.value ? "" : opt.value)}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${contactTimeRange === opt.value ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background hover:bg-muted"}`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <Button size="sm" onClick={handleSendPhoneContact} disabled={!contactPhone}>
-                <Phone className="ml-2 h-4 w-4" />
-                שלח
+                שלחו אל {confirmEmail || "המייל שלי"}
               </Button>
             </div>
           )}
